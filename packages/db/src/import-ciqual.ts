@@ -33,8 +33,10 @@ function kindAndAmount(value: NutrientValue): {
 }
 
 function findHeader(headers: string[], candidates: RegExp[]): number {
-  for (const [index, header] of headers.entries()) {
-    for (const candidate of candidates) {
+  // Try each pattern against every header so a loose fallback cannot steal an
+  // earlier column (Ciqual puts alim_grp_nom_fr before alim_nom_fr).
+  for (const candidate of candidates) {
+    for (const [index, header] of headers.entries()) {
       if (candidate.test(header)) return index;
     }
   }
@@ -121,7 +123,7 @@ export async function importCiqual(): Promise<{ count: number }> {
   });
 
   const codeIdx = findHeader(headers, [/^alim_code$/i, /code.?aliment/i]);
-  const nameIdx = findHeader(headers, [/^alim_nom_fr$/i, /nom.?fr/i]);
+  const nameIdx = findHeader(headers, [/^alim_nom_fr$/i, /(?<!grp_|ssgrp_|ssssgrp_)nom.?fr/i]);
   const groupIdx = findHeader(headers, [/^alim_grp_nom_fr$/i, /groupe/i]);
   const subIdx = findHeader(headers, [/^alim_ssgrp_nom_fr$/i, /sous.?groupe/i]);
   const subSubIdx = findHeader(headers, [/^alim_ssssgrp_nom_fr$/i]);
@@ -138,6 +140,9 @@ export async function importCiqual(): Promise<{ count: number }> {
       `Colonnes Ciqual introuvables. En-têtes: ${headers.filter(Boolean).slice(0, 20).join(' | ')}`,
     );
   }
+  console.log(
+    `Colonnes : nom="${headers[nameIdx]}" groupe="${headers[groupIdx] ?? ''}" code="${headers[codeIdx]}"`,
+  );
 
   const rows: Array<{
     ciqualCode: number;
@@ -161,10 +166,10 @@ export async function importCiqual(): Promise<{ count: number }> {
     if (rowNumber === 1) return;
     const get = (idx: number) => (idx >= 0 ? cellString(row.getCell(idx + 1).value) : '');
     const code = Number(get(codeIdx));
-    const nameFr = get(nameIdx).trim();
+    const nameFr = get(nameIdx).replace(/\s+/g, ' ').trim();
     if (!Number.isFinite(code) || nameFr.length === 0) return;
-    const groupName = get(groupIdx) || 'Non classé';
-    const subGroupName = get(subIdx) || null;
+    const groupName = (get(groupIdx) || 'Non classé').replace(/\s+/g, ' ').trim();
+    const subGroupName = get(subIdx).replace(/\s+/g, ' ').trim() || null;
     const category = mapCiqualToUxCategory({
       groupName,
       subGroupName,
@@ -176,7 +181,7 @@ export async function importCiqual(): Promise<{ count: number }> {
       nameNormalized: normalizeSearchText(nameFr),
       groupName,
       subGroupName,
-      subSubGroupName: get(subSubIdx) || null,
+      subSubGroupName: get(subSubIdx).replace(/\s+/g, ' ').trim() || null,
       uxCategory: category,
       uxSubCategory: uxSubCategory({ category, subGroupName }),
       energy: parseCiqualNutrient(get(kcalIdx)),

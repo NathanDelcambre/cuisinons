@@ -5,10 +5,9 @@ import {
   useId,
   type InputHTMLAttributes,
   type ReactNode,
-  type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from 'react';
-import { ChevronDown, Minus, Plus, Search, type LucideIcon } from 'lucide-react';
+import { Minus, Plus, Search, type LucideIcon } from 'lucide-react';
 import { cn } from './cn';
 import { IconButton } from './button';
 
@@ -80,31 +79,6 @@ export const SearchInput = forwardRef<HTMLInputElement, Omit<InputProps, 'icon' 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(
   function Textarea({ className, ...props }, ref) {
     return <textarea ref={ref} className={cn(control, 'min-h-24 resize-y px-4 py-3', className)} {...props} />;
-  },
-);
-
-/**
- * Liste deroulante. Le chevron est dessine par nos soins : un `select` natif
- * n'affiche aucune fleche coherente d'un navigateur a l'autre, et c'est
- * precisement ce qui manquait a l'interface.
- */
-export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(
-  function Select({ className, children, ...props }, ref) {
-    return (
-      <span className="relative block">
-        <select
-          ref={ref}
-          className={cn(control, 'h-11 cursor-pointer appearance-none pl-4 pr-10', className)}
-          {...props}
-        >
-          {children}
-        </select>
-        <ChevronDown
-          className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-400"
-          aria-hidden
-        />
-      </span>
-    );
   },
 );
 

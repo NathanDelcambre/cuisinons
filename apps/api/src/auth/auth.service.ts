@@ -3,6 +3,7 @@ import {
   resolveAuthorizedEmail,
   normalizeEmail,
   displayNameForEmail,
+  avatarUrlForEmail,
   validatePassword,
 } from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -61,7 +62,7 @@ export class AuthService {
     if (!user || !user.passwordHash || !ok) {
       throw new UnauthorizedException(GENERIC_LOGIN_ERROR);
     }
-    return this.issueSession(user.id, user.email, user.displayName);
+    return this.issueSession(user);
   }
 
   async loginWithGoogle(input: { email: string; emailVerified: boolean; googleSub: string }) {
@@ -84,7 +85,7 @@ export class AuthService {
         googleSub: input.googleSub,
       },
     });
-    return this.issueSession(user.id, user.email, user.displayName);
+    return this.issueSession(user);
   }
 
   async resolveSession(token: string) {
@@ -99,6 +100,7 @@ export class AuthService {
       userId: session.user.id,
       email: session.user.email,
       displayName: session.user.displayName,
+      avatarUrl: avatarUrlForEmail(session.user.email),
       sessionId: session.id,
     };
   }
@@ -142,28 +144,38 @@ export class AuthService {
   async me(userId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new UnauthorizedException('Session invalide.');
-    return { id: user.id, email: user.email, displayName: user.displayName };
+    return this.publicUser(user);
   }
 
   async listUsers() {
-    return this.prisma.user.findMany({
+    const users = await this.prisma.user.findMany({
       select: { id: true, email: true, displayName: true },
       orderBy: { displayName: 'asc' },
     });
+    return users.map((user) => this.publicUser(user));
   }
 
-  private async issueSession(userId: string, email: string, displayName: string) {
+  private publicUser(user: { id: string; email: string; displayName: string }) {
+    return {
+      id: user.id,
+      email: user.email,
+      displayName: user.displayName,
+      avatarUrl: avatarUrlForEmail(user.email),
+    };
+  }
+
+  private async issueSession(user: { id: string; email: string; displayName: string }) {
     const env = loadApiEnv();
     const token = createSessionToken();
     const expiresAt = new Date(Date.now() + env.SESSION_TTL_DAYS * 24 * 60 * 60_000);
     await this.prisma.session.create({
       data: {
-        userId,
+        userId: user.id,
         tokenHash: hashToken(token),
         familyId: createSessionToken(),
         expiresAt,
       },
     });
-    return { token, expiresAt, user: { id: userId, email, displayName } };
+    return { token, expiresAt, user: this.publicUser(user) };
   }
 }

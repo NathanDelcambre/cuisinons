@@ -72,12 +72,15 @@ export class OptimizationService {
     const dayItems = items.filter(
       (item) => item.date.toISOString().slice(0, 10) === date.toISOString().slice(0, 10),
     );
-    const occupied = new Set(dayItems.map((i) => i.slot));
-    const emptySlots = (['BREAKFAST', 'LUNCH', 'SNACK', 'DINNER'] as MealSlot[]).filter(
-      (slot) => !occupied.has(slot),
-    );
+      // Restaurant, repas sauté ou imposé occupent le créneau sans entrer
+      // dans le calcul nutritionnel : l'optimiseur ne les remplace pas.
+      const occupied = new Set(dayItems.map((i) => i.slot));
+      const emptySlots = (['BREAKFAST', 'LUNCH', 'SNACK', 'DINNER'] as MealSlot[]).filter(
+        (slot) => !occupied.has(slot),
+      );
     const recipes = await this.prisma.recipe.findMany({
       where: { status: 'PUBLISHED' },
+      omit: { photoUrl: true },
       include: {
         ingredients: { include: { ingredient: true } },
         tags: { include: { tag: true } },
@@ -85,18 +88,22 @@ export class OptimizationService {
     });
     const prefs = await this.prefs(userId);
     const result = optimizeDay({
-      meals: dayItems.map((item) => {
-        const portion = item.portions.find((p) => p.userId === userId);
-        return {
-          id: item.id,
-          recipeId: item.recipeId,
-          recipeName: item.recipe.name,
-          slot: item.slot as MealSlot,
-          portions: portion ? Number(portion.portions) : 0,
-          perServing: item.nutrition.perServing,
-          nutritionComplete: item.nutrition.complete,
-        };
-      }),
+      meals: dayItems
+        .filter((item): item is typeof item & { recipeId: string; recipe: NonNullable<typeof item.recipe> } =>
+          Boolean(item.recipe && item.recipeId),
+        )
+        .map((item) => {
+          const portion = item.portions.find((p) => p.userId === userId);
+          return {
+            id: item.id,
+            recipeId: item.recipeId,
+            recipeName: item.recipe.name,
+            slot: item.slot as MealSlot,
+            portions: portion ? Number(portion.portions) : 0,
+            perServing: item.nutrition.perServing,
+            nutritionComplete: item.nutrition.complete,
+          };
+        }),
       emptySlots,
       recipes: recipes.map((recipe) => {
         const nutrition = nutritionForRecipe(

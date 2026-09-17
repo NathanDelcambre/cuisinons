@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { json } from 'express';
 import { AppModule } from './app.module.js';
 import { loadApiEnv } from './config/env.js';
 import { loadEnvFiles } from './config/load-env.js';
@@ -9,7 +10,9 @@ import { loadEnvFiles } from './config/load-env.js';
 async function bootstrap() {
   loadEnvFiles();
   const env = loadApiEnv();
-  const app = await NestFactory.create(AppModule, { logger: ['error', 'warn', 'log'] });
+  const app = await NestFactory.create(AppModule, { logger: ['error', 'warn', 'log'], bodyParser: false });
+  // Photo de recette en JSON base64 : le plafond Express par defaut (100 Ko) est trop bas.
+  app.use(json({ limit: '1mb' }));
   app.use(
     helmet({
       contentSecurityPolicy: {

@@ -10,6 +10,8 @@ import { PlannerModule } from './planner/planner.module.js';
 import { NutritionModule } from './nutrition/nutrition.module.js';
 import { OptimizationModule } from './optimization/optimization.module.js';
 import { CatalogModule } from './catalog/catalog.module.js';
+import { ProvisionsModule } from './provisions/provisions.module.js';
+import { SuggestionsModule } from './suggestions/suggestions.module.js';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { CatalogModule } from './catalog/catalog.module.js';
     NutritionModule,
     OptimizationModule,
     CatalogModule,
+    ProvisionsModule,
+    SuggestionsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

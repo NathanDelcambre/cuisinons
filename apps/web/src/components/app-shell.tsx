@@ -2,48 +2,45 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { AnimatePresence, motion } from 'motion/react';
+import { motion } from 'motion/react';
+import { useQuery } from '@tanstack/react-query';
+import { Fragment } from 'react';
 import {
   CalendarDays,
   ChefHat,
-  ChevronRight,
-  Images,
   LogOut,
   Plus,
-  ShieldCheck,
+  Refrigerator,
+  ShoppingBasket,
   Target,
   UserRound,
   type LucideIcon,
 } from 'lucide-react';
+import { STORAGE_AREAS, STORAGE_AREA_LABELS, type StorageArea } from '@cuisinons/shared';
 import { buttonClasses, cn, transitions } from '@cuisinons/ui';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, apiJson } from '@/lib/api';
+import { routes } from '@/lib/routes';
 import { useAuth } from './auth-provider';
+import { Avatar } from './avatar';
 import { BrandMark } from './brand-mark';
 
-type NavItem = { href: string; label: string; icon: LucideIcon; children?: NavItem[] };
+type NavItem = { href: string; label: string; icon: LucideIcon };
 
 const NAV: NavItem[] = [
-  { href: '/planning', label: 'Planning', icon: CalendarDays },
-  { href: '/recipes', label: 'Recettes', icon: ChefHat },
-  { href: '/goals', label: 'Objectifs', icon: Target },
-  {
-    href: '/settings',
-    label: 'Profil',
-    icon: UserRound,
-    children: [
-      { href: '/settings/security', label: 'Sécurité', icon: ShieldCheck },
-      { href: '/dev/icons', label: 'Illustrations', icon: Images },
-    ],
-  },
+  { href: routes.planning, label: 'Planning', icon: CalendarDays },
+  { href: routes.recettes, label: 'Recettes', icon: ChefHat },
+  { href: routes.courses, label: 'Courses', icon: ShoppingBasket },
+  { href: routes.reserves, label: 'Réserves', icon: Refrigerator },
+  { href: routes.objectifs, label: 'Objectifs', icon: Target },
 ];
 
-/** Onglets mobiles : « Ajouter » y garde sa place, faute de barre laterale. */
+/** Cinq onglets au maximum : au-dela, les cibles deviennent trop etroites. */
 const TABS: NavItem[] = [
-  { href: '/planning', label: 'Planning', icon: CalendarDays },
-  { href: '/recipes', label: 'Recettes', icon: ChefHat },
-  { href: '/recipes/new', label: 'Ajouter', icon: Plus },
-  { href: '/goals', label: 'Objectifs', icon: Target },
-  { href: '/settings', label: 'Profil', icon: UserRound },
+  { href: routes.planning, label: 'Planning', icon: CalendarDays },
+  { href: routes.recettes, label: 'Recettes', icon: ChefHat },
+  { href: routes.courses, label: 'Courses', icon: ShoppingBasket },
+  { href: routes.reserves, label: 'Réserves', icon: Refrigerator },
+  { href: routes.profil, label: 'Profil', icon: UserRound },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -83,17 +80,44 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Etat des provisions, partage entre la barre laterale et les ecrans dedies :
+ * les cles de cache sont les memes, donc une modification faite sur la page des
+ * courses met la barre a jour sans requete supplementaire.
+ */
+function useProvisionsSummary() {
+  const pantry = useQuery({
+    queryKey: ['pantry'],
+    queryFn: () => apiJson<{ area: StorageArea }[]>('/api/bff/pantry'),
+    staleTime: 30_000,
+  });
+  const shopping = useQuery({
+    queryKey: ['shopping'],
+    queryFn: () => apiJson<{ items: { checked: boolean }[] } | null>('/api/bff/shopping/list'),
+    staleTime: 30_000,
+  });
+
+  const counts = new Map<StorageArea, number>();
+  for (const item of pantry.data ?? []) {
+    counts.set(item.area, (counts.get(item.area) ?? 0) + 1);
+  }
+  const toBuy = (shopping.data?.items ?? []).filter((item) => !item.checked).length;
+  return { counts, toBuy };
+}
+
 function DesktopSidebar({ pathname }: { pathname: string }) {
+  const { counts, toBuy } = useProvisionsSummary();
+
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[17rem] flex-col border-r border-white/60 bg-white/40 px-4 py-6 backdrop-blur-xl lg:flex">
       <div className="px-2">
-        <Link href="/planning" className="inline-flex rounded-2xl">
+        <Link href={routes.planning} className="inline-flex rounded-2xl">
           <BrandMark size="sm" align="start" />
         </Link>
       </div>
 
       <div className="mt-6 px-1">
-        <Link href="/recipes/new" className={buttonClasses({ block: true })}>
+        <Link href={routes.recetteNouvelle} className={buttonClasses({ block: true })}>
           <Plus className="size-4" aria-hidden />
           Nouvelle recette
         </Link>
@@ -101,114 +125,126 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
 
       <nav aria-label="Navigation principale" className="mt-6 flex flex-col gap-1">
         {NAV.map((item) => (
-          <SidebarItem key={item.href} item={item} pathname={pathname} />
+          <Fragment key={item.href}>
+            <SidebarItem
+              item={item}
+              pathname={pathname}
+              badge={item.href === routes.courses && toBuy > 0 ? toBuy : undefined}
+            />
+            {item.href === routes.reserves ? <PantryStatus counts={counts} /> : null}
+          </Fragment>
         ))}
       </nav>
 
-      <UserCard />
+      <UserCard pathname={pathname} />
     </aside>
   );
 }
 
-function SidebarItem({ item, pathname }: { item: NavItem; pathname: string }) {
+function SidebarItem({
+  item,
+  pathname,
+  badge,
+}: {
+  item: NavItem;
+  pathname: string;
+  badge?: number;
+}) {
   const active = isActive(pathname, item.href);
   const Icon = item.icon;
-  // Le sous-menu suit la section ouverte : aucun etat local, donc aucun
-  // desaccord possible entre l'URL affichee et le menu deploye.
-  const expanded = active && Boolean(item.children?.length);
 
   return (
-    <div>
+    <Link
+      href={item.href}
+      aria-current={active ? 'page' : undefined}
+      className={cn(
+        'group relative flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm transition-colors duration-200 ease-out-soft',
+        active ? 'font-medium text-ink-900' : 'text-ink-500 hover:text-ink-900',
+      )}
+    >
+      {active ? (
+        <motion.span
+          layoutId="sidebar-active"
+          transition={transitions.spring}
+          className="glass absolute inset-0 rounded-xl"
+        />
+      ) : null}
+      <Icon className="relative size-4 shrink-0" aria-hidden />
+      <span className="relative flex-1 truncate">{item.label}</span>
+      {badge !== undefined ? (
+        <span className="tabular relative rounded-full bg-sage-500 px-2 py-0.5 text-[11px] font-medium text-white">
+          {badge}
+        </span>
+      ) : null}
+    </Link>
+  );
+}
+
+/**
+ * Etat du stock par zone de rangement. C'est un panneau d'information et non un
+ * sous-menu : il reste visible depuis n'importe quel ecran, pour savoir ce qu'on
+ * a sous la main sans quitter la page en cours. Les zones vides sont masquees,
+ * sinon la liste dirait surtout ce qu'on ne possede pas.
+ */
+function PantryStatus({ counts }: { counts: Map<StorageArea, number> }) {
+  const filled = STORAGE_AREAS.filter((area) => (counts.get(area) ?? 0) > 0);
+  if (filled.length === 0) return null;
+
+  return (
+    <ul className="mb-1 ml-[1.6rem] border-l border-ink-200 pl-2">
+      {filled.map((area) => (
+        <li key={area}>
+          <Link
+            href={`${routes.reserves}#${area}`}
+            className="flex min-h-8 items-center justify-between gap-2 rounded-lg px-2 text-[13px] text-ink-500 transition-colors duration-200 ease-out-soft hover:text-ink-900"
+          >
+            <span className="truncate">{STORAGE_AREA_LABELS[area]}</span>
+            <span className="tabular shrink-0 text-xs text-ink-400">{counts.get(area)}</span>
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function UserCard({ pathname }: { pathname: string }) {
+  const { user, refresh } = useAuth();
+  const router = useRouter();
+  const active = isActive(pathname, routes.profil);
+
+  async function logout() {
+    await apiFetch('/api/auth/logout', { method: 'POST' });
+    await refresh();
+    router.replace(routes.connexion);
+  }
+
+  return (
+    <div className="mt-auto flex items-center gap-1">
       <Link
-        href={item.href}
+        href={routes.profil}
         aria-current={active ? 'page' : undefined}
         className={cn(
-          'group relative flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm transition-colors duration-200 ease-out-soft',
-          active ? 'font-medium text-ink-900' : 'text-ink-500 hover:text-ink-900',
+          'relative flex min-w-0 flex-1 items-center gap-3 rounded-2xl px-2 py-2 transition-colors duration-200 ease-out-soft',
+          active ? 'text-ink-900' : 'hover:bg-ink-900/5',
         )}
       >
         {active ? (
           <motion.span
             layoutId="sidebar-active"
             transition={transitions.spring}
-            className="glass absolute inset-0 rounded-xl"
+            className="glass absolute inset-0 rounded-2xl"
           />
         ) : null}
-        <Icon className="relative size-4 shrink-0" aria-hidden />
-        <span className="relative flex-1 truncate">{item.label}</span>
-        {item.children?.length ? (
-          <ChevronRight
-            aria-hidden
-            className={cn(
-              'relative size-3.5 shrink-0 text-ink-400 transition-transform duration-300 ease-out-soft',
-              expanded && 'rotate-90',
-            )}
-          />
-        ) : null}
+        <Avatar
+          name={user?.displayName}
+          src={user?.avatarUrl}
+          className="relative size-9 rounded-full text-sm"
+        />
+        <span className="relative min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium text-ink-900">{user?.displayName}</span>
+          <span className="block truncate text-xs text-ink-500">{user?.email}</span>
+        </span>
       </Link>
-
-      <AnimatePresence initial={false}>
-        {expanded ? (
-          <motion.div
-            // L'animation de hauteur evite que les elements suivants ne sautent
-            // brutalement a l'ouverture du sous-menu.
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={transitions.soft}
-            className="overflow-hidden"
-          >
-            <div className="ml-6 mt-1 flex flex-col gap-0.5 border-l border-ink-200 pl-3">
-              {item.children?.map((child) => {
-                const childActive = pathname === child.href;
-                const ChildIcon = child.icon;
-                return (
-                  <Link
-                    key={child.href}
-                    href={child.href}
-                    aria-current={childActive ? 'page' : undefined}
-                    className={cn(
-                      'flex min-h-9 items-center gap-2.5 rounded-lg px-2.5 text-[13px] transition-colors duration-200 ease-out-soft',
-                      childActive
-                        ? 'bg-white/70 font-medium text-ink-900'
-                        : 'text-ink-500 hover:bg-white/50 hover:text-ink-900',
-                    )}
-                  >
-                    <ChildIcon className="size-3.5 shrink-0" aria-hidden />
-                    <span className="truncate">{child.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-function UserCard() {
-  const { user, refresh } = useAuth();
-  const router = useRouter();
-
-  async function logout() {
-    await apiFetch('/api/auth/logout', { method: 'POST' });
-    await refresh();
-    router.replace('/login');
-  }
-
-  return (
-    <div className="mt-auto flex items-center gap-3 rounded-2xl px-2 py-2">
-      <span
-        aria-hidden
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sage-400 text-sm font-semibold text-white"
-      >
-        {user?.displayName?.[0]?.toUpperCase() ?? '·'}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-medium text-ink-900">{user?.displayName}</span>
-        <span className="block truncate text-xs text-ink-500">{user?.email}</span>
-      </span>
       <button
         type="button"
         onClick={() => void logout()}
@@ -225,7 +261,7 @@ function UserCard() {
 function MobileHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-white/60 bg-white/70 px-4 py-3 backdrop-blur-xl lg:hidden">
-      <Link href="/planning" className="inline-flex rounded-2xl">
+      <Link href={routes.planning} className="inline-flex rounded-2xl">
         <BrandMark size="sm" align="start" />
       </Link>
     </header>

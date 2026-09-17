@@ -1,0 +1,6 @@
+-- CreateEnum
+CREATE TYPE "MealKind" AS ENUM ('RECIPE', 'SKIPPED', 'RESTAURANT', 'IMPOSED');
+
+-- AlterTable
+ALTER TABLE "MealItem" ADD COLUMN "kind" "MealKind" NOT NULL DEFAULT 'RECIPE';
+ALTER TABLE "MealItem" ALTER COLUMN "recipeId" DROP NOT NULL;

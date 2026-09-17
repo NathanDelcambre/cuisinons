@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { avatarUrlForEmail } from '@cuisinons/shared';
 import { resolveSession } from '@/lib/auth/session';
 
 export async function GET() {
@@ -7,6 +8,11 @@ export async function GET() {
     return NextResponse.json({ user: null }, { status: 401 });
   }
   return NextResponse.json({
-    user: { id: session.userId, email: session.email, displayName: session.displayName },
+    user: {
+      id: session.userId,
+      email: session.email,
+      displayName: session.displayName,
+      avatarUrl: session.avatarUrl ?? avatarUrlForEmail(session.email),
+    },
   });
 }

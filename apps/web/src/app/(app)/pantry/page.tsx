@@ -1,0 +1,208 @@
+'use client';
+
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { Plus, Refrigerator, Trash2 } from 'lucide-react';
+import {
+  STORAGE_AREAS,
+  STORAGE_AREA_LABELS,
+  UNIT_LABELS,
+  type QuantityUnit,
+  type StorageArea,
+  type UxCategory,
+} from '@cuisinons/shared';
+import {
+  Button,
+  Card,
+  EmptyState,
+  IconButton,
+  Input,
+  PageHeader,
+  Select,
+  Skeleton,
+} from '@cuisinons/ui';
+import { apiJson } from '@/lib/api';
+import { IngredientPicker } from '@/components/ingredient-picker';
+import { QuantityDialog, type PickedIngredient } from '@/components/quantity-dialog';
+
+const AREA_OPTIONS = STORAGE_AREAS.map((value) => ({ value, label: STORAGE_AREA_LABELS[value] }));
+
+type PantryItem = {
+  id: string;
+  area: StorageArea;
+  quantity: number;
+  unit: QuantityUnit;
+  ingredient: { id: string; nameFr: string; iconUrl: string | null; uxCategory: UxCategory };
+};
+
+export default function PantryPage() {
+  const queryClient = useQueryClient();
+  const [picker, setPicker] = useState(false);
+  const [picked, setPicked] = useState<PickedIngredient | null>(null);
+
+  const pantry = useQuery({
+    queryKey: ['pantry'],
+    queryFn: () => apiJson<PantryItem[]>('/api/bff/pantry'),
+  });
+
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ['pantry'] });
+
+  const add = useMutation({
+    mutationFn: (input: {
+      ingredientId: string;
+      quantity: number;
+      unit: QuantityUnit;
+      area?: StorageArea;
+    }) => apiJson('/api/bff/pantry/items', { method: 'POST', body: JSON.stringify(input) }),
+    onSuccess: () => {
+      setPicked(null);
+      void refresh();
+    },
+  });
+
+  const patch = useMutation({
+    mutationFn: (input: { id: string; quantity?: number; area?: StorageArea }) =>
+      apiJson(`/api/bff/pantry/items/${input.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ quantity: input.quantity, area: input.area }),
+      }),
+    onSuccess: () => void refresh(),
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: string) => apiJson(`/api/bff/pantry/items/${id}`, { method: 'DELETE' }),
+    onSuccess: () => void refresh(),
+  });
+
+  const items = pantry.data ?? [];
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Réserves"
+        description="Ton stock personnel. Il se remplit quand tu valides tes courses et se vide quand tu consommes un repas."
+        actions={
+          <Button variant="glass" icon={Plus} onClick={() => setPicker(true)}>
+            Ajouter
+          </Button>
+        }
+      />
+
+      {pantry.isLoading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 6 }, (_, i) => (
+            <Skeleton key={i} className="h-14" />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
+        <EmptyState
+          icon={Refrigerator}
+          title="Réserves vides"
+          description="Ajoute ce que tu as déjà, ou valide une liste de courses pour remplir le stock."
+          action={
+            <Button icon={Plus} onClick={() => setPicker(true)}>
+              Ajouter un ingrédient
+            </Button>
+          }
+        />
+      ) : (
+        <div className="space-y-8">
+          {STORAGE_AREAS.map((area) => {
+            const rows = items.filter((item) => item.area === area);
+            return (
+              // L'ancre permet a la sidebar de pointer directement sur la zone.
+              <section key={area} id={area} className="scroll-mt-24 space-y-2">
+                <h2 className="flex items-baseline gap-2 px-1">
+                  <span className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
+                    {STORAGE_AREA_LABELS[area]}
+                  </span>
+                  <span className="tabular text-sm text-ink-500">{rows.length}</span>
+                </h2>
+                {rows.length === 0 ? (
+                  <p className="px-1 text-sm text-ink-400">Rien pour l’instant.</p>
+                ) : (
+                  rows.map((item) => (
+                    <PantryRow
+                      key={item.id}
+                      item={item}
+                      onQuantity={(quantity) => patch.mutate({ id: item.id, quantity })}
+                      onArea={(next) => patch.mutate({ id: item.id, area: next })}
+                      onRemove={() => remove.mutate(item.id)}
+                    />
+                  ))
+                )}
+              </section>
+            );
+          })}
+        </div>
+      )}
+
+      <IngredientPicker
+        open={picker}
+        onPick={(ingredient) => {
+          setPicked(ingredient);
+          setPicker(false);
+        }}
+        onClose={() => setPicker(false)}
+      />
+      <QuantityDialog
+        ingredient={picked}
+        withArea
+        pending={add.isPending}
+        onClose={() => setPicked(null)}
+        onConfirm={({ quantity, unit, area }) => {
+          if (picked) add.mutate({ ingredientId: picked.id, quantity, unit, area });
+        }}
+      />
+    </div>
+  );
+}
+
+function PantryRow({
+  item,
+  onQuantity,
+  onArea,
+  onRemove,
+}: {
+  item: PantryItem;
+  onQuantity: (quantity: number) => void;
+  onArea: (area: StorageArea) => void;
+  onRemove: () => void;
+}) {
+  return (
+    <Card className="flex items-center gap-3 py-3">
+      {item.ingredient.iconUrl ? (
+        <img src={item.ingredient.iconUrl} alt="" width={28} height={28} className="size-7 shrink-0" />
+      ) : null}
+      <span className="min-w-0 flex-1 truncate text-sm text-ink-900">{item.ingredient.nameFr}</span>
+
+      <Select
+        className="h-9 min-h-9 w-36 shrink-0 pl-3 text-[13px]"
+        value={item.area}
+        options={AREA_OPTIONS}
+        aria-label={`Rangement de ${item.ingredient.nameFr}`}
+        onChange={onArea}
+      />
+
+      <Input
+        className="tabular h-9 w-20 px-2 text-right"
+        inputMode="decimal"
+        defaultValue={String(item.quantity)}
+        aria-label={`Quantité de ${item.ingredient.nameFr}`}
+        onBlur={(e) => {
+          const next = Number(e.target.value.replace(',', '.'));
+          if (Number.isFinite(next) && next !== item.quantity) onQuantity(next);
+        }}
+      />
+      <span className="w-12 shrink-0 text-xs text-ink-500">{UNIT_LABELS[item.unit]}</span>
+
+      <IconButton
+        icon={Trash2}
+        label={`Retirer ${item.ingredient.nameFr}`}
+        size="sm"
+        variant="ghost"
+        onClick={onRemove}
+      />
+    </Card>
+  );
+}

@@ -1,8 +1,9 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, QuantityUnit } from '@cuisinons/db';
 import { resolveGrams, type QuantityUnit as SharedUnit } from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { nutritionForRecipe } from '../nutrition/recipe-nutrition.js';
+import { decodePhotoDataUrl, publicRecipePhotoUrl, type RecipePhoto } from './recipe-photo.js';
 
 export type RecipeWriteInput = {
   name: string;
@@ -11,6 +12,7 @@ export type RecipeWriteInput = {
   prepTimeMinutes?: number | null;
   cookTimeMinutes?: number | null;
   finalCookedWeight?: number | null;
+  photoDataUrl?: string | null;
   status?: 'DRAFT' | 'PUBLISHED';
   version?: number;
   ingredients: Array<{
@@ -63,7 +65,21 @@ export class RecipesService {
     };
   }
 
-  private serialize(recipe: Prisma.RecipeGetPayload<{ include: typeof recipeInclude }>) {
+  private photoFields(input: RecipeWriteInput): { photoUrl?: string | null } {
+    if (input.photoDataUrl === undefined) return {};
+    if (input.photoDataUrl === null) return { photoUrl: null };
+    try {
+      decodePhotoDataUrl(input.photoDataUrl);
+    } catch (err) {
+      throw new BadRequestException(err instanceof Error ? err.message : 'Photo invalide.');
+    }
+    return { photoUrl: input.photoDataUrl };
+  }
+
+  private serialize(
+    recipe: Omit<Prisma.RecipeGetPayload<{ include: typeof recipeInclude }>, 'photoUrl'>,
+    hasPhoto: boolean,
+  ) {
     const nutrition = nutritionForRecipe(
       recipe.ingredients,
       Number(recipe.servings),
@@ -72,7 +88,21 @@ export class RecipesService {
     const ratings = recipe.ratings;
     const average =
       ratings.length === 0 ? null : ratings.reduce((sum, r) => sum + r.stars, 0) / ratings.length;
-    return { ...recipe, nutrition, rating: { average, count: ratings.length, ratings } };
+    return {
+      ...recipe,
+      photoUrl: publicRecipePhotoUrl(recipe.id, hasPhoto, recipe.updatedAt),
+      nutrition,
+      rating: { average, count: ratings.length, ratings },
+    };
+  }
+
+  private async photoIds(ids: string[]) {
+    if (ids.length === 0) return new Set<string>();
+    const rows = await this.prisma.recipe.findMany({
+      where: { id: { in: ids }, photoUrl: { not: null } },
+      select: { id: true },
+    });
+    return new Set(rows.map((row) => row.id));
   }
 
   async list(input: {
@@ -84,10 +114,15 @@ export class RecipesService {
   }) {
     const where: Prisma.RecipeWhereInput = { status: 'PUBLISHED' };
     if (input.q) {
-      where.name = { contains: input.q, mode: 'insensitive' };
+      const needle = { contains: input.q, mode: 'insensitive' as const };
+      where.OR = [
+        { name: needle },
+        { description: needle },
+        { tags: { some: { tag: { label: needle } } } },
+      ];
     }
     if (input.tag) {
-      where.tags = { some: { tag: { slug: input.tag } } };
+      where.tags = { some: { tag: { OR: [{ slug: input.tag }, { id: input.tag }] } } };
     }
     if (input.equipment) {
       where.equipment = { some: { equipment: { slug: input.equipment } } };
@@ -95,9 +130,11 @@ export class RecipesService {
     const recipes = await this.prisma.recipe.findMany({
       where,
       include: recipeInclude,
+      omit: { photoUrl: true },
       orderBy: { updatedAt: 'desc' },
     });
-    const serialized = recipes.map((r) => this.serialize(r));
+    const withPhoto = await this.photoIds(recipes.map((recipe) => recipe.id));
+    const serialized = recipes.map((r) => this.serialize(r, withPhoto.has(r.id)));
     const basis = input.basis ?? 'serving';
     const pick = (r: (typeof serialized)[number], key: 'kcal' | 'protein' | 'carbs') => {
       if (basis === '100g') return r.nutrition.per100g?.[key] ?? 0;
@@ -142,13 +179,32 @@ export class RecipesService {
   }
 
   async get(id: string) {
-    const recipe = await this.prisma.recipe.findUnique({ where: { id }, include: recipeInclude });
+    const recipe = await this.prisma.recipe.findUnique({
+      where: { id },
+      include: recipeInclude,
+      omit: { photoUrl: true },
+    });
     if (!recipe) throw new NotFoundException('Recette introuvable.');
-    return this.serialize(recipe);
+    const withPhoto = await this.photoIds([recipe.id]);
+    return this.serialize(recipe, withPhoto.has(recipe.id));
+  }
+
+  async getPhoto(id: string): Promise<RecipePhoto> {
+    const recipe = await this.prisma.recipe.findUnique({
+      where: { id },
+      select: { photoUrl: true },
+    });
+    if (!recipe?.photoUrl) throw new NotFoundException('Photo introuvable.');
+    try {
+      return decodePhotoDataUrl(recipe.photoUrl);
+    } catch {
+      throw new NotFoundException('Photo introuvable.');
+    }
   }
 
   async create(userId: string, input: RecipeWriteInput) {
     const lines = await Promise.all(input.ingredients.map((line) => this.resolveLineGrams(line)));
+    const photo = this.photoFields(input);
     const created = await this.prisma.$transaction(async (tx) => {
       const recipe = await tx.recipe.create({
         data: {
@@ -159,6 +215,7 @@ export class RecipesService {
           prepTimeMinutes: input.prepTimeMinutes,
           cookTimeMinutes: input.cookTimeMinutes,
           finalCookedWeight: input.finalCookedWeight,
+          photoUrl: photo.photoUrl,
           status: input.status ?? 'DRAFT',
           ingredients: {
             create: input.ingredients.map((line, index) => ({
@@ -195,6 +252,7 @@ export class RecipesService {
       throw new ConflictException('La recette a été modifiée ailleurs. Recharge la page.');
     }
     const lines = await Promise.all(input.ingredients.map((line) => this.resolveLineGrams(line)));
+    const photo = this.photoFields(input);
     await this.prisma.$transaction(async (tx) => {
       await tx.recipeIngredient.deleteMany({ where: { recipeId: id } });
       await tx.recipeStep.deleteMany({ where: { recipeId: id } });
@@ -209,6 +267,7 @@ export class RecipesService {
           prepTimeMinutes: input.prepTimeMinutes,
           cookTimeMinutes: input.cookTimeMinutes,
           finalCookedWeight: input.finalCookedWeight,
+          ...photo,
           status: input.status ?? existing.status,
           version: { increment: 1 },
           ingredients: {

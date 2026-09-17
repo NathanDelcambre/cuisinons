@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { LogIn, TriangleAlert } from 'lucide-react';
 import { Button, Field, Input } from '@cuisinons/ui';
 import { apiFetch } from '@/lib/api';
+import { routes } from '@/lib/routes';
 import { useAuth } from '@/components/auth-provider';
 import { BrandMark } from '@/components/brand-mark';
 
@@ -65,7 +66,7 @@ export default function LoginPage() {
       return;
     }
     await refresh();
-    router.replace('/planning');
+    router.replace(routes.planning);
   }
 
   return (
@@ -96,7 +97,7 @@ export default function LoginPage() {
             <span className="h-px flex-1 bg-ink-200" />
           </div>
 
-          <form className="space-y-4" method="post" action="/login" onSubmit={onSubmit}>
+          <form className="space-y-4" method="post" action={routes.connexion} onSubmit={onSubmit}>
             <Field label="Adresse e-mail">
               {({ id }) => <Input id={id} name="email" type="email" autoComplete="username" required />}
             </Field>

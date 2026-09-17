@@ -43,20 +43,18 @@ export function macrosFromGrams(line: RecipeLineInput): MacroNutrients | null {
   if (line.grams === null || line.grams < 0) {
     return null;
   }
-  if (
-    line.energyKcalPer100g === null ||
-    line.proteinPer100g === null ||
-    line.carbsPer100g === null ||
-    line.fatPer100g === null
-  ) {
+  // Ciqual laisse souvent glucides/protéines à NA pour les huiles : on garde
+  // l'énergie connue et on traite les macros manquantes comme 0, plutôt que
+  // d'ignorer toute la ligne (vinaigrette à 1 kcal, patate douce à 0 g de lipides).
+  if (line.energyKcalPer100g === null) {
     return null;
   }
   const factor = line.grams / 100;
   return {
     kcal: line.energyKcalPer100g * factor,
-    protein: line.proteinPer100g * factor,
-    carbs: line.carbsPer100g * factor,
-    fat: line.fatPer100g * factor,
+    protein: (line.proteinPer100g ?? 0) * factor,
+    carbs: (line.carbsPer100g ?? 0) * factor,
+    fat: (line.fatPer100g ?? 0) * factor,
     fiber: line.fiberPer100g === null ? null : line.fiberPer100g * factor,
   };
 }

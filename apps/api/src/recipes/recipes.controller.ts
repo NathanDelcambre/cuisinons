@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Put, Query, StreamableFile, UseGuards } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { z } from 'zod';
 import { QUANTITY_UNITS } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthUser } from '../auth/internal-jwt.guard.js';
 import { RecipesService } from './recipes.service.js';
+import { MAX_PHOTO_DATA_URL_LENGTH } from './recipe-photo.js';
 
 const writeSchema = z.object({
   name: z.string().min(1).max(160),
@@ -13,6 +15,7 @@ const writeSchema = z.object({
   prepTimeMinutes: z.number().int().nonnegative().nullable().optional(),
   cookTimeMinutes: z.number().int().nonnegative().nullable().optional(),
   finalCookedWeight: z.number().positive().nullable().optional(),
+  photoDataUrl: z.string().max(MAX_PHOTO_DATA_URL_LENGTH).nullable().optional(),
   status: z.enum(['DRAFT', 'PUBLISHED']).optional(),
   version: z.number().int().optional(),
   ingredients: z.array(
@@ -53,6 +56,14 @@ export class RecipesController {
   @Post('/recipes')
   create(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     return this.recipes.create(user.id, writeSchema.parse(body));
+  }
+
+  @Get('/recipes/:id/photo')
+  @SkipThrottle()
+  @Header('Cache-Control', 'private, max-age=86400')
+  async photo(@Param('id') id: string) {
+    const { bytes, mime } = await this.recipes.getPhoto(id);
+    return new StreamableFile(bytes, { type: mime, disposition: 'inline' });
   }
 
   @Get('/recipes/:id')

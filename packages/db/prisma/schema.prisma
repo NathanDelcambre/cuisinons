@@ -18,6 +18,14 @@ enum MealSlot {
   DINNER
 }
 
+/// Occupant d'un creneau sans recette cuisinee a la maison.
+enum MealKind {
+  RECIPE
+  SKIPPED
+  RESTAURANT
+  IMPOSED
+}
+
 enum NutrientGoalMode {
   AT_LEAST
   AT_MOST
@@ -52,6 +60,22 @@ enum NutrientValueKind {
 enum RecipeStatus {
   DRAFT
   PUBLISHED
+}
+
+/// Zone de rangement d'un ingredient en stock. FRIDGE, PANTRY et OTHER se
+/// deduisent de la categorie de l'ingredient ; FREEZER et BREAKFAST relevent
+/// d'un choix personnel et ne sont donc jamais attribues automatiquement.
+enum StorageArea {
+  FRIDGE
+  FREEZER
+  PANTRY
+  BREAKFAST
+  OTHER
+}
+
+enum ShoppingItemOrigin {
+  PLANNER
+  MANUAL
 }
 
 enum UxCategory {
@@ -103,6 +127,8 @@ model User {
   ingredientFavorites        UserIngredientFavorite[]
   ingredientRecents          UserIngredientRecent[]
   createdMealItems           MealItem[]                    @relation("MealItemAuthor")
+  pantryItems                PantryItem[]
+  shoppingLists              ShoppingList[]
 }
 
 model Session {
@@ -158,6 +184,8 @@ model Ingredient {
   recipeIngredients RecipeIngredient[]
   favorites         UserIngredientFavorite[]
   recents           UserIngredientRecent[]
+  pantryItems       PantryItem[]
+  shoppingItems     ShoppingListItem[]
 
   @@index([nameNormalized])
   @@index([uxCategory])
@@ -285,8 +313,9 @@ model MealItem {
   id          String   @id @default(cuid())
   date        DateTime @db.Date
   slot        MealSlot
-  recipeId    String
-  recipe      Recipe   @relation(fields: [recipeId], references: [id])
+  kind        MealKind @default(RECIPE)
+  recipeId    String?
+  recipe      Recipe?  @relation(fields: [recipeId], references: [id])
   sortOrder   Int      @default(0)
   version     Int      @default(1)
   createdById String
@@ -306,8 +335,66 @@ model MealParticipantPortion {
   userId     String
   user       User     @relation(fields: [userId], references: [id])
   portions   Decimal  @db.Decimal(8, 3)
+  /// Horodate la consommation de cette portion. Sert de garde-fou : le stock
+  /// n'est deduit qu'une fois, et le retour en arriere le recredite.
+  consumedAt DateTime?
+  /// L'utilisateur a refuse la validation automatique d'un jour passe :
+  /// on ne re-deduit pas le stock a la prochaine ouverture du planning.
+  skipAutoConsume Boolean @default(false)
 
   @@unique([mealItemId, userId])
+  @@index([userId, consumedAt])
+}
+
+/// Stock personnel. Volontairement non partage entre les deux comptes : chacun
+/// gere ses propres provisions, comme ses propres courses.
+model PantryItem {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredientId String
+  ingredient   Ingredient   @relation(fields: [ingredientId], references: [id])
+  area         StorageArea
+  quantity     Decimal      @db.Decimal(12, 4)
+  unit         QuantityUnit
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  /// L'unite fait partie de la cle : 2 pieces et 100 g d'un meme ingredient ne
+  /// sont pas cumulables sans inventer une conversion.
+  @@unique([userId, ingredientId, unit])
+  @@index([userId, area])
+}
+
+/// Une liste de courses en cours par utilisateur. `completedAt` la cloture au
+/// moment ou les achats basculent dans le stock, ce qui en conserve l'historique.
+model ShoppingList {
+  id          String             @id @default(cuid())
+  userId      String
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromDate    DateTime?          @db.Date
+  toDate      DateTime?          @db.Date
+  createdAt   DateTime           @default(now())
+  completedAt DateTime?
+  items       ShoppingListItem[]
+
+  @@index([userId, completedAt])
+}
+
+model ShoppingListItem {
+  id           String             @id @default(cuid())
+  listId       String
+  list         ShoppingList       @relation(fields: [listId], references: [id], onDelete: Cascade)
+  ingredientId String
+  ingredient   Ingredient         @relation(fields: [ingredientId], references: [id])
+  quantity     Decimal            @db.Decimal(12, 4)
+  unit         QuantityUnit
+  origin       ShoppingItemOrigin @default(PLANNER)
+  checked      Boolean            @default(false)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@unique([listId, ingredientId, unit])
 }
 
 model NutritionGoal {

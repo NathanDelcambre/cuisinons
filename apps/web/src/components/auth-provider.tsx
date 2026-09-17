@@ -1,13 +1,29 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { avatarUrlForEmail } from '@cuisinons/shared';
 import { apiJson, ensureCsrf } from '@/lib/api';
 
 export type SessionUser = {
   id: string;
   email: string;
   displayName: string;
+  avatarUrl: string | null;
 };
+
+function withAvatar(user: {
+  id: string;
+  email: string;
+  displayName: string;
+  avatarUrl?: string | null;
+}): SessionUser {
+  return {
+    id: user.id,
+    email: user.email,
+    displayName: user.displayName,
+    avatarUrl: user.avatarUrl ?? avatarUrlForEmail(user.email),
+  };
+}
 
 const AuthContext = createContext<{
   user: SessionUser | null;
@@ -23,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await ensureCsrf();
       const data = await apiJson<{ user: SessionUser }>('/api/auth/me');
-      setUser(data.user);
+      setUser(withAvatar(data.user));
     } catch {
       setUser(null);
     } finally {

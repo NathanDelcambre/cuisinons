@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
   // La cause reste dans les logs serveur : l'utilisateur ne voit qu'une erreur generique.
   const fail = (reason: string, detail?: unknown) => {
     console.error('google callback rejete', reason, detail ?? '');
-    return NextResponse.redirect(new URL('/login?error=1', env.NEXT_PUBLIC_APP_URL));
+    return NextResponse.redirect(new URL('/connexion?error=1', env.NEXT_PUBLIC_APP_URL));
   };
   if (!code || !state || !savedState || !verifier || state !== savedState) {
     return fail('etat oauth invalide', {

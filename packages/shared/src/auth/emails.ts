@@ -48,3 +48,15 @@ export function displayNameForEmail(email: string): string {
       return 'Invité';
   }
 }
+
+/** Photo de profil locale, indépendante de Google et du mot de passe. */
+export function avatarUrlForEmail(email: string): string | null {
+  switch (resolveAuthorizedEmail(email)) {
+    case 'nathan.delcambre@gmail.com':
+      return '/avatars/nathan.jpg';
+    case 'jade.peroch@gmail.com':
+      return '/avatars/jade.jpg';
+    default:
+      return null;
+  }
+}

@@ -48,6 +48,63 @@ pastille active de la navigation, dépliage des sous-menus, feuille modale.
 
 Le navigateur ne parle qu’à Next.js. Les cookies de session restent sur l’origine web. Next signe un JWT interne court (`userId`, `email`, `iss=cuisinons-web`, `aud=cuisinons-api`) et l’envoie à Nest. Nest refuse toute identité navigateur. Seul `GET /health` est public.
 
+## Courses et réserves
+
+Deux écrans (`/shopping`, `/pantry`), un module Nest (`provisions`) et la logique
+de quantités dans `packages/shared/src/provisions`. **Tout y est personnel à un
+compte** : chacun a ses réserves et sa liste, jamais en commun.
+
+La génération part du planning : pour chaque repas de la période, on calcule le
+besoin du convive (`grams` de la ligne de recette, au prorata de ses portions),
+on cumule, puis on retire ce qu’il a déjà en stock. Les repas déjà consommés sont
+ignorés, sinon on rachèterait ce qui a servi. Trois périodes possibles : la
+semaine, des jours cochés à la main, ou les N prochains jours.
+
+Quatre décisions à connaître :
+
+1. **L’unité fait partie de la clé** des lignes de stock et de courses. On
+   ramène les masses au gramme et les volumes au millilitre (`canonicalQuantity`),
+   mais « 2 pièces » et « 100 g » d’un même ingrédient restent deux lignes :
+   les fondre exigerait une équivalence que nous n’avons pas.
+2. **Une ligne dont la quantité a été fixée à la main passe en `MANUAL`, et la
+   régénération n’y touche plus.** Sans cette règle, le besoin du planning
+   s’ajouterait à chaque génération et l’article grossirait tout seul.
+3. **`consumedAt` sur la portion rend la déduction idempotente** et réversible :
+   marquer un repas consommé retire ses ingrédients du stock, annuler les
+   recrédite. Le stock ne descend jamais sous zéro ; un manque est signalé à
+   l’écran, il ne devient pas une dette.
+4. **Les zones de rangement ne se devinent qu’à moitié.** `defaultStorageArea`
+   place au frigo ou au placard d’après la catégorie Ciqual, mais
+   « Congélateur » et « Petit déjeuner » sont des habitudes personnelles, pas des
+   propriétés de l’aliment : ils restent un choix explicite.
+
+L’état du stock par zone est affiché en permanence sous « Réserves » dans la
+barre latérale. Ce n’est pas un sous-menu mais un panneau d’information, et les
+requêtes partagent les clés de cache des écrans (`['pantry']`, `['shopping']`) :
+une modification faite sur la page des courses met la barre à jour sans requête
+supplémentaire.
+
+## Proposer un plat
+
+Modale sur `/recettes?proposer=1`, module Nest `suggestions`, logique dans
+`packages/shared/src/suggestions`. **Aucun LLM** : on remplit des archétypes
+génériques (poêlée, salade, soupe…) **et 100 plats healthy recensés** (dîners
+légers, méditerranéen, batch cooking) avec le stock personnel. Un plat du
+catalogue ne se propose que si les mots-clés (poulet, saumon, lentilles…)
+matchent un ingrédient en réserve — sinon on retombe sur les archétypes
+génériques. Rien n’est persisté tant que l’utilisateur n’a pas validé.
+
+Trois refus volontaires :
+
+1. **Hors stock = hors proposition.** On ne complète pas avec un ingrédient à
+   acheter. Si le frigo ne fait pas une assiette, on renvoie une pénurie, pas
+   un plat creux.
+2. **Une salade de courgette à 20 kcal n’est pas un plat.** En dessous d’environ
+   90 kcal par portion (70 au petit-déjeuner), la suggestion est rejetée.
+3. **Si les filtres (végétarien, 15 min, 3 ingrédients) ne passent pas**, on
+   propose au plus une alternative obtenue en relâchant *une* contrainte, clairement
+   étiquetée. On n’invente pas un deuxième moteur.
+
 ## Données
 
 PostgreSQL (Docker en local, Neon Free en production). Prisma + migrations versionnées. Pas de `db push` en production.

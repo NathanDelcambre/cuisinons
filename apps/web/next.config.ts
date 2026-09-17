@@ -7,6 +7,38 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@cuisinons/ui'],
   poweredByHeader: false,
+  async redirects() {
+    return [
+      { source: '/login', destination: '/connexion', permanent: true },
+      { source: '/recipes/new', destination: '/recettes/nouvelle', permanent: true },
+      { source: '/recipes/suggest', destination: '/recettes?proposer=1', permanent: true },
+      { source: '/recettes/proposer', destination: '/recettes?proposer=1', permanent: true },
+      { source: '/recipes/:id/edit', destination: '/recettes/:id/modifier', permanent: true },
+      { source: '/recipes/:id', destination: '/recettes/:id', permanent: true },
+      { source: '/recipes', destination: '/recettes', permanent: true },
+      { source: '/shopping', destination: '/courses', permanent: true },
+      { source: '/pantry', destination: '/reserves', permanent: true },
+      { source: '/goals', destination: '/objectifs', permanent: true },
+      { source: '/settings/security', destination: '/profil/securite', permanent: true },
+      { source: '/settings', destination: '/profil', permanent: true },
+      { source: '/dev/icons', destination: '/dev/illustrations', permanent: true },
+    ];
+  },
+  async rewrites() {
+    return [
+      { source: '/connexion', destination: '/login' },
+      { source: '/recettes/nouvelle', destination: '/recipes/new' },
+      { source: '/recettes/:id/modifier', destination: '/recipes/:id/edit' },
+      { source: '/recettes/:id', destination: '/recipes/:id' },
+      { source: '/recettes', destination: '/recipes' },
+      { source: '/courses', destination: '/shopping' },
+      { source: '/reserves', destination: '/pantry' },
+      { source: '/objectifs', destination: '/goals' },
+      { source: '/profil/securite', destination: '/settings/security' },
+      { source: '/profil', destination: '/settings' },
+      { source: '/dev/illustrations', destination: '/dev/icons' },
+    ];
+  },
   async headers() {
     return [
       {

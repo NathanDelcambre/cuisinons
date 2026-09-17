@@ -131,9 +131,66 @@ body {
   outline-offset: 3px;
 }
 
+/*
+ * Tailwind v4 a change son preflight : les boutons recoivent `cursor: default`.
+ * On retablit le pointeur sur tout ce qui declenche une action, une bonne fois
+ * pour toutes, plutot que d'ajouter `cursor-pointer` a chaque composant.
+ */
+button,
+summary,
+[role='button'],
+[role='switch'],
+[role='radio'],
+[role='tab'],
+select,
+input[type='checkbox'],
+input[type='radio'],
+input[type='range'],
+input[type='date'],
+input[type='file'] {
+  cursor: pointer;
+}
+
+button:disabled,
+select:disabled,
+input:disabled,
+[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+/* Un champ de saisie garde le curseur texte, meme si son label est cliquable. */
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+input[type='search'],
+textarea {
+  cursor: auto;
+}
+
 /* Les chiffres des tableaux de macros doivent s'aligner verticalement. */
 .tabular {
   font-variant-numeric: tabular-nums;
+}
+
+/* Ascenseur horizontal discret : pouce arrondi, piste transparente. */
+@utility scrollbar-soft {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(28, 25, 23, 0.22) transparent;
+}
+.scrollbar-soft::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.scrollbar-soft::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-soft::-webkit-scrollbar-thumb {
+  background: rgba(28, 25, 23, 0.18);
+  border-radius: 999px;
+}
+.scrollbar-soft::-webkit-scrollbar-thumb:hover {
+  background: rgba(28, 25, 23, 0.32);
 }
 
 @media (prefers-reduced-motion: reduce) {

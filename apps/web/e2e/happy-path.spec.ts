@@ -3,14 +3,15 @@ import { expect, test } from '@playwright/test';
 test('login, recette, note, planning, optimisation', async ({ page }) => {
   const password = process.env.E2E_NATHAN_PASSWORD;
   test.skip(!password, 'E2E_NATHAN_PASSWORD requis');
-  await page.goto('/login');
+  await page.goto('/connexion');
   await expect(page.getByRole('button', { name: 'Se connecter' })).toBeEnabled({ timeout: 20_000 });
   await page.getByLabel('Adresse e-mail').fill('nathan.delcambre@gmail.com');
   await page.getByLabel('Mot de passe').fill(password);
   await page.getByRole('button', { name: 'Se connecter' }).click();
   await page.waitForURL('**/planning');
-  await page.goto('/recipes');
-  await page.getByRole('link', { name: 'Nouvelle recette' }).click();
+  await page.goto('/recettes');
+  // Le meme lien existe dans la barre laterale : on cible celui de la page.
+  await page.getByRole('main').getByRole('link', { name: 'Nouvelle recette' }).click();
   await page.getByLabel('Nom').fill('Omelette e2e');
   await page.getByRole('button', { name: 'Ajouter', exact: true }).click();
   await page.getByPlaceholder(/Rechercher/).fill('oeuf');
@@ -28,9 +29,46 @@ test('login, recette, note, planning, optimisation', async ({ page }) => {
   await page.getByRole('button', { name: 'Valider' }).click();
   await page.goto('/planning');
   await expect(page.getByText(/kcal/i).first()).toBeVisible();
-  // role="switch" et non une case a cocher : check() ne s'y applique pas.
-  await page.getByRole('switch', { name: 'Activer' }).click();
-  await expect(page.getByRole('button', { name: 'Optimiser ma journée' })).toBeVisible();
-  await page.getByRole('button', { name: 'Optimiser ma journée' }).click();
+  await page.getByRole('button', { name: 'Ajustement intelligent' }).click();
   await expect(page.getByText(/Proposition visible|kcal|ajust/i).first()).toBeVisible();
+});
+
+test('courses generees depuis le planning puis versees dans les reserves', async ({ page }) => {
+  const password = process.env.E2E_NATHAN_PASSWORD;
+  test.skip(!password, 'E2E_NATHAN_PASSWORD requis');
+  await page.goto('/connexion');
+  await expect(page.getByRole('button', { name: 'Se connecter' })).toBeEnabled({ timeout: 20_000 });
+  await page.getByLabel('Adresse e-mail').fill('nathan.delcambre@gmail.com');
+  await page.getByLabel('Mot de passe').fill(password);
+  await page.getByRole('button', { name: 'Se connecter' }).click();
+  await page.waitForURL('**/planning');
+
+  await page.goto('/courses');
+  await page.getByRole('button', { name: 'Générer la liste' }).click();
+  // « Tout cocher » n'apparait qu'avec au moins une ligne a acheter.
+  await expect(page.getByRole('button', { name: 'Tout cocher' })).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('button', { name: 'Tout cocher' }).click();
+  await page.getByRole('button', { name: 'J’ai fait les courses' }).click();
+  await expect(page.getByText(/ajouté\(s\) à tes réserves/)).toBeVisible();
+
+  await page.goto('/reserves');
+  await expect(page.getByRole('heading', { name: 'Réserves', level: 1 })).toBeVisible();
+  // Une ligne de stock est editable : c'est la preuve que les achats sont arrives.
+  await expect(page.getByLabel(/^Quantité de /).first()).toBeVisible();
+});
+
+test('proposer un plat s’ouvre depuis les recettes', async ({ page }) => {
+  const password = process.env.E2E_NATHAN_PASSWORD;
+  test.skip(!password, 'E2E_NATHAN_PASSWORD requis');
+  await page.goto('/connexion');
+  await expect(page.getByRole('button', { name: 'Se connecter' })).toBeEnabled({ timeout: 20_000 });
+  await page.getByLabel('Adresse e-mail').fill('nathan.delcambre@gmail.com');
+  await page.getByLabel('Mot de passe').fill(password);
+  await page.getByRole('button', { name: 'Se connecter' }).click();
+  await page.waitForURL('**/planning');
+  await page.goto('/recettes');
+  await page.getByRole('main').getByRole('button', { name: 'Proposer un plat' }).first().click();
+  await expect(page).toHaveURL(/\/recettes(?:\?|$)/);
+  await expect(page.getByRole('dialog', { name: 'Proposer un plat' })).toBeVisible();
+  await expect(page.getByRole('radiogroup', { name: 'Régime' })).toBeVisible();
 });

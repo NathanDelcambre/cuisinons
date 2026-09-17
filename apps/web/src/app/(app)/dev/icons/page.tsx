@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft } from 'lucide-react';
 import { Meter, PageHeader, Panel, Skeleton } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
+import { routes } from '@/lib/routes';
 
 export default function IconsReportPage() {
   const report = useQuery({
@@ -16,7 +17,7 @@ export default function IconsReportPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <Link
-        href="/settings"
+        href={routes.profil}
         className="inline-flex items-center gap-1.5 text-sm text-ink-500 transition-colors duration-200 ease-out-soft hover:text-ink-900"
       >
         <ChevronLeft className="size-4" aria-hidden />

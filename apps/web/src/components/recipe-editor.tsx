@@ -18,7 +18,9 @@ import {
   Textarea,
 } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
+import { routes } from '@/lib/routes';
 import { IngredientPicker } from './ingredient-picker';
+import { RecipePhotoField } from './recipe-photo-field';
 
 type Line = {
   ingredientId: string;
@@ -43,6 +45,10 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
   const [steps, setSteps] = useState<Step[]>([{ description: '', durationMinutes: null }]);
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [equipmentIds, setEquipmentIds] = useState<string[]>([]);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(
+    typeof existing?.photoUrl === 'string' ? existing.photoUrl : null,
+  );
+  const [photoDataUrl, setPhotoDataUrl] = useState<string | null | undefined>(undefined);
   const [picker, setPicker] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -111,8 +117,13 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
     try {
       const path = existing?.id ? `/api/bff/recipes/${String(existing.id)}` : '/api/bff/recipes';
       const method = existing?.id ? 'PATCH' : 'POST';
-      const created = await apiJson<{ id: string }>(path, { method, body: JSON.stringify(payload) });
-      router.push(`/recipes/${created.id}`);
+      const created = await apiJson<{ id: string }>(path, {
+        method,
+        body: JSON.stringify(
+          photoDataUrl === undefined ? payload : { ...payload, photoDataUrl },
+        ),
+      });
+      router.push(`${routes.recettes}?recette=${created.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Enregistrement impossible.');
     } finally {
@@ -138,6 +149,13 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
         <h2 className="font-display text-base font-semibold tracking-[-0.01em] text-ink-900">
           Informations générales
         </h2>
+        <RecipePhotoField
+          preview={photoPreview}
+          onChange={(next) => {
+            setPhotoPreview(next);
+            setPhotoDataUrl(next);
+          }}
+        />
         <Field label="Nom">
           {({ id }) => (
             <Input id={id} value={name} onChange={(e) => setName(e.target.value)} required placeholder="Gratin de courgettes" />
@@ -244,19 +262,15 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
                 <Select
                   value={line.unit}
                   aria-label={`Unité de ${line.name}`}
-                  className="h-10 text-sm"
-                  onChange={(e) =>
-                    setLines((all) =>
-                      all.map((l, i) => (i === index ? { ...l, unit: e.target.value as QuantityUnit } : l)),
-                    )
+                  className="h-10 min-h-10 text-sm"
+                  options={QUANTITY_UNITS.map((unit) => ({
+                    value: unit,
+                    label: UNIT_LABELS[unit],
+                  }))}
+                  onChange={(next) =>
+                    setLines((all) => all.map((l, i) => (i === index ? { ...l, unit: next } : l)))
                   }
-                >
-                  {QUANTITY_UNITS.map((unit) => (
-                    <option key={unit} value={unit}>
-                      {UNIT_LABELS[unit]}
-                    </option>
-                  ))}
-                </Select>
+                />
                 <IconButton
                   icon={Trash2}
                   label={`Retirer ${line.name}`}
@@ -287,9 +301,9 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
               <img
                 src={`/equipment/${item.slug}.png`}
                 alt=""
-                width={20}
-                height={20}
-                className="size-5"
+                width={24}
+                height={24}
+                className="size-6"
                 decoding="async"
               />
               {item.label}

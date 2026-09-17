@@ -76,6 +76,26 @@ describe('macros', () => {
     expect(result.incompleteLines).toBe(1);
     expect(result.total.kcal).toBe(0);
   });
+
+  it('compte une huile dont les glucides Ciqual sont inconnus', () => {
+    const result = computeRecipeNutrition(
+      [
+        {
+          grams: 13.5,
+          energyKcalPer100g: 899,
+          proteinPer100g: 0,
+          carbsPer100g: null,
+          fatPer100g: 99.9,
+          fiberPer100g: 0,
+        },
+      ],
+      1,
+    );
+    expect(result.complete).toBe(true);
+    expect(result.total.kcal).toBeCloseTo(121.365);
+    expect(result.total.fat).toBeCloseTo(13.4865);
+    expect(result.total.carbs).toBe(0);
+  });
 });
 
 describe('conversions', () => {

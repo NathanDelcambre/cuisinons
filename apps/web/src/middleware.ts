@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const PUBLIC = ['/login', '/api/auth/login', '/api/auth/google', '/api/auth/csrf', '/ingredients/', '/brand/'];
+const PUBLIC = ['/login', '/connexion', '/api/auth/login', '/api/auth/google', '/api/auth/csrf', '/ingredients/', '/equipment/', '/brand/', '/avatars/'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -17,7 +17,7 @@ export function middleware(request: NextRequest) {
   const hasSession = [...request.cookies.getAll()].some((c) => c.name.includes('cuisinons_session'));
   if (!hasSession && !pathname.startsWith('/api/')) {
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = '/connexion';
     return NextResponse.redirect(url);
   }
   return NextResponse.next();

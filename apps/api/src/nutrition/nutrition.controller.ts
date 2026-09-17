@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, NotFoundException, Put, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { GOAL_MODES } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
@@ -32,11 +32,21 @@ export class NutritionController {
   ) {}
 
   @Get('/nutrition-goals')
-  async getGoals(@CurrentUser() user: AuthUser, @Query('date') date?: string) {
-    const base = await this.prisma.nutritionGoal.findUnique({ where: { userId: user.id } });
+  async getGoals(
+    @CurrentUser() user: AuthUser,
+    @Query('date') date?: string,
+    @Query('userId') userId?: string,
+  ) {
+    const targetId = userId?.trim() || user.id;
+    const target = await this.prisma.user.findUnique({
+      where: { id: targetId },
+      select: { id: true },
+    });
+    if (!target) throw new NotFoundException('Utilisateur introuvable.');
+    const base = await this.prisma.nutritionGoal.findUnique({ where: { userId: targetId } });
     if (!date) return base;
     const override = await this.prisma.dailyNutritionGoalOverride.findUnique({
-      where: { userId_date: { userId: user.id, date: parseIsoDate(date) } },
+      where: { userId_date: { userId: targetId, date: parseIsoDate(date) } },
     });
     return override ?? base;
   }

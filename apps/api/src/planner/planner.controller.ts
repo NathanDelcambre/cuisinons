@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
-import { MEAL_SLOTS } from '@cuisinons/shared';
+import { MEAL_KINDS, MEAL_SLOTS } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthUser } from '../auth/internal-jwt.guard.js';
@@ -25,8 +25,26 @@ export class PlannerController {
       .object({
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         slot: z.enum(MEAL_SLOTS),
-        recipeId: z.string().min(1),
+        kind: z.enum(MEAL_KINDS).optional(),
+        recipeId: z.string().min(1).optional(),
         portions: z.array(z.object({ userId: z.string(), portions: z.number().positive().max(6) })),
+      })
+      .superRefine((val, ctx) => {
+        const kind = val.kind ?? 'RECIPE';
+        if (kind === 'RECIPE' && !val.recipeId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Choisis une recette.',
+            path: ['recipeId'],
+          });
+        }
+        if (kind !== 'RECIPE' && val.recipeId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Pas de recette pour ce type de repas.',
+            path: ['recipeId'],
+          });
+        }
       })
       .parse(body);
     const date = parseIsoDate(parsed.date);
@@ -36,6 +54,7 @@ export class PlannerController {
     return this.planner.addItem({
       date,
       slot: parsed.slot,
+      kind: parsed.kind ?? 'RECIPE',
       recipeId: parsed.recipeId,
       createdById: user.id,
       portions: parsed.portions,
@@ -48,6 +67,8 @@ export class PlannerController {
       .object({
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
         slot: z.enum(MEAL_SLOTS).optional(),
+        recipeId: z.string().min(1).optional(),
+        kind: z.enum(MEAL_KINDS).optional(),
         version: z.number().int().optional(),
         portions: z
           .array(z.object({ userId: z.string(), portions: z.number().positive().max(6) }))
@@ -57,6 +78,8 @@ export class PlannerController {
     return this.planner.updateItem(id, {
       date: parsed.date ? parseIsoDate(parsed.date) : undefined,
       slot: parsed.slot,
+      recipeId: parsed.recipeId,
+      kind: parsed.kind,
       version: parsed.version,
       portions: parsed.portions,
     });

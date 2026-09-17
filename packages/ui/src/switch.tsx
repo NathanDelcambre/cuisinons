@@ -28,7 +28,7 @@ export function Switch({
   return (
     <div className={cn('flex items-center gap-3', className)}>
       <span className="min-w-0">
-        <label htmlFor={id} className="block text-sm font-medium text-ink-900">
+        <label htmlFor={id} className="block cursor-pointer text-sm font-medium text-ink-900">
           {label}
         </label>
         {description ? <span className="mt-0.5 block text-xs text-ink-500">{description}</span> : null}

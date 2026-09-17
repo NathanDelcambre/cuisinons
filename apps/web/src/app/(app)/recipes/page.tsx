@@ -1,28 +1,35 @@
 'use client';
 
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
-import { ChefHat, Flame, Plus, Star } from 'lucide-react';
+import { ChefHat, Flame, Plus, Sparkles, Star } from 'lucide-react';
 import {
   Badge,
+  Button,
   CardLink,
   EmptyState,
   PageHeader,
-  Segmented,
   Select,
   SearchInput,
   Skeleton,
+  Switch,
   buttonClasses,
 } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
+import { recetteIdFromSearch, routes, withSearch } from '@/lib/routes';
+import { RecipeModal } from '@/components/recipe-modal';
+import { SuggestDishModal } from '@/components/suggest-dish-modal';
+
+type Macros = { kcal: number; protein: number; carbs: number; fat: number };
 
 type Recipe = {
   id: string;
   name: string;
+  photoUrl?: string | null;
   author: { displayName: string };
-  nutrition: { perServing: { kcal: number; protein: number; carbs: number; fat: number } };
+  nutrition: { perServing: Macros; per100g: Macros | null };
   rating: { average: number | null; count: number };
   tags: Array<{ tag: { slug: string; label: string } }>;
 };
@@ -40,23 +47,55 @@ const SORTS = [
   { value: 'kcal-asc', label: 'Moins de calories' },
 ];
 
-const BASIS = [
-  { value: 'serving', label: 'Par portion' },
-  { value: '100g', label: 'Pour 100 g' },
-] as const;
+type Filters = {
+  q: string;
+  tag: string;
+  sort: string;
+  basis: 'serving' | '100g';
+};
+
+function filtersFromSearch(params: { get(name: string): string | null }): Filters {
+  return {
+    q: params.get('q') ?? '',
+    tag: params.get('tag') ?? '',
+    sort: params.get('sort') ?? 'date',
+    basis: params.get('basis') === '100g' ? '100g' : 'serving',
+  };
+}
 
 function RecipesInner() {
   const params = useSearchParams();
   const router = useRouter();
-  const q = params.get('q') ?? '';
-  const tag = params.get('tag') ?? '';
-  const sort = params.get('sort') ?? 'date';
-  const basis = (params.get('basis') as 'serving' | '100g') ?? 'serving';
-  const [draft, setDraft] = useState(q);
+  const fromUrl = filtersFromSearch(params);
+  const selectedId = recetteIdFromSearch(params);
+  const suggestOpen = params.has('proposer');
+  const [filters, setFilters] = useState(fromUrl);
+  const [draft, setDraft] = useState(fromUrl.q);
+  const queryClient = useQueryClient();
+  const { q, tag, sort, basis } = filters;
+  const per100g = basis === '100g';
 
-  // L'URL reste la source de verite : un retour arriere doit remettre le champ
-  // de recherche dans l'etat correspondant.
-  useEffect(() => setDraft(q), [q]);
+  useEffect(() => {
+    function onPopState() {
+      const sp = new URLSearchParams(window.location.search);
+      const next = filtersFromSearch(sp);
+      setFilters(next);
+      setDraft(next.q);
+    }
+    window.addEventListener('popstate', onPopState);
+    return () => window.removeEventListener('popstate', onPopState);
+  }, []);
+
+  useEffect(() => {
+    if (!params.has('recipe')) return;
+    const sp = new URLSearchParams(params.toString());
+    if (!sp.get('recette')) {
+      const legacy = sp.get('recipe');
+      if (legacy) sp.set('recette', legacy);
+    }
+    sp.delete('recipe');
+    router.replace(withSearch(routes.recettes, sp), { scroll: false });
+  }, [params, router]);
 
   const recipes = useQuery({
     queryKey: ['recipes', q, tag, sort, basis],
@@ -67,16 +106,80 @@ function RecipesInner() {
   });
   const tags = useQuery({
     queryKey: ['tags'],
-    queryFn: () => apiJson<Array<{ slug: string; label: string }>>('/api/bff/tags'),
+    queryFn: () => apiJson<Array<{ id: string; slug: string; label: string }>>('/api/bff/tags'),
   });
 
-  function update(next: Record<string, string>) {
+  function update(next: Partial<Filters>) {
+    setFilters((current) => {
+      const merged = { ...current, ...next };
+      const sp = new URLSearchParams(window.location.search);
+      const encoded: Record<string, string> = {
+        q: merged.q,
+        tag: merged.tag,
+        sort: merged.sort === 'date' ? '' : merged.sort,
+        basis: merged.basis === 'serving' ? '' : merged.basis,
+      };
+      for (const [k, v] of Object.entries(encoded)) {
+        if (v) sp.set(k, v);
+        else sp.delete(k);
+      }
+      if (sp.has('recipe') && !sp.has('recette')) {
+        sp.set('recette', sp.get('recipe') ?? '');
+      }
+      sp.delete('recipe');
+      const href = withSearch(routes.recettes, sp);
+      window.history.replaceState(window.history.state, '', href);
+      return merged;
+    });
+  }
+
+  useEffect(() => {
+    if (draft === q) return;
+    const timer = window.setTimeout(() => update({ q: draft }), 280);
+    return () => window.clearTimeout(timer);
+  }, [draft, q]);
+
+  function openRecipe(id: string) {
     const sp = new URLSearchParams(params.toString());
-    for (const [k, v] of Object.entries(next)) {
-      if (v) sp.set(k, v);
-      else sp.delete(k);
-    }
-    router.replace(`/recipes?${sp.toString()}`);
+    sp.set('recette', id);
+    sp.delete('recipe');
+    router.replace(withSearch(routes.recettes, sp), { scroll: false });
+  }
+
+  function closeRecipe() {
+    const sp = new URLSearchParams(params.toString());
+    sp.delete('recette');
+    sp.delete('recipe');
+    router.replace(withSearch(routes.recettes, sp), { scroll: false });
+  }
+
+  function openSuggest() {
+    const sp = new URLSearchParams(params.toString());
+    sp.set('proposer', '1');
+    sp.delete('recette');
+    sp.delete('recipe');
+    router.replace(withSearch(routes.recettes, sp), { scroll: false });
+  }
+
+  function closeSuggest() {
+    const sp = new URLSearchParams(params.toString());
+    sp.delete('proposer');
+    router.replace(withSearch(routes.recettes, sp), { scroll: false });
+  }
+
+  function onSuggestionAccepted(id: string) {
+    const sp = new URLSearchParams(params.toString());
+    sp.delete('proposer');
+    sp.set('recette', id);
+    sp.delete('recipe');
+    router.replace(withSearch(routes.recettes, sp), { scroll: false });
+  }
+
+  function prefetchRecipe(id: string) {
+    void queryClient.prefetchQuery({
+      queryKey: ['recipe', id],
+      queryFn: () => apiJson(`/api/bff/recipes/${id}`),
+    });
   }
 
   const list = recipes.data ?? [];
@@ -87,10 +190,15 @@ function RecipesInner() {
         eyebrow={list.length > 0 ? `${String(list.length)} recette${list.length > 1 ? 's' : ''}` : undefined}
         title="Recettes"
         actions={
-          <Link href="/recipes/new" className={buttonClasses()}>
-            <Plus className="size-4" aria-hidden />
-            Nouvelle recette
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" variant="glass" icon={Sparkles} onClick={openSuggest}>
+              Proposer un plat
+            </Button>
+            <Link href={routes.recetteNouvelle} className={buttonClasses()}>
+              <Plus className="size-4" aria-hidden />
+              Nouvelle recette
+            </Link>
+          </div>
         }
       />
 
@@ -101,44 +209,39 @@ function RecipesInner() {
           update({ q: draft });
         }}
       >
-        <SearchInput
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          placeholder="Rechercher une recette"
-          aria-label="Rechercher une recette"
-          className="min-w-56 flex-1"
-        />
+        <div className="w-80 max-w-full shrink-0">
+          <SearchInput
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Rechercher une recette"
+            aria-label="Rechercher une recette"
+          />
+        </div>
         <Select
           value={tag}
-          aria-label="Filtrer par tag"
-          className="w-auto"
-          onChange={(e) => update({ tag: e.target.value })}
-        >
-          <option value="">Tous les tags</option>
-          {(tags.data ?? []).map((t) => (
-            <option key={t.slug} value={t.slug}>
-              {t.label}
-            </option>
-          ))}
-        </Select>
+          aria-label="Filtrer par catégorie"
+          className="w-[13.5rem] max-w-full shrink-0"
+          options={[
+            { value: '', label: 'Toutes les catégories' },
+            ...(tags.data ?? []).map((t) => ({ value: t.slug || t.id, label: t.label })),
+          ]}
+          onChange={(next) => update({ tag: next })}
+        />
         <Select
           value={sort}
           aria-label="Trier"
-          className="w-auto"
-          onChange={(e) => update({ sort: e.target.value })}
-        >
-          {SORTS.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </Select>
-        <Segmented
-          label="Base de calcul"
-          options={BASIS}
-          value={basis}
-          onChange={(next) => update({ basis: next })}
+          className="w-[13.5rem] max-w-full shrink-0"
+          options={SORTS}
+          onChange={(next) => update({ sort: next })}
         />
+        <div className="flex h-11 items-center rounded-full bg-sage-100/80 px-3.5 ring-1 ring-inset ring-sage-200/80">
+          <Switch
+            label="Pour 100 g"
+            checked={per100g}
+            onChange={(on) => update({ basis: on ? '100g' : 'serving' })}
+            className="gap-2.5"
+          />
+        </div>
       </form>
 
       {recipes.isLoading ? (
@@ -154,57 +257,102 @@ function RecipesInner() {
           description={
             q || tag
               ? 'Essaie un autre mot-clé ou retire le filtre de tag.'
-              : 'Crée la première recette : les macros se calculeront automatiquement.'
+              : 'Crée la première recette, ou laisse-nous en proposer une avec tes réserves.'
           }
           action={
-            <Link href="/recipes/new" className={buttonClasses({ size: 'sm' })}>
-              <Plus className="size-3.5" aria-hidden />
-              Nouvelle recette
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button type="button" size="sm" variant="glass" icon={Sparkles} onClick={openSuggest}>
+                Proposer un plat
+              </Button>
+              <Link href={routes.recetteNouvelle} className={buttonClasses({ size: 'sm' })}>
+                <Plus className="size-3.5" aria-hidden />
+                Nouvelle recette
+              </Link>
+            </div>
           }
         />
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {list.map((recipe) => (
             <li key={recipe.id}>
-              <Link href={`/recipes/${recipe.id}`} className="block rounded-2xl">
-                <CardLink className="h-full">
+              <button
+                type="button"
+                onClick={() => openRecipe(recipe.id)}
+                onPointerEnter={() => prefetchRecipe(recipe.id)}
+                className="block h-full w-full rounded-2xl text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500"
+              >
+                <CardLink className="flex h-full flex-col overflow-hidden p-0">
+                  {recipe.photoUrl ? (
+                    <img
+                      src={recipe.photoUrl}
+                      alt=""
+                      className="aspect-[16/10] w-full shrink-0 object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <div className="flex aspect-[16/10] shrink-0 items-center justify-center bg-sage-100/60">
+                      <ChefHat className="size-8 text-sage-400" aria-hidden />
+                    </div>
+                  )}
+                  <div className="flex flex-1 flex-col p-5">
                   <div className="flex items-start justify-between gap-3">
-                    <h2 className="font-display text-lg font-semibold leading-snug tracking-[-0.02em] text-ink-900">
+                    <h2 className="line-clamp-2 min-h-[2.75em] font-display text-lg font-semibold leading-snug tracking-[-0.02em] text-ink-900">
                       {recipe.name}
                     </h2>
                     <Rating average={recipe.rating.average} count={recipe.rating.count} />
                   </div>
-                  <p className="mt-1 text-sm text-ink-500">par {recipe.author.displayName}</p>
+                  <p className="mt-1 truncate text-sm text-ink-500">par {recipe.author.displayName}</p>
 
-                  <div className="tabular mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-700">
-                    <span className="flex items-center gap-1.5">
-                      <Flame className="size-3.5 text-peach-500" aria-hidden />
-                      {Math.round(recipe.nutrition.perServing.kcal)} kcal
-                    </span>
-                    <span>{Math.round(recipe.nutrition.perServing.protein)} g prot.</span>
-                    <span className="text-ink-500">
-                      {Math.round(recipe.nutrition.perServing.carbs)} g gluc.
-                    </span>
-                    <span className="text-ink-500">{Math.round(recipe.nutrition.perServing.fat)} g lip.</span>
+                  <RecipeMacros
+                    macros={per100g ? recipe.nutrition.per100g : recipe.nutrition.perServing}
+                    per100g={per100g}
+                  />
+
+                  <div className="mt-4 flex h-7 flex-nowrap items-center gap-1.5 overflow-hidden">
+                    {recipe.tags.slice(0, 3).map((t) => (
+                      <Badge key={t.tag.slug} tone="sage">
+                        {t.tag.label}
+                      </Badge>
+                    ))}
+                    {recipe.tags.length > 3 ? <Badge>+{recipe.tags.length - 3}</Badge> : null}
                   </div>
-
-                  {recipe.tags.length > 0 ? (
-                    <div className="mt-4 flex flex-wrap gap-1.5">
-                      {recipe.tags.slice(0, 3).map((t) => (
-                        <Badge key={t.tag.slug} tone="sage">
-                          {t.tag.label}
-                        </Badge>
-                      ))}
-                      {recipe.tags.length > 3 ? <Badge>+{recipe.tags.length - 3}</Badge> : null}
-                    </div>
-                  ) : null}
+                  </div>
                 </CardLink>
-              </Link>
+              </button>
             </li>
           ))}
         </ul>
       )}
+
+      <RecipeModal recipeId={selectedId} onClose={closeRecipe} />
+      <SuggestDishModal open={suggestOpen} onClose={closeSuggest} onAccepted={onSuggestionAccepted} />
+    </div>
+  );
+}
+
+function RecipeMacros({ macros, per100g }: { macros: Macros | null; per100g: boolean }) {
+  if (!macros) {
+    return (
+      <p className="mt-4 text-sm text-ink-400">
+        Poids indisponible{per100g ? ' pour 100 g' : ''}
+      </p>
+    );
+  }
+  return (
+    <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+      <p className="tabular flex flex-nowrap items-center gap-x-3 overflow-hidden text-sm text-ink-700">
+        <span className="flex shrink-0 items-center gap-1.5">
+          <Flame className="size-3.5 text-peach-500" aria-hidden />
+          {Math.round(macros.kcal)} kcal
+        </span>
+        <span className="shrink-0 font-bold text-sage-600">{Math.round(macros.protein)} P</span>
+        <span className="shrink-0 font-bold text-ink-800">{Math.round(macros.carbs)} G</span>
+        <span className="shrink-0 font-bold text-tomato-500">{Math.round(macros.fat)} L</span>
+      </p>
+      {per100g ? (
+        <span className="text-[11px] font-medium text-sage-600">/ 100 g</span>
+      ) : null}
     </div>
   );
 }

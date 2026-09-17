@@ -5,22 +5,27 @@ import { useEffect, useState } from 'react';
 import { Check, Search } from 'lucide-react';
 import { Button, EmptyState, Modal, SearchInput, Skeleton, Stepper, cn } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
-import { MEAL_SLOT_LABELS, type MealSlot } from '@cuisinons/shared';
+import { MEAL_SLOT_LABELS, type MealSlot, avatarUrlForEmail } from '@cuisinons/shared';
 import { useAuth } from './auth-provider';
+import { Avatar } from './avatar';
 
 type Recipe = { id: string; name: string };
-type User = { id: string; displayName: string };
+type User = { id: string; email?: string; displayName: string; avatarUrl?: string | null };
 
 export function AddMealDialog({
   open,
   date,
   slot,
+  replaceItemId,
+  initialRecipeId,
   onClose,
   onAdded,
 }: {
   open: boolean;
   date: string;
   slot: MealSlot;
+  replaceItemId?: string | null;
+  initialRecipeId?: string | null;
   onClose: () => void;
   onAdded: () => void;
 }) {
@@ -29,15 +34,14 @@ export function AddMealDialog({
   const [query, setQuery] = useState('');
   const [recipeId, setRecipeId] = useState<string | null>(null);
   const [portions, setPortions] = useState<Record<string, number>>({});
+  const replacing = Boolean(replaceItemId);
 
-  // Chaque ouverture repart d'une feuille vierge, sinon la recette choisie la
-  // fois precedente reste selectionnee pour un autre creneau.
   useEffect(() => {
     if (!open) return;
     setQuery('');
-    setRecipeId(null);
+    setRecipeId(initialRecipeId ?? null);
     setPortions({});
-  }, [open, date, slot]);
+  }, [open, date, slot, initialRecipeId]);
 
   const recipes = useQuery({
     queryKey: ['recipes', query],
@@ -50,16 +54,27 @@ export function AddMealDialog({
     enabled: open,
   });
   const add = useMutation({
-    mutationFn: () =>
-      apiJson('/api/bff/planner/items', {
+    mutationFn: () => {
+      const portionsPayload = (users.data ?? []).map((u) => ({
+        userId: u.id,
+        portions: portions[u.id] ?? 1,
+      }));
+      if (replaceItemId) {
+        return apiJson(`/api/bff/planner/items/${replaceItemId}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ recipeId, kind: 'RECIPE', portions: portionsPayload }),
+        });
+      }
+      return apiJson('/api/bff/planner/items', {
         method: 'POST',
         body: JSON.stringify({
           date,
           slot,
           recipeId,
-          portions: (users.data ?? []).map((u) => ({ userId: u.id, portions: portions[u.id] ?? 1 })),
+          portions: portionsPayload,
         }),
-      }),
+      });
+    },
     onSuccess: async () => {
       onAdded();
       await queryClient.invalidateQueries({ queryKey: ['planner'] });
@@ -72,7 +87,7 @@ export function AddMealDialog({
   return (
     <Modal
       open={open}
-      title={`Ajouter · ${MEAL_SLOT_LABELS[slot]}`}
+      title={`${replacing ? 'Changer de recette' : 'Ajouter'} · ${MEAL_SLOT_LABELS[slot]}`}
       description={new Date(`${date}T12:00:00`).toLocaleDateString('fr-FR', {
         weekday: 'long',
         day: 'numeric',
@@ -90,7 +105,7 @@ export function AddMealDialog({
             loading={add.isPending}
             onClick={() => add.mutate()}
           >
-            Ajouter au planning
+            {replacing ? 'Remplacer' : 'Ajouter au planning'}
           </Button>
         </>
       }
@@ -147,9 +162,16 @@ export function AddMealDialog({
         <p className="text-sm font-medium text-ink-700">Portions</p>
         {(users.data ?? []).map((u) => (
           <div key={u.id} className="flex items-center justify-between gap-4">
-            <span className="min-w-0 truncate text-sm text-ink-600">
-              {u.displayName}
-              {u.id === user?.id ? ' (toi)' : ''}
+            <span className="flex min-w-0 items-center gap-2.5">
+              <Avatar
+                name={u.displayName}
+                src={u.avatarUrl ?? (u.email ? avatarUrlForEmail(u.email) : null)}
+                className="size-8 rounded-full text-xs"
+              />
+              <span className="min-w-0 truncate text-sm text-ink-600">
+                {u.displayName}
+                {u.id === user?.id ? ' (toi)' : ''}
+              </span>
             </span>
             <Stepper
               value={portions[u.id] ?? 1}

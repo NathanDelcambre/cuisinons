@@ -56,5 +56,6 @@ Le code est sur le dépôt GitHub privé [NathanDelcambre/cuisinons](https://git
 ## Limitations connues
 
 - L’optimiseur ne parle à aucun LLM.
+- Les plats proposés à partir des réserves non plus : archétypes déterministes, à valider avant enregistrement.
 - Les illustrations dédiées couvrent les aliments courants ; le reste utilise un fallback de catégorie.
 - Le throttle login est en mémoire (instance serverless).

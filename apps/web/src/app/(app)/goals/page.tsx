@@ -2,10 +2,14 @@
 
 import { GOAL_MODES, GOAL_MODE_LABELS, type GoalMode } from '@cuisinons/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'motion/react';
+import { useState } from 'react';
 import { Check, Croissant, Droplet, Flame, Beef, Loader2 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
-import { Card, Field, Input, PageHeader, Select, Skeleton } from '@cuisinons/ui';
+import { Card, Field, Input, PageHeader, Select, Skeleton, transitions, cn } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
+import { useAuth } from '@/components/auth-provider';
+import { Avatar } from '@/components/avatar';
 
 type Goals = {
   caloriesMode: GoalMode;
@@ -20,6 +24,13 @@ type Goals = {
   fatMode: GoalMode;
   fatValue: string | null;
   fatTolerance: string | null;
+};
+
+type HouseholdUser = {
+  id: string;
+  email: string;
+  displayName: string;
+  avatarUrl: string | null;
 };
 
 const empty: Goals = {
@@ -51,14 +62,29 @@ const MACROS: Array<{
 ];
 
 export default function GoalsPage() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [viewUserId, setViewUserId] = useState<string | null>(null);
+  const household = useQuery({
+    queryKey: ['users'],
+    queryFn: () => apiJson<HouseholdUser[]>('/api/bff/users'),
+  });
+  const selectedId = viewUserId ?? user?.id;
+  const selected = household.data?.find((member) => member.id === selectedId);
+  const isSelf = !viewUserId || viewUserId === user?.id;
+
   const goals = useQuery({
-    queryKey: ['goals'],
-    queryFn: () => apiJson<Goals | null>('/api/bff/nutrition-goals'),
+    queryKey: ['goals', selectedId],
+    queryFn: () =>
+      apiJson<Goals | null>(`/api/bff/nutrition-goals?userId=${encodeURIComponent(selectedId!)}`),
+    enabled: Boolean(selectedId),
   });
   const save = useMutation({
-    mutationFn: (body: Goals) =>
-      apiJson('/api/bff/nutrition-goals', {
+    mutationFn: (body: Goals) => {
+      if (!isSelf) {
+        return Promise.reject(new Error('Consultation uniquement.'));
+      }
+      return apiJson('/api/bff/nutrition-goals', {
         method: 'PUT',
         body: JSON.stringify({
           ...body,
@@ -71,28 +97,45 @@ export default function GoalsPage() {
           fatValue: body.fatValue ? Number(body.fatValue) : null,
           fatTolerance: body.fatTolerance ? Number(body.fatTolerance) : null,
         }),
-      }),
+      });
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['goals'] }),
   });
 
   const value = goals.data ?? empty;
+  const otherName = selected?.displayName ?? 'l’autre';
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Objectifs nutritionnels"
-        description="Ces valeurs servent de référence par défaut. Une journée du planning peut les surcharger ponctuellement."
-        actions={<SaveStatus pending={save.isPending} saved={save.isSuccess} />}
+        description={
+          isSelf
+            ? 'Ces valeurs servent de référence par défaut. Une journée du planning peut les surcharger ponctuellement.'
+            : `Les objectifs de ${otherName}. Consultation uniquement — ${otherName} les modifie depuis son compte.`
+        }
+        actions={
+          isSelf ? <SaveStatus pending={save.isPending} saved={save.isSuccess} /> : null
+        }
       />
 
-      {goals.isLoading ? (
+      {household.data && household.data.length > 1 ? (
+        <PersonSwitch
+          people={household.data}
+          selectedId={selectedId}
+          selfId={user?.id}
+          onChange={setViewUserId}
+        />
+      ) : null}
+
+      {goals.isLoading || !selectedId ? (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }, (_, i) => (
             <Skeleton key={i} className="h-52" />
           ))}
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div key={selectedId} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {MACROS.map((macro) => {
             const Icon = macro.icon;
             return (
@@ -112,15 +155,14 @@ export default function GoalsPage() {
                   {({ id }) => (
                     <Select
                       id={id}
-                      value={String(value[macro.modeKey])}
-                      onChange={(e) => save.mutate({ ...value, [macro.modeKey]: e.target.value })}
-                    >
-                      {GOAL_MODES.map((mode) => (
-                        <option key={mode} value={mode}>
-                          {GOAL_MODE_LABELS[mode]}
-                        </option>
-                      ))}
-                    </Select>
+                      disabled={!isSelf}
+                      value={String(value[macro.modeKey]) as GoalMode}
+                      options={GOAL_MODES.map((mode) => ({
+                        value: mode,
+                        label: GOAL_MODE_LABELS[mode],
+                      }))}
+                      onChange={(next) => save.mutate({ ...value, [macro.modeKey]: next })}
+                    />
                   )}
                 </Field>
                 <Field label="Valeur cible" hint={`En ${macro.unit}. Laisser vide pour ne rien viser.`}>
@@ -132,8 +174,13 @@ export default function GoalsPage() {
                       min={0}
                       inputMode="numeric"
                       placeholder={macro.unit}
+                      readOnly={!isSelf}
+                      disabled={!isSelf}
                       defaultValue={value[macro.valueKey] ?? ''}
-                      onBlur={(e) => save.mutate({ ...value, [macro.valueKey]: e.target.value || null })}
+                      onBlur={(e) => {
+                        if (!isSelf) return;
+                        save.mutate({ ...value, [macro.valueKey]: e.target.value || null });
+                      }}
                     />
                   )}
                 </Field>
@@ -142,6 +189,62 @@ export default function GoalsPage() {
           })}
         </div>
       )}
+    </div>
+  );
+}
+
+function PersonSwitch({
+  people,
+  selectedId,
+  selfId,
+  onChange,
+}: {
+  people: HouseholdUser[];
+  selectedId?: string;
+  selfId?: string;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label="Personne"
+      className="glass inline-flex gap-1 rounded-full p-1"
+    >
+      {people.map((person) => {
+        const active = person.id === selectedId;
+        return (
+          <button
+            key={person.id}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(person.id)}
+            className={cn(
+              'relative flex min-h-11 items-center gap-2 rounded-full py-1 pl-1.5 pr-3.5 text-sm font-medium transition-colors duration-200 ease-out-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500',
+              active ? 'text-ink-900' : 'text-ink-500 hover:text-ink-800',
+            )}
+          >
+            {active ? (
+              <motion.span
+                layoutId="goals-person"
+                transition={transitions.spring}
+                className="absolute inset-0 rounded-full bg-white shadow-soft"
+              />
+            ) : null}
+            <Avatar
+              name={person.displayName}
+              src={person.avatarUrl}
+              className="relative size-8 rounded-full text-xs"
+            />
+            <span className="relative">
+              {person.displayName}
+              {person.id === selfId ? (
+                <span className="text-ink-400"> · toi</span>
+              ) : null}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }

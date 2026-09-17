@@ -1,9 +1,10 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { MealSlot } from '@cuisinons/db';
 import { addDays, startOfWeek } from './dates.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { nutritionForRecipe } from '../nutrition/recipe-nutrition.js';
-import type { MacroNutrients } from '@cuisinons/shared';
+import { publicRecipePhotoUrl } from '../recipes/recipe-photo.js';
+import { computeRecipeNutrition, type MacroNutrients, type MealKind } from '@cuisinons/shared';
 
 @Injectable()
 export class PlannerService {
@@ -21,6 +22,7 @@ export class PlannerService {
       where: { date: { gte: start, lte: end } },
       include: {
         recipe: {
+          omit: { photoUrl: true },
           include: {
             ingredients: { include: { ingredient: true } },
             tags: { include: { tag: true } },
@@ -32,26 +34,53 @@ export class PlannerService {
       },
       orderBy: [{ date: 'asc' }, { slot: 'asc' }, { sortOrder: 'asc' }],
     });
+    const withPhoto = new Set(
+      (
+        await this.prisma.recipe.findMany({
+          where: {
+            id: { in: items.map((item) => item.recipeId).filter((id): id is string => Boolean(id)) },
+            photoUrl: { not: null },
+          },
+          select: { id: true },
+        })
+      ).map((row) => row.id),
+    );
     return items.map((item) => {
+      if (!item.recipe) {
+        return { ...item, recipe: null, nutrition: computeRecipeNutrition([], 1) };
+      }
       const nutrition = nutritionForRecipe(
         item.recipe.ingredients,
         Number(item.recipe.servings),
         item.recipe.finalCookedWeight,
       );
-      return { ...item, nutrition };
+      return {
+        ...item,
+        recipe: {
+          ...item.recipe,
+          photoUrl: publicRecipePhotoUrl(item.recipe.id, withPhoto.has(item.recipe.id), item.recipe.updatedAt),
+        },
+        nutrition,
+      };
     });
   }
 
   async addItem(input: {
     date: Date;
     slot: MealSlot;
-    recipeId: string;
+    kind: MealKind;
+    recipeId?: string;
     createdById: string;
     portions: Array<{ userId: string; portions: number }>;
   }) {
     return this.prisma.$transaction(async (tx) => {
-      const recipe = await tx.recipe.findUnique({ where: { id: input.recipeId } });
-      if (!recipe) throw new NotFoundException('Recette introuvable.');
+      if (input.kind === 'RECIPE') {
+        if (!input.recipeId) throw new BadRequestException('Choisis une recette.');
+        const recipe = await tx.recipe.findUnique({ where: { id: input.recipeId } });
+        if (!recipe) throw new NotFoundException('Recette introuvable.');
+      } else if (input.recipeId) {
+        throw new BadRequestException('Pas de recette pour ce type de repas.');
+      }
       const count = await tx.mealItem.count({
         where: { date: input.date, slot: input.slot },
       });
@@ -59,7 +88,8 @@ export class PlannerService {
         data: {
           date: input.date,
           slot: input.slot,
-          recipeId: input.recipeId,
+          kind: input.kind,
+          recipeId: input.kind === 'RECIPE' ? input.recipeId : null,
           createdById: input.createdById,
           sortOrder: count,
           portions: {
@@ -79,6 +109,8 @@ export class PlannerService {
     input: {
       date?: Date;
       slot?: MealSlot;
+      recipeId?: string;
+      kind?: MealKind;
       version?: number;
       portions?: Array<{ userId: string; portions: number }>;
     },
@@ -87,6 +119,14 @@ export class PlannerService {
     if (!existing) throw new NotFoundException('Repas introuvable.');
     if (input.version !== undefined && input.version !== existing.version) {
       throw new ConflictException('Ce créneau a été modifié ailleurs.');
+    }
+    if (input.recipeId) {
+      const recipe = await this.prisma.recipe.findUnique({ where: { id: input.recipeId } });
+      if (!recipe) throw new NotFoundException('Recette introuvable.');
+    }
+    const nextKind = input.kind ?? (input.recipeId ? 'RECIPE' : existing.kind);
+    if (nextKind === 'RECIPE' && !(input.recipeId ?? existing.recipeId)) {
+      throw new BadRequestException('Choisis une recette.');
     }
     return this.prisma.$transaction(async (tx) => {
       if (input.portions) {
@@ -104,6 +144,8 @@ export class PlannerService {
         data: {
           date: input.date,
           slot: input.slot,
+          kind: nextKind,
+          recipeId: nextKind === 'RECIPE' ? (input.recipeId ?? existing.recipeId) : null,
           version: { increment: 1 },
         },
         include: { portions: true, recipe: true },

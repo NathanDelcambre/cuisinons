@@ -9,6 +9,7 @@ import './load-env';
 import { prisma } from './client';
 import { loadDbEnv } from './env';
 import { applyDedicatedIcons } from './icons';
+import { seedOfficialRecipes } from './seed-official-recipes';
 
 async function hashPassword(password: string, pepper: string): Promise<string> {
   return argon2.hash(`${password}${pepper}`, { type: argon2.argon2id });
@@ -337,8 +338,10 @@ async function main() {
     });
   }
 
+  await seedOfficialRecipes(jade.id);
+
   await applyDedicatedIcons();
-  console.log('Seed terminé (utilisateurs, tags, équipements, recettes démo).');
+  console.log('Seed terminé (utilisateurs, tags, équipements, recettes démo et officielles).');
 }
 
 main()

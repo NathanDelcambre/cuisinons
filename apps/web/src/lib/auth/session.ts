@@ -2,7 +2,12 @@ import { loadWebEnv } from '../env';
 import { mintInternalJwt } from './internal-jwt';
 import { readSessionToken } from './cookies';
 
-export async function resolveSession(): Promise<{ userId: string; email: string; displayName: string } | null> {
+export async function resolveSession(): Promise<{
+  userId: string;
+  email: string;
+  displayName: string;
+  avatarUrl: string | null;
+} | null> {
   const token = await readSessionToken();
   if (!token) return null;
   const env = loadWebEnv();
@@ -15,7 +20,12 @@ export async function resolveSession(): Promise<{ userId: string; email: string;
     body: JSON.stringify({ token }),
   });
   if (!res.ok) return null;
-  return (await res.json()) as { userId: string; email: string; displayName: string };
+  return (await res.json()) as {
+    userId: string;
+    email: string;
+    displayName: string;
+    avatarUrl: string | null;
+  };
 }
 
 export async function nestFetch(path: string, init: RequestInit = {}): Promise<Response> {

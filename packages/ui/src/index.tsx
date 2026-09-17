@@ -6,7 +6,8 @@ export { buttonClasses, type ButtonSize, type ButtonVariant } from './button-sty
 export { Card, CardLink, Inset, Panel } from './surface';
 export { Badge, type BadgeTone } from './badge';
 export { Chip } from './chip';
-export { Field, Input, SearchInput, Select, Stepper, Textarea, type InputProps } from './field';
+export { Field, Input, SearchInput, Stepper, Textarea, type InputProps } from './field';
+export { Select, type SelectOption } from './select';
 export { Switch } from './switch';
 export { Segmented, type SegmentedOption } from './segmented';
 export { Modal } from './modal';

@@ -1,0 +1,134 @@
+import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { z } from 'zod';
+import { QUANTITY_UNITS, STORAGE_AREAS } from '@cuisinons/shared';
+import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
+import { CurrentUser } from '../auth/current-user.decorator.js';
+import type { AuthUser } from '../auth/internal-jwt.guard.js';
+import { parseIsoDate } from '../planner/dates.js';
+import { ProvisionsService } from './provisions.service.js';
+
+const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const quantity = z.number().positive().max(100_000);
+
+const generateSchema = z.discriminatedUnion('mode', [
+  z.object({ mode: z.literal('week'), from: isoDate }),
+  z.object({ mode: z.literal('days'), dates: z.array(isoDate).min(1).max(31) }),
+  z.object({ mode: z.literal('next'), days: z.number().int().min(1).max(31), from: isoDate.optional() }),
+]);
+
+@Controller()
+@UseGuards(InternalJwtGuard)
+export class ProvisionsController {
+  constructor(@Inject(ProvisionsService) private readonly provisions: ProvisionsService) {}
+
+  // ---------------------------------------------------------------- Stock
+
+  @Get('/pantry')
+  pantry(@CurrentUser() user: AuthUser) {
+    return this.provisions.listPantry(user.id);
+  }
+
+  @Post('/pantry/items')
+  addPantry(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    const parsed = z
+      .object({
+        ingredientId: z.string().min(1),
+        quantity,
+        unit: z.enum(QUANTITY_UNITS),
+        area: z.enum(STORAGE_AREAS).optional(),
+      })
+      .parse(body);
+    return this.provisions.addPantryItem(user.id, parsed);
+  }
+
+  @Patch('/pantry/items/:id')
+  updatePantry(@CurrentUser() user: AuthUser, @Param('id') id: string, @Body() body: unknown) {
+    const parsed = z
+      .object({
+        // Zero est accepte : c'est ainsi qu'on vide une ligne depuis l'interface.
+        quantity: z.number().nonnegative().max(100_000).optional(),
+        area: z.enum(STORAGE_AREAS).optional(),
+      })
+      .parse(body);
+    return this.provisions.updatePantryItem(user.id, id, parsed);
+  }
+
+  @Delete('/pantry/items/:id')
+  removePantry(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.provisions.removePantryItem(user.id, id);
+  }
+
+  // -------------------------------------------------------------- Courses
+
+  @Get('/shopping/list')
+  list(@CurrentUser() user: AuthUser) {
+    return this.provisions.activeList(user.id);
+  }
+
+  @Post('/shopping/generate')
+  generate(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    const parsed = generateSchema.parse(body);
+    if (parsed.mode === 'week') {
+      return this.provisions.generate(user.id, { mode: 'week', from: parseIsoDate(parsed.from) });
+    }
+    if (parsed.mode === 'days') {
+      return this.provisions.generate(user.id, {
+        mode: 'days',
+        dates: parsed.dates.map(parseIsoDate),
+      });
+    }
+    return this.provisions.generate(user.id, {
+      mode: 'next',
+      days: parsed.days,
+      from: parsed.from ? parseIsoDate(parsed.from) : todayUtc(),
+    });
+  }
+
+  @Post('/shopping/items')
+  addItem(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    const parsed = z
+      .object({ ingredientId: z.string().min(1), quantity, unit: z.enum(QUANTITY_UNITS) })
+      .parse(body);
+    return this.provisions.addShoppingItem(user.id, parsed);
+  }
+
+  @Patch('/shopping/items/:id')
+  updateItem(@CurrentUser() user: AuthUser, @Param('id') id: string, @Body() body: unknown) {
+    const parsed = z
+      .object({
+        quantity: z.number().nonnegative().max(100_000).optional(),
+        checked: z.boolean().optional(),
+      })
+      .parse(body);
+    return this.provisions.updateShoppingItem(user.id, id, parsed);
+  }
+
+  @Delete('/shopping/items/:id')
+  removeItem(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.provisions.removeShoppingItem(user.id, id);
+  }
+
+  @Post('/shopping/validate')
+  validate(@CurrentUser() user: AuthUser) {
+    return this.provisions.validate(user.id);
+  }
+
+  // --------------------------------------------------------- Consommation
+
+  @Post('/provisions/consumption')
+  consumption(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    const parsed = z.object({ portionId: z.string().min(1), consumed: z.boolean() }).parse(body);
+    return this.provisions.setConsumption(user.id, parsed.portionId, parsed.consumed);
+  }
+
+  @Post('/provisions/settle-past')
+  settlePast(@CurrentUser() user: AuthUser) {
+    return this.provisions.settlePastConsumption(user.id);
+  }
+}
+
+/** Minuit UTC du jour courant, comme les dates du planning. */
+function todayUtc(): Date {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CalendarDays, Compass } from 'lucide-react';
 import { Panel, buttonClasses } from '@cuisinons/ui';
+import { routes } from '@/lib/routes';
 
 export default function NotFound() {
   return (
@@ -14,7 +15,7 @@ export default function NotFound() {
         </span>
         <h1 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">Page introuvable</h1>
         <p className="mt-2 text-sm text-ink-500">Cette adresse ne correspond à aucun écran de Cuisinons.</p>
-        <Link href="/planning" className={buttonClasses({ className: 'mt-6' })}>
+        <Link href={routes.planning} className={buttonClasses({ className: 'mt-6' })}>
           <CalendarDays className="size-4" aria-hidden />
           Retour au planning
         </Link>

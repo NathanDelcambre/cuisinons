@@ -21,6 +21,8 @@ export function Modal({
   footer,
   children,
   className,
+  size = 'md',
+  chrome = 'default',
 }: {
   open: boolean;
   title: string;
@@ -29,6 +31,9 @@ export function Modal({
   footer?: ReactNode;
   children: ReactNode;
   className?: string;
+  size?: 'md' | 'xl' | '2xl';
+  /** `bare` : pas d’en-tête standard, pour une photo plein cadre ou un chrome custom. */
+  chrome?: 'default' | 'bare';
 }) {
   const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -63,7 +68,7 @@ export function Modal({
             type="button"
             aria-label="Fermer"
             onClick={onClose}
-            className="absolute inset-0 bg-ink-900/25 backdrop-blur-sm"
+            className="absolute inset-0 bg-ink-900/40 backdrop-blur-md"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -76,7 +81,12 @@ export function Modal({
             aria-label={title}
             tabIndex={-1}
             className={cn(
-              'glass-raised relative z-10 max-h-[88dvh] w-full max-w-lg overflow-y-auto rounded-3xl p-6 focus:outline-none',
+              'glass-raised relative z-10 flex w-full flex-col overflow-hidden rounded-3xl focus:outline-none',
+              size === '2xl'
+                ? 'max-h-[min(92dvh,56rem)] max-w-5xl bg-[rgba(255,252,247,0.97)]'
+                : size === 'xl'
+                  ? 'max-h-[min(92dvh,56rem)] max-w-3xl bg-[rgba(255,252,247,0.97)]'
+                  : 'max-h-[88dvh] max-w-lg',
               className,
             )}
             initial={{ opacity: 0, y: 28, scale: 0.98 }}
@@ -84,17 +94,29 @@ export function Modal({
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={transitions.spring}
           >
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">
-                  {title}
-                </h2>
-                {description ? <p className="mt-1 text-sm text-ink-500">{description}</p> : null}
+            {chrome === 'default' ? (
+              <div className="flex shrink-0 items-start justify-between gap-4 px-6 pt-6">
+                <div className="min-w-0">
+                  <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">
+                    {title}
+                  </h2>
+                  {description ? <p className="mt-1 text-sm text-ink-500">{description}</p> : null}
+                </div>
+                <IconButton icon={X} label="Fermer" size="sm" variant="ghost" onClick={onClose} />
               </div>
-              <IconButton icon={X} label="Fermer" size="sm" variant="ghost" onClick={onClose} />
+            ) : null}
+            <div className={cn('min-h-0 flex-1 overflow-y-auto', chrome === 'default' && 'px-6 pt-5 pb-6')}>
+              {children}
             </div>
-            {children}
-            {footer ? <div className="mt-6 flex flex-wrap justify-end gap-2">{footer}</div> : null}
+            {footer ? (
+              <div
+                className={cn(
+                  'flex w-full shrink-0 flex-wrap items-center justify-end gap-2 border-t border-white/70 bg-white/55 px-6 py-4',
+                )}
+              >
+                {footer}
+              </div>
+            ) : null}
           </motion.div>
         </div>
       ) : null}
