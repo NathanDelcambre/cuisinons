@@ -1,14 +1,109 @@
 @import 'tailwindcss';
 
+/* Tailwind v4 ne scanne que le dossier de l'application. Sans cette ligne, une
+   classe utilisee uniquement dans le design system ne serait jamais generee. */
+@source '../../../../packages/ui/src';
+
 @theme {
-  --font-sans: 'SF Pro Display', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'SF Pro Text', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
   /* Titres : Outfit sert de repli homogene la ou SF Pro Display n'existe pas. */
   --font-display: var(--font-outfit), 'SF Pro Display', ui-sans-serif, system-ui, sans-serif;
-  --color-ink: #1c1917;
-  --color-sage: #7d9b8a;
-  --color-peach: #e8b298;
-  --color-tomato: #c45c4a;
-  --color-mist: #f6f4f1;
+
+  /* Neutres chauds. Toute l'interface repose sur cette rampe plutot que sur
+     stone-*, pour que les gris s'accordent au fond creme. */
+  --color-ink-50: #faf9f8;
+  --color-ink-100: #f4f2ef;
+  --color-ink-200: #e9e5e0;
+  --color-ink-300: #d7d1c9;
+  --color-ink-400: #b0a8a0;
+  --color-ink-500: #8a8178;
+  --color-ink-600: #6b635c;
+  --color-ink-700: #4c463f;
+  --color-ink-800: #2f2b27;
+  --color-ink-900: #1c1917;
+
+  /* Sage : couleur d'action et d'accent. */
+  --color-sage-50: #f1f6f4;
+  --color-sage-100: #e4ede8;
+  --color-sage-200: #c7dad0;
+  --color-sage-300: #a1bfb0;
+  --color-sage-400: #7d9b8a;
+  --color-sage-500: #648374;
+  --color-sage-600: #4f6a5d;
+  --color-sage-700: #3f5449;
+  --color-sage-800: #33433a;
+  --color-sage-900: #2a3730;
+
+  /* Peach : accent chaud, reserve aux mises en avant. */
+  --color-peach-200: #f7e2d6;
+  --color-peach-300: #f2cdb8;
+  --color-peach-400: #e8b298;
+  --color-peach-500: #d9946f;
+
+  /* Tomato : erreurs et actions destructrices. */
+  --color-tomato-100: #f7e3df;
+  --color-tomato-400: #d97767;
+  --color-tomato-500: #c45c4a;
+  --color-tomato-600: #a94838;
+
+  /* Rayons genereux, dans l'esprit des coins continus d'Apple. */
+  --radius-xs: 0.5rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 1.75rem;
+  --radius-3xl: 2.25rem;
+
+  /* Ombres en deux couches : un contact net, une diffusion large et basse. */
+  --shadow-soft: 0 1px 2px rgba(28, 25, 23, 0.04), 0 8px 24px -14px rgba(28, 25, 23, 0.14);
+  --shadow-card: 0 1px 2px rgba(28, 25, 23, 0.05), 0 16px 36px -20px rgba(28, 25, 23, 0.2);
+  --shadow-lift: 0 2px 6px rgba(28, 25, 23, 0.07), 0 28px 56px -24px rgba(28, 25, 23, 0.26);
+  --shadow-modal: 0 40px 96px -32px rgba(28, 25, 23, 0.42);
+
+  /* Courbes d'animation. out-soft decelere longuement (le defaut), spring
+     depasse legerement la cible pour les apparitions d'elements tactiles. */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  --animate-fade-in: fade-in 0.28s var(--ease-out-soft) both;
+  --animate-rise: rise 0.42s var(--ease-out-soft) both;
+  --animate-scale-in: scale-in 0.22s var(--ease-out-soft) both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position: 200% 0;
+  }
+}
+
+html {
+  /* Reserve la place de l'ascenseur en permanence : sans cela, une page courte
+     et une page longue ne centrent pas le contenu au meme endroit, et toute la
+     mise en page (sidebar comprise) saute a chaque navigation. */
+  scrollbar-gutter: stable;
 }
 
 html,
@@ -18,17 +113,27 @@ body {
     radial-gradient(1200px 600px at 10% -10%, rgba(125, 155, 138, 0.12), transparent 50%),
     radial-gradient(900px 500px at 100% 0%, rgba(232, 178, 152, 0.14), transparent 45%),
     #f7f5f2;
-  color: #1c1917;
+  color: var(--color-ink-900);
 }
 
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(125, 155, 138, 0.28);
 }
 
 :focus-visible {
-  outline: 2px solid #7d9b8a;
+  outline: 2px solid var(--color-sage-500);
   outline-offset: 3px;
+}
+
+/* Les chiffres des tableaux de macros doivent s'aligner verticalement. */
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -41,22 +146,31 @@ body {
   }
 }
 
-.glass {
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(22px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 12px 40px rgba(28, 25, 23, 0.06);
+/* Verre depoli. Le liseré blanc interne imite la refraction sur le bord. */
+@utility glass {
+  background: rgba(255, 255, 255, 0.66);
+  backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
-.glass-auth {
+@utility glass-raised {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(28px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+@utility glass-auth {
   background: rgba(255, 252, 247, 0.86);
   backdrop-filter: blur(28px) saturate(1.15);
   border: 1px solid rgba(255, 255, 255, 0.7);
-  box-shadow: 0 28px 80px rgba(28, 25, 23, 0.22);
+  box-shadow: var(--shadow-modal), inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 @supports not ((backdrop-filter: blur(1px))) {
   .glass,
+  .glass-raised,
   .glass-auth {
     background: rgba(255, 255, 255, 0.96);
   }

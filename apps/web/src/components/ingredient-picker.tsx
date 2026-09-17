@@ -1,9 +1,10 @@
 'use client';
 
 import { UX_CATEGORIES, UX_CATEGORY_LABELS, type UxCategory } from '@cuisinons/shared';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Carrot } from 'lucide-react';
+import { Chip, EmptyState, Modal, SearchInput, cn } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
-import { GlassModal } from '@cuisinons/ui';
 
 type Ingredient = {
   id: string;
@@ -13,21 +14,26 @@ type Ingredient = {
 };
 
 export function IngredientPicker({
+  open,
   onPick,
   onClose,
 }: {
+  open: boolean;
   onPick: (ingredient: Ingredient) => void;
   onClose: () => void;
 }) {
-  const [q, setQ] = useState('');
+  const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string>('');
   const [items, setItems] = useState<Ingredient[]>([]);
   const [active, setActive] = useState(0);
+  const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
+    if (!open) return;
+    // Anti-rebond : la recherche part apres 180 ms sans frappe.
     const handle = setTimeout(() => {
       const params = new URLSearchParams();
-      if (q) params.set('q', q);
+      if (query) params.set('q', query);
       if (category) params.set('category', category);
       void apiJson<{ items: Ingredient[] }>(`/api/bff/ingredients?${params.toString()}`).then((data) => {
         setItems(data.items);
@@ -35,16 +41,21 @@ export function IngredientPicker({
       });
     }, 180);
     return () => clearTimeout(handle);
-  }, [q, category]);
+  }, [open, query, category]);
+
+  // Garde la ligne selectionnee au clavier dans la zone visible.
+  useEffect(() => {
+    listRef.current?.children[active]?.scrollIntoView({ block: 'nearest' });
+  }, [active]);
 
   return (
-    <GlassModal title="Choisir un ingrédient" onClose={onClose}>
-      <input
+    <Modal open={open} title="Choisir un ingrédient" onClose={onClose}>
+      <SearchInput
         autoFocus
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
         placeholder="Rechercher (insensible aux accents)"
-        className="w-full rounded-2xl border px-3 py-2"
+        aria-label="Rechercher un ingrédient"
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') {
             e.preventDefault();
@@ -54,38 +65,61 @@ export function IngredientPicker({
             e.preventDefault();
             setActive((v) => Math.max(0, v - 1));
           }
-          if (e.key === 'Enter' && items[active]) {
-            onPick(items[active]);
+          const target = items[active];
+          if (e.key === 'Enter' && target) {
+            e.preventDefault();
+            onPick(target);
           }
         }}
       />
-      <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
-        <button className={`rounded-full px-3 py-1 text-xs ${category === '' ? 'bg-stone-900 text-white' : 'bg-white'}`} onClick={() => setCategory('')}>
-          Tous
-        </button>
-        {UX_CATEGORIES.map((cat) => (
-          <button
-            key={cat}
-            className={`whitespace-nowrap rounded-full px-3 py-1 text-xs ${category === cat ? 'bg-stone-900 text-white' : 'bg-white'}`}
-            onClick={() => setCategory(cat)}
-          >
-            {UX_CATEGORY_LABELS[cat]}
-          </button>
-        ))}
-      </div>
-      <ul className="mt-3 max-h-72 overflow-auto">
-        {items.map((item, index) => (
-          <li key={item.id}>
-            <button
-              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left ${index === active ? 'bg-stone-900 text-white' : ''}`}
-              onClick={() => onPick(item)}
+
+      <div className="-mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-2">
+        {[{ value: '', label: 'Tous' }, ...UX_CATEGORIES.map((c) => ({ value: c, label: UX_CATEGORY_LABELS[c] }))].map(
+          (option) => (
+            <Chip
+              key={option.value}
+              selected={category === option.value}
+              onClick={() => setCategory(option.value)}
             >
-              {item.iconUrl ? <img src={item.iconUrl} alt="" className="size-8" /> : null}
-              {item.nameFr}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </GlassModal>
+              {option.label}
+            </Chip>
+          ),
+        )}
+      </div>
+
+      {items.length === 0 ? (
+        <EmptyState
+          icon={Carrot}
+          title="Aucun ingrédient"
+          description="Change de catégorie ou essaie un autre mot-clé."
+          className="mt-2 py-10"
+        />
+      ) : (
+        <ul ref={listRef} className="mt-1 max-h-72 space-y-1 overflow-y-auto">
+          {items.map((item, index) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                onClick={() => onPick(item)}
+                onMouseEnter={() => setActive(index)}
+                className={cn(
+                  'flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm transition-colors duration-150 ease-out-soft',
+                  index === active ? 'bg-ink-900 font-medium text-white' : 'text-ink-700 hover:bg-white/80',
+                )}
+              >
+                {item.iconUrl ? (
+                  <img src={item.iconUrl} alt="" width={28} height={28} className="size-7 shrink-0" />
+                ) : (
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/30">
+                    <Carrot className="size-4 opacity-60" aria-hidden />
+                  </span>
+                )}
+                <span className="min-w-0 truncate">{item.nameFr}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Modal>
   );
 }

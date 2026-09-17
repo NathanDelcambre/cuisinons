@@ -19,15 +19,17 @@ test('login, recette, note, planning, optimisation', async ({ page }) => {
   });
   await page.keyboard.press('Enter');
   await page.getByPlaceholder('Étape 1').fill('Battre et cuire.');
-  await page.getByRole('button', { name: 'Enregistrer' }).click();
+  // L'editeur expose le meme bouton en entete et en pied de formulaire.
+  await page.getByRole('button', { name: 'Enregistrer' }).first().click();
   await expect(page.getByRole('heading', { name: 'Omelette e2e' })).toBeVisible();
-  await page.getByLabel('5 étoiles').click();
+  await page.getByRole('button', { name: 'Noter 5 sur 5' }).click();
   await page.getByRole('button', { name: 'Ajouter au planning' }).click();
   await expect(page.getByRole('button', { name: 'Valider' })).toBeEnabled();
   await page.getByRole('button', { name: 'Valider' }).click();
   await page.goto('/planning');
   await expect(page.getByText(/kcal/i).first()).toBeVisible();
-  await page.getByLabel('Activer').check();
+  // role="switch" et non une case a cocher : check() ne s'y applique pas.
+  await page.getByRole('switch', { name: 'Activer' }).click();
   await expect(page.getByRole('button', { name: 'Optimiser ma journée' })).toBeVisible();
   await page.getByRole('button', { name: 'Optimiser ma journée' }).click();
   await expect(page.getByText(/Proposition visible|kcal|ajust/i).first()).toBeVisible();

@@ -9,12 +9,19 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "echo lint-ok"
   },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.484.0",
+    "motion": "^12.6.2",
+    "tailwind-merge": "^3.0.2"
+  },
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
     "typescript": "^5.8.2"
   }
 }

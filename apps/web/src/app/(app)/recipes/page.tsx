@@ -3,7 +3,19 @@
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { ChefHat, Flame, Plus, Star } from 'lucide-react';
+import {
+  Badge,
+  CardLink,
+  EmptyState,
+  PageHeader,
+  Segmented,
+  Select,
+  SearchInput,
+  Skeleton,
+  buttonClasses,
+} from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 
 type Recipe = {
@@ -15,6 +27,24 @@ type Recipe = {
   tags: Array<{ tag: { slug: string; label: string } }>;
 };
 
+const SORTS = [
+  { value: 'date', label: 'Plus récentes' },
+  { value: 'name', label: 'Nom' },
+  { value: 'rating-desc', label: 'Mieux notées' },
+  { value: 'rating-asc', label: 'Moins notées' },
+  { value: 'protein-desc', label: 'Plus de protéines' },
+  { value: 'protein-asc', label: 'Moins de protéines' },
+  { value: 'carbs-desc', label: 'Plus de glucides' },
+  { value: 'carbs-asc', label: 'Moins de glucides' },
+  { value: 'kcal-desc', label: 'Plus de calories' },
+  { value: 'kcal-asc', label: 'Moins de calories' },
+];
+
+const BASIS = [
+  { value: 'serving', label: 'Par portion' },
+  { value: '100g', label: 'Pour 100 g' },
+] as const;
+
 function RecipesInner() {
   const params = useSearchParams();
   const router = useRouter();
@@ -23,6 +53,11 @@ function RecipesInner() {
   const sort = params.get('sort') ?? 'date';
   const basis = (params.get('basis') as 'serving' | '100g') ?? 'serving';
   const [draft, setDraft] = useState(q);
+
+  // L'URL reste la source de verite : un retour arriere doit remettre le champ
+  // de recherche dans l'etat correspondant.
+  useEffect(() => setDraft(q), [q]);
+
   const recipes = useQuery({
     queryKey: ['recipes', q, tag, sort, basis],
     queryFn: () =>
@@ -44,77 +79,160 @@ function RecipesInner() {
     router.replace(`/recipes?${sp.toString()}`);
   }
 
+  const list = recipes.data ?? [];
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="text-3xl font-semibold tracking-tight">Recettes</h1>
-        <Link href="/recipes/new" className="rounded-full bg-stone-900 px-4 py-2 text-sm text-white">
-          Nouvelle recette
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow={list.length > 0 ? `${String(list.length)} recette${list.length > 1 ? 's' : ''}` : undefined}
+        title="Recettes"
+        actions={
+          <Link href="/recipes/new" className={buttonClasses()}>
+            <Plus className="size-4" aria-hidden />
+            Nouvelle recette
+          </Link>
+        }
+      />
+
       <form
-        className="flex flex-wrap gap-3"
+        className="flex flex-wrap items-center gap-3"
         onSubmit={(e) => {
           e.preventDefault();
           update({ q: draft });
         }}
       >
-        <input
+        <SearchInput
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
-          placeholder="Rechercher"
-          className="glass min-h-11 min-w-56 flex-1 rounded-full px-4"
+          placeholder="Rechercher une recette"
+          aria-label="Rechercher une recette"
+          className="min-w-56 flex-1"
         />
-        <select className="glass rounded-full px-3 py-2 text-sm" value={tag} onChange={(e) => update({ tag: e.target.value })}>
+        <Select
+          value={tag}
+          aria-label="Filtrer par tag"
+          className="w-auto"
+          onChange={(e) => update({ tag: e.target.value })}
+        >
           <option value="">Tous les tags</option>
           {(tags.data ?? []).map((t) => (
             <option key={t.slug} value={t.slug}>
               {t.label}
             </option>
           ))}
-        </select>
-        <select className="glass rounded-full px-3 py-2 text-sm" value={sort} onChange={(e) => update({ sort: e.target.value })}>
-          <option value="date">Date</option>
-          <option value="name">Nom</option>
-          <option value="rating-desc">Note décroissante</option>
-          <option value="rating-asc">Note croissante</option>
-          <option value="protein-desc">Protéines décroissantes</option>
-          <option value="protein-asc">Protéines croissantes</option>
-          <option value="carbs-desc">Glucides décroissants</option>
-          <option value="carbs-asc">Glucides croissants</option>
-          <option value="kcal-desc">Calories décroissantes</option>
-          <option value="kcal-asc">Calories croissantes</option>
-        </select>
-        <select className="glass rounded-full px-3 py-2 text-sm" value={basis} onChange={(e) => update({ basis: e.target.value })}>
-          <option value="serving">Par portion</option>
-          <option value="100g">Pour 100 g</option>
-        </select>
+        </Select>
+        <Select
+          value={sort}
+          aria-label="Trier"
+          className="w-auto"
+          onChange={(e) => update({ sort: e.target.value })}
+        >
+          {SORTS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </Select>
+        <Segmented
+          label="Base de calcul"
+          options={BASIS}
+          value={basis}
+          onChange={(next) => update({ basis: next })}
+        />
       </form>
-      {recipes.isLoading ? <p>Chargement…</p> : null}
-      {recipes.data?.length === 0 ? <p className="text-stone-500">Aucune recette pour l’instant.</p> : null}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {(recipes.data ?? []).map((recipe) => (
-          <Link key={recipe.id} href={`/recipes/${recipe.id}`} className="glass rounded-[28px] p-5 transition hover:-translate-y-0.5">
-            <h2 className="text-lg font-medium">{recipe.name}</h2>
-            <p className="mt-1 text-sm text-stone-500">par {recipe.author.displayName}</p>
-            <p className="mt-3 text-sm">
-              {Math.round(recipe.nutrition.perServing.kcal)} kcal · {Math.round(recipe.nutrition.perServing.protein)} g prot.
-            </p>
-            <p className="mt-2 text-sm text-stone-500">
-              {recipe.rating.count === 0
-                ? 'Pas encore de note'
-                : `${recipe.rating.average?.toFixed(1)} / 5 (${recipe.rating.count} note${recipe.rating.count > 1 ? 's' : ''})`}
-            </p>
-          </Link>
-        ))}
-      </div>
+
+      {recipes.isLoading ? (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }, (_, i) => (
+            <Skeleton key={i} className="h-44" />
+          ))}
+        </div>
+      ) : list.length === 0 ? (
+        <EmptyState
+          icon={ChefHat}
+          title={q || tag ? 'Aucune recette ne correspond' : 'Aucune recette pour l’instant'}
+          description={
+            q || tag
+              ? 'Essaie un autre mot-clé ou retire le filtre de tag.'
+              : 'Crée la première recette : les macros se calculeront automatiquement.'
+          }
+          action={
+            <Link href="/recipes/new" className={buttonClasses({ size: 'sm' })}>
+              <Plus className="size-3.5" aria-hidden />
+              Nouvelle recette
+            </Link>
+          }
+        />
+      ) : (
+        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {list.map((recipe) => (
+            <li key={recipe.id}>
+              <Link href={`/recipes/${recipe.id}`} className="block rounded-2xl">
+                <CardLink className="h-full">
+                  <div className="flex items-start justify-between gap-3">
+                    <h2 className="font-display text-lg font-semibold leading-snug tracking-[-0.02em] text-ink-900">
+                      {recipe.name}
+                    </h2>
+                    <Rating average={recipe.rating.average} count={recipe.rating.count} />
+                  </div>
+                  <p className="mt-1 text-sm text-ink-500">par {recipe.author.displayName}</p>
+
+                  <div className="tabular mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-700">
+                    <span className="flex items-center gap-1.5">
+                      <Flame className="size-3.5 text-peach-500" aria-hidden />
+                      {Math.round(recipe.nutrition.perServing.kcal)} kcal
+                    </span>
+                    <span>{Math.round(recipe.nutrition.perServing.protein)} g prot.</span>
+                    <span className="text-ink-500">
+                      {Math.round(recipe.nutrition.perServing.carbs)} g gluc.
+                    </span>
+                    <span className="text-ink-500">{Math.round(recipe.nutrition.perServing.fat)} g lip.</span>
+                  </div>
+
+                  {recipe.tags.length > 0 ? (
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {recipe.tags.slice(0, 3).map((t) => (
+                        <Badge key={t.tag.slug} tone="sage">
+                          {t.tag.label}
+                        </Badge>
+                      ))}
+                      {recipe.tags.length > 3 ? <Badge>+{recipe.tags.length - 3}</Badge> : null}
+                    </div>
+                  ) : null}
+                </CardLink>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
+  );
+}
+
+function Rating({ average, count }: { average: number | null; count: number }) {
+  if (count === 0) {
+    return <span className="shrink-0 text-xs text-ink-400">Pas de note</span>;
+  }
+  return (
+    <span className="tabular flex shrink-0 items-center gap-1 text-sm font-medium text-ink-900">
+      <Star className="size-3.5 fill-peach-400 text-peach-400" aria-hidden />
+      {average?.toFixed(1)}
+      <span className="text-xs font-normal text-ink-400">({count})</span>
+    </span>
   );
 }
 
 export default function RecipesPage() {
   return (
-    <Suspense>
+    <Suspense
+      fallback={
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }, (_, i) => (
+            <Skeleton key={i} className="h-44" />
+          ))}
+        </div>
+      }
+    >
       <RecipesInner />
     </Suspense>
   );

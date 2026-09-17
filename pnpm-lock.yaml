@@ -240,16 +240,31 @@ importers:
 
   packages/ui:
     dependencies:
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      lucide-react:
+        specifier: ^0.484.0
+        version: 0.484.0(react@19.3.0)
+      motion:
+        specifier: ^12.6.2
+        version: 12.43.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       react:
         specifier: ^19.0.0
         version: 19.3.0
       react-dom:
         specifier: ^19.0.0
         version: 19.3.0(react@19.3.0)
+      tailwind-merge:
+        specifier: ^3.0.2
+        version: 3.7.0
     devDependencies:
       '@types/react':
         specifier: ^19.0.12
         version: 19.3.0
+      '@types/react-dom':
+        specifier: ^19.0.4
+        version: 19.3.0(@types/react@19.3.0)
       typescript:
         specifier: ^5.8.2
         version: 5.9.3
@@ -3448,6 +3463,9 @@ packages:
 
   swagger-ui-dist@5.32.13:
     resolution: {integrity: sha512-qQobzb3DeC2LeK0j3E8812Ef4aIq1y9flJxvZkimkqUC/w4u7wS+yCc+VakqGJLweUUBrI24effhwo8OsAvNAw==}
+
+  tailwind-merge@3.7.0:
+    resolution: {integrity: sha512-XPPUyAc+cvspz3lHTcR/QgPfW2A0lv/xQNIjX3HGhLR+Nq2lHaLq5MtTesHn8GUr3W3DguT2KT5x3NVgRtYwmA==}
 
   tailwindcss@4.3.3:
     resolution: {integrity: sha512-gOhV3P7ufE62QDGg1zVaTgCR+EtPv92k2nIhVcVKcLmxT1sUBsQGhnZj175j+MqRt4zLF7ic+sCYjfhxMxj7YQ==}
@@ -6989,6 +7007,8 @@ snapshots:
   swagger-ui-dist@5.32.13:
     dependencies:
       '@scarf/scarf': 1.4.0
+
+  tailwind-merge@3.7.0: {}
 
   tailwindcss@4.3.3: {}
 

@@ -1,7 +1,9 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { LogIn, TriangleAlert } from 'lucide-react';
+import { Button, Field, Input } from '@cuisinons/ui';
 import { apiFetch } from '@/lib/api';
 import { useAuth } from '@/components/auth-provider';
 import { BrandMark } from '@/components/brand-mark';
@@ -75,50 +77,43 @@ export default function LoginPage() {
         </picture>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,248,240,0.12)_0%,rgba(28,25,23,0.22)_62%,rgba(28,25,23,0.48)_100%)]" />
       </div>
-      <div className="relative z-10 w-full max-w-md">
-        <div className="glass-auth rounded-[36px] p-8">
+
+      <div className="animate-rise relative z-10 w-full max-w-md">
+        <div className="glass-auth rounded-3xl p-8">
           <BrandMark size="lg" titleAs="h1" subtitle="Recettes, planning des repas et macros." />
+
           <a
             href="/api/auth/google"
-            className="mt-8 flex min-h-12 items-center justify-center gap-3 rounded-full bg-stone-900 text-sm font-medium text-white"
+            className="mt-8 flex min-h-12 items-center justify-center gap-3 rounded-full bg-ink-900 text-sm font-medium text-white shadow-soft transition duration-200 ease-out-soft hover:bg-ink-800 active:scale-[0.98]"
           >
             <GoogleLogo />
             Continuer avec Google
           </a>
-          <div className="my-6 flex items-center gap-3 text-xs text-stone-400">
-            <span className="h-px flex-1 bg-stone-200" />
+
+          <div className="my-6 flex items-center gap-3 text-xs text-ink-400">
+            <span className="h-px flex-1 bg-ink-200" />
             ou
-            <span className="h-px flex-1 bg-stone-200" />
+            <span className="h-px flex-1 bg-ink-200" />
           </div>
+
           <form className="space-y-4" method="post" action="/login" onSubmit={onSubmit}>
-            <label className="block text-sm">
-              Adresse e-mail
-              <input
-                name="email"
-                type="email"
-                autoComplete="username"
-                required
-                className="mt-1 w-full rounded-2xl border border-stone-200 bg-white/70 px-4 py-3"
-              />
-            </label>
-            <label className="block text-sm">
-              Mot de passe
-              <input
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="mt-1 w-full rounded-2xl border border-stone-200 bg-white/70 px-4 py-3"
-              />
-            </label>
-            {error ? <p className="text-sm text-[#c45c4a]">{error}</p> : null}
-            <button
-              type="submit"
-              disabled={!hydrated || pending}
-              className="flex min-h-12 w-full items-center justify-center rounded-full bg-stone-900 text-sm font-medium text-white disabled:opacity-60"
-            >
-              {pending ? 'Connexion…' : 'Se connecter'}
-            </button>
+            <Field label="Adresse e-mail">
+              {({ id }) => <Input id={id} name="email" type="email" autoComplete="username" required />}
+            </Field>
+            <Field label="Mot de passe">
+              {({ id }) => (
+                <Input id={id} name="password" type="password" autoComplete="current-password" required />
+              )}
+            </Field>
+            {error ? (
+              <p role="alert" className="flex items-start gap-2 text-sm font-medium text-tomato-500">
+                <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden />
+                {error}
+              </p>
+            ) : null}
+            <Button type="submit" size="lg" icon={LogIn} block disabled={!hydrated} loading={pending}>
+              Se connecter
+            </Button>
           </form>
         </div>
       </div>

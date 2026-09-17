@@ -1,12 +1,26 @@
 'use client';
 
+import Link from 'next/link';
+import { ChevronLeft } from 'lucide-react';
+import { PageHeader } from '@cuisinons/ui';
 import { PasswordForm } from '@/components/password-form';
 
 export default function SecurityPage() {
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-semibold tracking-tight">Sécurité</h1>
-      <p className="text-sm text-stone-500">Pas de récupération par e-mail. Le mot de passe se change ici uniquement.</p>
+    <div className="max-w-2xl space-y-6">
+      <Link
+        href="/settings"
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 transition-colors duration-200 ease-out-soft hover:text-ink-900"
+      >
+        <ChevronLeft className="size-4" aria-hidden />
+        Profil
+      </Link>
+
+      <PageHeader
+        title="Sécurité"
+        description="Il n’y a pas de récupération par e-mail : le mot de passe se change uniquement depuis cet écran."
+      />
+
       <PasswordForm />
     </div>
   );
