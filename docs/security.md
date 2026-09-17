@@ -27,4 +27,8 @@ Lifio (`../Lifio`) a été inspecté **uniquement** pour l’auth et la sécurit
 
 ## Whitelist
 
-Seuls `nathan.delcambre@gmail.com` et `jade.peroch@gmail.com` (normalisés trim + lowercase) peuvent se connecter, y compris via Google (`email_verified` obligatoire).
+Seuls `nathan.delcambre@gmail.com` et `jade.peroch@gmail.com` peuvent se connecter, y compris via Google (`email_verified` obligatoire).
+
+La comparaison se fait sur l’identité de la boîte, pas sur la chaîne : trim, lowercase, puis suppression des points du nom local sur `gmail.com` et `googlemail.com`, que Gmail ne distingue pas. Sans cela un compte enregistré comme `nathandelcambre@` serait refusé alors qu’il s’agit de la même personne, car Google renvoie l’orthographe du compte et non la nôtre. Les suffixes `+tag` restent refusés : Google ne les renvoie jamais.
+
+`resolveAuthorizedEmail` renvoie l’orthographe de référence de la liste, et c’est elle qui est stockée en base. Une personne a donc toujours une seule ligne `User`, quelle que soit la variante saisie ou transmise.

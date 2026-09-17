@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { isAuthorizedEmail, normalizeEmail } from '../src/auth/emails.js';
+import {
+  isAuthorizedEmail,
+  normalizeEmail,
+  resolveAuthorizedEmail,
+} from '../src/auth/emails.js';
 import { validatePassword } from '../src/auth/password.js';
 
 describe('email whitelist', () => {
@@ -9,9 +13,22 @@ describe('email whitelist', () => {
     expect(isAuthorizedEmail('  Nathan.Delcambre@gmail.com  ')).toBe(true);
   });
 
+  it('ignore les points, que Gmail ne distingue pas', () => {
+    expect(isAuthorizedEmail('nathandelcambre@gmail.com')).toBe(true);
+    expect(isAuthorizedEmail('n.a.t.h.a.n.delcambre@gmail.com')).toBe(true);
+    expect(isAuthorizedEmail('jadeperoch@googlemail.com')).toBe(true);
+  });
+
+  it('ramène toujours à l’orthographe de référence', () => {
+    expect(resolveAuthorizedEmail('NathanDelcambre@Gmail.com')).toBe('nathan.delcambre@gmail.com');
+    expect(resolveAuthorizedEmail('jadeperoch@googlemail.com')).toBe('jade.peroch@gmail.com');
+    expect(resolveAuthorizedEmail('intrus@gmail.com')).toBeNull();
+  });
+
   it('refuse un troisième e-mail', () => {
     expect(isAuthorizedEmail('intrus@gmail.com')).toBe(false);
     expect(isAuthorizedEmail('nathan.delcambre+tag@gmail.com')).toBe(false);
+    expect(isAuthorizedEmail('nathan.delcambre@autre.com')).toBe(false);
   });
 
   it('normalise en minuscules', () => {

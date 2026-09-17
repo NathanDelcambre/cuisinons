@@ -1,6 +1,6 @@
 import { ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import {
-  isAuthorizedEmail,
+  resolveAuthorizedEmail,
   normalizeEmail,
   displayNameForEmail,
   validatePassword,
@@ -50,8 +50,8 @@ export class AuthService {
   async login(input: { email: string; password: string; ip: string }) {
     this.assertLoginThrottle(input.ip, input.email);
     const env = loadApiEnv();
-    const email = normalizeEmail(input.email);
-    if (!isAuthorizedEmail(email)) {
+    const email = resolveAuthorizedEmail(input.email);
+    if (!email) {
       await verifyPassword(await this.dummyHash(), input.password, env.PASSWORD_PEPPER);
       throw new UnauthorizedException(GENERIC_LOGIN_ERROR);
     }
@@ -65,13 +65,13 @@ export class AuthService {
   }
 
   async loginWithGoogle(input: { email: string; emailVerified: boolean; googleSub: string }) {
-    const email = normalizeEmail(input.email);
-    if (!input.emailVerified || !isAuthorizedEmail(email)) {
+    const email = resolveAuthorizedEmail(input.email);
+    if (!input.emailVerified || !email) {
       // Le client ne recoit qu'un message generique : la raison reste dans les logs.
       console.warn('google refuse', {
-        email,
+        email: normalizeEmail(input.email),
         emailVerifie: input.emailVerified,
-        autorise: isAuthorizedEmail(email),
+        autorise: email !== null,
       });
       throw new UnauthorizedException(GENERIC_LOGIN_ERROR);
     }
