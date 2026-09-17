@@ -5,7 +5,7 @@ const isDev = process.env.NODE_ENV !== 'production';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  transpilePackages: ['@cuisinons/shared', '@cuisinons/ui'],
+  transpilePackages: ['@cuisinons/ui'],
   poweredByHeader: false,
   async headers() {
     return [

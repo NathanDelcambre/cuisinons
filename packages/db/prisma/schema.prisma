@@ -1,6 +1,8 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/client"
+  // Hors de src/ et à la même profondeur que dist/ : l'import relatif
+  // '../generated/client' résout donc aussi bien depuis les sources que depuis dist.
+  output   = "../generated/client"
 }
 
 datasource db {

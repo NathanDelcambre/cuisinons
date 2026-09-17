@@ -9,7 +9,7 @@
     "pnpm": ">=10.0.0"
   },
   "scripts": {
-    "dev": "turbo run dev --filter=@cuisinons/web --filter=@cuisinons/api",
+    "dev": "turbo run dev --filter=@cuisinons/web --filter=@cuisinons/api --filter=@cuisinons/shared",
     "dev:web": "pnpm --filter @cuisinons/web dev",
     "dev:api": "pnpm --filter @cuisinons/api dev",
     "build": "turbo run build",

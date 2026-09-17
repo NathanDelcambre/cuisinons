@@ -1,4 +1,4 @@
-export { PrismaClient, Prisma } from './generated/client';
+export { PrismaClient, Prisma } from '../generated/client';
 export type {
   MealSlot,
   QuantityUnit,
@@ -6,5 +6,5 @@ export type {
   RecipeStatus,
   UxCategory,
   NutrientGoalMode,
-} from './generated/client';
+} from '../generated/client';
 export { prisma } from './client';
