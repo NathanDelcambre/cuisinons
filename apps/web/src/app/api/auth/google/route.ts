@@ -1,0 +1,32 @@
+import { NextResponse } from 'next/server';
+import { Google, generateCodeVerifier, generateState } from 'arctic';
+import { loadWebEnv } from '@/lib/env';
+import { cookieOptions } from '@/lib/auth/cookies';
+
+function googleClient() {
+  const env = loadWebEnv();
+  return new Google(
+    env.GOOGLE_CLIENT_ID,
+    env.GOOGLE_CLIENT_SECRET,
+    `${env.NEXT_PUBLIC_APP_URL}/api/auth/google/callback`,
+  );
+}
+
+export async function GET() {
+  const env = loadWebEnv();
+  if (!env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) {
+    return NextResponse.json({ message: 'Google OAuth n’est pas configuré.' }, { status: 501 });
+  }
+  const state = generateState();
+  const codeVerifier = generateCodeVerifier();
+  const url = googleClient().createAuthorizationURL(state, codeVerifier, [
+    'openid',
+    'email',
+    'profile',
+  ]);
+  const response = NextResponse.redirect(url);
+  const short = cookieOptions(10 * 60);
+  response.cookies.set('cuisinons_oauth_state', state, short);
+  response.cookies.set('cuisinons_oauth_verifier', codeVerifier, short);
+  return response;
+}
