@@ -1,0 +1,379 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MealSlot {
+  BREAKFAST
+  LUNCH
+  SNACK
+  DINNER
+}
+
+enum NutrientGoalMode {
+  AT_LEAST
+  AT_MOST
+  TARGET
+  NONE
+}
+
+enum QuantityUnit {
+  G
+  KG
+  ML
+  CL
+  L
+  TSP
+  TBSP
+  PIECE
+  PINCH
+  SLICE
+  SACHET
+  JAR
+  CUSTOM
+}
+
+enum NutrientValueKind {
+  VALUE
+  TRACES
+  LESS_THAN
+  ABSENT
+  NA
+}
+
+enum RecipeStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum UxCategory {
+  VEGETABLES
+  FRUITS
+  STARCHES
+  CEREALS
+  LEGUMES
+  MEATS
+  FISH
+  SEAFOOD
+  CHARCUTERIE
+  EGGS
+  CHEESES
+  DAIRY
+  FATS
+  NUTS_SEEDS
+  SPICES
+  AROMATICS
+  SAUCES
+  CONDIMENTS
+  PREPARATIONS
+  BAKERY
+  PASTRY
+  SUGARS
+  BEVERAGES
+  VEGETARIAN_PRODUCTS
+  PROCESSED
+  OTHER
+}
+
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  displayName       String
+  passwordHash      String?
+  googleSub         String?   @unique
+  passwordChangedAt DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  sessions                   Session[]
+  recipesCreated             Recipe[]                      @relation("RecipeAuthor")
+  ratings                    RecipeRating[]
+  portions                   MealParticipantPortion[]
+  nutritionGoal              NutritionGoal?
+  dailyOverrides             DailyNutritionGoalOverride[]
+  optimizationPreference     OptimizationPreference?
+  ingredientFavorites        UserIngredientFavorite[]
+  ingredientRecents          UserIngredientRecent[]
+  createdMealItems           MealItem[]                    @relation("MealItemAuthor")
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  familyId  String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([familyId])
+}
+
+model Ingredient {
+  id              String      @id @default(cuid())
+  ciqualCode      Int         @unique
+  nameFr          String
+  nameNormalized  String
+  groupName       String
+  subGroupName    String?
+  subSubGroupName String?
+  uxCategory      UxCategory
+  uxSubCategory   String
+
+  energyKcalKind NutrientValueKind
+  energyKcal     Decimal?          @db.Decimal(12, 4)
+  proteinKind    NutrientValueKind
+  proteinG       Decimal?          @db.Decimal(12, 4)
+  carbKind       NutrientValueKind
+  carbG          Decimal?          @db.Decimal(12, 4)
+  fatKind        NutrientValueKind
+  fatG           Decimal?          @db.Decimal(12, 4)
+  fiberKind      NutrientValueKind
+  fiberG         Decimal?          @db.Decimal(12, 4)
+  sugarKind      NutrientValueKind
+  sugarG         Decimal?          @db.Decimal(12, 4)
+  saltKind       NutrientValueKind
+  saltG          Decimal?          @db.Decimal(12, 4)
+
+  source          String   @default("Ciqual")
+  sourceVersion   String   @default("2025")
+  sourceDate      DateTime
+  iconSlug        String?
+  iconUrl         String?
+  iconSource      String?
+  iconAttribution String?
+  dedicatedIcon   Boolean  @default(false)
+
+  conversions       IngredientConversion[]
+  recipeIngredients RecipeIngredient[]
+  favorites         UserIngredientFavorite[]
+  recents           UserIngredientRecent[]
+
+  @@index([nameNormalized])
+  @@index([uxCategory])
+  @@index([nameFr])
+}
+
+model IngredientConversion {
+  id           String       @id @default(cuid())
+  ingredientId String
+  ingredient   Ingredient   @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  unit         QuantityUnit
+  gramsPerUnit Decimal      @db.Decimal(12, 4)
+  source       String
+  confidence   String
+  createdAt    DateTime     @default(now())
+
+  @@unique([ingredientId, unit])
+}
+
+model Recipe {
+  id                String       @id @default(cuid())
+  name              String
+  description       String?
+  status            RecipeStatus @default(DRAFT)
+  authorId          String
+  author            User         @relation("RecipeAuthor", fields: [authorId], references: [id])
+  servings          Decimal      @db.Decimal(8, 2)
+  prepTimeMinutes   Int?
+  cookTimeMinutes   Int?
+  photoUrl          String?
+  finalCookedWeight Decimal?     @db.Decimal(12, 4)
+  version           Int          @default(1)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  ingredients RecipeIngredient[]
+  steps       RecipeStep[]
+  tags        RecipeTag[]
+  equipment   RecipeEquipment[]
+  ratings     RecipeRating[]
+  mealItems   MealItem[]
+
+  @@index([name])
+  @@index([authorId])
+  @@index([updatedAt])
+  @@index([status])
+}
+
+model RecipeIngredient {
+  id           String       @id @default(cuid())
+  recipeId     String
+  recipe       Recipe       @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredientId String
+  ingredient   Ingredient   @relation(fields: [ingredientId], references: [id])
+  quantity     Decimal      @db.Decimal(12, 4)
+  unit         QuantityUnit
+  grams        Decimal?     @db.Decimal(12, 4)
+  gramsManual  Boolean      @default(false)
+  displayQuantity String?
+  sortOrder    Int
+  estimated    Boolean      @default(false)
+
+  @@index([recipeId])
+}
+
+model RecipeStep {
+  id              String @id @default(cuid())
+  recipeId        String
+  recipe          Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  stepNumber      Int
+  description     String
+  durationMinutes Int?
+
+  @@index([recipeId])
+}
+
+model Tag {
+  id      String      @id @default(cuid())
+  slug    String      @unique
+  label   String
+  recipes RecipeTag[]
+}
+
+model RecipeTag {
+  recipeId String
+  tagId    String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([recipeId, tagId])
+  @@index([tagId])
+}
+
+model Equipment {
+  id       String            @id @default(cuid())
+  slug     String            @unique
+  label    String
+  iconSlug String?
+  recipes  RecipeEquipment[]
+}
+
+model RecipeEquipment {
+  recipeId    String
+  equipmentId String
+  recipe      Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  equipment   Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@id([recipeId, equipmentId])
+}
+
+model RecipeRating {
+  id        String   @id @default(cuid())
+  recipeId  String
+  userId    String
+  stars     Int
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([recipeId, userId])
+}
+
+model MealItem {
+  id          String   @id @default(cuid())
+  date        DateTime @db.Date
+  slot        MealSlot
+  recipeId    String
+  recipe      Recipe   @relation(fields: [recipeId], references: [id])
+  sortOrder   Int      @default(0)
+  version     Int      @default(1)
+  createdById String
+  createdBy   User     @relation("MealItemAuthor", fields: [createdById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  portions    MealParticipantPortion[]
+
+  @@index([date, slot])
+  @@index([recipeId])
+}
+
+model MealParticipantPortion {
+  id         String   @id @default(cuid())
+  mealItemId String
+  mealItem   MealItem @relation(fields: [mealItemId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  portions   Decimal  @db.Decimal(8, 3)
+
+  @@unique([mealItemId, userId])
+}
+
+model NutritionGoal {
+  id                 String            @id @default(cuid())
+  userId             String            @unique
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  caloriesMode       NutrientGoalMode  @default(NONE)
+  caloriesValue      Decimal?          @db.Decimal(10, 2)
+  caloriesTolerance  Decimal?          @db.Decimal(10, 2)
+  proteinMode        NutrientGoalMode  @default(NONE)
+  proteinValue       Decimal?          @db.Decimal(10, 2)
+  proteinTolerance   Decimal?          @db.Decimal(10, 2)
+  carbsMode          NutrientGoalMode  @default(NONE)
+  carbsValue         Decimal?          @db.Decimal(10, 2)
+  carbsTolerance     Decimal?          @db.Decimal(10, 2)
+  fatMode            NutrientGoalMode  @default(NONE)
+  fatValue           Decimal?          @db.Decimal(10, 2)
+  fatTolerance       Decimal?          @db.Decimal(10, 2)
+  updatedAt          DateTime          @updatedAt
+}
+
+model DailyNutritionGoalOverride {
+  id                 String            @id @default(cuid())
+  userId             String
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date               DateTime          @db.Date
+  caloriesMode       NutrientGoalMode
+  caloriesValue      Decimal?          @db.Decimal(10, 2)
+  caloriesTolerance  Decimal?          @db.Decimal(10, 2)
+  proteinMode        NutrientGoalMode
+  proteinValue       Decimal?          @db.Decimal(10, 2)
+  proteinTolerance   Decimal?          @db.Decimal(10, 2)
+  carbsMode          NutrientGoalMode
+  carbsValue         Decimal?          @db.Decimal(10, 2)
+  carbsTolerance     Decimal?          @db.Decimal(10, 2)
+  fatMode            NutrientGoalMode
+  fatValue           Decimal?          @db.Decimal(10, 2)
+  fatTolerance       Decimal?          @db.Decimal(10, 2)
+
+  @@unique([userId, date])
+}
+
+model OptimizationPreference {
+  id                   String  @id @default(cuid())
+  userId               String  @unique
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled              Boolean @default(false)
+  allowAutoAdd         Boolean @default(true)
+  minPortionMultiplier Decimal @default(0.5) @db.Decimal(4, 2)
+  maxPortionMultiplier Decimal @default(2.0) @db.Decimal(4, 2)
+}
+
+model UserIngredientFavorite {
+  userId       String
+  ingredientId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@id([userId, ingredientId])
+}
+
+model UserIngredientRecent {
+  userId       String
+  ingredientId String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  usedAt       DateTime   @updatedAt @default(now())
+
+  @@id([userId, ingredientId])
+  @@index([userId, usedAt])
+}

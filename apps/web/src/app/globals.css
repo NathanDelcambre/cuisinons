@@ -1,0 +1,53 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'SF Pro Display', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #1c1917;
+  --color-sage: #7d9b8a;
+  --color-peach: #e8b298;
+  --color-tomato: #c45c4a;
+  --color-mist: #f6f4f1;
+}
+
+html,
+body {
+  min-height: 100%;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(125, 155, 138, 0.12), transparent 50%),
+    radial-gradient(900px 500px at 100% 0%, rgba(232, 178, 152, 0.14), transparent 45%),
+    #f7f5f2;
+  color: #1c1917;
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid #7d9b8a;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 12px 40px rgba(28, 25, 23, 0.06);
+}
+
+@supports not ((backdrop-filter: blur(1px))) {
+  .glass {
+    background: rgba(255, 255, 255, 0.96);
+  }
+}

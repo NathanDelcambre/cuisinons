@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "55432:5432"
+    environment:
+      POSTGRES_USER: cuisinons
+      POSTGRES_PASSWORD: cuisinons
+      POSTGRES_DB: cuisinons
+    volumes:
+      - cuisinons_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cuisinons -d cuisinons"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  cuisinons_pg:

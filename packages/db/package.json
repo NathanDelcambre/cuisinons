@@ -1,0 +1,36 @@
+{
+  "name": "@cuisinons/db",
+  "version": "0.1.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "seed": "tsx src/seed.ts",
+    "import-ciqual": "tsx src/import-ciqual.ts",
+    "auth:bootstrap": "tsx src/auth-bootstrap.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@cuisinons/shared": "workspace:*",
+    "@prisma/client": "6.15.0",
+    "argon2": "^0.41.1",
+    "dotenv": "^16.4.7",
+    "exceljs": "^4.4.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "dotenv": "^16.4.7",
+    "prisma": "6.15.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "prisma": {
+    "schema": "prisma/schema.prisma",
+    "seed": "tsx src/seed.ts"
+  }
+}

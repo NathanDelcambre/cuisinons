@@ -1,0 +1,7 @@
+'use client';
+
+import { RecipeEditor } from '@/components/recipe-editor';
+
+export default function NewRecipePage() {
+  return <RecipeEditor />;
+}
