@@ -11,6 +11,7 @@ test-results
 .env
 .env.local
 .env.*.local
+.env.vercel*
 .data
 *.tsbuildinfo
 apps/web/.next
@@ -22,3 +23,5 @@ Thumbs.db
 .idea
 .vscode/*
 !.vscode/extensions.json
+.agents
+.env.production.local
