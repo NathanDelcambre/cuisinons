@@ -35,8 +35,8 @@ Variables : `DATABASE_URL`, `PASSWORD_PEPPER`, `AUTH_SECRET`, `INTERNAL_API_SECR
 
 ## Google OAuth
 
-- Origine JS autorisée : `https://<web>.vercel.app` et `http://localhost:3000`
-- Redirect : `http://localhost:3000/api/auth/google/callback`
+- Origine JS autorisée : `https://<web>.vercel.app` et `http://localhost:3600`
+- Redirect : `http://localhost:3600/api/auth/google/callback`
 - Redirect prod : `https://<web>.vercel.app/api/auth/google/callback`
 
 ## Migrations

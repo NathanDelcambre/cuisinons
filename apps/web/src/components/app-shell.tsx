@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { CalendarDays, ChefHat, Plus, Target, UserRound } from 'lucide-react';
 import { useAuth } from './auth-provider';
+import { BrandMark } from './brand-mark';
 
 const links = [
   { href: '/planning', label: 'Planning', icon: CalendarDays },
@@ -20,7 +21,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto flex min-h-dvh max-w-7xl">
       <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-2 p-6 lg:flex">
-        <p className="mb-6 px-3 text-lg font-semibold tracking-tight">Cuisinons</p>
+        <div className="mb-6 px-1">
+          <BrandMark size="sm" align="start" />
+        </div>
         {links.map((link) => {
           const active = pathname === link.href || (link.href !== '/recipes/new' && pathname.startsWith(link.href));
           const Icon = link.icon;

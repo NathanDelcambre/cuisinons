@@ -41,10 +41,10 @@ export function loadWebEnv(): WebEnv {
     NODE_ENV: nodeEnv,
     AUTH_SECRET: strip(process.env.AUTH_SECRET),
     INTERNAL_API_SECRET: strip(process.env.INTERNAL_API_SECRET),
-    API_BASE_URL: asUrl(process.env.API_BASE_URL, 'http://localhost:4000'),
+    API_BASE_URL: asUrl(process.env.API_BASE_URL, 'http://localhost:3601'),
     NEXT_PUBLIC_APP_URL: asUrl(
       process.env.NEXT_PUBLIC_APP_URL,
-      vercelUrl ? `https://${vercelUrl.replace(/^https?:\/\//, '')}` : 'http://localhost:3000',
+      vercelUrl ? `https://${vercelUrl.replace(/^https?:\/\//, '')}` : 'http://localhost:3600',
     ),
     SESSION_TTL_DAYS: strip(process.env.SESSION_TTL_DAYS),
     INTERNAL_JWT_TTL_SECONDS: strip(process.env.INTERNAL_JWT_TTL_SECONDS),

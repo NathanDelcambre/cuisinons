@@ -1,6 +1,6 @@
 import type { NextConfig } from 'next';
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3600';
 const isDev = process.env.NODE_ENV !== 'production';
 
 const nextConfig: NextConfig = {

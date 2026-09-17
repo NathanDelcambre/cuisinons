@@ -1,8 +1,10 @@
 import 'reflect-metadata';
 import { config } from 'dotenv';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-config({ path: path.resolve(__dirname, '../../../.env') });
+const here = path.dirname(fileURLToPath(import.meta.url));
+config({ path: path.resolve(here, '../../../.env') });
 config({ path: path.resolve(process.cwd(), '../../.env') });
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';

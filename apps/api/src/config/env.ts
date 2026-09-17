@@ -15,7 +15,7 @@ function asUrl(value: string | undefined, fallback: string): string {
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   APP_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.coerce.number().default(4000),
+  PORT: z.coerce.number().default(3601),
   DATABASE_URL: z.string().min(1),
   AUTH_SECRET: z.string().min(16),
   PASSWORD_PEPPER: z.string().min(16),
@@ -39,7 +39,7 @@ export function loadApiEnv(): ApiEnv {
     INTERNAL_API_SECRET: strip(process.env.INTERNAL_API_SECRET),
     SESSION_TTL_DAYS: strip(process.env.SESSION_TTL_DAYS),
     INTERNAL_JWT_TTL_SECONDS: strip(process.env.INTERNAL_JWT_TTL_SECONDS),
-    WEB_ORIGIN: asUrl(process.env.WEB_ORIGIN, 'http://localhost:3000'),
+    WEB_ORIGIN: asUrl(process.env.WEB_ORIGIN, 'http://localhost:3600'),
     GOOGLE_CLIENT_ID: strip(process.env.GOOGLE_CLIENT_ID) ?? '',
   });
   if (!parsed.success) {

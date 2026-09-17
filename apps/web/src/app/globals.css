@@ -46,8 +46,16 @@ body {
   box-shadow: 0 12px 40px rgba(28, 25, 23, 0.06);
 }
 
+.glass-auth {
+  background: rgba(255, 252, 247, 0.86);
+  backdrop-filter: blur(28px) saturate(1.15);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 28px 80px rgba(28, 25, 23, 0.22);
+}
+
 @supports not ((backdrop-filter: blur(1px))) {
-  .glass {
+  .glass,
+  .glass-auth {
     background: rgba(255, 255, 255, 0.96);
   }
 }

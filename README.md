@@ -23,8 +23,8 @@ pnpm auth:bootstrap
 pnpm dev
 ```
 
-Web : http://localhost:3000  
-API : http://localhost:4000 (`/health`, `/docs` en dev)
+Web : http://localhost:3600  
+API : http://localhost:3601 (`/health`, `/docs` en dev)
 
 ## Scripts
 

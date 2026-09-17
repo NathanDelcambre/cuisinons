@@ -22,13 +22,13 @@ export default defineConfig({
   testDir: './e2e',
   timeout: 90_000,
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000',
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3600',
     trace: 'on-first-retry',
   },
   webServer: {
     command: 'pnpm dev',
     cwd: resolve(__dirname, '../..'),
-    url: 'http://localhost:3000',
+    url: 'http://localhost:3600',
     reuseExistingServer: true,
     timeout: 180_000,
   },

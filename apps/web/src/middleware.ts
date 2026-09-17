@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const PUBLIC = ['/login', '/api/auth/login', '/api/auth/google', '/api/auth/csrf', '/ingredients/'];
+const PUBLIC = ['/login', '/api/auth/login', '/api/auth/google', '/api/auth/csrf', '/ingredients/', '/brand/'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (
     PUBLIC.some((p) => pathname === p || pathname.startsWith(p)) ||
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/api/auth/google')
+    pathname.startsWith('/api/auth/google') ||
+    pathname === '/favicon.ico' ||
+    pathname.startsWith('/icon') ||
+    pathname.startsWith('/apple-icon')
   ) {
     return NextResponse.next();
   }
@@ -21,5 +24,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.png|apple-icon.png).*)'],
 };
