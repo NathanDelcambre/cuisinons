@@ -189,7 +189,7 @@ export async function importCiqual(): Promise<{ count: number }> {
     });
   });
 
-  const chunkSize = 100;
+  const chunkSize = 10;
   for (let i = 0; i < rows.length; i += chunkSize) {
     const chunk = rows.slice(i, i + chunkSize);
     await Promise.all(
