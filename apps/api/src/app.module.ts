@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
-import { HealthController } from './health/health.controller';
-import { IngredientsModule } from './ingredients/ingredients.module';
-import { RecipesModule } from './recipes/recipes.module';
-import { PlannerModule } from './planner/planner.module';
-import { NutritionModule } from './nutrition/nutrition.module';
-import { OptimizationModule } from './optimization/optimization.module';
-import { CatalogModule } from './catalog/catalog.module';
+import { PrismaModule } from './prisma/prisma.module.js';
+import { AuthModule } from './auth/auth.module.js';
+import { HealthController } from './health/health.controller.js';
+import { IngredientsModule } from './ingredients/ingredients.module.js';
+import { RecipesModule } from './recipes/recipes.module.js';
+import { PlannerModule } from './planner/planner.module.js';
+import { NutritionModule } from './nutrition/nutrition.module.js';
+import { OptimizationModule } from './optimization/optimization.module.js';
+import { CatalogModule } from './catalog/catalog.module.js';
 
 @Module({
   imports: [

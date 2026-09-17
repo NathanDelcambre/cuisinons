@@ -5,10 +5,10 @@ import {
   type GoalMode,
   type MealSlot,
 } from '@cuisinons/shared';
-import { PrismaService } from '../prisma/prisma.service';
-import { PlannerService } from '../planner/planner.service';
-import { parseIsoDate } from '../planner/dates';
-import { nutritionForRecipe } from '../nutrition/recipe-nutrition';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { PlannerService } from '../planner/planner.service.js';
+import { parseIsoDate } from '../planner/dates.js';
+import { nutritionForRecipe } from '../nutrition/recipe-nutrition.js';
 
 function toGoal(mode: GoalMode, value: unknown, tolerance: unknown) {
   return {

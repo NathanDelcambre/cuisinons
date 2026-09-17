@@ -1,9 +1,9 @@
 import { Controller, Get, Inject, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { UX_CATEGORIES } from '@cuisinons/shared';
-import { InternalJwtGuard } from '../auth/internal-jwt.guard';
-import { CurrentUser } from '../auth/current-user.decorator';
-import type { AuthUser } from '../auth/internal-jwt.guard';
-import { IngredientsService } from './ingredients.service';
+import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
+import { CurrentUser } from '../auth/current-user.decorator.js';
+import type { AuthUser } from '../auth/internal-jwt.guard.js';
+import { IngredientsService } from './ingredients.service.js';
 
 @Controller()
 @UseGuards(InternalJwtGuard)

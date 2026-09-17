@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { PlannerModule } from '../planner/planner.module';
-import { NutritionController } from './nutrition.controller';
+import { PlannerModule } from '../planner/planner.module.js';
+import { NutritionController } from './nutrition.controller.js';
 
 @Module({
   imports: [PlannerModule],

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { optimizeDay } from '../src/optimization/engine';
-import type { MacroNutrients } from '../src/nutrition/macros';
-import { mapCiqualToUxCategory } from '../src/ciqual/ux-categories';
+import { optimizeDay } from '../src/optimization/engine.js';
+import type { MacroNutrients } from '../src/nutrition/macros.js';
+import { mapCiqualToUxCategory } from '../src/ciqual/ux-categories.js';
 
 const chicken: MacroNutrients = {
   kcal: 165,

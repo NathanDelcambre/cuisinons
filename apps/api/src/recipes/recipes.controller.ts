@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { QUANTITY_UNITS } from '@cuisinons/shared';
-import { InternalJwtGuard } from '../auth/internal-jwt.guard';
-import { CurrentUser } from '../auth/current-user.decorator';
-import type { AuthUser } from '../auth/internal-jwt.guard';
-import { RecipesService } from './recipes.service';
+import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
+import { CurrentUser } from '../auth/current-user.decorator.js';
+import type { AuthUser } from '../auth/internal-jwt.guard.js';
+import { RecipesService } from './recipes.service.js';
 
 const writeSchema = z.object({
   name: z.string().min(1).max(160),

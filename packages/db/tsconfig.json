@@ -4,8 +4,8 @@
     "noEmit": true,
     "declaration": false,
     "declarationMap": false,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "CommonJS",
+    "moduleResolution": "Node10",
     "types": ["node"]
   },
   "include": ["src", "prisma"],

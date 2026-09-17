@@ -1,8 +1,8 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { MealSlot } from '@cuisinons/db';
-import { addDays, startOfWeek } from './dates';
-import { PrismaService } from '../prisma/prisma.service';
-import { nutritionForRecipe } from '../nutrition/recipe-nutrition';
+import { addDays, startOfWeek } from './dates.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { nutritionForRecipe } from '../nutrition/recipe-nutrition.js';
 import type { MacroNutrients } from '@cuisinons/shared';
 
 @Injectable()

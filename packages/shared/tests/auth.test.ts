@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { isAuthorizedEmail, normalizeEmail } from '../src/auth/emails';
-import { validatePassword } from '../src/auth/password';
+import { isAuthorizedEmail, normalizeEmail } from '../src/auth/emails.js';
+import { validatePassword } from '../src/auth/password.js';
 
 describe('email whitelist', () => {
   it('autorise Nathan et Jade', () => {

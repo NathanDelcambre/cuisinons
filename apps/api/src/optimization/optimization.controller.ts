@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Inject, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
-import { InternalJwtGuard } from '../auth/internal-jwt.guard';
-import { CurrentUser } from '../auth/current-user.decorator';
-import type { AuthUser } from '../auth/internal-jwt.guard';
-import { OptimizationService } from './optimization.service';
+import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
+import { CurrentUser } from '../auth/current-user.decorator.js';
+import type { AuthUser } from '../auth/internal-jwt.guard.js';
+import { OptimizationService } from './optimization.service.js';
 
 @Controller()
 @UseGuards(InternalJwtGuard)

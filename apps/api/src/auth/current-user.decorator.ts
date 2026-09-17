@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import type { Request } from 'express';
-import type { AuthUser } from './internal-jwt.guard';
+import type { AuthUser } from './internal-jwt.guard.js';
 
 export const CurrentUser = createParamDecorator((_data: unknown, ctx: ExecutionContext): AuthUser => {
   const req = ctx.switchToHttp().getRequest<Request & { user?: AuthUser }>();

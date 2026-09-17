@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { formatQuantity, parseQuantity } from '../src/nutrition/fractions';
-import { computeRecipeNutrition } from '../src/nutrition/macros';
-import { parseCiqualNutrient, nutrientAmountForMath } from '../src/nutrition/nutrient-value';
-import { resolveGrams } from '../src/nutrition/conversions';
+import { formatQuantity, parseQuantity } from '../src/nutrition/fractions.js';
+import { computeRecipeNutrition } from '../src/nutrition/macros.js';
+import { parseCiqualNutrient, nutrientAmountForMath } from '../src/nutrition/nutrient-value.js';
+import { resolveGrams } from '../src/nutrition/conversions.js';
 
 describe('fractions', () => {
   it('parse 1/2, 0,5 et mixte', () => {

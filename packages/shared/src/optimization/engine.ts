@@ -3,9 +3,9 @@ import {
   remainingGap,
   type MacroTotals,
   type NutritionGoals,
-} from '../nutrition/goals';
-import type { MacroNutrients } from '../nutrition/macros';
-import type { MealSlot } from '../planner/slots';
+} from '../nutrition/goals.js';
+import type { MacroNutrients } from '../nutrition/macros.js';
+import type { MealSlot } from '../planner/slots.js';
 
 export type OptimizerMealItem = {
   id: string;

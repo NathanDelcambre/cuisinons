@@ -5,15 +5,15 @@ import {
   displayNameForEmail,
   validatePassword,
 } from '@cuisinons/shared';
-import { PrismaService } from '../prisma/prisma.service';
-import { loadApiEnv } from '../config/env';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { loadApiEnv } from '../config/env.js';
 import {
   createSessionToken,
   hashEmail,
   hashPassword,
   hashToken,
   verifyPassword,
-} from './auth.crypto';
+} from './auth.crypto.js';
 
 const LOGIN_WINDOW_MS = 10 * 60_000;
 const LOGIN_MAX = 8;

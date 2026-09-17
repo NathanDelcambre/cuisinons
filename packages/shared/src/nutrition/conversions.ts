@@ -3,7 +3,7 @@ import {
   metricQuantityToGrams,
   type QuantityUnit,
   volumeToMilliliters,
-} from './units';
+} from './units.js';
 
 export type ConversionRecord = {
   unit: QuantityUnit;

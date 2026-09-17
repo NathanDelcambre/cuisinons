@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Inject, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { z } from 'zod';
-import { AuthService } from './auth.service';
-import { InternalKeyGuard } from './internal-key.guard';
-import { InternalJwtGuard } from './internal-jwt.guard';
-import { CurrentUser } from './current-user.decorator';
-import type { AuthUser } from './internal-jwt.guard';
+import { AuthService } from './auth.service.js';
+import { InternalKeyGuard } from './internal-key.guard.js';
+import { InternalJwtGuard } from './internal-jwt.guard.js';
+import { CurrentUser } from './current-user.decorator.js';
+import type { AuthUser } from './internal-jwt.guard.js';
 
 const loginSchema = z.object({
   email: z.string().email(),

@@ -1,8 +1,8 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, QuantityUnit } from '@cuisinons/db';
 import { resolveGrams, type QuantityUnit as SharedUnit } from '@cuisinons/shared';
-import { PrismaService } from '../prisma/prisma.service';
-import { nutritionForRecipe } from '../nutrition/recipe-nutrition';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { nutritionForRecipe } from '../nutrition/recipe-nutrition.js';
 
 export type RecipeWriteInput = {
   name: string;

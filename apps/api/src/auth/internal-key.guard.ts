@@ -5,8 +5,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import { loadApiEnv } from '../config/env';
-import { safeEqualString } from './auth.crypto';
+import { loadApiEnv } from '../config/env.js';
+import { safeEqualString } from './auth.crypto.js';
 
 @Injectable()
 export class InternalKeyGuard implements CanActivate {

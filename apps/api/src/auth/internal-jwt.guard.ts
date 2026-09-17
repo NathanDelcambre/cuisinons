@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { jwtVerify } from 'jose';
-import { loadApiEnv } from '../config/env';
+import { loadApiEnv } from '../config/env.js';
 
 export type AuthUser = {
   id: string;

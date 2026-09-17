@@ -1,12 +1,12 @@
 import { Body, Controller, Get, Inject, Put, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { GOAL_MODES } from '@cuisinons/shared';
-import { InternalJwtGuard } from '../auth/internal-jwt.guard';
-import { CurrentUser } from '../auth/current-user.decorator';
-import type { AuthUser } from '../auth/internal-jwt.guard';
-import { PrismaService } from '../prisma/prisma.service';
-import { PlannerService } from '../planner/planner.service';
-import { parseIsoDate } from '../planner/dates';
+import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
+import { CurrentUser } from '../auth/current-user.decorator.js';
+import type { AuthUser } from '../auth/internal-jwt.guard.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { PlannerService } from '../planner/planner.service.js';
+import { parseIsoDate } from '../planner/dates.js';
 
 const goalSchema = z.object({
   caloriesMode: z.enum(GOAL_MODES),

@@ -1,11 +1,11 @@
 import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { MEAL_SLOTS } from '@cuisinons/shared';
-import { InternalJwtGuard } from '../auth/internal-jwt.guard';
-import { CurrentUser } from '../auth/current-user.decorator';
-import type { AuthUser } from '../auth/internal-jwt.guard';
-import { PlannerService } from './planner.service';
-import { maxFutureDate, parseIsoDate } from './dates';
+import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
+import { CurrentUser } from '../auth/current-user.decorator.js';
+import type { AuthUser } from '../auth/internal-jwt.guard.js';
+import { PlannerService } from './planner.service.js';
+import { maxFutureDate, parseIsoDate } from './dates.js';
 import { ForbiddenException } from '@nestjs/common';
 
 @Controller()
