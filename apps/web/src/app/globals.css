@@ -2,6 +2,8 @@
 
 @theme {
   --font-sans: 'SF Pro Display', 'Segoe UI', ui-sans-serif, system-ui, sans-serif;
+  /* Titres : Outfit sert de repli homogene la ou SF Pro Display n'existe pas. */
+  --font-display: var(--font-outfit), 'SF Pro Display', ui-sans-serif, system-ui, sans-serif;
   --color-ink: #1c1917;
   --color-sage: #7d9b8a;
   --color-peach: #e8b298;

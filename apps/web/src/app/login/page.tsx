@@ -6,6 +6,34 @@ import { apiFetch } from '@/lib/api';
 import { useAuth } from '@/components/auth-provider';
 import { BrandMark } from '@/components/brand-mark';
 
+function GoogleLogo() {
+  return (
+    <span
+      aria-hidden
+      className="flex size-5 shrink-0 items-center justify-center rounded-full bg-white"
+    >
+      <svg viewBox="0 0 48 48" className="size-3.5">
+        <path
+          fill="#4285F4"
+          d="M45.1 24.5c0-1.6-.1-3.2-.4-4.7H24v8.9h11.8c-.5 2.7-2 5-4.3 6.5v5.4h7c4.1-3.8 6.6-9.4 6.6-16.1z"
+        />
+        <path
+          fill="#34A853"
+          d="M24 46c5.8 0 10.7-1.9 14.3-5.2l-7-5.4c-1.9 1.3-4.4 2.1-7.3 2.1-5.6 0-10.4-3.8-12.1-8.9h-7.2v5.6C8.3 41.3 15.6 46 24 46z"
+        />
+        <path
+          fill="#FBBC05"
+          d="M11.9 28.6c-.4-1.3-.7-2.7-.7-4.1s.2-2.8.7-4.1v-5.6H4.7C3.1 18 2.2 20.9 2.2 24.5s.9 6.5 2.5 9.7l7.2-5.6z"
+        />
+        <path
+          fill="#EA4335"
+          d="M24 11.4c3.2 0 6 1.1 8.2 3.2l6.2-6.2C34.7 5 29.8 3 24 3 15.6 3 8.3 7.7 4.7 14.8l7.2 5.6C13.6 15.2 18.4 11.4 24 11.4z"
+        />
+      </svg>
+    </span>
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const { refresh } = useAuth();
@@ -49,15 +77,12 @@ export default function LoginPage() {
       </div>
       <div className="relative z-10 w-full max-w-md">
         <div className="glass-auth rounded-[36px] p-8">
-          <BrandMark
-            size="lg"
-            titleAs="h1"
-            subtitle="Recettes, planning et nutrition — privé, pour deux."
-          />
+          <BrandMark size="lg" titleAs="h1" subtitle="Recettes, planning des repas et macros." />
           <a
             href="/api/auth/google"
-            className="mt-8 flex min-h-12 items-center justify-center rounded-full bg-stone-900 text-sm font-medium text-white"
+            className="mt-8 flex min-h-12 items-center justify-center gap-3 rounded-full bg-stone-900 text-sm font-medium text-white"
           >
+            <GoogleLogo />
             Continuer avec Google
           </a>
           <div className="my-6 flex items-center gap-3 text-xs text-stone-400">

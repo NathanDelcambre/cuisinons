@@ -1,9 +1,9 @@
 import Image from 'next/image';
 
 const sizes = {
-  sm: { px: 32, radius: 'rounded-xl', title: 'text-lg' },
-  md: { px: 44, radius: 'rounded-2xl', title: 'text-xl' },
-  lg: { px: 80, radius: 'rounded-[28px]', title: 'text-4xl' },
+  sm: { px: 32, radius: 'rounded-xl', title: 'text-lg tracking-[-0.02em]' },
+  md: { px: 44, radius: 'rounded-2xl', title: 'text-xl tracking-[-0.025em]' },
+  lg: { px: 80, radius: 'rounded-[28px]', title: 'text-[2.6rem] leading-none tracking-[-0.035em]' },
 } as const;
 
 export function BrandMark({
@@ -29,8 +29,8 @@ export function BrandMark({
         priority={size === 'lg'}
       />
       <div>
-        <TitleTag className={`${spec.title} font-semibold tracking-tight text-stone-900`}>Cuisinons</TitleTag>
-        {subtitle ? <p className="mt-1 max-w-xs text-sm text-stone-600">{subtitle}</p> : null}
+        <TitleTag className={`font-display ${spec.title} font-semibold text-stone-900`}>Cuisinons</TitleTag>
+        {subtitle ? <p className="mt-2 max-w-xs text-sm text-stone-600">{subtitle}</p> : null}
       </div>
     </div>
   );
