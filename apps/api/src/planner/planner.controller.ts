@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { MEAL_SLOTS } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard';
@@ -11,7 +11,7 @@ import { ForbiddenException } from '@nestjs/common';
 @Controller()
 @UseGuards(InternalJwtGuard)
 export class PlannerController {
-  constructor(private readonly planner: PlannerService) {}
+  constructor(@Inject(PlannerService) private readonly planner: PlannerService) {}
 
   @Get('/planner/week')
   week(@Query('from') from?: string) {

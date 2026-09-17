@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, QuantityUnit } from '@cuisinons/db';
 import { resolveGrams, type QuantityUnit as SharedUnit } from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service';
@@ -36,7 +36,7 @@ const recipeInclude = {
 
 @Injectable()
 export class RecipesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   private async resolveLineGrams(line: RecipeWriteInput['ingredients'][number]) {
     const ingredient = await this.prisma.ingredient.findUnique({

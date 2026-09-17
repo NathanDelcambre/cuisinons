@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { MealSlot } from '@cuisinons/db';
 import { addDays, startOfWeek } from './dates';
 import { PrismaService } from '../prisma/prisma.service';
@@ -7,7 +7,7 @@ import type { MacroNutrients } from '@cuisinons/shared';
 
 @Injectable()
 export class PlannerService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   weekBounds(from: Date) {
     const start = startOfWeek(from);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { apiJson } from '@/lib/api';
 
 type Preview = {
@@ -11,6 +12,7 @@ type Preview = {
 
 export function OptimizePanel({ date }: { date: string }) {
   const queryClient = useQueryClient();
+  const [enabledOverride, setEnabledOverride] = useState<boolean | null>(null);
   const preview = useMutation({
     mutationFn: () =>
       apiJson<Preview>('/api/bff/optimization/day/preview', {
@@ -43,6 +45,7 @@ export function OptimizePanel({ date }: { date: string }) {
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['opt-prefs'] }),
   });
+  const enabled = enabledOverride ?? Boolean(prefs.data?.enabled);
 
   return (
     <div className="glass rounded-[28px] p-5">
@@ -54,13 +57,16 @@ export function OptimizePanel({ date }: { date: string }) {
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
-            checked={Boolean(prefs.data?.enabled)}
-            onChange={(e) => save.mutate(e.target.checked)}
+            checked={enabled}
+            onChange={(e) => {
+              setEnabledOverride(e.target.checked);
+              save.mutate(e.target.checked);
+            }}
           />
           Activer
         </label>
       </div>
-      {prefs.data?.enabled ? (
+      {enabled ? (
         <div className="mt-4 flex flex-wrap gap-2">
           <button className="rounded-full bg-stone-900 px-4 py-2 text-sm text-white" onClick={() => preview.mutate()}>
             Optimiser ma journée

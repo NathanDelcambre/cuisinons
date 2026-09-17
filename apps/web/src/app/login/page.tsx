@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api';
 import { useAuth } from '@/components/auth-provider';
@@ -10,6 +10,11 @@ export default function LoginPage() {
   const { refresh } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -48,7 +53,7 @@ export default function LoginPage() {
           ou
           <span className="h-px flex-1 bg-stone-200" />
         </div>
-        <form className="space-y-4" onSubmit={onSubmit}>
+        <form className="space-y-4" method="post" action="/login" onSubmit={onSubmit}>
           <label className="block text-sm">
             Adresse e-mail
             <input
@@ -72,7 +77,7 @@ export default function LoginPage() {
           {error ? <p className="text-sm text-[#c45c4a]">{error}</p> : null}
           <button
             type="submit"
-            disabled={pending}
+            disabled={!hydrated || pending}
             className="flex min-h-12 w-full items-center justify-center rounded-full bg-stone-900 text-sm font-medium text-white disabled:opacity-60"
           >
             {pending ? 'Connexion…' : 'Se connecter'}

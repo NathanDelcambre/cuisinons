@@ -53,11 +53,6 @@ export default function PlanningPage() {
     queryKey: ['goals'],
     queryFn: () => apiJson<Goal | null>('/api/bff/nutrition-goals'),
   });
-  const prefsQuery = useQuery({
-    queryKey: ['opt-prefs'],
-    queryFn: () => apiJson<{ enabled: boolean }>('/api/bff/optimization/preferences'),
-  });
-
   const remove = useMutation({
     mutationFn: (id: string) => apiJson(`/api/bff/planner/items/${id}`, { method: 'DELETE' }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['planner'] }),
@@ -105,7 +100,7 @@ export default function PlanningPage() {
       </header>
 
       {goalsQuery.data ? <MacroBars actual={macrosFor(selectedDate)} goals={goalsQuery.data} /> : null}
-      {prefsQuery.data?.enabled ? <OptimizePanel date={iso(selectedDate)} /> : null}
+      <OptimizePanel date={iso(selectedDate)} />
 
       <div className="flex gap-2 overflow-x-auto lg:hidden">
         {days.map((day, index) => (

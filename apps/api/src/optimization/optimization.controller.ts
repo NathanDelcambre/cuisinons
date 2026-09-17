@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -8,7 +8,7 @@ import { OptimizationService } from './optimization.service';
 @Controller()
 @UseGuards(InternalJwtGuard)
 export class OptimizationController {
-  constructor(private readonly optimization: OptimizationService) {}
+  constructor(@Inject(OptimizationService) private readonly optimization: OptimizationService) {}
 
   @Get('/optimization/preferences')
   prefs(@CurrentUser() user: AuthUser) {

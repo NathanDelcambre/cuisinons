@@ -195,7 +195,11 @@ function AddToPlan({ recipeId, onClose }: { recipeId: string; onClose: () => voi
             </option>
           ))}
         </select>
-        <button className="rounded-full bg-stone-900 px-4 py-2 text-sm text-white" onClick={() => add.mutate()}>
+        <button
+          className="rounded-full bg-stone-900 px-4 py-2 text-sm text-white disabled:opacity-50"
+          disabled={add.isPending || !users.data?.length}
+          onClick={() => add.mutate()}
+        >
           Valider
         </button>
         <button onClick={onClose}>Annuler</button>

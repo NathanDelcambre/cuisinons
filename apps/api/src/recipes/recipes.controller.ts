@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { QUANTITY_UNITS } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard';
@@ -37,7 +37,7 @@ const writeSchema = z.object({
 @Controller()
 @UseGuards(InternalJwtGuard)
 export class RecipesController {
-  constructor(private readonly recipes: RecipesService) {}
+  constructor(@Inject(RecipesService) private readonly recipes: RecipesService) {}
 
   @Get('/recipes')
   list(

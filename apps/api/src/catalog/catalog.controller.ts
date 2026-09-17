@@ -1,11 +1,11 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, UseGuards } from '@nestjs/common';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Controller()
 @UseGuards(InternalJwtGuard)
 export class CatalogController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   @Get('/tags')
   tags() {

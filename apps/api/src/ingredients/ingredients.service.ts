@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@cuisinons/db';
 import { normalizeSearchText, type UxCategory } from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class IngredientsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async search(input: {
     q?: string;

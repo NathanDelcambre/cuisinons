@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import {
   isAuthorizedEmail,
   normalizeEmail,
@@ -25,7 +25,7 @@ const GENERIC_LOGIN_ERROR = 'Identifiants incorrects.';
 export class AuthService {
   private dummyHashPromise: Promise<string> | null = null;
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   private dummyHash(): Promise<string> {
     const env = loadApiEnv();
