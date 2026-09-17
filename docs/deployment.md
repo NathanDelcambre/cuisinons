@@ -29,7 +29,12 @@ Variables :
 
 ## Vercel — API (NestJS)
 
-Racine : `apps/api`. Entrée serverless : `api/index.ts`.
+Racine : `apps/api`. Entrée serverless : `api/index.ts`. `vercel.json` réécrit `/(.*)` vers `/api`, et Nest route sur l’URL d’origine.
+
+Deux contraintes structurelles, toutes deux déjà cassées une fois en production :
+
+1. **`apps/api/api/` ne contient qu’`index.ts`.** Vercel crée une fonction par fichier de ce dossier et bundle chacune séparément : un import relatif d’une fonction vers une autre n’existe plus au runtime (`ERR_MODULE_NOT_FOUND`). Tout helper va dans `src/` — voir `src/config/load-env.ts`. Le test `tests/vercel-entry.test.ts` échoue si un fichier est ajouté.
+2. **Preset framework = « Other ».** Le preset `nestjs` compile en plus `src/main.ts` en fonction `index`, or ce fichier appelle `app.listen()` : inexploitable en serverless. `src/main.ts` reste réservé au développement local.
 
 Variables : `DATABASE_URL`, `PASSWORD_PEPPER`, `AUTH_SECRET`, `INTERNAL_API_SECRET`, `WEB_ORIGIN` (URL web https), `APP_ENV=production`.
 

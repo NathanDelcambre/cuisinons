@@ -1,11 +1,13 @@
-import './load-env';
 import 'reflect-metadata';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { NestFactory } from '@nestjs/core';
 import { ExpressAdapter } from '@nestjs/platform-express';
 import express from 'express';
 import helmet from 'helmet';
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../src/app.module.js';
+import { loadEnvFiles } from '../src/config/load-env.js';
+
+loadEnvFiles();
 
 let cached: express.Express | null = null;
 

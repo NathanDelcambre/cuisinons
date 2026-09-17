@@ -1,18 +1,13 @@
 import 'reflect-metadata';
-import { config } from 'dotenv';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const here = path.dirname(fileURLToPath(import.meta.url));
-config({ path: path.resolve(here, '../../../.env') });
-config({ path: path.resolve(process.cwd(), '../../.env') });
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
-import { AppModule } from './app.module';
-import { loadApiEnv } from './config/env';
+import { AppModule } from './app.module.js';
+import { loadApiEnv } from './config/env.js';
+import { loadEnvFiles } from './config/load-env.js';
 
 async function bootstrap() {
+  loadEnvFiles();
   const env = loadApiEnv();
   const app = await NestFactory.create(AppModule, { logger: ['error', 'warn', 'log'] });
   app.use(
