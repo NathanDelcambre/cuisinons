@@ -45,9 +45,40 @@ Variables : `DATABASE_URL`, `PASSWORD_PEPPER`, `AUTH_SECRET`, `INTERNAL_API_SECR
 - Redirect : `http://localhost:3600/api/auth/google/callback`
 - Redirect prod : `https://<web>.vercel.app/api/auth/google/callback`
 
+## Latence
+
+Deux réglages non évidents, tous les deux responsables d’une production lente ou cassée.
+
+1. **Les deux projets sont épinglés à `lhr1` (Londres) dans leur `vercel.json`.**
+   Par défaut Vercel exécute les fonctions à `iad1` (Washington) alors que Neon
+   est en `aws-eu-west-2` : chaque requête SQL traversait l’Atlantique, et une
+   seule lecture du BFF en enchaîne plusieurs (résolution de session, puis le
+   métier). Le plan Hobby n’autorise qu’une région, d’où Londres — au plus près
+   de la base, que l’on interroge beaucoup plus souvent que le navigateur.
+2. **Le BFF ne relaie jamais les en-têtes de transport de Nest.** `fetch`
+   décompresse le corps mais conserve `content-encoding: gzip` : renvoyer la
+   réponse telle quelle faisait échouer le navigateur en
+   `ERR_CONTENT_DECODING_FAILED`, uniquement sur les réponses assez grosses pour
+   que Vercel les compresse. `relay()` dans `lib/bff/proxy.ts` ne recopie que le
+   type de contenu.
+
+La base reste sur l’offre gratuite : elle se suspend après quelques minutes
+d’inactivité, donc la première requête d’une session paie le réveil du compute.
+
 ## Migrations
 
 Toujours `prisma migrate deploy`. Jamais `prisma db push` en production.
+
+Le seed est rejouable (upserts) et sert aussi à publier le catalogue de recettes
+en production. Depuis la racine, avec `DATABASE_URL` pointé sur Neon :
+
+```powershell
+$env:DATABASE_URL = '<url pooled Neon>'
+$env:PASSWORD_PEPPER = '<pepper>'
+pnpm --filter @cuisinons/db seed
+```
+
+Il ne recrée pas les comptes existants et ne touche pas aux repas déjà planifiés.
 
 ## Actions manuelles restantes
 
