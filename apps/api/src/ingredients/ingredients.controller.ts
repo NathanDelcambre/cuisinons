@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { UX_CATEGORIES } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard';
 import { CurrentUser } from '../auth/current-user.decorator';
@@ -8,7 +8,7 @@ import { IngredientsService } from './ingredients.service';
 @Controller()
 @UseGuards(InternalJwtGuard)
 export class IngredientsController {
-  constructor(private readonly ingredients: IngredientsService) {}
+  constructor(@Inject(IngredientsService) private readonly ingredients: IngredientsService) {}
 
   @Get('/ingredients')
   search(

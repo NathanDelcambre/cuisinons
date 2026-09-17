@@ -49,9 +49,12 @@ Voir [docs/deployment.md](docs/deployment.md).
 
 Voir [docs/security.md](docs/security.md). Cookies HttpOnly, CSRF, whitelist serveur, pas de token dans `localStorage`.
 
+## Dépôt
+
+Le code est sur le dépôt GitHub privé [Hexachip/cuisinons](https://github.com/Hexachip/cuisinons) (compte `gh` authentifié : Hexachip). Le login GitHub `nathan.delcambre` n’existe pas ; pour le transférer vers le compte GitHub lié à `nathan.delcambre@gmail.com`, se reconnecter avec ce compte puis transférer le dépôt.
+
 ## Limitations connues
 
 - L’optimiseur ne parle à aucun LLM.
 - Les illustrations dédiées couvrent les aliments courants ; le reste utilise un fallback de catégorie.
 - Le throttle login est en mémoire (instance serverless).
-- Compte GitHub `gh` actuel : Hexachip — le dépôt `nathan.delcambre/cuisinons` doit être créé/poussé avec le bon compte.

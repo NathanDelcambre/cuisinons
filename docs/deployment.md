@@ -40,3 +40,17 @@ Variables : `DATABASE_URL`, `PASSWORD_PEPPER`, `AUTH_SECRET`, `INTERNAL_API_SECR
 ## Migrations
 
 Toujours `prisma migrate deploy`. Jamais `prisma db push` en production.
+
+## Actions manuelles restantes
+
+CLI Vercel absente d’une session authentifiée, Neon non provisionné, Google OAuth sans identifiants. Ne pas inventer de secrets. À faire une seule fois :
+
+1. **GitHub** — le dépôt privé est [https://github.com/Hexachip/cuisinons](https://github.com/Hexachip/cuisinons). Transférer vers le compte GitHub personnel (l’e-mail `nathan.delcambre@gmail.com` n’est pas un login GitHub).
+2. **Neon Free** — créer un projet, copier `DATABASE_URL` (pooled) et `DIRECT_URL` (direct).
+3. **Vercel — deux projets gratuits**
+   - Web : racine `apps/web`, framework Next.js.
+   - API : racine `apps/api`, entrée `api/index.ts`.
+4. **Variables** — coller celles listées ci-dessus (secrets ≥ 32 caractères, jamais ceux du `.env` local).
+5. **Google Cloud** — OAuth Web, origines et callbacks ci-dessus.
+6. **Données prod** — `pnpm db:migrate:deploy`, `pnpm db:import-ciqual`, `pnpm auth:bootstrap` (mots de passe via prompt, jamais Git).
+7. **E2E local** — `pnpm test:e2e` avec `E2E_NATHAN_PASSWORD` dans `apps/web/.env.local` (même mot de passe que le bootstrap Nathan).

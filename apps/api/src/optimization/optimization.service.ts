@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   optimizeDay,
   type NutritionGoals,
@@ -21,8 +21,8 @@ function toGoal(mode: GoalMode, value: unknown, tolerance: unknown) {
 @Injectable()
 export class OptimizationService {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly planner: PlannerService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(PlannerService) private readonly planner: PlannerService,
   ) {}
 
   async prefs(userId: string) {

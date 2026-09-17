@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Put, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { GOAL_MODES } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard';
@@ -27,8 +27,8 @@ const goalSchema = z.object({
 @UseGuards(InternalJwtGuard)
 export class NutritionController {
   constructor(
-    private readonly prisma: PrismaService,
-    private readonly planner: PlannerService,
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(PlannerService) private readonly planner: PlannerService,
   ) {}
 
   @Get('/nutrition-goals')
