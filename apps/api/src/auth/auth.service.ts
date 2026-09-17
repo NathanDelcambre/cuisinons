@@ -67,6 +67,12 @@ export class AuthService {
   async loginWithGoogle(input: { email: string; emailVerified: boolean; googleSub: string }) {
     const email = normalizeEmail(input.email);
     if (!input.emailVerified || !isAuthorizedEmail(email)) {
+      // Le client ne recoit qu'un message generique : la raison reste dans les logs.
+      console.warn('google refuse', {
+        email,
+        emailVerifie: input.emailVerified,
+        autorise: isAuthorizedEmail(email),
+      });
       throw new UnauthorizedException(GENERIC_LOGIN_ERROR);
     }
     const user = await this.prisma.user.upsert({

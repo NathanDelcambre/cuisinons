@@ -10,9 +10,19 @@ export async function GET(request: NextRequest) {
   const state = request.nextUrl.searchParams.get('state');
   const savedState = request.cookies.get('cuisinons_oauth_state')?.value;
   const verifier = request.cookies.get('cuisinons_oauth_verifier')?.value;
-  const fail = () => NextResponse.redirect(new URL('/login?error=1', env.NEXT_PUBLIC_APP_URL));
+  // La cause reste dans les logs serveur : l'utilisateur ne voit qu'une erreur generique.
+  const fail = (reason: string, detail?: unknown) => {
+    console.error('google callback rejete', reason, detail ?? '');
+    return NextResponse.redirect(new URL('/login?error=1', env.NEXT_PUBLIC_APP_URL));
+  };
   if (!code || !state || !savedState || !verifier || state !== savedState) {
-    return fail();
+    return fail('etat oauth invalide', {
+      code: Boolean(code),
+      state: Boolean(state),
+      cookieState: Boolean(savedState),
+      verifier: Boolean(verifier),
+      concordance: state === savedState,
+    });
   }
   const google = new Google(
     env.GOOGLE_CLIENT_ID,
@@ -25,13 +35,15 @@ export async function GET(request: NextRequest) {
     const userRes = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
       headers: { authorization: `Bearer ${accessToken}` },
     });
-    if (!userRes.ok) return fail();
+    if (!userRes.ok) return fail('userinfo google en echec', userRes.status);
     const profile = (await userRes.json()) as {
       sub?: string;
       email?: string;
       email_verified?: boolean;
     };
-    if (!profile.email || !profile.sub) return fail();
+    if (!profile.email || !profile.sub) {
+      return fail('profil google incomplet', { email: profile.email, sub: Boolean(profile.sub) });
+    }
     const login = await nestWithKey('/internal/auth/google', {
       method: 'POST',
       body: JSON.stringify({
@@ -40,8 +52,17 @@ export async function GET(request: NextRequest) {
         googleSub: profile.sub,
       }),
     });
-    const data = (await login.json()) as { token?: string };
-    if (!login.ok || !data.token) return fail();
+    const body = await login.text();
+    if (!login.ok) {
+      return fail('api interne refuse', {
+        status: login.status,
+        body: body.slice(0, 200),
+        email: profile.email,
+        emailVerifie: Boolean(profile.email_verified),
+      });
+    }
+    const data = JSON.parse(body) as { token?: string };
+    if (!data.token) return fail('api interne sans jeton', body.slice(0, 200));
     const response = NextResponse.redirect(new URL('/planning', env.NEXT_PUBLIC_APP_URL));
     response.cookies.set(
       sessionCookieName(),
@@ -51,7 +72,7 @@ export async function GET(request: NextRequest) {
     response.cookies.set('cuisinons_oauth_state', '', { ...cookieOptions(0), maxAge: 0 });
     response.cookies.set('cuisinons_oauth_verifier', '', { ...cookieOptions(0), maxAge: 0 });
     return response;
-  } catch {
-    return fail();
+  } catch (error) {
+    return fail('exception', error instanceof Error ? error.message : error);
   }
 }
