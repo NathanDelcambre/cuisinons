@@ -4,11 +4,13 @@ Ne jamais passer sur un plan payant.
 
 ## Neon PostgreSQL Free
 
-1. Créer un projet Neon Free.
-2. Copier l’URL pooled (`DATABASE_URL`) et l’URL directe (`DIRECT_URL`).
-3. `pnpm db:migrate:deploy` avec `DATABASE_URL` de production.
-4. `pnpm db:import-ciqual` une fois (pas à chaque boot).
-5. `pnpm auth:bootstrap` pour poser les mots de passe (jamais dans Git).
+Projet lié : `frosty-lab-38361236` (branche `production`, région `aws-eu-west-2`). Compte CLI : `nathandelcambre`.
+
+Le dépôt contient `.neon` + `neon.ts` (`defineConfig({})` — Postgres seulement, pas Better Auth). Les URLs de prod sont dans `.env.production.local` (gitignored). Le `.env` local reste sur Docker `localhost:55432`.
+
+Déjà fait : `prisma migrate deploy`, seed, import Ciqual 2025 (3483 aliments), `auth:bootstrap`.
+
+Pour Vercel API, coller `DATABASE_URL` (pooled, host `-pooler`) et `DIRECT_URL` (direct) depuis `neon connection-string production --pooled` / sans `--pooled`.
 
 ## Vercel — web (Next.js)
 
@@ -43,14 +45,12 @@ Toujours `prisma migrate deploy`. Jamais `prisma db push` en production.
 
 ## Actions manuelles restantes
 
-CLI Vercel absente d’une session authentifiée, Neon non provisionné, Google OAuth sans identifiants. Ne pas inventer de secrets. À faire une seule fois :
+Neon est prêt. CLI Vercel non authentifiée, Google OAuth sans identifiants. Ne pas inventer de secrets.
 
-1. **GitHub** — le dépôt privé est [https://github.com/Hexachip/cuisinons](https://github.com/Hexachip/cuisinons). Transférer vers le compte GitHub personnel (l’e-mail `nathan.delcambre@gmail.com` n’est pas un login GitHub).
-2. **Neon Free** — créer un projet, copier `DATABASE_URL` (pooled) et `DIRECT_URL` (direct).
-3. **Vercel — deux projets gratuits**
+1. **GitHub** — dépôt privé [https://github.com/NathanDelcambre/cuisinons](https://github.com/NathanDelcambre/cuisinons).
+2. **Vercel — deux projets gratuits**
    - Web : racine `apps/web`, framework Next.js.
    - API : racine `apps/api`, entrée `api/index.ts`.
-4. **Variables** — coller celles listées ci-dessus (secrets ≥ 32 caractères, jamais ceux du `.env` local).
-5. **Google Cloud** — OAuth Web, origines et callbacks ci-dessus.
-6. **Données prod** — `pnpm db:migrate:deploy`, `pnpm db:import-ciqual`, `pnpm auth:bootstrap` (mots de passe via prompt, jamais Git).
-7. **E2E local** — `pnpm test:e2e` avec `E2E_NATHAN_PASSWORD` dans `apps/web/.env.local` (même mot de passe que le bootstrap Nathan).
+3. **Variables** — coller celles listées ci-dessus. Pour l’API : `DATABASE_URL` pooled Neon + `DIRECT_URL` directe.
+4. **Google Cloud** — OAuth Web, origines et callbacks ci-dessus.
+5. **E2E local** — `pnpm test:e2e` avec `E2E_NATHAN_PASSWORD` dans `apps/web/.env.local`.

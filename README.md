@@ -51,7 +51,7 @@ Voir [docs/security.md](docs/security.md). Cookies HttpOnly, CSRF, whitelist ser
 
 ## Dépôt
 
-Le code est sur le dépôt GitHub privé [Hexachip/cuisinons](https://github.com/Hexachip/cuisinons) (compte `gh` authentifié : Hexachip). Le login GitHub `nathan.delcambre` n’existe pas ; pour le transférer vers le compte GitHub lié à `nathan.delcambre@gmail.com`, se reconnecter avec ce compte puis transférer le dépôt.
+Le code est sur le dépôt GitHub privé [NathanDelcambre/cuisinons](https://github.com/NathanDelcambre/cuisinons).
 
 ## Limitations connues
 
