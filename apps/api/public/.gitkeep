@@ -1,0 +1,3 @@
+L'API ne sert aucun fichier statique, mais Vercel exige un dossier de sortie
+(outputDirectory dans vercel.json). Ce dossier reste vide volontairement :
+tout le trafic est réécrit vers la fonction api/index.ts.
