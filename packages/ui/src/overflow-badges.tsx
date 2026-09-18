@@ -29,7 +29,7 @@ export function OverflowBadges({
     if (!host || !row) return;
 
     const update = () => {
-      const chips = [...row.querySelectorAll<HTMLElement>('[data-overflow-item]')];
+      const chips = Array.from(row.querySelectorAll<HTMLElement>('[data-overflow-item]'));
       const plus = row.querySelector<HTMLElement>('[data-overflow-more]');
       const max = host.clientWidth;
       if (max <= 0) return;
