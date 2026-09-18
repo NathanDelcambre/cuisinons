@@ -262,15 +262,18 @@ function RecipeModalBody({
       <div className="space-y-6 px-5 py-5 sm:px-6">
         <header className="pr-12">
           <p className="flex items-center gap-2 text-sm text-ink-500">
-            <Avatar
-              name={data.author.displayName}
-              src={data.author.email ? avatarUrlForEmail(data.author.email) : null}
-              className="size-6 rounded-full text-[10px]"
-            />
-            Proposé par {data.author.displayName}
             {data.source === 'CATALOG' ? (
               <Badge tone="sage">{RECIPE_SOURCE_LABELS.CATALOG}</Badge>
-            ) : null}
+            ) : (
+              <>
+                <Avatar
+                  name={data.author.displayName}
+                  src={data.author.email ? avatarUrlForEmail(data.author.email) : null}
+                  className="size-6 rounded-full text-[10px]"
+                />
+                Proposé par {data.author.displayName}
+              </>
+            )}
           </p>
           <h2 className="mt-1 font-display text-[1.65rem] font-semibold leading-tight tracking-[-0.03em] text-ink-900">
             {data.name}

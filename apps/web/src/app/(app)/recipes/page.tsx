@@ -324,11 +324,13 @@ function RecipesInner() {
                     <Rating average={recipe.rating.average} count={recipe.rating.count} />
                   </div>
                   <p className="mt-1 flex min-w-0 items-center gap-2 truncate text-sm text-ink-500">
-                    <Avatar
-                      name={recipe.author.displayName}
-                      src={recipe.author.email ? avatarUrlForEmail(recipe.author.email) : null}
-                      className="size-5 rounded-full text-[9px]"
-                    />
+                    {recipe.source === 'CATALOG' ? null : (
+                      <Avatar
+                        name={recipe.author.displayName}
+                        src={recipe.author.email ? avatarUrlForEmail(recipe.author.email) : null}
+                        className="size-5 rounded-full text-[9px]"
+                      />
+                    )}
                     <span className="truncate">
                       {recipe.source === 'CATALOG'
                         ? RECIPE_SOURCE_LABELS.CATALOG
