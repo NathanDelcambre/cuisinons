@@ -130,8 +130,14 @@ export class RecipesService {
     basis?: 'serving' | '100g';
     equipment?: string;
     slot?: 'BREAKFAST' | 'LUNCH' | 'SNACK' | 'DINNER';
+    view?: 'mine' | 'ideas';
   }) {
     const where: Prisma.RecipeWhereInput = { status: 'PUBLISHED' };
+    if (input.view === 'ideas') {
+      where.id = { startsWith: 'official-h' };
+    } else if (input.view === 'mine') {
+      where.NOT = { id: { startsWith: 'official-h' } };
+    }
     if (input.q) {
       const needle = { contains: input.q, mode: 'insensitive' as const };
       where.OR = [

@@ -13,11 +13,11 @@ export const SLOT_CHROME: Record<
 > = {
   BREAKFAST: {
     icon: Sunrise,
-    border: 'border-gold-400/80 hover:border-gold-500',
-    tint: 'bg-gold-200/55 hover:bg-gold-200/80',
-    iconClass: 'bg-gold-300 text-gold-500',
+    border: 'border-gold-300/65 hover:border-gold-400',
+    tint: 'bg-gold-200/22 hover:bg-gold-200/40',
+    iconClass: 'bg-gold-200/75 text-gold-500',
     labelClass: 'text-gold-500',
-    rail: 'border-l-[3px] border-l-gold-400',
+    rail: 'border-l-[3px] border-l-gold-300',
   },
   LUNCH: {
     icon: Sun,
@@ -71,7 +71,7 @@ export function SlotAddMenu({
   variant: 'empty' | 'plus';
   pending?: boolean;
   onChooseRecipe: () => void;
-  onChooseKind: (kind: SpecialMealKind, options?: { onlyMe?: boolean }) => void;
+  onChooseKind: (kind: SpecialMealKind) => void;
 }) {
   const slotLabel = MEAL_SLOT_LABELS[slot];
   const chrome = SLOT_CHROME[slot];
@@ -86,7 +86,6 @@ export function SlotAddMenu({
   const [mounted, setMounted] = useState(false);
   const [pos, setPos] = useState<MenuPos | null>(null);
   const [highlighted, setHighlighted] = useState(0);
-  const [onlyMe, setOnlyMe] = useState(false);
 
   const updatePosition = useCallback(() => {
     const trigger = triggerRef.current;
@@ -155,10 +154,8 @@ export function SlotAddMenu({
   }
 
   function chooseKind(kind: SpecialMealKind) {
-    const scoped = onlyMe;
     close();
-    setOnlyMe(false);
-    onChooseKind(kind, { onlyMe: scoped });
+    onChooseKind(kind);
   }
 
   function moveHighlight(delta: number) {
@@ -329,15 +326,6 @@ export function SlotAddMenu({
                         </button>
                       );
                     })}
-                    <label className="mt-1 flex min-h-10 cursor-pointer items-center gap-2.5 rounded-xl px-3 text-sm text-ink-600">
-                      <input
-                        type="checkbox"
-                        className="size-4"
-                        checked={onlyMe}
-                        onChange={(e) => setOnlyMe(e.target.checked)}
-                      />
-                      Pour moi seulement
-                    </label>
                   </div>
                 </motion.div>
               ) : null}

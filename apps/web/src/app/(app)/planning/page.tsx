@@ -3,7 +3,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { addDays, differenceInCalendarDays, format, isToday, startOfWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Carrot, Check, ChevronLeft, ChevronRight, Clock, CookingPot, RefreshCw, Sparkles, Trash2, UtensilsCrossed, type LucideIcon } from 'lucide-react';
 import {
   Badge,
@@ -29,7 +30,6 @@ import {
   type MealSlot,
 } from '@cuisinons/shared';
 import { AddMealDialog } from '@/components/add-meal-dialog';
-import { IngredientIcon } from '@/components/ingredient-icon';
 import { PlannedMealModal } from '@/components/planned-meal-modal';
 import { SlotAddMenu, SLOT_CHROME, type SpecialMealKind } from '@/components/slot-add-menu';
 import { OptimizePanel } from '@/components/optimize-panel';
@@ -118,7 +118,7 @@ export default function PlanningPage() {
   });
 
   const addKind = useMutation({
-    mutationFn: async (input: { date: string; slot: MealSlot; kind: SpecialMealKind; onlyMe?: boolean }) => {
+    mutationFn: async (input: { date: string; slot: MealSlot; kind: SpecialMealKind }) => {
       const users = await apiJson<Array<{ id: string }>>('/api/bff/users');
       return apiJson('/api/bff/planner/items', {
         method: 'POST',
@@ -128,7 +128,7 @@ export default function PlanningPage() {
           kind: input.kind,
           portions: users.map((u) => ({
             userId: u.id,
-            portions: input.onlyMe ? (u.id === user?.id ? 1 : 0) : 1,
+            portions: 1,
           })),
         }),
       });
@@ -192,7 +192,13 @@ export default function PlanningPage() {
       <PageHeader
         eyebrow={
           <span className="inline-flex items-center gap-2">
-            <IngredientIcon bare src="/ingredients/pomme.png" className="size-6" />
+            <img
+              src="/brand/panier-fruits.png"
+              alt=""
+              width={24}
+              height={24}
+              className="size-6 shrink-0 object-contain"
+            />
             Bonjour {user?.displayName ?? ''}
           </span>
         }
@@ -300,7 +306,7 @@ export default function PlanningPage() {
                 selected={index === selectedIndex}
                 onSelect={() => setSelectedIndex(index)}
                 onAddRecipe={(slot) => setDialog({ date: iso(day), slot })}
-                onAddKind={(slot, kind, onlyMe) => addKind.mutate({ date: iso(day), slot, kind, onlyMe })}
+                onAddKind={(slot, kind) => addKind.mutate({ date: iso(day), slot, kind })}
                 onOpenItem={setDetail}
                 onChangeRecipe={(item, scope) =>
                   setDialog({
@@ -404,7 +410,7 @@ function DayCard({
   selected: boolean;
   onSelect?: () => void;
   onAddRecipe: (slot: MealSlot) => void;
-  onAddKind: (slot: MealSlot, kind: SpecialMealKind, onlyMe?: boolean) => void;
+  onAddKind: (slot: MealSlot, kind: SpecialMealKind) => void;
   onOpenItem: (item: MealItem) => void;
   onChangeRecipe: (item: MealItem, scope?: 'me' | 'all') => void;
   onRemove: (id: string, scope?: 'me' | 'all') => void;
@@ -449,7 +455,7 @@ function DayCard({
             userId={userId}
             targets={targets}
             onAddRecipe={() => onAddRecipe(slot)}
-            onAddKind={(kind, options) => onAddKind(slot, kind, options?.onlyMe)}
+            onAddKind={(kind) => onAddKind(slot, kind)}
             onOpenItem={onOpenItem}
             onChangeRecipe={onChangeRecipe}
             onRemove={onRemove}
@@ -478,7 +484,7 @@ function SlotSection({
   userId?: string;
   targets: MacroTargets;
   onAddRecipe: () => void;
-  onAddKind: (kind: SpecialMealKind, options?: { onlyMe?: boolean }) => void;
+  onAddKind: (kind: SpecialMealKind) => void;
   onOpenItem: (item: MealItem) => void;
   onChangeRecipe: (item: MealItem, scope?: 'me' | 'all') => void;
   onRemove: (id: string, scope?: 'me' | 'all') => void;
@@ -506,32 +512,17 @@ function SlotSection({
             const kind = item.kind ?? 'RECIPE';
             const recipe = kind === 'RECIPE' ? item.recipe : null;
             const title = recipe?.name ?? MEAL_KIND_LABELS[kind];
-            const photoUrl = recipe?.photoUrl ?? null;
             return (
               <li
                 key={item.id}
                 className={cn(
-                  'group relative flex min-h-[5.25rem] flex-1 items-stretch overflow-hidden rounded-xl bg-white/75 pr-2 shadow-[0_0_10px_rgba(28,25,23,0.08),0_2px_8px_rgba(28,25,23,0.08)]',
-                  photoUrl ? 'py-0 pl-0' : 'items-center py-2.5 pl-3.5',
+                  'group relative flex min-h-[5.25rem] flex-1 items-center overflow-hidden rounded-xl bg-white/75 py-2.5 pl-3.5 pr-2 shadow-[0_0_10px_rgba(28,25,23,0.08),0_2px_8px_rgba(28,25,23,0.08)]',
                   validated
                     ? 'border border-sage-500 border-l-[3px] border-l-sage-500'
                     : cn('border border-white/70', chrome.rail),
                 )}
               >
-                {photoUrl ? (
-                  <img
-                    src={photoUrl}
-                    alt=""
-                    className="w-[4.5rem] shrink-0 self-stretch object-cover"
-                    decoding="async"
-                  />
-                ) : null}
-                <div
-                  className={cn(
-                    'flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2.5',
-                    photoUrl && 'py-2.5 pl-3',
-                  )}
-                >
+                <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2.5">
                   <button
                     type="button"
                     onClick={() => onOpenItem(item)}
@@ -656,21 +647,110 @@ function ActionMenu({
   hoverClass: string;
   children: ReactNode;
 }) {
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top?: number; bottom?: number; left: number; width: number } | null>(
+    null,
+  );
+
+  const updatePosition = useCallback(() => {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    const gap = 8;
+    const width = 240;
+    const viewportPad = 12;
+    const spaceBelow = window.innerHeight - rect.bottom - viewportPad;
+    const menuHeight = 96;
+    const placeAbove = spaceBelow < menuHeight && rect.top - viewportPad > menuHeight;
+    let left = rect.right - width;
+    if (left < viewportPad) left = viewportPad;
+    if (left + width > window.innerWidth - viewportPad) {
+      left = window.innerWidth - viewportPad - width;
+    }
+    setPos({
+      top: placeAbove ? undefined : rect.bottom + gap,
+      bottom: placeAbove ? window.innerHeight - rect.top + gap : undefined,
+      left,
+      width,
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    updatePosition();
+  }, [open, updatePosition]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (triggerRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const onKey = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [open, updatePosition]);
+
+  function onTriggerKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      setOpen(true);
+    }
+  }
+
   return (
-    <details className="relative">
-      <summary
+    <>
+      <button
+        ref={triggerRef}
+        type="button"
+        aria-label={label}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+        onKeyDown={onTriggerKeyDown}
         className={cn(
-          'flex size-8 cursor-pointer list-none items-center justify-center rounded-lg text-ink-400',
+          'flex size-8 cursor-pointer items-center justify-center rounded-lg text-ink-400 outline-none focus:outline-none focus-visible:outline-none',
           hoverClass,
         )}
       >
-        <span className="sr-only">{label}</span>
         <Icon className="size-4" aria-hidden />
-      </summary>
-      <div className="glass-raised absolute right-0 z-40 mt-1 w-52 rounded-xl p-1 shadow-lift">
-        {children}
-      </div>
-    </details>
+      </button>
+      {open && pos
+        ? createPortal(
+            <div
+              ref={menuRef}
+              role="menu"
+              aria-label={label}
+              onClick={() => setOpen(false)}
+              style={{
+                position: 'fixed',
+                top: pos.top,
+                bottom: pos.bottom,
+                left: pos.left,
+                width: pos.width,
+                zIndex: 70,
+              }}
+              className="rounded-xl border border-ink-200 bg-white p-1 shadow-lift outline-none [&_button]:outline-none [&_button]:focus-visible:outline-none [&_button]:focus-visible:bg-ink-100"
+            >
+              {children}
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
   );
 }
 

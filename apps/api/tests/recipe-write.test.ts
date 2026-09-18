@@ -58,4 +58,8 @@ describe('photo publique', () => {
   it('sert le PNG officiel même si la base pointe encore vers un SVG', () => {
     expect(publicRecipePhotoUrl('official-h01', '/recipes/oven.svg', new Date())).toBe('/recipes/official-h01.png');
   });
+
+  it('sert le PNG d’une idée healthy', () => {
+    expect(publicRecipePhotoUrl('official-h42', null, new Date())).toBe('/recipes/official-h42.png');
+  });
 });

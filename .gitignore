@@ -25,3 +25,4 @@ Thumbs.db
 !.vscode/extensions.json
 .agents
 .env.production.local
+.env*

@@ -107,9 +107,35 @@ async function main() {
 
   await seedOfficialRecipes(jade.id);
 
-  await prisma.mealItem.deleteMany({ where: { recipeId: { in: ['seed-poulet-curry', 'seed-skyr'] } } });
-  await prisma.recipe.deleteMany({ where: { id: { in: ['seed-poulet-curry', 'seed-skyr'] } } });
+  await prisma.recipe.updateMany({
+    where: { id: 'seed-poulet-curry', photoUrl: null },
+    data: { photoUrl: '/recipes/seed-poulet-curry.png' },
+  });
+  await prisma.recipe.updateMany({
+    where: { id: 'seed-skyr', photoUrl: null },
+    data: { photoUrl: '/recipes/seed-skyr.png' },
+  });
+
   const demoCodes = [900001, 900002, 900003, 900004, 900005, 900006];
+  const demoToCiqual: Array<[number, number]> = [
+    [900001, 36017],
+    [900002, 9104],
+    [900003, 17270],
+    [900004, 20034],
+    [900005, 19410],
+    [900006, 19663],
+  ];
+  for (const [fromCode, toCode] of demoToCiqual) {
+    const [from, to] = await Promise.all([
+      prisma.ingredient.findUnique({ where: { ciqualCode: fromCode }, select: { id: true } }),
+      prisma.ingredient.findUnique({ where: { ciqualCode: toCode }, select: { id: true } }),
+    ]);
+    if (!from || !to) continue;
+    await prisma.recipeIngredient.updateMany({
+      where: { ingredientId: from.id },
+      data: { ingredientId: to.id },
+    });
+  }
   await prisma.pantryItem.deleteMany({ where: { ingredient: { ciqualCode: { in: demoCodes } } } });
   await prisma.shoppingListItem.deleteMany({ where: { ingredient: { ciqualCode: { in: demoCodes } } } });
   await prisma.userIngredientFavorite.deleteMany({ where: { ingredient: { ciqualCode: { in: demoCodes } } } });

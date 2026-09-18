@@ -6,13 +6,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { ChefHat, Plus, Sparkles, Star } from 'lucide-react';
 import {
-  Badge,
   Button,
   CardLink,
   EmptyState,
+  OverflowBadges,
   PageHeader,
   Select,
   SearchInput,
+  Segmented,
   Skeleton,
   Switch,
   buttonClasses,
@@ -23,7 +24,7 @@ import { RecipeModal } from '@/components/recipe-modal';
 import { SuggestDishModal } from '@/components/suggest-dish-modal';
 import { Avatar } from '@/components/avatar';
 import { MacroIcon } from '@/components/macro-icon';
-import { avatarUrlForEmail, RECIPE_SOURCE_LABELS } from '@cuisinons/shared';
+import { avatarUrlForEmail, RECIPE_SOURCE_LABELS, type RecipeListView } from '@cuisinons/shared';
 
 type Macros = { kcal: number; protein: number; carbs: number; fat: number };
 
@@ -57,6 +58,7 @@ type Filters = {
   tag: string;
   sort: string;
   basis: 'serving' | '100g';
+  view: RecipeListView;
 };
 
 function filtersFromSearch(params: { get(name: string): string | null }): Filters {
@@ -65,6 +67,7 @@ function filtersFromSearch(params: { get(name: string): string | null }): Filter
     tag: params.get('tag') ?? '',
     sort: params.get('sort') ?? 'date',
     basis: params.get('basis') === '100g' ? '100g' : 'serving',
+    view: params.get('vue') === 'idees' ? 'ideas' : 'mine',
   };
 }
 
@@ -77,8 +80,9 @@ function RecipesInner() {
   const [filters, setFilters] = useState(fromUrl);
   const [draft, setDraft] = useState(fromUrl.q);
   const queryClient = useQueryClient();
-  const { q, tag, sort, basis } = filters;
+  const { q, tag, sort, basis, view } = filters;
   const per100g = basis === '100g';
+  const ideas = view === 'ideas';
 
   useEffect(() => {
     function onPopState() {
@@ -103,10 +107,10 @@ function RecipesInner() {
   }, [params, router]);
 
   const recipes = useQuery({
-    queryKey: ['recipes', q, tag, sort, basis],
+    queryKey: ['recipes', q, tag, sort, basis, view],
     queryFn: () =>
       apiJson<Recipe[]>(
-        `/api/bff/recipes?q=${encodeURIComponent(q)}&tag=${encodeURIComponent(tag)}&sort=${sort}&basis=${basis}`,
+        `/api/bff/recipes?q=${encodeURIComponent(q)}&tag=${encodeURIComponent(tag)}&sort=${sort}&basis=${basis}&view=${view}`,
       ),
   });
   const tags = useQuery({
@@ -123,6 +127,7 @@ function RecipesInner() {
         tag: merged.tag,
         sort: merged.sort === 'date' ? '' : merged.sort,
         basis: merged.basis === 'serving' ? '' : merged.basis,
+        vue: merged.view === 'ideas' ? 'idees' : '',
       };
       for (const [k, v] of Object.entries(encoded)) {
         if (v) sp.set(k, v);
@@ -192,7 +197,13 @@ function RecipesInner() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={list.length > 0 ? `${String(list.length)} recette${list.length > 1 ? 's' : ''}` : undefined}
+        eyebrow={
+          list.length > 0
+            ? ideas
+              ? `${String(list.length)} idée${list.length > 1 ? 's' : ''}`
+              : `${String(list.length)} recette${list.length > 1 ? 's' : ''}`
+            : undefined
+        }
         title="Recettes"
         actions={
           <div className="flex flex-wrap items-center gap-2">
@@ -250,6 +261,16 @@ function RecipesInner() {
             className="gap-2.5"
           />
         </div>
+        <Segmented
+          label="Vue des recettes"
+          className="h-11 shrink-0 self-start md:ml-auto"
+          value={view}
+          onChange={(next) => update({ view: next })}
+          options={[
+            { value: 'mine', label: 'Mes recettes' },
+            { value: 'ideas', label: 'Idées' },
+          ]}
+        />
       </form>
 
       {recipes.isLoading ? (
@@ -261,11 +282,21 @@ function RecipesInner() {
       ) : list.length === 0 ? (
         <EmptyState
           icon={ChefHat}
-          title={q || tag ? 'Aucune recette ne correspond' : 'Aucune recette pour l’instant'}
+          title={
+            q || tag
+              ? ideas
+                ? 'Aucune idée ne correspond'
+                : 'Aucune recette ne correspond'
+              : ideas
+                ? 'Pas encore d’idées'
+                : 'Aucune recette pour l’instant'
+          }
           description={
             q || tag
               ? 'Essaie un autre mot-clé ou retire le filtre de tag.'
-              : 'Crée la première recette, ou laisse-nous en proposer une avec tes réserves.'
+              : ideas
+                ? 'Les idées healthy apparaîtront ici.'
+                : 'Crée la première recette, ou laisse-nous en proposer une avec tes réserves.'
           }
           action={
             <div className="flex flex-wrap items-center justify-center gap-2">
@@ -331,14 +362,10 @@ function RecipesInner() {
                     per100g={per100g}
                   />
 
-                  <div className="mt-4 flex h-7 flex-nowrap items-center gap-1.5 overflow-hidden">
-                    {recipe.tags.slice(0, 3).map((t) => (
-                      <Badge key={t.tag.slug} tone="sage">
-                        {t.tag.label}
-                      </Badge>
-                    ))}
-                    {recipe.tags.length > 3 ? <Badge>+{recipe.tags.length - 3}</Badge> : null}
-                  </div>
+                  <OverflowBadges
+                    className="mt-4"
+                    items={recipe.tags.map((t) => ({ key: t.tag.slug, label: t.tag.label }))}
+                  />
                   </div>
                 </CardLink>
               </button>

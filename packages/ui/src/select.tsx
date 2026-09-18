@@ -223,7 +223,7 @@ export function Select<T extends string>({
         onClick={() => !disabled && setOpen((current) => !current)}
         onKeyDown={onKeyDown}
         className={cn(
-          'flex h-11 min-h-11 min-w-0 w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/80 bg-white/75 pr-3 text-left text-sm text-ink-900 shadow-soft transition duration-200 ease-out-soft hover:bg-white/90 focus:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500 disabled:cursor-not-allowed disabled:opacity-55',
+          'flex h-11 min-h-11 min-w-0 w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-ink-200 bg-ink-100 pr-3 text-left text-sm text-ink-900 transition duration-200 ease-out-soft hover:border-ink-300 hover:bg-white focus:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500 disabled:cursor-not-allowed disabled:opacity-55',
           selected?.icon ? 'pl-3' : 'pl-4',
           open && 'bg-white ring-2 ring-sage-300',
           className,

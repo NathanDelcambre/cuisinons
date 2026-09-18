@@ -121,6 +121,11 @@ export function RecipeModal({
         setServings(null);
         onClose();
       }}
+      footerClassName={
+        data && !planning && plan
+          ? 'flex-nowrap gap-1.5 px-3 py-3 sm:gap-2 sm:px-6 sm:py-4'
+          : undefined
+      }
       footer={
         data ? (
           planning ? (
@@ -131,18 +136,40 @@ export function RecipeModal({
             />
           ) : (
             <>
-              <Link href={routes.recetteModifier(data.id)} className={buttonClasses({ variant: 'glass' })}>
-                <Pencil className="size-4" aria-hidden />
-                Modifier
+              <Link
+                href={routes.recetteModifier(data.id)}
+                aria-label={plan ? 'Modifier' : undefined}
+                title={plan ? 'Modifier' : undefined}
+                className={buttonClasses({
+                  variant: 'glass',
+                  size: 'sm',
+                  className: plan
+                    ? 'size-9 shrink-0 p-0 sm:size-11'
+                    : undefined,
+                })}
+              >
+                <Pencil className="size-3.5 sm:size-4" aria-hidden />
+                {plan ? null : 'Modifier'}
               </Link>
               {plan ? (
                 <>
                   {plan.validated ? (
-                    <Button variant="glass" loading={plan.loading} onClick={plan.onCancelValidation}>
+                    <Button
+                      variant="glass"
+                      size="sm"
+                      className="shrink-0 sm:h-11 sm:min-h-11 sm:px-5 sm:text-sm"
+                      loading={plan.loading}
+                      onClick={plan.onCancelValidation}
+                    >
                       Annuler la validation
                     </Button>
                   ) : null}
-                  <Button loading={plan.loading} onClick={plan.onChangeRecipe}>
+                  <Button
+                    size="sm"
+                    className="shrink-0 sm:h-11 sm:min-h-11 sm:px-5 sm:text-sm"
+                    loading={plan.loading}
+                    onClick={plan.onChangeRecipe}
+                  >
                     Changer de recette
                   </Button>
                 </>
@@ -531,7 +558,7 @@ function AddToPlan({
         value={date}
         aria-label="Date"
         onChange={(e) => setDate(e.target.value)}
-        className="h-11 rounded-xl border border-white/80 bg-white/75 px-4 text-sm text-ink-900 shadow-soft"
+        className="h-11 rounded-xl border border-ink-200 bg-ink-100 px-4 text-sm text-ink-900 hover:border-ink-300 hover:bg-white focus:border-sage-300 focus:bg-white"
       />
       <Select
         value={slot}

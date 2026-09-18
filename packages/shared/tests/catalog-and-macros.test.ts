@@ -3,7 +3,7 @@ import { parseStepMentions, insertIngredientToken, scaleMentionQuantity, mention
 import { compareRecipesForSlot } from '../src/planner/slot-tags.js';
 import { weekMacroAverages } from '../src/nutrition/planned-consumed.js';
 import { aggregateUserStats } from '../src/nutrition/stats.js';
-import { buildHealthyOfficialSpecs, HEALTHY_OFFICIAL_COUNT, OFFICIAL_RECIPE_COUNT, HANDCRAFTED_OFFICIAL_COUNT } from '../src/suggestions/official-healthy.js';
+import { buildHealthyOfficialSpecs, HEALTHY_OFFICIAL_COUNT, OFFICIAL_RECIPE_COUNT, HANDCRAFTED_OFFICIAL_COUNT, IDEAS_RECIPE_IDS, IDEAS_RECIPE_COUNT, isIdeasRecipeId } from '../src/suggestions/official-healthy.js';
 import { HEALTHY_RECIPES } from '../src/suggestions/catalog.js';
 import { DISH_KINDS } from '../src/suggestions/kinds.js';
 import { categoryIconUrl } from '../src/ciqual/category-icons.js';
@@ -127,6 +127,11 @@ describe('catalogue healthy officiel', () => {
     expect(specs.every((s) => DISH_KINDS.some((kind) => s.tagSlugs.includes(kind)))).toBe(true);
     expect(specs.every((s) => s.steps.length >= 2)).toBe(true);
     expect(OFFICIAL_RECIPE_COUNT).toBe(122);
+    expect(IDEAS_RECIPE_IDS).toHaveLength(100);
+    expect(IDEAS_RECIPE_COUNT).toBe(100);
+    expect(IDEAS_RECIPE_IDS.every((id) => id.startsWith('official-h'))).toBe(true);
+    expect(isIdeasRecipeId('official-h01')).toBe(true);
+    expect(isIdeasRecipeId('official-vinaigrette-crudites')).toBe(false);
     expect(specs.every((s) => s.servings === 2)).toBe(true);
     const meatKeys = new Set([
       'chicken',

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Put, Query, StreamableFile, UseGuards } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import { z } from 'zod';
-import { MEAL_SLOTS } from '@cuisinons/shared';
+import { MEAL_SLOTS, RECIPE_LIST_VIEWS, type RecipeListView } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthUser } from '../auth/internal-jwt.guard.js';
@@ -21,11 +21,15 @@ export class RecipesController {
     @Query('basis') basis?: 'serving' | '100g',
     @Query('equipment') equipment?: string,
     @Query('slot') slot?: string,
+    @Query('view') view?: string,
   ) {
     const parsedSlot = MEAL_SLOTS.includes(slot as (typeof MEAL_SLOTS)[number])
       ? (slot as (typeof MEAL_SLOTS)[number])
       : undefined;
-    return this.recipes.list({ q, tag, sort, basis, equipment, slot: parsedSlot });
+    const parsedView = RECIPE_LIST_VIEWS.includes(view as RecipeListView)
+      ? (view as RecipeListView)
+      : undefined;
+    return this.recipes.list({ q, tag, sort, basis, equipment, slot: parsedSlot, view: parsedView });
   }
 
   @Post('/recipes')

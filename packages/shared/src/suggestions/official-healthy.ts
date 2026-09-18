@@ -532,3 +532,14 @@ export function buildHealthyOfficialSpecs(): OfficialHealthySpec[] {
 export const HEALTHY_OFFICIAL_COUNT = HEALTHY_RECIPES.length;
 export const HANDCRAFTED_OFFICIAL_COUNT = 22;
 export const OFFICIAL_RECIPE_COUNT = HANDCRAFTED_OFFICIAL_COUNT + HEALTHY_OFFICIAL_COUNT;
+
+/** Banque « Idées » : toutes les fiches healthy déjà photographiées. */
+export const IDEAS_RECIPE_IDS = HEALTHY_RECIPES.map((spec) => `official-${spec.id}`);
+export const IDEAS_RECIPE_COUNT = IDEAS_RECIPE_IDS.length;
+
+export const RECIPE_LIST_VIEWS = ['mine', 'ideas'] as const;
+export type RecipeListView = (typeof RECIPE_LIST_VIEWS)[number];
+
+export function isIdeasRecipeId(id: string): boolean {
+  return id.startsWith('official-h');
+}

@@ -12,7 +12,7 @@ import { cn } from './cn';
 import { IconButton } from './button';
 
 const control =
-  'w-full rounded-xl border border-white/80 bg-white/75 text-base text-ink-900 shadow-soft transition duration-200 ease-out-soft placeholder:text-ink-400 hover:bg-white/90 focus:bg-white disabled:opacity-55';
+  'w-full rounded-xl border border-ink-200 bg-ink-100 text-base text-ink-900 transition duration-200 ease-out-soft placeholder:text-ink-400 hover:border-ink-300 hover:bg-white focus:border-sage-300 focus:bg-white disabled:opacity-55';
 
 /** Etiquette, aide et message d'erreur relies au champ par aria-describedby. */
 export function Field({

@@ -22,6 +22,7 @@ export function Modal({
   children,
   className,
   bodyClassName,
+  footerClassName,
   size = 'md',
   chrome = 'default',
 }: {
@@ -33,6 +34,7 @@ export function Modal({
   children: ReactNode;
   className?: string;
   bodyClassName?: string;
+  footerClassName?: string;
   size?: 'md' | 'xl' | '2xl';
   /** `bare` : pas d’en-tête standard, pour une photo plein cadre ou un chrome custom. */
   chrome?: 'default' | 'bare';
@@ -120,6 +122,7 @@ export function Modal({
               <div
                 className={cn(
                   'flex w-full shrink-0 flex-wrap items-center justify-end gap-2 border-t border-white/70 bg-white/55 px-6 py-4',
+                  footerClassName,
                 )}
               >
                 {footer}

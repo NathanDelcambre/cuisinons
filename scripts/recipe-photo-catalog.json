@@ -608,5 +608,15 @@
     "id": "official-tartine-fromage-blanc-concombre",
     "name": "Tartine fromage blanc, concombre et chia",
     "en": "toasted wholemeal bread slices spread with herbed white cheese, topped with thin cucumber ribbons and chia seeds"
+  },
+  {
+    "id": "seed-skyr",
+    "name": "Skyr fruits rouges",
+    "en": "a ceramic bowl of thick white skyr yogurt topped with mixed red berries, strawberries, raspberries and redcurrants"
+  },
+  {
+    "id": "seed-poulet-curry",
+    "name": "Poulet curry express",
+    "en": "golden seared chicken strips in a light creamy yellow curry sauce with fluffy basmati rice"
   }
 ]

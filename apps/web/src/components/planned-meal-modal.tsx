@@ -70,15 +70,27 @@ export function PlannedMealModal({
       title={title}
       description={item ? `${MEAL_SLOT_LABELS[item.slot]} · ${when}` : undefined}
       onClose={onClose}
+      footerClassName="flex-nowrap gap-1.5 px-3 py-3 sm:gap-2 sm:px-6 sm:py-4"
       footer={
         item ? (
           <>
             {validated ? (
-              <Button variant="glass" loading={loading} onClick={onCancelValidation}>
+              <Button
+                variant="glass"
+                size="sm"
+                className="shrink-0 sm:h-11 sm:min-h-11 sm:px-5 sm:text-sm"
+                loading={loading}
+                onClick={onCancelValidation}
+              >
                 Annuler la validation
               </Button>
             ) : null}
-            <Button loading={loading} onClick={onChangeRecipe}>
+            <Button
+              size="sm"
+              className="shrink-0 sm:h-11 sm:min-h-11 sm:px-5 sm:text-sm"
+              loading={loading}
+              onClick={onChangeRecipe}
+            >
               Changer de recette
             </Button>
           </>

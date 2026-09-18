@@ -5,6 +5,7 @@ export { Button, IconButton, type ButtonProps } from './button';
 export { buttonClasses, type ButtonSize, type ButtonVariant } from './button-styles';
 export { Card, CardLink, Inset, Panel } from './surface';
 export { Badge, type BadgeTone } from './badge';
+export { OverflowBadges } from './overflow-badges';
 export { Chip } from './chip';
 export { Field, Input, SearchInput, Stepper, Textarea, type InputProps } from './field';
 export { Select, type SelectOption } from './select';

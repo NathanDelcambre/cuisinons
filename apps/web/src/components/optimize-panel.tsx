@@ -173,7 +173,7 @@ export function OptimizePanel({
               setDay(e.target.value);
               preview.reset();
             }}
-            className="mt-1.5 h-11 w-full rounded-xl border border-white/80 bg-white/75 px-4 text-sm"
+            className="mt-1.5 h-11 w-full rounded-xl border border-ink-200 bg-ink-100 px-4 text-sm hover:border-ink-300 hover:bg-white focus:border-sage-300 focus:bg-white"
           />
         </div>
       ) : null}
