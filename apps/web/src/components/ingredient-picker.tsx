@@ -119,13 +119,20 @@ export function IngredientPicker({
   }, [open, nextCursor, query, category, fetchPage, items.length]);
 
   return (
-    <Modal open={open} title="Choisir un ingrédient" onClose={onClose}>
+    <Modal
+      open={open}
+      title="Choisir un ingrédient"
+      onClose={onClose}
+      className="h-[min(88dvh,36rem)]"
+      bodyClassName="flex flex-col overflow-hidden"
+    >
       <SearchInput
         autoFocus
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Rechercher un ingrédient"
         aria-label="Rechercher un ingrédient"
+        className="focus-visible:outline-none"
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') {
             e.preventDefault();
@@ -143,7 +150,7 @@ export function IngredientPicker({
         }}
       />
 
-      <div className="-mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-2">
+      <div className="-mx-1 mt-3 shrink-0 flex gap-1.5 overflow-x-auto px-1 pb-2">
         {[{ value: '', label: 'Tous' }, ...UX_CATEGORIES.map((c) => ({ value: c, label: UX_CATEGORY_LABELS[c] }))].map(
           (option) => (
             <Chip
@@ -163,10 +170,10 @@ export function IngredientPicker({
           icon={Carrot}
           title="Aucun ingrédient"
           description="Change de catégorie ou essaie un autre mot-clé."
-          className="mt-2 py-10"
+          className="mt-1 min-h-0 flex-1 py-6"
         />
       ) : (
-        <ul ref={listRef} className="mt-1 max-h-72 space-y-1 overflow-y-auto">
+        <ul ref={listRef} className="mt-1 min-h-0 flex-1 space-y-1 overflow-y-auto">
           {items.map((item, index) => (
             <li key={item.id}>
               <button

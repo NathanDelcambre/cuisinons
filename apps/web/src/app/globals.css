@@ -175,6 +175,15 @@ body {
   outline-offset: 3px;
 }
 
+/* Les champs ont déjà un fond / ombre au focus : le contour sage se superpose
+   et décale le texte, surtout dans une barre de recherche autofocus. */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  outline-offset: 0;
+}
+
 /*
  * Tailwind v4 a change son preflight : les boutons recoivent `cursor: default`.
  * On retablit le pointeur sur tout ce qui declenche une action, une bonne fois

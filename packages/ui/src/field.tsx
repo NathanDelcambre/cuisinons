@@ -77,7 +77,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       <input
         ref={ref}
         className={cn(
-          'h-full min-w-0 flex-1 bg-transparent text-sm text-ink-900 outline-none placeholder:text-ink-400',
+          'h-full min-w-0 flex-1 bg-transparent text-sm text-ink-900 outline-none focus-visible:outline-none placeholder:text-ink-400',
           '[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
           className,
         )}

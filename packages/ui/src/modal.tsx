@@ -21,6 +21,7 @@ export function Modal({
   footer,
   children,
   className,
+  bodyClassName,
   size = 'md',
   chrome = 'default',
 }: {
@@ -31,6 +32,7 @@ export function Modal({
   footer?: ReactNode;
   children: ReactNode;
   className?: string;
+  bodyClassName?: string;
   size?: 'md' | 'xl' | '2xl';
   /** `bare` : pas d’en-tête standard, pour une photo plein cadre ou un chrome custom. */
   chrome?: 'default' | 'bare';
@@ -105,7 +107,13 @@ export function Modal({
                 <IconButton icon={X} label="Fermer" size="sm" variant="ghost" onClick={onClose} />
               </div>
             ) : null}
-            <div className={cn('min-h-0 flex-1 overflow-y-auto', chrome === 'default' && 'px-6 pt-5 pb-6')}>
+            <div
+              className={cn(
+                'min-h-0 flex-1 overflow-y-auto',
+                chrome === 'default' && 'px-6 pt-5 pb-6',
+                bodyClassName,
+              )}
+            >
               {children}
             </div>
             {footer ? (
