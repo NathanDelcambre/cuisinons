@@ -273,7 +273,11 @@ export default function ShoppingPage() {
       <QuantityDialog
         ingredient={picked}
         pending={add.isPending}
-        onClose={() => setPicked(null)}
+        error={add.error instanceof Error ? add.error.message : null}
+        onClose={() => {
+          add.reset();
+          setPicked(null);
+        }}
         onConfirm={({ quantity, unit }) => {
           if (picked) add.mutate({ ingredientId: picked.id, quantity, unit });
         }}

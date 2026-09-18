@@ -152,7 +152,11 @@ export default function PantryPage() {
         ingredient={picked}
         withArea
         pending={add.isPending}
-        onClose={() => setPicked(null)}
+        error={add.error instanceof Error ? add.error.message : null}
+        onClose={() => {
+          add.reset();
+          setPicked(null);
+        }}
         onConfirm={({ quantity, unit, area }) => {
           if (picked) add.mutate({ ingredientId: picked.id, quantity, unit, area });
         }}

@@ -3,9 +3,11 @@ import { Google } from 'arctic';
 import { cookieOptions, sessionCookieName } from '@/lib/auth/cookies';
 import { nestWithKey } from '@/lib/auth/session';
 import { loadWebEnv } from '@/lib/env';
+import { canonicalAppOrigin } from '@/lib/auth/csrf';
 
 export async function GET(request: NextRequest) {
   const env = loadWebEnv();
+  const origin = canonicalAppOrigin(request.nextUrl.origin);
   const code = request.nextUrl.searchParams.get('code');
   const state = request.nextUrl.searchParams.get('state');
   const savedState = request.cookies.get('cuisinons_oauth_state')?.value;
@@ -13,7 +15,7 @@ export async function GET(request: NextRequest) {
   // La cause reste dans les logs serveur : l'utilisateur ne voit qu'une erreur generique.
   const fail = (reason: string, detail?: unknown) => {
     console.error('google callback rejete', reason, detail ?? '');
-    return NextResponse.redirect(new URL('/connexion?error=1', env.NEXT_PUBLIC_APP_URL));
+    return NextResponse.redirect(new URL('/connexion?error=1', origin));
   };
   if (!code || !state || !savedState || !verifier || state !== savedState) {
     return fail('etat oauth invalide', {
@@ -27,7 +29,7 @@ export async function GET(request: NextRequest) {
   const google = new Google(
     env.GOOGLE_CLIENT_ID,
     env.GOOGLE_CLIENT_SECRET,
-    `${env.NEXT_PUBLIC_APP_URL}/api/auth/google/callback`,
+    `${origin}/api/auth/google/callback`,
   );
   try {
     const tokens = await google.validateAuthorizationCode(code, verifier);
@@ -63,7 +65,7 @@ export async function GET(request: NextRequest) {
     }
     const data = JSON.parse(body) as { token?: string };
     if (!data.token) return fail('api interne sans jeton', body.slice(0, 200));
-    const response = NextResponse.redirect(new URL('/planning', env.NEXT_PUBLIC_APP_URL));
+    const response = NextResponse.redirect(new URL('/planning', origin));
     response.cookies.set(
       sessionCookieName(),
       data.token,

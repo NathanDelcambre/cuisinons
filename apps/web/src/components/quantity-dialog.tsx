@@ -34,12 +34,14 @@ export function QuantityDialog({
   ingredient,
   withArea = false,
   pending = false,
+  error = null,
   onConfirm,
   onClose,
 }: {
   ingredient: PickedIngredient | null;
   withArea?: boolean;
   pending?: boolean;
+  error?: string | null;
   onConfirm: (input: { quantity: number; unit: QuantityUnit; area?: StorageArea }) => void;
   onClose: () => void;
 }) {
@@ -98,6 +100,11 @@ export function QuantityDialog({
           <Field label="Rangement" className="sm:col-span-2">
             {({ id }) => <Select id={id} value={area} options={AREA_OPTIONS} onChange={setArea} />}
           </Field>
+        ) : null}
+        {error ? (
+          <p role="alert" className="text-sm font-medium text-tomato-500 sm:col-span-2">
+            {error}
+          </p>
         ) : null}
       </div>
     </Modal>
