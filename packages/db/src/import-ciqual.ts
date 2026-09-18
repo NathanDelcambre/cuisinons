@@ -123,7 +123,7 @@ export async function importCiqual(): Promise<{ count: number }> {
   });
 
   const codeIdx = findHeader(headers, [/^alim_code$/i, /code.?aliment/i]);
-  const nameIdx = findHeader(headers, [/^alim_nom_fr$/i, /(?<!grp_|ssgrp_|ssssgrp_)nom.?fr/i]);
+  const nameIdx = findHeader(headers, [/^alim_nom_fr$/i]);
   const groupIdx = findHeader(headers, [/^alim_grp_nom_fr$/i, /groupe/i]);
   const subIdx = findHeader(headers, [/^alim_ssgrp_nom_fr$/i, /sous.?groupe/i]);
   const subSubIdx = findHeader(headers, [/^alim_ssssgrp_nom_fr$/i]);
