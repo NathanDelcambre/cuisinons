@@ -39,4 +39,36 @@ export class OptimizationController {
     const { date } = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }).parse(body);
     return this.optimization.apply(user.id, date);
   }
+
+  @Post('/optimization/week/preview')
+  previewWeek(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    const parsed = z
+      .object({
+        from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        mode: z.enum(['fill', 'replace']),
+      })
+      .parse(body);
+    return this.optimization.previewWeek(user.id, parsed.from, parsed.mode);
+  }
+
+  @Post('/optimization/week/apply')
+  applyWeek(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    const parsed = z
+      .object({
+        from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        mode: z.enum(['fill', 'replace']),
+      })
+      .parse(body);
+    return this.optimization.applyWeek(user.id, parsed.from, parsed.mode);
+  }
+
+  @Post('/optimization/undo')
+  undo(@CurrentUser() user: AuthUser) {
+    return this.optimization.undo(user.id);
+  }
+
+  @Get('/optimization/undo')
+  undoStatus(@CurrentUser() user: AuthUser) {
+    return this.optimization.hasUndo(user.id);
+  }
 }

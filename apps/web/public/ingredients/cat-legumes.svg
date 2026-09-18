@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="cat-legumes">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="hsl(223 42% 78%)"/>
-      <stop offset="1" stop-color="hsl(263 38% 88%)"/>
-    </linearGradient>
-  </defs>
-  <circle cx="64" cy="64" r="54" fill="url(#g)" />
-  <ellipse cx="64" cy="78" rx="31" ry="25" fill="hsla(0,0%,100%,0.55)"/>
-  <path d="M44 54c8-18 32-18 40 0" fill="none" stroke="hsla(30,20%,25%,0.35)" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="53" cy="55" r="6" fill="hsla(0,0%,100%,0.8)"/>
+  <circle cx="64" cy="64" r="56" fill="#f4f2ef"/>
+  <circle cx="64" cy="64" r="56" fill="none" stroke="#f2cdb8" stroke-width="1.25" opacity=".7"/>
+  <ellipse cx="48" cy="72" rx="14" ry="18" fill="#648374"/><circle cx="72" cy="70" r="18" fill="#c45c4a"/>
+    <path d="M64 44c8 6 12 14 10 20" fill="#4f6a5d"/>
 </svg>

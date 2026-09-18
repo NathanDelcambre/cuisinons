@@ -11,8 +11,8 @@ export const routes = {
   reserves: '/reserves',
   objectifs: '/objectifs',
   profil: '/profil',
+  profilStatistiques: '/profil/statistiques',
   profilSecurite: '/profil/securite',
-  illustrations: '/dev/illustrations',
 } as const;
 
 export function withSearch(path: string, search: URLSearchParams | string) {

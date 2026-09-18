@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import { ChefHat, Clock, Flame, Leaf, Refrigerator, Sparkles } from 'lucide-react';
+import { Clock, Flame, Leaf, Refrigerator, Sparkles } from 'lucide-react';
 import {
   DIET_LABELS,
   DIETS,
   DISH_KIND_LABELS,
   DISH_KINDS,
   UNIT_LABELS,
+  kitchenLabel,
   type Diet,
   type DishKind,
 } from '@cuisinons/shared';
@@ -28,6 +29,7 @@ import {
 } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 import { routes } from '@/lib/routes';
+import { IngredientIcon } from './ingredient-icon';
 
 type RecipeDraft = {
   name: string;
@@ -71,6 +73,11 @@ type SuggestedDish = {
 };
 
 type Preview = {
+  pantry: {
+    count: number;
+    usableCount: number;
+    names: string[];
+  };
   dishes: SuggestedDish[];
   shortage: {
     title: string;
@@ -106,6 +113,86 @@ const COUNT_OPTIONS = [
   { value: '8', label: '8 ingrédients max' },
 ];
 
+function InventoryBanner({
+  count,
+  names,
+  status,
+}: {
+  count: number;
+  names: string[];
+  status: 'pending' | 'empty' | 'stocked';
+}) {
+  const sample = names.slice(0, 4).join(', ');
+  const title =
+    status === 'empty'
+      ? 'Aucun aliment en réserve'
+      : status === 'stocked'
+        ? `${String(count)} aliment${count > 1 ? 's' : ''} dans tes réserves`
+        : 'Basé sur tes réserves';
+  const detail =
+    status === 'empty'
+      ? 'On n’invente rien : un plat n’est proposé que s’il tient avec ton inventaire.'
+      : status === 'stocked'
+        ? `Uniquement ${sample || 'ce que tu as en stock'}${names.length > 4 ? '…' : ''}. Rien n’est ajouté hors stock.`
+        : 'On compose un plat uniquement avec ce que tu as déjà en stock. Rien n’est inventé.';
+  return (
+    <div className="flex items-start gap-3 rounded-2xl border border-sage-200/80 bg-sage-50/90 px-3.5 py-3">
+      <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-sage-100 text-sage-600">
+        <Refrigerator className="size-4" aria-hidden />
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-ink-900">{title}</p>
+        <p className="mt-0.5 text-sm text-ink-500">{detail}</p>
+      </div>
+    </div>
+  );
+}
+
+function emptySuggestion({
+  pantryEmpty,
+  shortage,
+  requestFailed,
+  noDish,
+  waiting,
+}: {
+  pantryEmpty: boolean;
+  shortage: Preview['shortage'];
+  requestFailed: boolean;
+  noDish: boolean;
+  waiting: boolean;
+}): { show: boolean; title: string; description: string } {
+  if (pantryEmpty) {
+    return {
+      show: true,
+      title: 'Tes réserves sont vides',
+      description:
+        'On compose un plat uniquement avec ce que tu as déjà. Ajoute d’abord tes ingrédients, puis reviens ici.',
+    };
+  }
+  if (waiting) {
+    return { show: false, title: '', description: '' };
+  }
+  if (noDish && shortage) {
+    return { show: true, title: shortage.title, description: shortage.explanation };
+  }
+  if (requestFailed) {
+    return {
+      show: true,
+      title: 'Aucun plat avec tes réserves',
+      description:
+        'Les propositions s’appuient uniquement sur ton inventaire. Complète tes réserves, ou réessaie.',
+    };
+  }
+  if (noDish) {
+    return {
+      show: true,
+      title: 'Aucun plat avec tes réserves',
+      description: 'Avec ce que tu as en stock et ces filtres, on ne peut pas assembler un plat.',
+    };
+  }
+  return { show: false, title: '', description: '' };
+}
+
 export function SuggestDishModal({
   open,
   onClose,
@@ -134,6 +221,13 @@ export function SuggestDishModal({
     [servings, diet, kind, maxMinutes, maxIngredients],
   );
 
+  const pantry = useQuery({
+    queryKey: ['pantry'],
+    queryFn: () => apiJson<Array<{ id: string }>>('/api/bff/pantry'),
+    enabled: open,
+    staleTime: 30_000,
+  });
+
   const preview = useQuery({
     queryKey: ['suggestions', body],
     queryFn: () =>
@@ -142,15 +236,35 @@ export function SuggestDishModal({
         body: JSON.stringify(body),
       }),
     enabled: open,
+    retry: 1,
   });
 
   const dishes = preview.data?.dishes ?? [];
   const shortage = preview.data?.shortage ?? null;
+  const pantryCount = preview.data?.pantry.count ?? pantry.data?.length ?? 0;
+  const usableCount = preview.data?.pantry.usableCount ?? pantryCount;
+  const pantryNames = preview.data?.pantry.names ?? [];
+  const pantryEmpty = pantry.isSuccess && pantry.data.length === 0;
+  const knownEmpty = pantryEmpty || (preview.isSuccess && usableCount === 0);
+  const bannerStatus: 'pending' | 'empty' | 'stocked' = knownEmpty
+    ? 'empty'
+    : pantryCount > 0
+      ? 'stocked'
+      : 'pending';
   const selected =
     dishes.find((dish) => dish.key === selectedKey) ??
     dishes[0] ??
     shortage?.alternative?.dish ??
     null;
+  const waiting = preview.isLoading || (preview.isPending && !preview.data);
+  const noDish = dishes.length === 0 && !shortage?.alternative;
+  const empty = emptySuggestion({
+    pantryEmpty: knownEmpty,
+    shortage,
+    requestFailed: preview.isError,
+    noDish,
+    waiting,
+  });
 
   const accept = useMutation({
     mutationFn: (draft: RecipeDraft) =>
@@ -168,7 +282,7 @@ export function SuggestDishModal({
     <Modal
       open={open}
       title="Proposer un plat"
-      description="Uniquement ce que tu as en stock. Rien n’est enregistré tant que tu n’as pas validé."
+      description="Rien n’est enregistré tant que tu n’as pas validé."
       size="2xl"
       onClose={onClose}
       footer={
@@ -189,6 +303,8 @@ export function SuggestDishModal({
       }
     >
       <div className="space-y-4">
+        <InventoryBanner count={pantryCount} names={pantryNames} status={bannerStatus} />
+
         <div className="space-y-3">
           <Segmented
             label="Régime"
@@ -232,28 +348,28 @@ export function SuggestDishModal({
           </div>
         </div>
 
-        {!open ? null : preview.isLoading ? (
+        {!open ? null : waiting && !empty.show ? (
           <div className="grid gap-4 lg:grid-cols-[minmax(0,16rem)_1fr]">
             <Skeleton className="h-40" />
             <Skeleton className="h-72" />
           </div>
-        ) : preview.isError ? (
+        ) : empty.show ? (
           <EmptyState
-            icon={ChefHat}
-            title="Proposition impossible"
-            description={preview.error instanceof Error ? preview.error.message : 'Réessaie dans un instant.'}
-            className="py-8"
-          />
-        ) : dishes.length === 0 && !shortage?.alternative ? (
-          <EmptyState
-            icon={shortage?.title === 'Réserves vides' ? Refrigerator : ChefHat}
-            title={shortage?.title ?? 'Aucun plat imaginable'}
-            description={shortage?.explanation}
+            icon={Refrigerator}
+            title={empty.title}
+            description={empty.description}
             className="py-8"
             action={
-              <Link href={routes.reserves} className={buttonClasses({ size: 'sm' })}>
-                Ouvrir les réserves
-              </Link>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {preview.isError && !knownEmpty ? (
+                  <Button variant="glass" size="sm" onClick={() => void preview.refetch()}>
+                    Réessayer
+                  </Button>
+                ) : null}
+                <Link href={routes.reserves} className={buttonClasses({ size: 'sm' })}>
+                  Ouvrir les réserves
+                </Link>
+              </div>
             }
           />
         ) : (
@@ -368,12 +484,8 @@ function DishDetail({ dish, error }: { dish: SuggestedDish; error: string | null
         <ul className="space-y-1.5">
           {dish.ingredients.map((line) => (
             <li key={line.ingredientId} className="flex items-center gap-3 text-sm text-ink-800">
-              {line.iconUrl ? (
-                <img src={line.iconUrl} alt="" width={28} height={28} className="size-7 shrink-0" />
-              ) : (
-                <span className="size-7 shrink-0 rounded-lg bg-sage-100" />
-              )}
-              <span className="min-w-0 flex-1 truncate">{line.nameFr}</span>
+              <IngredientIcon src={line.iconUrl} />
+              <span className="min-w-0 flex-1 truncate">{kitchenLabel(line.nameFr)}</span>
               <span className="tabular shrink-0 text-ink-500">
                 {line.displayQuantity} {UNIT_LABELS[line.unit]}
               </span>

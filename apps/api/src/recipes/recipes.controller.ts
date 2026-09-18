@@ -1,41 +1,12 @@
 import { Body, Controller, Delete, Get, Header, Inject, Param, Patch, Post, Put, Query, StreamableFile, UseGuards } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import { z } from 'zod';
-import { QUANTITY_UNITS } from '@cuisinons/shared';
+import { MEAL_SLOTS } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthUser } from '../auth/internal-jwt.guard.js';
 import { RecipesService } from './recipes.service.js';
-import { MAX_PHOTO_DATA_URL_LENGTH } from './recipe-photo.js';
-
-const writeSchema = z.object({
-  name: z.string().min(1).max(160),
-  description: z.string().max(4000).nullable().optional(),
-  servings: z.number().positive().max(50),
-  prepTimeMinutes: z.number().int().nonnegative().nullable().optional(),
-  cookTimeMinutes: z.number().int().nonnegative().nullable().optional(),
-  finalCookedWeight: z.number().positive().nullable().optional(),
-  photoDataUrl: z.string().max(MAX_PHOTO_DATA_URL_LENGTH).nullable().optional(),
-  status: z.enum(['DRAFT', 'PUBLISHED']).optional(),
-  version: z.number().int().optional(),
-  ingredients: z.array(
-    z.object({
-      ingredientId: z.string().min(1),
-      quantity: z.number().nonnegative(),
-      unit: z.enum(QUANTITY_UNITS),
-      gramsManual: z.number().positive().nullable().optional(),
-      displayQuantity: z.string().max(32).nullable().optional(),
-    }),
-  ),
-  steps: z.array(
-    z.object({
-      description: z.string().min(1).max(2000),
-      durationMinutes: z.number().int().nonnegative().nullable().optional(),
-    }),
-  ),
-  tagIds: z.array(z.string()),
-  equipmentIds: z.array(z.string()),
-});
+import { recipeWriteSchema } from './recipe-write.js';
 
 @Controller()
 @UseGuards(InternalJwtGuard)
@@ -49,13 +20,17 @@ export class RecipesController {
     @Query('sort') sort?: string,
     @Query('basis') basis?: 'serving' | '100g',
     @Query('equipment') equipment?: string,
+    @Query('slot') slot?: string,
   ) {
-    return this.recipes.list({ q, tag, sort, basis, equipment });
+    const parsedSlot = MEAL_SLOTS.includes(slot as (typeof MEAL_SLOTS)[number])
+      ? (slot as (typeof MEAL_SLOTS)[number])
+      : undefined;
+    return this.recipes.list({ q, tag, sort, basis, equipment, slot: parsedSlot });
   }
 
   @Post('/recipes')
   create(@CurrentUser() user: AuthUser, @Body() body: unknown) {
-    return this.recipes.create(user.id, writeSchema.parse(body));
+    return this.recipes.create(user.id, recipeWriteSchema.parse(body));
   }
 
   @Get('/recipes/:id/photo')
@@ -73,7 +48,7 @@ export class RecipesController {
 
   @Patch('/recipes/:id')
   update(@Param('id') id: string, @Body() body: unknown) {
-    return this.recipes.update(id, writeSchema.parse(body));
+    return this.recipes.update(id, recipeWriteSchema.parse(body));
   }
 
   @Delete('/recipes/:id')

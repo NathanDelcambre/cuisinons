@@ -39,8 +39,8 @@ describe('email whitelist', () => {
   it('associe une photo de profil à Nathan et Jade', () => {
     expect(avatarUrlForEmail('nathan.delcambre@gmail.com')).toBe('/avatars/nathan.jpg');
     expect(avatarUrlForEmail('nathandelcambre@gmail.com')).toBe('/avatars/nathan.jpg');
-    expect(avatarUrlForEmail('jade.peroch@gmail.com')).toBe('/avatars/jade.jpg');
-    expect(avatarUrlForEmail('jadeperoch@googlemail.com')).toBe('/avatars/jade.jpg');
+    expect(avatarUrlForEmail('jade.peroch@gmail.com')).toBe('/avatars/jade.jpg?v=4');
+    expect(avatarUrlForEmail('jadeperoch@googlemail.com')).toBe('/avatars/jade.jpg?v=4');
     expect(avatarUrlForEmail('intrus@gmail.com')).toBeNull();
   });
 });

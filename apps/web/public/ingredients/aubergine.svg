@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="aubergine">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="hsl(138 42% 64%)"/>
-      <stop offset="1" stop-color="hsl(178 38% 88%)"/>
-    </linearGradient>
-  </defs>
-  <circle cx="64" cy="64" r="54" fill="url(#g)" />
-  <ellipse cx="64" cy="78" rx="36" ry="20" fill="hsla(0,0%,100%,0.55)"/>
-  <path d="M44 54c8-18 32-18 40 0" fill="none" stroke="hsla(30,20%,25%,0.35)" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="68" cy="54" r="6" fill="hsla(0,0%,100%,0.8)"/>
+  <circle cx="64" cy="64" r="56" fill="#f4f2ef"/>
+  <circle cx="64" cy="64" r="56" fill="none" stroke="#f2cdb8" stroke-width="1.25" opacity=".7"/>
+  <ellipse cx="64" cy="72" rx="18" ry="28" fill="#6a4c7a"/>
+    <path d="M56 46c6 4 14 4 18 0-4-8-14-8-18 0z" fill="#648374"/>
+    <ellipse cx="58" cy="66" rx="5" ry="10" fill="#8a6a9a" opacity=".5"/>
 </svg>

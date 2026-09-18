@@ -17,6 +17,7 @@ export function AddMealDialog({
   date,
   slot,
   replaceItemId,
+  replaceScope = 'all',
   initialRecipeId,
   onClose,
   onAdded,
@@ -25,6 +26,7 @@ export function AddMealDialog({
   date: string;
   slot: MealSlot;
   replaceItemId?: string | null;
+  replaceScope?: 'me' | 'all';
   initialRecipeId?: string | null;
   onClose: () => void;
   onAdded: () => void;
@@ -44,8 +46,9 @@ export function AddMealDialog({
   }, [open, date, slot, initialRecipeId]);
 
   const recipes = useQuery({
-    queryKey: ['recipes', query],
-    queryFn: () => apiJson<Recipe[]>(`/api/bff/recipes?q=${encodeURIComponent(query)}`),
+    queryKey: ['recipes', query, slot],
+    queryFn: () =>
+      apiJson<Recipe[]>(`/api/bff/recipes?q=${encodeURIComponent(query)}&slot=${slot}`),
     enabled: open,
   });
   const users = useQuery({
@@ -59,6 +62,15 @@ export function AddMealDialog({
         userId: u.id,
         portions: portions[u.id] ?? 1,
       }));
+      if (replaceItemId && replaceScope === 'me') {
+        return apiJson(`/api/bff/planner/items/${replaceItemId}/replace-for-me`, {
+          method: 'POST',
+          body: JSON.stringify({
+            recipeId,
+            portions: portions[user?.id ?? ''] ?? 1,
+          }),
+        });
+      }
       if (replaceItemId) {
         return apiJson(`/api/bff/planner/items/${replaceItemId}`, {
           method: 'PATCH',
@@ -101,7 +113,10 @@ export function AddMealDialog({
           </Button>
           <Button
             icon={Check}
-            disabled={!recipeId}
+            disabled={
+              !recipeId ||
+              (users.data ?? []).every((u) => (portions[u.id] ?? 1) <= 0)
+            }
             loading={add.isPending}
             onClick={() => add.mutate()}
           >
@@ -177,13 +192,35 @@ export function AddMealDialog({
               value={portions[u.id] ?? 1}
               onChange={(next) => setPortions((p) => ({ ...p, [u.id]: next }))}
               step={0.5}
-              min={0.5}
+              min={0}
+              max={6}
               suffix="portion"
               labelDecrease={`Diminuer les portions de ${u.displayName}`}
               labelIncrease={`Augmenter les portions de ${u.displayName}`}
             />
           </div>
         ))}
+        {(users.data ?? []).length >= 2 ? (
+          <div className="flex flex-wrap gap-2 pt-1">
+            {(users.data ?? []).map((u) => (
+              <Button
+                key={`only-${u.id}`}
+                type="button"
+                size="sm"
+                variant="glass"
+                onClick={() => {
+                  const next: Record<string, number> = {};
+                  for (const other of users.data ?? []) {
+                    next[other.id] = other.id === u.id ? 1 : 0;
+                  }
+                  setPortions(next);
+                }}
+              >
+                {u.id === user?.id ? 'Pour moi seulement' : `Pour ${u.displayName} seulement`}
+              </Button>
+            ))}
+          </div>
+        ) : null}
       </div>
     </Modal>
   );

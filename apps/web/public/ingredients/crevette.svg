@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="crevette">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="hsl(338 42% 64%)"/>
-      <stop offset="1" stop-color="hsl(18 38% 88%)"/>
-    </linearGradient>
-  </defs>
-  <circle cx="64" cy="64" r="54" fill="url(#g)" />
-  <ellipse cx="64" cy="78" rx="36" ry="20" fill="hsla(0,0%,100%,0.55)"/>
-  <path d="M44 54c8-18 32-18 40 0" fill="none" stroke="hsla(30,20%,25%,0.35)" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="68" cy="50" r="6" fill="hsla(0,0%,100%,0.8)"/>
+  <circle cx="64" cy="64" r="56" fill="#f4f2ef"/>
+  <circle cx="64" cy="64" r="56" fill="none" stroke="#f2cdb8" stroke-width="1.25" opacity=".7"/>
+  <path d="M44 80c-8-8-8-20 2-28 12-8 28-4 32 8 2 8-6 12-12 8 8 4 12 14 4 20-8 6-18 2-26-8z" fill="#d9946f"/>
+    <path d="M72 52c8-8 16-6 20 0" fill="none" stroke="#f2cdb8" stroke-width="3" stroke-linecap="round"/>
 </svg>

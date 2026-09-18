@@ -9,7 +9,7 @@ import { MEAL_KIND_LABELS, MEAL_SLOT_LABELS, type MealKind, type MealSlot } from
 
 export const SLOT_CHROME: Record<
   MealSlot,
-  { icon: LucideIcon; border: string; tint: string; iconClass: string; labelClass: string }
+  { icon: LucideIcon; border: string; tint: string; iconClass: string; labelClass: string; rail: string }
 > = {
   BREAKFAST: {
     icon: Sunrise,
@@ -17,6 +17,7 @@ export const SLOT_CHROME: Record<
     tint: 'bg-peach-200/25 hover:bg-peach-200/45',
     iconClass: 'bg-peach-200/80 text-peach-500',
     labelClass: 'text-peach-500',
+    rail: 'border-l-[3px] border-l-peach-400',
   },
   LUNCH: {
     icon: Sun,
@@ -24,6 +25,7 @@ export const SLOT_CHROME: Record<
     tint: 'bg-sage-50/70 hover:bg-sage-100/80',
     iconClass: 'bg-sage-100 text-sage-600',
     labelClass: 'text-sage-600',
+    rail: 'border-l-[3px] border-l-sage-400',
   },
   SNACK: {
     icon: Cookie,
@@ -31,6 +33,7 @@ export const SLOT_CHROME: Record<
     tint: 'bg-peach-200/20 hover:bg-peach-200/40',
     iconClass: 'bg-peach-200/70 text-peach-400',
     labelClass: 'text-peach-400',
+    rail: 'border-l-[3px] border-l-peach-400',
   },
   DINNER: {
     icon: Moon,
@@ -38,6 +41,7 @@ export const SLOT_CHROME: Record<
     tint: 'bg-ink-100/50 hover:bg-ink-100/80',
     iconClass: 'bg-ink-100 text-ink-600',
     labelClass: 'text-ink-600',
+    rail: 'border-l-[3px] border-l-ink-400',
   },
 };
 
@@ -67,7 +71,7 @@ export function SlotAddMenu({
   variant: 'empty' | 'plus';
   pending?: boolean;
   onChooseRecipe: () => void;
-  onChooseKind: (kind: SpecialMealKind) => void;
+  onChooseKind: (kind: SpecialMealKind, options?: { onlyMe?: boolean }) => void;
 }) {
   const slotLabel = MEAL_SLOT_LABELS[slot];
   const chrome = SLOT_CHROME[slot];
@@ -82,6 +86,7 @@ export function SlotAddMenu({
   const [mounted, setMounted] = useState(false);
   const [pos, setPos] = useState<MenuPos | null>(null);
   const [highlighted, setHighlighted] = useState(0);
+  const [onlyMe, setOnlyMe] = useState(false);
 
   const updatePosition = useCallback(() => {
     const trigger = triggerRef.current;
@@ -150,8 +155,10 @@ export function SlotAddMenu({
   }
 
   function chooseKind(kind: SpecialMealKind) {
+    const scoped = onlyMe;
     close();
-    onChooseKind(kind);
+    setOnlyMe(false);
+    onChooseKind(kind, { onlyMe: scoped });
   }
 
   function moveHighlight(delta: number) {
@@ -220,7 +227,7 @@ export function SlotAddMenu({
           onClick={() => setOpen((current) => !current)}
           onKeyDown={onTriggerKeyDown}
           className={cn(
-            'group flex h-full min-h-[3.5rem] w-full items-center gap-2.5 rounded-xl border border-dashed px-3 text-left transition-colors duration-200 ease-out-soft',
+            'group flex h-full min-h-[5.25rem] w-full items-center gap-2.5 rounded-xl border border-dashed px-3 text-left transition-colors duration-200 ease-out-soft',
             chrome.border,
             chrome.tint,
           )}
@@ -322,6 +329,15 @@ export function SlotAddMenu({
                         </button>
                       );
                     })}
+                    <label className="mt-1 flex min-h-10 cursor-pointer items-center gap-2.5 rounded-xl px-3 text-sm text-ink-600">
+                      <input
+                        type="checkbox"
+                        className="size-4"
+                        checked={onlyMe}
+                        onChange={(e) => setOnlyMe(e.target.checked)}
+                      />
+                      Pour moi seulement
+                    </label>
                   </div>
                 </motion.div>
               ) : null}

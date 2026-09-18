@@ -6,11 +6,9 @@ import { useEffect, useState } from 'react';
 import {
   CalendarPlus,
   Clock,
-  Flame,
   Pencil,
   Star,
   TriangleAlert,
-  Utensils,
   X,
 } from 'lucide-react';
 import {
@@ -26,30 +24,40 @@ import {
 } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 import { routes } from '@/lib/routes';
+import { useAuth } from './auth-provider';
 import {
   MEAL_SLOTS,
   MEAL_SLOT_LABELS,
+  RECIPE_SOURCE_LABELS,
   UNIT_LABELS,
   formatQuantity,
+  avatarUrlForEmail,
+  kitchenLabel,
   type MealSlot,
   type QuantityUnit,
 } from '@cuisinons/shared';
+import { Avatar } from './avatar';
+import { IngredientIcon } from './ingredient-icon';
+import { MacroIcon } from './macro-icon';
+import { StepMentionPreview } from './step-mentions';
 
 export type RecipeDetail = {
   id: string;
   name: string;
   description?: string | null;
   photoUrl?: string | null;
+  source?: 'USER' | 'CATALOG';
   servings: string;
   prepTimeMinutes: number | null;
   cookTimeMinutes: number | null;
-  author: { displayName: string };
+  author: { displayName: string; email?: string };
   ingredients: Array<{
+    ingredientId?: string;
     quantity: string;
     unit: string;
     grams: string | null;
     estimated: boolean;
-    ingredient: { nameFr: string; iconUrl: string | null };
+    ingredient: { id?: string; nameFr: string; iconUrl: string | null };
   }>;
   steps: Array<{ stepNumber: number; description: string; durationMinutes: number | null }>;
   tags: Array<{ tag: { label: string } }>;
@@ -127,15 +135,16 @@ export function RecipeModal({
                 Modifier
               </Link>
               {plan ? (
-                plan.validated ? (
-                  <Button variant="glass" loading={plan.loading} onClick={plan.onCancelValidation}>
-                    Annuler la validation
-                  </Button>
-                ) : (
+                <>
+                  {plan.validated ? (
+                    <Button variant="glass" loading={plan.loading} onClick={plan.onCancelValidation}>
+                      Annuler la validation
+                    </Button>
+                  ) : null}
                   <Button loading={plan.loading} onClick={plan.onChangeRecipe}>
                     Changer de recette
                   </Button>
-                )
+                </>
               ) : (
                 <Button icon={CalendarPlus} onClick={() => setPlanning(true)}>
                   Ajouter au planning
@@ -222,7 +231,17 @@ function RecipeModalBody({
 
       <div className="space-y-6 px-5 py-5 sm:px-6">
         <header className="pr-12">
-          <p className="text-sm text-ink-500">par {data.author.displayName}</p>
+          <p className="flex items-center gap-2 text-sm text-ink-500">
+            <Avatar
+              name={data.author.displayName}
+              src={data.author.email ? avatarUrlForEmail(data.author.email) : null}
+              className="size-6 rounded-full text-[10px]"
+            />
+            Proposé par {data.author.displayName}
+            {data.source === 'CATALOG' ? (
+              <Badge tone="sage">{RECIPE_SOURCE_LABELS.CATALOG}</Badge>
+            ) : null}
+          </p>
           <h2 className="mt-1 font-display text-[1.65rem] font-semibold leading-tight tracking-[-0.03em] text-ink-900">
             {data.name}
           </h2>
@@ -254,19 +273,21 @@ function RecipeModalBody({
         <section className="rounded-2xl border border-white/70 bg-white/70 p-4 shadow-soft">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-ink-400">Portions</p>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-ink-400">Personnes</p>
               <p className="mt-0.5 text-xs text-ink-500">
-                Prévue pour {baseServings.toLocaleString('fr-FR')}
+                Recette prévue pour {baseServings.toLocaleString('fr-FR')}{' '}
+                {baseServings > 1 ? 'personnes' : 'personne'}
               </p>
             </div>
-            <Stepper value={shown} onChange={onServings} step={0.5} min={0.5} suffix="portions" />
+            <Stepper value={shown} onChange={onServings} step={1} min={1} suffix="pers." />
           </div>
           <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-white/70 pt-4 sm:grid-cols-4">
-            <Macro label="Calories" value={data.nutrition.perServing.kcal * factor} unit="kcal" accent />
-            <Macro label="Protéines" value={data.nutrition.perServing.protein * factor} unit="g" />
-            <Macro label="Glucides" value={data.nutrition.perServing.carbs * factor} unit="g" />
-            <Macro label="Lipides" value={data.nutrition.perServing.fat * factor} unit="g" />
+            <Macro kind="kcal" label="Calories" value={data.nutrition.perServing.kcal} unit="kcal" />
+            <Macro kind="protein" label="Protéines" value={data.nutrition.perServing.protein} unit="g" />
+            <Macro kind="carbs" label="Glucides" value={data.nutrition.perServing.carbs} unit="g" />
+            <Macro kind="fat" label="Lipides" value={data.nutrition.perServing.fat} unit="g" />
           </dl>
+          <p className="mt-3 text-xs text-ink-400">Macros pour 1 personne. Les ingrédients suivent le nombre de personnes.</p>
           {!data.nutrition.complete && data.nutrition.incompleteLines > 0 ? (
             <p className="mt-3 flex items-start gap-2 text-xs text-peach-500">
               <TriangleAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden />
@@ -286,24 +307,12 @@ function RecipeModalBody({
             <ul className="divide-y divide-white/80 overflow-hidden rounded-2xl border border-white/70 bg-white/60">
               {data.ingredients.map((line, index) => (
                 <li key={index} className="flex items-center gap-3 px-3 py-2.5">
-                  {line.ingredient.iconUrl ? (
-                    <img
-                      src={line.ingredient.iconUrl}
-                      alt=""
-                      width={32}
-                      height={32}
-                      className="size-8 shrink-0"
-                    />
-                  ) : (
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sage-100 text-sage-600">
-                      <Utensils className="size-4" aria-hidden />
-                    </span>
-                  )}
+                  <IngredientIcon src={line.ingredient.iconUrl} size={32} />
                   <span className="min-w-0 flex-1 text-sm text-ink-900">
                     <span className="tabular font-medium">
                       {formatQuantity(Number(line.quantity) * factor)} {unitLabel(line.unit)}
                     </span>{' '}
-                    <span className="text-ink-700">{line.ingredient.nameFr}</span>
+                    <span className="text-ink-700">{kitchenLabel(line.ingredient.nameFr)}</span>
                   </span>
                   {line.estimated ? <Badge tone="peach">estim.</Badge> : null}
                 </li>
@@ -313,29 +322,7 @@ function RecipeModalBody({
         </section>
 
         {data.equipment.length > 0 ? (
-          <section>
-            <h3 className="mb-3 font-display text-base font-semibold tracking-[-0.01em] text-ink-900">
-              Ustensiles
-            </h3>
-            <ul className="flex flex-wrap gap-2">
-              {data.equipment.map((e) => (
-                <li
-                  key={e.equipment.slug}
-                  className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 text-[13px] font-medium text-ink-600 shadow-soft"
-                >
-                  <img
-                    src={`/equipment/${e.equipment.slug}.png`}
-                    alt=""
-                    width={24}
-                    height={24}
-                    className="size-6"
-                    decoding="async"
-                  />
-                  {e.equipment.label}
-                </li>
-              ))}
-            </ul>
-          </section>
+          <EquipmentReadList items={data.equipment} />
         ) : null}
 
         <section>
@@ -355,7 +342,16 @@ function RecipeModalBody({
                     {step.stepNumber}
                   </span>
                   <div className="min-w-0 flex-1 pt-0.5">
-                    <p className="text-sm leading-relaxed text-ink-800">{step.description}</p>
+                    <StepMentionPreview
+                      description={step.description}
+                      factor={factor}
+                      ingredients={data.ingredients.map((line) => ({
+                        id: String(line.ingredientId ?? line.ingredient.id ?? ''),
+                        name: kitchenLabel(line.ingredient.nameFr),
+                        quantity: Number(line.quantity),
+                        unitLabel: unitLabel(line.unit),
+                      }))}
+                    />
                     {step.durationMinutes ? (
                       <p className="mt-1 flex items-center gap-1 text-xs text-ink-500">
                         <Clock className="size-3" aria-hidden />
@@ -418,20 +414,20 @@ function RecipeModalSkeleton() {
 }
 
 function Macro({
+  kind,
   label,
   value,
   unit,
-  accent = false,
 }: {
+  kind: 'kcal' | 'protein' | 'carbs' | 'fat';
   label: string;
   value: number;
   unit: string;
-  accent?: boolean;
 }) {
   return (
     <div>
       <dt className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-ink-400">
-        {accent ? <Flame className="size-3 text-peach-500" aria-hidden /> : null}
+        <MacroIcon kind={kind} className="size-3" />
         {label}
       </dt>
       <dd className="tabular mt-1 font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
@@ -439,6 +435,50 @@ function Macro({
         <span className="ml-0.5 text-xs font-medium text-ink-500">{unit}</span>
       </dd>
     </div>
+  );
+}
+
+function EquipmentReadList({
+  items,
+}: {
+  items: Array<{ equipment: { label: string; slug: string } }>;
+}) {
+  const [open, setOpen] = useState(false);
+  const visible = open || items.length <= 6 ? items : items.slice(0, 6);
+  return (
+    <section>
+      <h3 className="mb-3 font-display text-base font-semibold tracking-[-0.01em] text-ink-900">
+        Ustensiles
+      </h3>
+      <ul className="flex flex-wrap gap-2">
+        {visible.map((e) => (
+          <li
+            key={e.equipment.slug}
+            className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-2 text-[13px] font-medium text-ink-600 shadow-soft"
+          >
+            <img
+              src={`/equipment/${e.equipment.slug}.png`}
+              alt=""
+              width={24}
+              height={24}
+              className="size-6"
+              decoding="async"
+            />
+            {e.equipment.label}
+          </li>
+        ))}
+      </ul>
+      {items.length > 6 ? (
+        <button
+          type="button"
+          className="mt-2 text-sm font-medium text-sage-700"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {open ? 'Voir moins' : 'Voir plus'}
+        </button>
+      ) : null}
+    </section>
   );
 }
 
@@ -458,15 +498,20 @@ function AddToPlan({
     queryKey: ['users'],
     queryFn: () => apiJson<Array<{ id: string }>>('/api/bff/users'),
   });
+  const [onlyMe, setOnlyMe] = useState(false);
+  const { user } = useAuth();
   const add = useMutation({
-    mutationFn: () =>
+    mutationFn: (solo?: boolean) =>
       apiJson('/api/bff/planner/items', {
         method: 'POST',
         body: JSON.stringify({
           date,
           slot,
           recipeId,
-          portions: (users.data ?? []).map((u) => ({ userId: u.id, portions: 1 })),
+          portions: (users.data ?? []).map((u) => ({
+            userId: u.id,
+            portions: solo || onlyMe ? (u.id === user?.id ? 1 : 0) : 1,
+          })),
         }),
       }),
     onSuccess: async () => {
@@ -494,6 +539,12 @@ function AddToPlan({
       />
       <Button variant="ghost" onClick={onCancel}>
         Annuler
+      </Button>
+      <Button
+        variant="glass"
+        onClick={() => add.mutate(true)}
+      >
+        Pour moi seulement
       </Button>
       <Button disabled={!users.data?.length} loading={add.isPending} onClick={() => add.mutate()}>
         Valider

@@ -45,9 +45,4 @@ export class IngredientsController {
   recent(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     return this.ingredients.markRecent(user.id, id);
   }
-
-  @Get('/dev/icons')
-  icons() {
-    return this.ingredients.iconReport();
-  }
 }

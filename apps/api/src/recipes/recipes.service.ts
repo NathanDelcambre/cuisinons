@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, QuantityUnit } from '@cuisinons/db';
-import { resolveGrams, type QuantityUnit as SharedUnit } from '@cuisinons/shared';
+import { resolveGrams, type QuantityUnit as SharedUnit, compareRecipesForSlot } from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { nutritionForRecipe } from '../nutrition/recipe-nutrition.js';
 import { decodePhotoDataUrl, publicRecipePhotoUrl, type RecipePhoto } from './recipe-photo.js';
@@ -78,7 +78,7 @@ export class RecipesService {
 
   private serialize(
     recipe: Omit<Prisma.RecipeGetPayload<{ include: typeof recipeInclude }>, 'photoUrl'>,
-    hasPhoto: boolean,
+    photoUrl: string | null,
   ) {
     const nutrition = nutritionForRecipe(
       recipe.ingredients,
@@ -90,19 +90,37 @@ export class RecipesService {
       ratings.length === 0 ? null : ratings.reduce((sum, r) => sum + r.stars, 0) / ratings.length;
     return {
       ...recipe,
-      photoUrl: publicRecipePhotoUrl(recipe.id, hasPhoto, recipe.updatedAt),
+      photoUrl,
       nutrition,
       rating: { average, count: ratings.length, ratings },
     };
   }
 
-  private async photoIds(ids: string[]) {
-    if (ids.length === 0) return new Set<string>();
-    const rows = await this.prisma.recipe.findMany({
-      where: { id: { in: ids }, photoUrl: { not: null } },
-      select: { id: true },
+  private async photoUrlById(ids: string[], updatedAtById: Map<string, Date>) {
+    if (ids.length === 0) return new Map<string, string | null>();
+    const publicRows = await this.prisma.recipe.findMany({
+      where: { id: { in: ids }, photoUrl: { startsWith: '/' } },
+      select: { id: true, photoUrl: true },
     });
-    return new Set(rows.map((row) => row.id));
+    const stored = new Map(publicRows.map((row) => [row.id, row.photoUrl]));
+    const map = new Map<string, string | null>();
+    const missing: string[] = [];
+    for (const id of ids) {
+      const url = publicRecipePhotoUrl(id, stored.get(id) ?? null, updatedAtById.get(id) ?? new Date());
+      if (url) map.set(id, url);
+      else if (!stored.has(id)) missing.push(id);
+    }
+    if (missing.length > 0) {
+      const dataRows = await this.prisma.recipe.findMany({
+        where: { id: { in: missing }, photoUrl: { not: null } },
+        select: { id: true },
+      });
+      for (const row of dataRows) {
+        const updatedAt = updatedAtById.get(row.id) ?? new Date();
+        map.set(row.id, publicRecipePhotoUrl(row.id, true, updatedAt));
+      }
+    }
+    return map;
   }
 
   async list(input: {
@@ -111,6 +129,7 @@ export class RecipesService {
     sort?: string;
     basis?: 'serving' | '100g';
     equipment?: string;
+    slot?: 'BREAKFAST' | 'LUNCH' | 'SNACK' | 'DINNER';
   }) {
     const where: Prisma.RecipeWhereInput = { status: 'PUBLISHED' };
     if (input.q) {
@@ -133,8 +152,11 @@ export class RecipesService {
       omit: { photoUrl: true },
       orderBy: { updatedAt: 'desc' },
     });
-    const withPhoto = await this.photoIds(recipes.map((recipe) => recipe.id));
-    const serialized = recipes.map((r) => this.serialize(r, withPhoto.has(r.id)));
+    const photos = await this.photoUrlById(
+      recipes.map((recipe) => recipe.id),
+      new Map(recipes.map((recipe) => [recipe.id, recipe.updatedAt])),
+    );
+    const serialized = recipes.map((r) => this.serialize(r, photos.get(r.id) ?? null));
     const basis = input.basis ?? 'serving';
     const pick = (r: (typeof serialized)[number], key: 'kcal' | 'protein' | 'carbs') => {
       if (basis === '100g') return r.nutrition.per100g?.[key] ?? 0;
@@ -175,6 +197,15 @@ export class RecipesService {
       default:
         break;
     }
+    if (input.slot) {
+      sorted.sort((a, b) =>
+        compareRecipesForSlot(
+          { tags: a.tags.map((t) => t.tag.slug), name: a.name },
+          { tags: b.tags.map((t) => t.tag.slug), name: b.name },
+          input.slot!,
+        ),
+      );
+    }
     return sorted;
   }
 
@@ -185,8 +216,8 @@ export class RecipesService {
       omit: { photoUrl: true },
     });
     if (!recipe) throw new NotFoundException('Recette introuvable.');
-    const withPhoto = await this.photoIds([recipe.id]);
-    return this.serialize(recipe, withPhoto.has(recipe.id));
+    const photos = await this.photoUrlById([recipe.id], new Map([[recipe.id, recipe.updatedAt]]));
+    return this.serialize(recipe, photos.get(recipe.id) ?? null);
   }
 
   async getPhoto(id: string): Promise<RecipePhoto> {

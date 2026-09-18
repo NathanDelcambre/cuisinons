@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Images, LogOut, Mail, ShieldCheck } from 'lucide-react';
+import { ChartNoAxesCombined, LogOut, Mail, ShieldCheck } from 'lucide-react';
 import { Button, Card, NavRow, PageHeader } from '@cuisinons/ui';
 import { apiFetch } from '@/lib/api';
 import { routes } from '@/lib/routes';
@@ -11,16 +11,16 @@ import { Avatar } from '@/components/avatar';
 
 const LINKS = [
   {
+    href: routes.profilStatistiques,
+    icon: ChartNoAxesCombined,
+    label: 'Statistiques',
+    description: 'Apports prévus, consommés et plats préférés',
+  },
+  {
     href: routes.profilSecurite,
     icon: ShieldCheck,
     label: 'Sécurité et mot de passe',
     description: 'Changer le mot de passe du compte',
-  },
-  {
-    href: routes.illustrations,
-    icon: Images,
-    label: 'Rapport des illustrations',
-    description: 'Couverture des icônes d’ingrédients',
   },
 ];
 

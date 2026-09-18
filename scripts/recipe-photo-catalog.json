@@ -1,0 +1,612 @@
+[
+  {
+    "id": "official-vinaigrette-crudites",
+    "name": "Vinaigrette pour salade de crudités",
+    "en": "a small ceramic bowl of golden olive-oil vinaigrette beside mixed crudités"
+  },
+  {
+    "id": "official-sauce-yaourt-salade",
+    "name": "Sauce yaourt pour salade",
+    "en": "a bowl of creamy herb yogurt salad dressing with chives"
+  },
+  {
+    "id": "official-salade-grecque",
+    "name": "Salade à la grecque",
+    "en": "a Greek salad with tomatoes, cucumber, red onion, feta and olives"
+  },
+  {
+    "id": "official-marinade-soja",
+    "name": "Marinade viande au soja",
+    "en": "a bowl of dark soy marinade with garlic and spices, raw chicken nearby"
+  },
+  {
+    "id": "official-marinade-yaourt",
+    "name": "Marinade viande yaourt",
+    "en": "a bowl of creamy yogurt marinade with spices and raw chicken pieces"
+  },
+  {
+    "id": "official-marinade-fraiche",
+    "name": "Marinade viande fraîche",
+    "en": "a bowl of fresh lemon-herb marinade with olive oil"
+  },
+  {
+    "id": "official-salade-riz",
+    "name": "Salade de riz",
+    "en": "a colorful rice salad with corn, tomato, cucumber and herbs in a bowl"
+  },
+  {
+    "id": "official-patate-douce-air-fryer",
+    "name": "Patate douce au air fryer",
+    "en": "roasted sweet potato wedges, golden and crispy, on a ceramic plate"
+  },
+  {
+    "id": "official-tacos-bowl-mexicains",
+    "name": "Tacos bowl mexicains",
+    "en": "a Mexican taco bowl with rice, chicken, corn, avocado, tomato and cheese"
+  },
+  {
+    "id": "official-pancake-proteine",
+    "name": "Pancake protéiné",
+    "en": "a small stack of protein pancakes with yogurt and fruit"
+  },
+  {
+    "id": "official-poivron-cocotte",
+    "name": "Poivron cocotte",
+    "en": "stewed bell peppers in a rustic casserole dish with tomato sauce"
+  },
+  {
+    "id": "official-crumble-legumes-ete",
+    "name": "Crumble de légumes d’été",
+    "en": "a summer vegetable crumble in a baking dish, golden topping"
+  },
+  {
+    "id": "official-h01",
+    "name": "Filet mignon aux tomates provençales",
+    "en": "pork tenderloin with Provençal roasted tomatoes"
+  },
+  {
+    "id": "official-h02",
+    "name": "Poulet mariné soja-moutarde",
+    "en": "pan-seared mustard-soy marinated chicken breast with vegetables"
+  },
+  {
+    "id": "official-h03",
+    "name": "One pot lentilles-poulet au curry",
+    "en": "one-pot chicken and lentil curry in a casserole"
+  },
+  {
+    "id": "official-h04",
+    "name": "Salade de lentilles à l’aubergine et yaourt",
+    "en": "lentil salad with roasted eggplant and yogurt"
+  },
+  {
+    "id": "official-h05",
+    "name": "Gaspacho de courgettes",
+    "en": "a glass bowl of green zucchini gazpacho"
+  },
+  {
+    "id": "official-h06",
+    "name": "Saumon express à l’italienne",
+    "en": "pan-seared salmon with tomato, basil and olive oil"
+  },
+  {
+    "id": "official-h07",
+    "name": "Papillote de saumon et légumes",
+    "en": "salmon and vegetables cooked in an opened parchment papillote"
+  },
+  {
+    "id": "official-h08",
+    "name": "Ceviche de saumon",
+    "en": "salmon ceviche with citrus, red onion and herbs"
+  },
+  {
+    "id": "official-h09",
+    "name": "Poulet au four façon basquaise",
+    "en": "Basque-style roasted chicken with peppers and tomatoes"
+  },
+  {
+    "id": "official-h10",
+    "name": "Roulés d’aubergine au poulet",
+    "en": "eggplant rolls stuffed with chicken, baked with tomato sauce"
+  },
+  {
+    "id": "official-h11",
+    "name": "Salade de légumes croquants sauce thaï",
+    "en": "crunchy vegetable salad with Thai peanut-lime dressing"
+  },
+  {
+    "id": "official-h12",
+    "name": "Gaspacho aux poivrons",
+    "en": "a bowl of red pepper gazpacho"
+  },
+  {
+    "id": "official-h13",
+    "name": "Salade de courgettes au chèvre",
+    "en": "zucchini salad with goat cheese"
+  },
+  {
+    "id": "official-h14",
+    "name": "Ratatouille confite au four",
+    "en": "slow-roasted ratatouille of zucchini, eggplant, pepper and tomato"
+  },
+  {
+    "id": "official-h15",
+    "name": "Chakchouka aux œufs",
+    "en": "shakshuka with eggs in spicy tomato-pepper sauce"
+  },
+  {
+    "id": "official-h16",
+    "name": "Dos de merlu aux légumes",
+    "en": "baked hake fillet with roasted vegetables"
+  },
+  {
+    "id": "official-h17",
+    "name": "Œuf cocotte à la truite",
+    "en": "baked eggs cocotte with smoked trout"
+  },
+  {
+    "id": "official-h18",
+    "name": "Salade de lentilles, truite et œuf",
+    "en": "lentil salad with trout and a boiled egg"
+  },
+  {
+    "id": "official-h19",
+    "name": "Curry express de crevettes aux légumes",
+    "en": "quick shrimp curry with vegetables"
+  },
+  {
+    "id": "official-h20",
+    "name": "Salade de quinoa et patate douce rôtie",
+    "en": "quinoa bowl with roasted sweet potato"
+  },
+  {
+    "id": "official-h21",
+    "name": "Zaalouk d’aubergines",
+    "en": "Moroccan zaalouk eggplant salad"
+  },
+  {
+    "id": "official-h22",
+    "name": "Poulet mariné citron vert et gingembre",
+    "en": "lime-ginger marinated chicken with vegetables"
+  },
+  {
+    "id": "official-h23",
+    "name": "Boulettes de dinde aux olives",
+    "en": "turkey meatballs with olives in tomato sauce"
+  },
+  {
+    "id": "official-h24",
+    "name": "Tomates farcies aux sardines et lentilles",
+    "en": "tomatoes stuffed with sardines and lentils"
+  },
+  {
+    "id": "official-h25",
+    "name": "Taboulé de chou-fleur",
+    "en": "cauliflower tabbouleh salad"
+  },
+  {
+    "id": "official-h26",
+    "name": "Curry de crevettes et poivrons",
+    "en": "shrimp and bell pepper curry"
+  },
+  {
+    "id": "official-h27",
+    "name": "Frittata aux poivrons",
+    "en": "pepper frittata in a skillet"
+  },
+  {
+    "id": "official-h28",
+    "name": "Tartare de saumon aux câpres",
+    "en": "salmon tartare with capers"
+  },
+  {
+    "id": "official-h29",
+    "name": "Thon basquaise",
+    "en": "Basque tuna with peppers and tomatoes"
+  },
+  {
+    "id": "official-h30",
+    "name": "Poisson grillé sauce moutarde",
+    "en": "grilled white fish with mustard sauce"
+  },
+  {
+    "id": "official-h31",
+    "name": "Salade de chou-fleur, haricots et œuf",
+    "en": "cauliflower salad with beans and egg"
+  },
+  {
+    "id": "official-h32",
+    "name": "Œufs cocotte piperade",
+    "en": "eggs baked in piperade pepper stew"
+  },
+  {
+    "id": "official-h33",
+    "name": "Maquereaux au four",
+    "en": "oven-baked mackerel with lemon and herbs"
+  },
+  {
+    "id": "official-h34",
+    "name": "Brochettes de poulet chermoula",
+    "en": "chermoula chicken skewers"
+  },
+  {
+    "id": "official-h35",
+    "name": "Cabillaud aux poivrons et olives",
+    "en": "baked cod with peppers and olives"
+  },
+  {
+    "id": "official-h36",
+    "name": "Saumon à la chermoula",
+    "en": "chermoula salmon fillet"
+  },
+  {
+    "id": "official-h37",
+    "name": "Tomate-œuf cocotte",
+    "en": "baked eggs in roasted tomatoes"
+  },
+  {
+    "id": "official-h38",
+    "name": "Sardines à la plancha",
+    "en": "plancha-grilled sardines with lemon"
+  },
+  {
+    "id": "official-h39",
+    "name": "Gaspacho andalou",
+    "en": "Andalusian tomato gazpacho in a bowl"
+  },
+  {
+    "id": "official-h40",
+    "name": "Salade niçoise au thon",
+    "en": "Niçoise salad with tuna, egg, green beans and olives"
+  },
+  {
+    "id": "official-h41",
+    "name": "Caponata d’aubergines",
+    "en": "Sicilian eggplant caponata"
+  },
+  {
+    "id": "official-h42",
+    "name": "Poulet piccata au citron",
+    "en": "chicken piccata with lemon and capers"
+  },
+  {
+    "id": "official-h43",
+    "name": "Salade de lentilles, artichaut et truite",
+    "en": "lentil salad with artichoke and trout"
+  },
+  {
+    "id": "official-h44",
+    "name": "Couscous de la mer",
+    "en": "seafood couscous with shrimp and fish"
+  },
+  {
+    "id": "official-h45",
+    "name": "Poulet basquaise léger",
+    "en": "light Basque chicken with peppers"
+  },
+  {
+    "id": "official-h46",
+    "name": "Salade César légère au poulet",
+    "en": "light chicken Caesar salad"
+  },
+  {
+    "id": "official-h47",
+    "name": "Gaspacho de courgettes au basilic",
+    "en": "zucchini basil gazpacho"
+  },
+  {
+    "id": "official-h48",
+    "name": "Tian de légumes",
+    "en": "Provençal vegetable tian, sliced and baked"
+  },
+  {
+    "id": "official-h49",
+    "name": "Poulet aux épices, courgettes et câpres",
+    "en": "spiced chicken with zucchini and capers"
+  },
+  {
+    "id": "official-h50",
+    "name": "Courgettes farcies à la dinde",
+    "en": "zucchini stuffed with turkey"
+  },
+  {
+    "id": "official-h51",
+    "name": "Brochettes de poulet à l’orientale",
+    "en": "Oriental chicken skewers with vegetables"
+  },
+  {
+    "id": "official-h52",
+    "name": "Salade de poulet aux saveurs vietnamiennes",
+    "en": "Vietnamese-style chicken salad with herbs"
+  },
+  {
+    "id": "official-h53",
+    "name": "Cacik de concombre au yaourt",
+    "en": "Turkish cacik cucumber yogurt salad"
+  },
+  {
+    "id": "official-h54",
+    "name": "Brochettes de poulet moutarde-estragon",
+    "en": "mustard-tarragon chicken skewers"
+  },
+  {
+    "id": "official-h55",
+    "name": "Axoa de dinde",
+    "en": "Basque axoa turkey stew with peppers"
+  },
+  {
+    "id": "official-h56",
+    "name": "Brochettes de poulet soja-gingembre",
+    "en": "soy-ginger chicken skewers"
+  },
+  {
+    "id": "official-h57",
+    "name": "Coleslaw léger",
+    "en": "light cabbage coleslaw"
+  },
+  {
+    "id": "official-h58",
+    "name": "Papillote de lieu aux petits légumes",
+    "en": "pollock in parchment with baby vegetables"
+  },
+  {
+    "id": "official-h59",
+    "name": "Filet de poulet mariné citron et épices",
+    "en": "lemon-spice marinated chicken fillet"
+  },
+  {
+    "id": "official-h60",
+    "name": "Gratin de courgettes et carottes",
+    "en": "zucchini and carrot gratin"
+  },
+  {
+    "id": "official-h61",
+    "name": "Salade lentilles et sardines",
+    "en": "lentil salad with sardines"
+  },
+  {
+    "id": "official-h62",
+    "name": "Salade haricots verts et pomme de terre",
+    "en": "green bean and potato salad"
+  },
+  {
+    "id": "official-h63",
+    "name": "Ceviche de crevettes aux poivrons",
+    "en": "shrimp ceviche with peppers"
+  },
+  {
+    "id": "official-h64",
+    "name": "Salade pois chiches, tomate, concombre et feta",
+    "en": "chickpea salad with tomato, cucumber and feta"
+  },
+  {
+    "id": "official-h65",
+    "name": "Curry de légumes et pois chiches",
+    "en": "vegetable and chickpea curry"
+  },
+  {
+    "id": "official-h66",
+    "name": "Soupe de haricots blancs et légumes",
+    "en": "white bean and vegetable soup"
+  },
+  {
+    "id": "official-h67",
+    "name": "Curry de lentilles vertes et légumes",
+    "en": "green lentil vegetable curry"
+  },
+  {
+    "id": "official-h68",
+    "name": "Dahl de lentilles corail",
+    "en": "red lentil dahl in a bowl"
+  },
+  {
+    "id": "official-h69",
+    "name": "Bolognaise de lentilles et champignons",
+    "en": "lentil and mushroom bolognese on pasta"
+  },
+  {
+    "id": "official-h70",
+    "name": "Poisson au citron en papillote",
+    "en": "lemon fish in an opened parchment papillote"
+  },
+  {
+    "id": "official-h71",
+    "name": "Blanc de poulet au four",
+    "en": "oven-baked chicken breast with herbs"
+  },
+  {
+    "id": "official-h72",
+    "name": "Nouilles sautées aux légumes sauce soja",
+    "en": "stir-fried noodles with vegetables and soy sauce"
+  },
+  {
+    "id": "official-h73",
+    "name": "Curry thaï de légumes au lait de coco",
+    "en": "Thai vegetable curry with coconut milk"
+  },
+  {
+    "id": "official-h74",
+    "name": "Velouté de courgette au fromage frais",
+    "en": "creamy zucchini soup with fresh cheese"
+  },
+  {
+    "id": "official-h75",
+    "name": "Soupe de butternut et lentilles corail",
+    "en": "butternut and red lentil soup"
+  },
+  {
+    "id": "official-h76",
+    "name": "Harira aux pois chiches",
+    "en": "Moroccan harira soup with chickpeas"
+  },
+  {
+    "id": "official-h77",
+    "name": "Crevettes sautées à l’ail",
+    "en": "garlic sautéed shrimp"
+  },
+  {
+    "id": "official-h78",
+    "name": "Salade de betterave, yaourt et noix",
+    "en": "beet salad with yogurt and walnuts"
+  },
+  {
+    "id": "official-h79",
+    "name": "Salade de concombre, pois chiches et feta",
+    "en": "cucumber, chickpea and feta salad"
+  },
+  {
+    "id": "official-h80",
+    "name": "Salade de betterave, céréales et orange",
+    "en": "beet, grain and orange salad"
+  },
+  {
+    "id": "official-h81",
+    "name": "Pancakes banane et avoine",
+    "en": "banana oat pancakes with fruit"
+  },
+  {
+    "id": "official-h82",
+    "name": "Boulettes de poulet aux herbes",
+    "en": "herb chicken meatballs"
+  },
+  {
+    "id": "official-h83",
+    "name": "Bowl poulet citron et quinoa",
+    "en": "lemon chicken quinoa bowl"
+  },
+  {
+    "id": "official-h84",
+    "name": "Saumon méditerranéen au four",
+    "en": "Mediterranean baked salmon with tomatoes and olives"
+  },
+  {
+    "id": "official-h85",
+    "name": "Pâtes aux crevettes à l’ail",
+    "en": "garlic shrimp pasta"
+  },
+  {
+    "id": "official-h86",
+    "name": "Poulet et légumes à la plaque",
+    "en": "sheet-pan chicken and vegetables"
+  },
+  {
+    "id": "official-h87",
+    "name": "Poivrons farcis méditerranéens",
+    "en": "Mediterranean stuffed peppers"
+  },
+  {
+    "id": "official-h88",
+    "name": "Poulet et pois chiches à la poêle",
+    "en": "skillet chicken with chickpeas"
+  },
+  {
+    "id": "official-h89",
+    "name": "Cabillaud et asperges rôtis",
+    "en": "roasted cod with asparagus"
+  },
+  {
+    "id": "official-h90",
+    "name": "Bowl crevettes et quinoa",
+    "en": "shrimp and quinoa bowl"
+  },
+  {
+    "id": "official-h91",
+    "name": "Poulet et haricots blancs",
+    "en": "chicken with white beans"
+  },
+  {
+    "id": "official-h92",
+    "name": "Bowl de thon méditerranéen",
+    "en": "Mediterranean tuna bowl"
+  },
+  {
+    "id": "official-h93",
+    "name": "Ragoût de dinde aux lentilles",
+    "en": "turkey and lentil stew"
+  },
+  {
+    "id": "official-h94",
+    "name": "Crevettes méditerranéennes à l’ail",
+    "en": "Mediterranean garlic shrimp with tomato"
+  },
+  {
+    "id": "official-h95",
+    "name": "Salade de poulet grillé méditerranéenne",
+    "en": "Mediterranean grilled chicken salad"
+  },
+  {
+    "id": "official-h96",
+    "name": "Buddha bowl aux pois chiches",
+    "en": "chickpea buddha bowl with quinoa and vegetables"
+  },
+  {
+    "id": "official-h97",
+    "name": "Overnight porridge",
+    "en": "overnight oats with fruit in a glass jar"
+  },
+  {
+    "id": "official-h98",
+    "name": "Soupe de lentilles corail",
+    "en": "red lentil soup"
+  },
+  {
+    "id": "official-h99",
+    "name": "Velouté lentilles corail et potiron",
+    "en": "red lentil and pumpkin velouté"
+  },
+  {
+    "id": "official-h100",
+    "name": "Nouilles sautées au poulet et légumes",
+    "en": "stir-fried noodles with chicken and vegetables"
+  },
+  {
+    "id": "official-porridge-pomme-cannelle",
+    "name": "Porridge pomme-cannelle proteine",
+    "en": "a creamy oat porridge topped with fresh diced apple, a dusting of cinnamon and a drizzle of honey"
+  },
+  {
+    "id": "official-bowl-skyr-myrtilles",
+    "name": "Bowl skyr, myrtilles et amandes",
+    "en": "a thick white skyr breakfast bowl topped with fresh blueberries, toasted oats and chopped almonds"
+  },
+  {
+    "id": "official-omelette-epinards-feta",
+    "name": "Omelette epinards et feta",
+    "en": "a folded fluffy omelette with wilted spinach and crumbled feta, cracked pepper on top"
+  },
+  {
+    "id": "official-pain-perdu-proteine",
+    "name": "Pain perdu proteine au pain complet",
+    "en": "golden pan-fried wholemeal French toast slices topped with banana coins and cinnamon"
+  },
+  {
+    "id": "official-smoothie-bowl-banane-cacao",
+    "name": "Smoothie bowl banane-cacao",
+    "en": "a thick chocolate banana smoothie bowl topped with banana slices and rolled oats"
+  },
+  {
+    "id": "official-gouter-skyr-fraises-granola",
+    "name": "Skyr, fraises et granola maison",
+    "en": "a glass of thick white skyr layered with fresh quartered strawberries and crunchy homemade granola clusters"
+  },
+  {
+    "id": "official-gouter-pomme-beurre-cacahuete",
+    "name": "Pomme, beurre de cacahuete et chocolat noir",
+    "en": "crisp apple wedges spread with peanut butter and sprinkled with grated dark chocolate"
+  },
+  {
+    "id": "official-energy-balls-dattes-amandes",
+    "name": "Energy balls dattes, amandes et cacao",
+    "en": "a small pile of rustic no-bake date and almond cocoa energy balls"
+  },
+  {
+    "id": "official-pudding-chia-framboise",
+    "name": "Pudding de chia aux framboises",
+    "en": "a chia seed pudding in a glass verrine topped with crushed fresh raspberries"
+  },
+  {
+    "id": "official-tartine-fromage-blanc-concombre",
+    "name": "Tartine fromage blanc, concombre et chia",
+    "en": "toasted wholemeal bread slices spread with herbed white cheese, topped with thin cucumber ribbons and chia seeds"
+  }
+]

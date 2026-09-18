@@ -31,7 +31,7 @@ export function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className={cn('glass inline-flex gap-1 rounded-full p-1', className)}
+      className={cn('segmented-track inline-flex rounded-full p-[3px]', className)}
     >
       {options.map((option) => {
         const active = option.value === value;
@@ -51,7 +51,7 @@ export function Segmented<T extends string>({
               <motion.span
                 layoutId={`segmented-${groupId}`}
                 transition={transitions.spring}
-                className="absolute inset-0 rounded-full bg-white shadow-soft"
+                className="segmented-thumb absolute inset-0 rounded-full"
               />
             ) : null}
             <span className="relative flex flex-col items-center leading-tight">

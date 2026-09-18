@@ -72,15 +72,16 @@ export function PlannedMealModal({
       onClose={onClose}
       footer={
         item ? (
-          validated ? (
-            <Button variant="glass" loading={loading} onClick={onCancelValidation}>
-              Annuler la validation
-            </Button>
-          ) : (
+          <>
+            {validated ? (
+              <Button variant="glass" loading={loading} onClick={onCancelValidation}>
+                Annuler la validation
+              </Button>
+            ) : null}
             <Button loading={loading} onClick={onChangeRecipe}>
               Changer de recette
             </Button>
-          )
+          </>
         ) : null
       }
     >

@@ -5,6 +5,7 @@ export type {
   QuantityUnit,
   NutrientValueKind,
   RecipeStatus,
+  RecipeSource,
   UxCategory,
   NutrientGoalMode,
   StorageArea,

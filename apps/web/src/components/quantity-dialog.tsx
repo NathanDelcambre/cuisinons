@@ -8,6 +8,7 @@ import {
   STORAGE_AREA_LABELS,
   UNIT_LABELS,
   defaultStorageArea,
+  kitchenLabel,
   type QuantityUnit,
   type StorageArea,
   type UxCategory,
@@ -59,7 +60,7 @@ export function QuantityDialog({
   return (
     <Modal
       open={ingredient !== null}
-      title={ingredient?.nameFr ?? ''}
+      title={ingredient ? kitchenLabel(ingredient.nameFr) : ''}
       description="Quantité à enregistrer"
       onClose={onClose}
       footer={

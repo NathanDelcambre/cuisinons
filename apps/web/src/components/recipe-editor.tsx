@@ -3,8 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Carrot, Check, Plus, Trash2, X } from 'lucide-react';
-import { QUANTITY_UNITS, UNIT_LABELS, type QuantityUnit } from '@cuisinons/shared';
+import { Carrot, Check, Flame, Plus, Search, Timer, Trash2, Users, X } from 'lucide-react';
+import { QUANTITY_UNITS, UNIT_LABELS, kitchenLabel, type QuantityUnit } from '@cuisinons/shared';
 import {
   Button,
   Card,
@@ -20,7 +20,9 @@ import {
 import { apiJson } from '@/lib/api';
 import { routes } from '@/lib/routes';
 import { IngredientPicker } from './ingredient-picker';
+import { IngredientIcon } from './ingredient-icon';
 import { RecipePhotoField } from './recipe-photo-field';
+import { StepDescriptionField } from './step-mentions';
 
 type Line = {
   ingredientId: string;
@@ -52,6 +54,8 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
   const [picker, setPicker] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [equipmentOpen, setEquipmentOpen] = useState(false);
+  const [equipmentQuery, setEquipmentQuery] = useState('');
   const tags = useQuery({
     queryKey: ['tags'],
     queryFn: () => apiJson<Array<{ id: string; label: string }>>('/api/bff/tags'),
@@ -69,7 +73,7 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
         const ingredient = line.ingredient as { id?: string; nameFr?: string; iconUrl?: string | null };
         return {
           ingredientId: String(line.ingredientId ?? ingredient.id ?? ''),
-          name: String(ingredient.nameFr ?? ''),
+          name: kitchenLabel(String(ingredient.nameFr ?? '')),
           iconUrl: ingredient.iconUrl ?? null,
           quantity: Number(line.quantity),
           unit: line.unit as QuantityUnit,
@@ -111,6 +115,9 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
     [name, description, servings, prep, cook, lines, steps, tagIds, equipmentIds, existing],
   );
 
+  const distinctIngredients = new Set(lines.map((line) => line.ingredientId).filter(Boolean)).size;
+  const canSave = Boolean(name.trim()) && distinctIngredients >= 2;
+
   async function save() {
     setSaving(true);
     setError(null);
@@ -132,7 +139,7 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
   }
 
   const saveButton = (
-    <Button icon={Check} disabled={!name} loading={saving} onClick={() => void save()}>
+    <Button icon={Check} disabled={!canSave} loading={saving} onClick={() => void save()}>
       Enregistrer
     </Button>
   );
@@ -171,40 +178,80 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
             />
           )}
         </Field>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Field label="Portions">
+        <div className="grid grid-cols-3 gap-3">
+          <Field
+            label={
+              <span className="inline-flex items-center gap-1.5">
+                <Users className="size-3.5 text-ink-400" aria-hidden />
+                Portions
+              </span>
+            }
+          >
             {({ id }) => (
-              <Input
-                id={id}
-                type="number"
-                min={1}
-                value={servings}
-                onChange={(e) => setServings(Number(e.target.value))}
-              />
+              <div className="relative">
+                <Input
+                  id={id}
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  value={servings}
+                  className="h-11 min-h-11 pr-14"
+                  onChange={(e) => setServings(Number(e.target.value))}
+                />
+                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[11px] text-ink-400">
+                  pers.
+                </span>
+              </div>
             )}
           </Field>
-          <Field label="Préparation" hint="minutes">
-            {({ id, describedBy }) => (
-              <Input
-                id={id}
-                aria-describedby={describedBy}
-                type="number"
-                min={0}
-                value={prep ?? ''}
-                onChange={(e) => setPrep(e.target.value ? Number(e.target.value) : null)}
-              />
+          <Field
+            label={
+              <span className="inline-flex items-center gap-1.5">
+                <Timer className="size-3.5 text-ink-400" aria-hidden />
+                Prépa
+              </span>
+            }
+          >
+            {({ id }) => (
+              <div className="relative">
+                <Input
+                  id={id}
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  value={prep ?? ''}
+                  className="h-11 min-h-11 pr-10"
+                  onChange={(e) => setPrep(e.target.value ? Number(e.target.value) : null)}
+                />
+                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[11px] text-ink-400">
+                  min
+                </span>
+              </div>
             )}
           </Field>
-          <Field label="Cuisson" hint="minutes">
-            {({ id, describedBy }) => (
-              <Input
-                id={id}
-                aria-describedby={describedBy}
-                type="number"
-                min={0}
-                value={cook ?? ''}
-                onChange={(e) => setCook(e.target.value ? Number(e.target.value) : null)}
-              />
+          <Field
+            label={
+              <span className="inline-flex items-center gap-1.5">
+                <Flame className="size-3.5 text-ink-400" aria-hidden />
+                Cuisson
+              </span>
+            }
+          >
+            {({ id }) => (
+              <div className="relative">
+                <Input
+                  id={id}
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  value={cook ?? ''}
+                  className="h-11 min-h-11 pr-10"
+                  onChange={(e) => setCook(e.target.value ? Number(e.target.value) : null)}
+                />
+                <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[11px] text-ink-400">
+                  min
+                </span>
+              </div>
             )}
           </Field>
         </div>
@@ -233,18 +280,26 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
             {lines.map((line, index) => (
               <li
                 key={`${line.ingredientId}-${index}`}
-                className="grid grid-cols-[1fr_auto] items-center gap-2 rounded-xl border border-white/70 bg-white/70 p-2.5 sm:grid-cols-[1fr_5.5rem_8rem_auto]"
+                className="min-w-0 rounded-xl border border-white/70 bg-white/70 p-2.5 sm:grid sm:grid-cols-[1fr_5.5rem_8rem_auto] sm:items-center sm:gap-2"
               >
-                <span className="flex min-w-0 items-center gap-2.5 text-sm text-ink-900">
-                  {line.iconUrl ? (
-                    <img src={line.iconUrl} alt="" width={28} height={28} className="size-7 shrink-0" />
-                  ) : null}
-                  <span className="truncate">{line.name}</span>
-                </span>
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <IngredientIcon src={line.iconUrl} />
+                  <span className="min-w-0 flex-1 truncate text-sm text-ink-900">{line.name}</span>
+                  <IconButton
+                    icon={Trash2}
+                    label={`Retirer ${line.name}`}
+                    size="sm"
+                    variant="ghost"
+                    className="shrink-0 text-ink-400 hover:text-tomato-500 sm:hidden"
+                    onClick={() => setLines((all) => all.filter((_, i) => i !== index))}
+                  />
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2 sm:mt-0 sm:contents">
                 <Input
                   value={line.displayQuantity}
                   aria-label={`Quantité de ${line.name}`}
-                  className="h-10 px-3 text-sm"
+                  className="h-11 min-w-0 px-3 text-sm"
+                  inputMode="decimal"
                   onChange={(e) =>
                     setLines((all) =>
                       all.map((l, i) =>
@@ -262,7 +317,7 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
                 <Select
                   value={line.unit}
                   aria-label={`Unité de ${line.name}`}
-                  className="h-10 min-h-10 text-sm"
+                  className="h-11 min-h-11 min-w-0 text-sm"
                   options={QUANTITY_UNITS.map((unit) => ({
                     value: unit,
                     label: UNIT_LABELS[unit],
@@ -271,45 +326,48 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
                     setLines((all) => all.map((l, i) => (i === index ? { ...l, unit: next } : l)))
                   }
                 />
+                </div>
                 <IconButton
                   icon={Trash2}
                   label={`Retirer ${line.name}`}
                   size="sm"
                   variant="ghost"
-                  className="text-ink-400 hover:text-tomato-500"
+                  className="hidden text-ink-400 hover:text-tomato-500 sm:inline-flex"
                   onClick={() => setLines((all) => all.filter((_, i) => i !== index))}
                 />
               </li>
             ))}
           </ul>
         )}
+        {distinctIngredients < 2 ? (
+          <p role="alert" className="text-sm font-medium text-tomato-500">
+            Ajoute au moins deux ingrédients distincts.
+          </p>
+        ) : null}
       </Card>
 
       <Card>
         <h2 className="mb-3 font-display text-base font-semibold tracking-[-0.01em] text-ink-900">Ustensiles</h2>
-        <div className="flex flex-wrap gap-2">
-          {(equipment.data ?? []).map((item) => (
-            <Chip
-              key={item.id}
-              selected={equipmentIds.includes(item.id)}
-              onClick={() =>
-                setEquipmentIds((ids) =>
-                  ids.includes(item.id) ? ids.filter((id) => id !== item.id) : [...ids, item.id],
-                )
-              }
-            >
-              <img
-                src={`/equipment/${item.slug}.png`}
-                alt=""
-                width={24}
-                height={24}
-                className="size-6"
-                decoding="async"
-              />
-              {item.label}
-            </Chip>
-          ))}
+        <div className="mb-3">
+          <Input
+            icon={Search}
+            value={equipmentQuery}
+            onChange={(e) => setEquipmentQuery(e.target.value)}
+            placeholder="Filtrer les ustensiles"
+            aria-label="Filtrer les ustensiles"
+            className="h-11"
+          />
         </div>
+        <EquipmentChips
+          items={equipment.data ?? []}
+          selectedIds={equipmentIds}
+          query={equipmentQuery}
+          expanded={equipmentOpen}
+          onToggleExpand={() => setEquipmentOpen((v) => !v)}
+          onToggle={(id) =>
+            setEquipmentIds((ids) => (ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id]))
+          }
+        />
       </Card>
 
       <Card className="space-y-3">
@@ -322,12 +380,13 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
             >
               {index + 1}
             </span>
-            <Textarea
+            <StepDescriptionField
               value={step.description}
-              aria-label={`Étape ${String(index + 1)}`}
-              placeholder={`Étape ${String(index + 1)}`}
-              onChange={(e) =>
-                setSteps((all) => all.map((s, i) => (i === index ? { ...s, description: e.target.value } : s)))
+              label={`Étape ${String(index + 1)}`}
+              placeholder={`Étape ${String(index + 1)} — tape / pour un ingrédient`}
+              ingredients={lines.map((line) => ({ id: line.ingredientId, name: line.name }))}
+              onChange={(next) =>
+                setSteps((all) => all.map((s, i) => (i === index ? { ...s, description: next } : s)))
               }
             />
             <IconButton
@@ -383,7 +442,7 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
             ...all,
             {
               ingredientId: ingredient.id,
-              name: ingredient.nameFr,
+              name: kitchenLabel(ingredient.nameFr),
               iconUrl: ingredient.iconUrl,
               quantity: 100,
               unit: 'G',
@@ -394,6 +453,80 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
           setPicker(false);
         }}
       />
+    </div>
+  );
+}
+
+const COMMON_EQUIPMENT = [
+  'poele',
+  'casserole',
+  'four',
+  'couteau',
+  'saladier',
+  'planche',
+  'fouet',
+  'spatule',
+  'passoire',
+  'air-fryer',
+];
+
+function EquipmentChips({
+  items,
+  selectedIds,
+  query,
+  expanded,
+  onToggleExpand,
+  onToggle,
+}: {
+  items: Array<{ id: string; label: string; slug: string }>;
+  selectedIds: string[];
+  query: string;
+  expanded: boolean;
+  onToggleExpand: () => void;
+  onToggle: (id: string) => void;
+}) {
+  const needle = query.trim().toLowerCase();
+  const filtered = items.filter((item) => {
+    if (!needle) return true;
+    return item.label.toLowerCase().includes(needle) || item.slug.includes(needle);
+  });
+  const selected = filtered.filter((item) => selectedIds.includes(item.id));
+  const common = filtered.filter(
+    (item) => !selectedIds.includes(item.id) && COMMON_EQUIPMENT.includes(item.slug),
+  );
+  const rest = filtered.filter(
+    (item) => !selectedIds.includes(item.id) && !COMMON_EQUIPMENT.includes(item.slug),
+  );
+  const visible = needle || expanded ? [...selected, ...common, ...rest] : [...selected, ...common];
+  const hiddenCount = rest.length;
+
+  return (
+    <div>
+      <div className="flex flex-wrap gap-2">
+        {visible.map((item) => (
+          <Chip key={item.id} selected={selectedIds.includes(item.id)} onClick={() => onToggle(item.id)}>
+            <img
+              src={`/equipment/${item.slug}.png`}
+              alt=""
+              width={24}
+              height={24}
+              className="size-6"
+              decoding="async"
+            />
+            {item.label}
+          </Chip>
+        ))}
+      </div>
+      {!needle && hiddenCount > 0 ? (
+        <button
+          type="button"
+          className="mt-3 text-sm font-medium text-sage-700 underline-offset-2 hover:underline"
+          aria-expanded={expanded}
+          onClick={onToggleExpand}
+        >
+          {expanded ? 'Voir moins' : 'Voir plus'}
+        </button>
+      ) : null}
     </div>
   );
 }

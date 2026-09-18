@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
+  catalogRecipeToArchetype,
   suggestDishes,
   type ComposedDish,
   type Diet,
@@ -27,13 +28,21 @@ export class SuggestionsService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async preview(userId: string, input: SuggestInput) {
-    const [pantry, tags, equipment] = await Promise.all([
+    const [pantry, tags, equipment, catalogRows] = await Promise.all([
       this.prisma.pantryItem.findMany({
         where: { userId },
         include: { ingredient: { include: { conversions: true } } },
       }),
       this.prisma.tag.findMany({ select: { id: true, slug: true } }),
       this.prisma.equipment.findMany({ select: { id: true, slug: true } }),
+      this.prisma.recipe.findMany({
+        where: { source: 'CATALOG', status: 'PUBLISHED' },
+        include: {
+          ingredients: { include: { ingredient: true }, orderBy: { sortOrder: 'asc' } },
+          tags: { include: { tag: true } },
+          equipment: { include: { equipment: true } },
+        },
+      }),
     ]);
 
     const stock: PantryIngredient[] = pantry.map((item) => ({
@@ -64,22 +73,59 @@ export class SuggestionsService {
 
     const tagBySlug = new Map(tags.map((tag) => [tag.slug, tag.id]));
     const equipmentBySlug = new Map(equipment.map((item) => [item.slug, item.id]));
-    const result = suggestDishes(stock, filters);
-
-    return {
-      dishes: result.dishes.map((dish) => this.present(dish, tagBySlug, equipmentBySlug)),
-      shortage: result.shortage
-        ? {
-            ...result.shortage,
-            alternative: result.shortage.alternative
-              ? {
-                  ...result.shortage.alternative,
-                  dish: this.present(result.shortage.alternative.dish, tagBySlug, equipmentBySlug),
-                }
-              : null,
-          }
-        : null,
+    const catalog = catalogRows.map((recipe) =>
+      catalogRecipeToArchetype({
+        id: recipe.id,
+        name: recipe.name,
+        description: recipe.description,
+        prepTimeMinutes: recipe.prepTimeMinutes,
+        cookTimeMinutes: recipe.cookTimeMinutes,
+        tagSlugs: recipe.tags.map((row) => row.tag.slug),
+        equipmentSlugs: recipe.equipment.map((row) => row.equipment.slug),
+        ingredients: recipe.ingredients.map((line) => ({
+          nameFr: line.ingredient.nameFr,
+          uxCategory: line.ingredient.uxCategory,
+        })),
+      }),
+    );
+    const pantrySummary = {
+      count: pantry.length,
+      usableCount: stock.length,
+      names: pantry.slice(0, 8).map((item) => item.ingredient.nameFr),
     };
+
+    try {
+      const result = suggestDishes(stock, filters, catalog);
+      return {
+        pantry: pantrySummary,
+        dishes: result.dishes.map((dish) => this.present(dish, tagBySlug, equipmentBySlug)),
+        shortage: result.shortage
+          ? {
+              ...result.shortage,
+              alternative: result.shortage.alternative
+                ? {
+                    ...result.shortage.alternative,
+                    dish: this.present(result.shortage.alternative.dish, tagBySlug, equipmentBySlug),
+                  }
+                : null,
+            }
+          : null,
+      };
+    } catch {
+      return {
+        pantry: pantrySummary,
+        dishes: [],
+        shortage: {
+          title: stock.length === 0 ? 'Réserves vides' : 'Aucun plat avec tes réserves',
+          explanation:
+            stock.length === 0
+              ? 'On ne compose un plat qu’avec tes réserves. Ajoute d’abord ce que tu as dans le frigo ou le placard.'
+              : 'On compose uniquement à partir de ton inventaire. Assouplis les filtres, ou complète tes réserves.',
+          missing: [],
+          alternative: null,
+        },
+      };
+    }
   }
 
   /**

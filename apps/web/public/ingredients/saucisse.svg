@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="saucisse">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="hsl(328 42% 64%)"/>
-      <stop offset="1" stop-color="hsl(8 38% 88%)"/>
-    </linearGradient>
-  </defs>
-  <circle cx="64" cy="64" r="54" fill="url(#g)" />
-  <ellipse cx="64" cy="78" rx="36" ry="18" fill="hsla(0,0%,100%,0.55)"/>
-  <path d="M44 54c8-18 32-18 40 0" fill="none" stroke="hsla(30,20%,25%,0.35)" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="58" cy="52" r="6" fill="hsla(0,0%,100%,0.8)"/>
+  <circle cx="64" cy="64" r="56" fill="#f4f2ef"/>
+  <circle cx="64" cy="64" r="56" fill="none" stroke="#f2cdb8" stroke-width="1.25" opacity=".7"/>
+  <path d="M34 72c8-16 20-20 30-8 10-16 28-16 36 2 4 10-4 18-16 16-12 10-28 8-36-2-8 6-18 4-14-8z" fill="#c45c4a"/>
+    <path d="M50 66c6 6 12 6 18 0M70 64c6 6 10 6 16 0" stroke="#2f2b27" stroke-width="2" opacity=".25"/>
 </svg>

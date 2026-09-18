@@ -77,6 +77,53 @@ describe('optimizer', () => {
     expect(result.penaltyAfter).toBeLessThanOrEqual(result.penaltyBefore);
   });
 
+  it('propose d’abord un goûter pour le SNACK, même si un plat a de meilleures macros', () => {
+    const dessert: MacroNutrients = { kcal: 90, protein: 8, carbs: 10, fat: 2, fiber: 0 };
+    const result = optimizeDay({
+      meals: [
+        {
+          id: 'm1',
+          recipeId: 'r1',
+          recipeName: 'Poulet',
+          slot: 'LUNCH',
+          portions: 1,
+          perServing: chicken,
+          nutritionComplete: true,
+        },
+      ],
+      emptySlots: ['SNACK'],
+      recipes: [
+        {
+          id: 'main',
+          name: 'Bowl quinoa',
+          tags: ['plat-principal', 'healthy'],
+          perServing: { kcal: 120, protein: 20, carbs: 10, fat: 2, fiber: 0 },
+          nutritionComplete: true,
+        },
+        {
+          id: 'snack',
+          name: 'Skyr',
+          tags: ['gouter'],
+          perServing: dessert,
+          nutritionComplete: true,
+        },
+      ],
+      goals: {
+        calories: { mode: 'NONE', value: null, tolerance: null },
+        protein: { mode: 'AT_LEAST', value: 50, tolerance: null },
+        carbs: { mode: 'NONE', value: null, tolerance: null },
+        fat: { mode: 'NONE', value: null, tolerance: null },
+      },
+      prefs: {
+        minPortionMultiplier: 1,
+        maxPortionMultiplier: 1,
+        allowAutoAdd: true,
+        fillOnly: true,
+      },
+    });
+    expect(result.suggestedAdds[0]?.recipeName).toBe('Skyr');
+  });
+
   it('n’invente pas de macros pour une recette incomplète', () => {
     const result = optimizeDay({
       meals: [
@@ -111,5 +158,33 @@ describe('ciqual UX mapping', () => {
     expect(mapCiqualToUxCategory({ groupName: 'Fromages' })).toBe('CHEESES');
     expect(mapCiqualToUxCategory({ groupName: 'Légumes' })).toBe('VEGETABLES');
     expect(mapCiqualToUxCategory({ groupName: 'Inconnu spatial' })).toBe('OTHER');
+  });
+
+  it('ne mélange pas les rayons du groupe parent Ciqual 2025', () => {
+    const parent = 'fruits, légumes, légumineuses et oléagineux';
+    expect(mapCiqualToUxCategory({ groupName: parent, subGroupName: 'fruits' })).toBe('FRUITS');
+    expect(mapCiqualToUxCategory({ groupName: parent, subGroupName: 'légumes' })).toBe('VEGETABLES');
+    expect(mapCiqualToUxCategory({ groupName: parent, subGroupName: 'légumineuses' })).toBe('LEGUMES');
+    expect(
+      mapCiqualToUxCategory({
+        groupName: parent,
+        subGroupName: 'fruits à coque et graines oléagineuses',
+      }),
+    ).toBe('NUTS_SEEDS');
+    expect(
+      mapCiqualToUxCategory({
+        groupName: 'viandes, oeufs, poissons',
+        subGroupName: 'poissons crus',
+      }),
+    ).toBe('FISH');
+    expect(
+      mapCiqualToUxCategory({ groupName: 'viandes, oeufs, poissons', subGroupName: 'oeufs' }),
+    ).toBe('EGGS');
+    expect(
+      mapCiqualToUxCategory({
+        groupName: 'viandes, oeufs, poissons',
+        subGroupName: 'viandes crues',
+      }),
+    ).toBe('MEATS');
   });
 });

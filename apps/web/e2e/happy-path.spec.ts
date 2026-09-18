@@ -19,6 +19,12 @@ test('login, recette, note, planning, optimisation', async ({ page }) => {
     timeout: 15_000,
   });
   await page.keyboard.press('Enter');
+  await page.getByRole('button', { name: 'Ajouter', exact: true }).click();
+  await page.getByPlaceholder(/Rechercher/).fill('lait');
+  await expect(page.getByRole('button').filter({ hasText: /lait/i }).first()).toBeVisible({
+    timeout: 15_000,
+  });
+  await page.keyboard.press('Enter');
   await page.getByPlaceholder('Étape 1').fill('Battre et cuire.');
   // L'editeur expose le meme bouton en entete et en pied de formulaire.
   await page.getByRole('button', { name: 'Enregistrer' }).first().click();
@@ -30,7 +36,7 @@ test('login, recette, note, planning, optimisation', async ({ page }) => {
   await page.goto('/planning');
   await expect(page.getByText(/kcal/i).first()).toBeVisible();
   await page.getByRole('button', { name: 'Ajustement intelligent' }).click();
-  await expect(page.getByText(/Proposition visible|kcal|ajust/i).first()).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Ajustement intelligent' })).toBeVisible();
 });
 
 test('courses generees depuis le planning puis versees dans les reserves', async ({ page }) => {
@@ -44,6 +50,8 @@ test('courses generees depuis le planning puis versees dans les reserves', async
   await page.waitForURL('**/planning');
 
   await page.goto('/courses');
+  await page.getByRole('main').getByRole('button', { name: 'Générer mes courses' }).first().click();
+  await expect(page.getByRole('dialog', { name: 'Générer mes courses' })).toBeVisible();
   await page.getByRole('button', { name: 'Générer la liste' }).click();
   // « Tout cocher » n'apparait qu'avec au moins une ligne a acheter.
   await expect(page.getByRole('button', { name: 'Tout cocher' })).toBeVisible({ timeout: 15_000 });
@@ -71,4 +79,7 @@ test('proposer un plat s’ouvre depuis les recettes', async ({ page }) => {
   await expect(page).toHaveURL(/\/recettes(?:\?|$)/);
   await expect(page.getByRole('dialog', { name: 'Proposer un plat' })).toBeVisible();
   await expect(page.getByRole('radiogroup', { name: 'Régime' })).toBeVisible();
+  await expect(page.getByText('Proposition impossible')).toHaveCount(0);
+  await expect(page.getByText('Une erreur est survenue.')).toHaveCount(0);
+  await expect(page.getByText(/réserves/i).first()).toBeVisible();
 });

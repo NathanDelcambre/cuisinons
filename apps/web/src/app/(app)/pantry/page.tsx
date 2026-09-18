@@ -7,6 +7,7 @@ import {
   STORAGE_AREAS,
   STORAGE_AREA_LABELS,
   UNIT_LABELS,
+  kitchenLabel,
   type QuantityUnit,
   type StorageArea,
   type UxCategory,
@@ -23,6 +24,7 @@ import {
 } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 import { IngredientPicker } from '@/components/ingredient-picker';
+import { IngredientIcon } from '@/components/ingredient-icon';
 import { QuantityDialog, type PickedIngredient } from '@/components/quantity-dialog';
 
 const AREA_OPTIONS = STORAGE_AREAS.map((value) => ({ value, label: STORAGE_AREA_LABELS[value] }));
@@ -81,6 +83,7 @@ export default function PantryPage() {
       <PageHeader
         title="Réserves"
         description="Ton stock personnel. Il se remplit quand tu valides tes courses et se vide quand tu consommes un repas."
+        actionsBesideTitle
         actions={
           <Button variant="glass" icon={Plus} onClick={() => setPicker(true)}>
             Ajouter
@@ -170,25 +173,23 @@ function PantryRow({
   onRemove: () => void;
 }) {
   return (
-    <Card className="flex items-center gap-3 py-3">
-      {item.ingredient.iconUrl ? (
-        <img src={item.ingredient.iconUrl} alt="" width={28} height={28} className="size-7 shrink-0" />
-      ) : null}
-      <span className="min-w-0 flex-1 truncate text-sm text-ink-900">{item.ingredient.nameFr}</span>
-
+    <Card className="flex flex-wrap items-center gap-3 py-3">
+      <IngredientIcon src={item.ingredient.iconUrl} />
+      <span className="min-w-0 flex-1 truncate text-sm text-ink-900">{kitchenLabel(item.ingredient.nameFr)}</span>
+      <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
       <Select
-        className="h-9 min-h-9 w-36 shrink-0 pl-3 text-[13px]"
+        className="h-11 min-h-11 min-w-0 flex-1 sm:w-36 sm:flex-none sm:shrink-0 pl-3 text-[13px]"
         value={item.area}
         options={AREA_OPTIONS}
-        aria-label={`Rangement de ${item.ingredient.nameFr}`}
+        aria-label={`Rangement de ${kitchenLabel(item.ingredient.nameFr)}`}
         onChange={onArea}
       />
 
       <Input
-        className="tabular h-9 w-20 px-2 text-right"
+        className="tabular h-11 w-20 px-2 text-right"
         inputMode="decimal"
         defaultValue={String(item.quantity)}
-        aria-label={`Quantité de ${item.ingredient.nameFr}`}
+        aria-label={`Quantité de ${kitchenLabel(item.ingredient.nameFr)}`}
         onBlur={(e) => {
           const next = Number(e.target.value.replace(',', '.'));
           if (Number.isFinite(next) && next !== item.quantity) onQuantity(next);
@@ -198,11 +199,12 @@ function PantryRow({
 
       <IconButton
         icon={Trash2}
-        label={`Retirer ${item.ingredient.nameFr}`}
+        label={`Retirer ${kitchenLabel(item.ingredient.nameFr)}`}
         size="sm"
         variant="ghost"
         onClick={onRemove}
       />
+      </div>
     </Card>
   );
 }

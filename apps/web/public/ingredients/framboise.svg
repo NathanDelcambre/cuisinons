@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="framboise">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="hsl(40 42% 64%)"/>
-      <stop offset="1" stop-color="hsl(80 38% 88%)"/>
-    </linearGradient>
-  </defs>
-  <circle cx="64" cy="64" r="54" fill="url(#g)" />
-  <ellipse cx="64" cy="78" rx="28" ry="18" fill="hsla(0,0%,100%,0.55)"/>
-  <path d="M44 54c8-18 32-18 40 0" fill="none" stroke="hsla(30,20%,25%,0.35)" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="50" cy="52" r="6" fill="hsla(0,0%,100%,0.8)"/>
+  <circle cx="64" cy="64" r="56" fill="#f4f2ef"/>
+  <circle cx="64" cy="64" r="56" fill="none" stroke="#f2cdb8" stroke-width="1.25" opacity=".7"/>
+  <circle cx="54" cy="58" r="10" fill="#c45c4a"/><circle cx="70" cy="56" r="10" fill="#d97767"/>
+    <circle cx="52" cy="72" r="9" fill="#d97767"/><circle cx="68" cy="74" r="10" fill="#c45c4a"/>
+    <circle cx="62" cy="64" r="9" fill="#c45c4a"/>
+    <path d="M60 44c2 8 8 10 12 8" fill="none" stroke="#648374" stroke-width="3" stroke-linecap="round"/>
 </svg>

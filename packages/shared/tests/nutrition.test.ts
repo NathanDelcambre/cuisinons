@@ -3,6 +3,7 @@ import { formatQuantity, parseQuantity } from '../src/nutrition/fractions.js';
 import { computeRecipeNutrition } from '../src/nutrition/macros.js';
 import { parseCiqualNutrient, nutrientAmountForMath } from '../src/nutrition/nutrient-value.js';
 import { resolveGrams } from '../src/nutrition/conversions.js';
+import { estimateDailyMacros } from '../src/nutrition/body-estimate.js';
 
 describe('fractions', () => {
   it('parse 1/2, 0,5 et mixte', () => {
@@ -95,6 +96,30 @@ describe('macros', () => {
     expect(result.total.kcal).toBeCloseTo(121.365);
     expect(result.total.fat).toBeCloseTo(13.4865);
     expect(result.total.carbs).toBe(0);
+  });
+});
+
+describe('body estimate', () => {
+  it('propose des macros cohérentes pour un maintien', () => {
+    const result = estimateDailyMacros({ weightKg: 80, heightCm: 180, targetWeightKg: null });
+    expect(result).not.toBeNull();
+    expect(result!.stable).toBe(true);
+    expect(result!.protein).toBe(145);
+    expect(result!.fat).toBe(70);
+    expect(result!.kcal).toBe(result!.protein * 4 + result!.carbs * 4 + result!.fat * 9);
+    expect(result!.kcal).toBeGreaterThan(2000);
+    expect(result!.kcal).toBeLessThan(3000);
+  });
+
+  it('abaisse les calories si le poids visé est plus bas', () => {
+    const keep = estimateDailyMacros({ weightKg: 80, heightCm: 180, targetWeightKg: null })!;
+    const lose = estimateDailyMacros({ weightKg: 80, heightCm: 180, targetWeightKg: 74 })!;
+    expect(lose.stable).toBe(false);
+    expect(lose.kcal).toBeLessThan(keep.kcal);
+  });
+
+  it('refuse des mesures hors plage', () => {
+    expect(estimateDailyMacros({ weightKg: 10, heightCm: 180, targetWeightKg: null })).toBeNull();
   });
 });
 

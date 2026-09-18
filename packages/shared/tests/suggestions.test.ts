@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { culinaryName, complementDe, foldText, joinFrench } from '../src/suggestions/names.js';
-import { HEALTHY_RECIPES } from '../src/suggestions/catalog.js';
+import { culinaryName, complementDe, foldText, joinFrench, kitchenLabel } from '../src/suggestions/names.js';
+import { collapseKitchenIngredients } from '../src/ciqual/kitchen.js';
+import { catalogRecipeToArchetype } from '../src/suggestions/from-recipe.js';
 import {
   DEFAULT_SUGGESTION_FILTERS,
   suggestDishes,
@@ -118,6 +119,27 @@ describe('noms de plat', () => {
     expect(foldText('Œuf de poule')).toContain('oeuf');
   });
 
+  it('raccourcit les noms Ciqual et fusionne les variantes', () => {
+    expect(kitchenLabel('Abricot, dénoyauté, cru')).toBe('Abricot');
+    expect(kitchenLabel('Abricot, dénoyauté, sec')).toBe('Abricot sec');
+    expect(
+      kitchenLabel(
+        'Abricot au sirop (sans précision sur léger ou classique), appertisé, égoutté (aliment moyen)',
+      ),
+    ).toBe('Abricot au sirop');
+    const collapsed = collapseKitchenIngredients([
+      { nameFr: 'Abricot, dénoyauté, cru' },
+      { nameFr: 'Abricot, dénoyauté, sec' },
+      { nameFr: 'Abricot au sirop, appertisé, égoutté' },
+      { nameFr: 'Abricot au sirop léger, appertisé, non égoutté' },
+    ]);
+    expect(collapsed.map((item) => kitchenLabel(item.nameFr))).toEqual([
+      'Abricot',
+      'Abricot au sirop',
+      'Abricot sec',
+    ]);
+  });
+
   it('construit un complément sans se tromper de genre', () => {
     expect(complementDe('poulet')).toBe('de poulet');
     expect(complementDe('oignon')).toBe('d’oignon');
@@ -196,6 +218,7 @@ describe('compositeur de plats', () => {
     const { dishes, shortage } = suggestDishes([], filters());
     expect(dishes).toEqual([]);
     expect(shortage?.title).toMatch(/vides/i);
+    expect(shortage?.explanation).toMatch(/réserves/i);
     expect(shortage?.alternative).toBeNull();
   });
 
@@ -236,12 +259,7 @@ describe('compositeur de plats', () => {
     ).toBe(true);
   });
 
-  it('compte 100 recettes healthy recensées', () => {
-    expect(HEALTHY_RECIPES).toHaveLength(100);
-    expect(new Set(HEALTHY_RECIPES.map((spec) => spec.id)).size).toBe(100);
-  });
-
-  it('propose un plat saumon quand le stock en contient', () => {
+  it('reconnaît un plat catalogue saumon via ses ingrédients, pas un second catalogue TS', () => {
     const salmon = item('salmon', 'Saumon, cru', 'FISH', 400, {
       kcal: 180,
       protein: 20,
@@ -249,7 +267,22 @@ describe('compositeur de plats', () => {
       fat: 12,
       fiber: 0,
     });
-    const { dishes } = suggestDishes([salmon, zucchini, oil], filters());
-    expect(dishes.some((dish) => dish.archetypeId.includes('saumon') || /saumon/i.test(dish.name))).toBe(true);
+    const catalog = catalogRecipeToArchetype({
+      id: 'official-saumon-test',
+      name: 'Saumon méditerranéen au four',
+      description: null,
+      prepTimeMinutes: 8,
+      cookTimeMinutes: 18,
+      tagSlugs: ['four', 'healthy', 'plat-principal'],
+      equipmentSlugs: ['four'],
+      ingredients: [
+        { nameFr: 'Saumon, cru', uxCategory: 'FISH' },
+        { nameFr: 'Courgette, crue', uxCategory: 'VEGETABLES' },
+        { nameFr: "Huile d'olive", uxCategory: 'FATS' },
+      ],
+    });
+    const { dishes } = suggestDishes([salmon, zucchini, oil], filters({ kind: 'four' }), [catalog]);
+    expect(dishes.some((dish) => dish.archetypeId === 'official-saumon-test')).toBe(true);
+    expect(dishes.some((dish) => /saumon/i.test(dish.name))).toBe(true);
   });
 });

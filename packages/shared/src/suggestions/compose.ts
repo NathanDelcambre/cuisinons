@@ -356,13 +356,17 @@ function composeArchetype(
   };
 }
 
-function composeMatching(pool: Usable[], filters: SuggestionFilters): {
+function composeMatching(
+  pool: Usable[],
+  filters: SuggestionFilters,
+  archetypes: readonly Archetype[],
+): {
   dishes: ComposedDish[];
   failures: Failure[];
 } {
   const failures: Failure[] = [];
   const dishes: ComposedDish[] = [];
-  for (const archetype of ARCHETYPES) {
+  for (const archetype of archetypes) {
     if (filters.kind && archetype.kind !== filters.kind) {
       failures.push({
         reason: 'kind',
@@ -430,7 +434,7 @@ function explainShortage(pool: Usable[], filters: SuggestionFilters, failures: F
     return {
       title: 'Réserves vides',
       explanation:
-        'Sans ingrédients en stock, on ne peut pas inventer un plat. Ajoute d’abord ce que tu as dans tes réserves.',
+        'On ne compose un plat qu’avec tes réserves. Ajoute d’abord ce que tu as dans le frigo ou le placard.',
       missing: [],
     };
   }
@@ -439,14 +443,14 @@ function explainShortage(pool: Usable[], filters: SuggestionFilters, failures: F
   if (filters.diet !== 'omnivore' && !roles.has('protein') && !roles.has('egg') && !roles.has('vegetable')) {
     return {
       title: 'Rien de compatible',
-      explanation: `Avec le filtre ${filters.diet === 'vegan' ? 'vegan' : 'végétarien'}, tes réserves ne couvrent pas une assiette.`,
+      explanation: `Avec le filtre ${filters.diet === 'vegan' ? 'vegan' : 'végétarien'}, rien dans tes réserves ne fait une assiette.`,
       missing,
     };
   }
   if (failures.every((failure) => failure.reason === 'time') && filters.maxMinutes !== null) {
     return {
       title: 'Trop court',
-      explanation: `Rien ne tient en ${String(filters.maxMinutes)} min avec ce que tu as.`,
+      explanation: `Rien dans tes réserves ne tient en ${String(filters.maxMinutes)} min.`,
       missing,
     };
   }
@@ -459,14 +463,14 @@ function explainShortage(pool: Usable[], filters: SuggestionFilters, failures: F
   }
   if (missing.length > 0) {
     return {
-      title: 'Aucun plat imaginable',
-      explanation: `Avec ce stock, il manque ${missing.join(', ')} pour composer un plat sain.`,
+      title: 'Il manque des aliments',
+      explanation: `Avec tes réserves actuelles, il manque ${missing.join(', ')} pour composer un plat.`,
       missing,
     };
   }
   return {
-    title: 'Aucun plat imaginable',
-    explanation: 'Les contraintes (temps, type, régime) ne laissent passer aucun plat honnête avec ce stock.',
+    title: 'Aucun plat avec ces réserves',
+    explanation: 'Temps, type ou régime : aucun plat honnête ne passe avec ce que tu as en stock.',
     missing,
   };
 }
@@ -518,15 +522,16 @@ function relaxations(filters: SuggestionFilters): Relaxation[] {
 }
 
 /**
- * Propose au plus quelques plats. Rien n'est écrit : le résultat est une
- * suggestion à valider. Si aucun archétype ne se remplit honnêtement, on
- * renvoie la pénurie et, si possible, un plat obtenu en relâchant une seule
- * contrainte — jamais un plat inventé hors stock.
+ * Propose au plus quelques plats. `catalog` ce sont les fiches Recipe
+ * déjà en base, converties en archétypes. Les patrons génériques (poêlée,
+ * salade…) restent le filet si aucune fiche ne matche le stock.
  */
 export function suggestDishes(
   pantry: readonly PantryIngredient[],
   filters: SuggestionFilters,
+  catalog: readonly Archetype[] = [],
 ): SuggestionResult {
+  const archetypes = [...catalog, ...ARCHETYPES];
   const pool = mergeUsable(pantry);
   if (pool.length === 0) {
     return {
@@ -534,21 +539,21 @@ export function suggestDishes(
       shortage: {
         title: 'Réserves vides',
         explanation:
-          'Sans ingrédients en stock, on ne peut pas inventer un plat. Ajoute d’abord ce que tu as dans tes réserves.',
+          'On ne compose un plat qu’avec tes réserves. Ajoute d’abord ce que tu as dans le frigo ou le placard.',
         missing: [],
         alternative: null,
       },
     };
   }
 
-  const { dishes, failures } = composeMatching(pool, filters);
+  const { dishes, failures } = composeMatching(pool, filters, archetypes);
   if (dishes.length > 0) {
     return { dishes: diversify(dishes), shortage: null };
   }
 
   const base = explainShortage(pool, filters, failures);
   for (const attempt of relaxations(filters)) {
-    const found = composeMatching(pool, attempt.filters).dishes[0];
+    const found = composeMatching(pool, attempt.filters, archetypes).dishes[0];
     if (found) {
       return {
         dishes: [],

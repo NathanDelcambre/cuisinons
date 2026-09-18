@@ -53,18 +53,37 @@ export function Field({
   );
 }
 
-export type InputProps = InputHTMLAttributes<HTMLInputElement> & { icon?: LucideIcon };
+export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+  icon?: LucideIcon;
+  suffix?: ReactNode;
+};
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { icon: Icon, className, ...props },
+  { icon: Icon, suffix, className, ...props },
   ref,
 ) {
-  const field = <input ref={ref} className={cn(control, 'h-11 px-4', Icon && 'pl-11', className)} {...props} />;
-  if (!Icon) return field;
+  if (!Icon && !suffix) {
+    return <input ref={ref} className={cn(control, 'h-11 px-4', className)} {...props} />;
+  }
   return (
-    <span className="relative block">
-      <Icon className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-ink-400" aria-hidden />
-      {field}
+    <span
+      className={cn(
+        control,
+        'flex h-11 items-center gap-2 px-4 focus-within:bg-white',
+        props.disabled && 'opacity-55',
+      )}
+    >
+      {Icon ? <Icon className="size-4 shrink-0 text-ink-400" aria-hidden /> : null}
+      <input
+        ref={ref}
+        className={cn(
+          'h-full min-w-0 flex-1 bg-transparent text-sm text-ink-900 outline-none placeholder:text-ink-400',
+          '[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
+          className,
+        )}
+        {...props}
+      />
+      {suffix ? <span className="shrink-0 text-sm text-ink-400">{suffix}</span> : null}
     </span>
   );
 });

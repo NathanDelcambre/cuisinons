@@ -459,6 +459,17 @@ export class ProvisionsService {
     return { settled: pending.length, missing };
   }
 
+  /** Tous les comptes : destiné au cron, pas à une ouverture de page. */
+  async settlePastConsumptionAll() {
+    const users = await this.prisma.user.findMany({ select: { id: true } });
+    let settled = 0;
+    for (const user of users) {
+      const result = await this.settlePastConsumption(user.id);
+      settled += result.settled;
+    }
+    return { settled };
+  }
+
   /** L'interface annonce ce qui a manque : un identifiant n'y suffirait pas. */
   private async withNames(lines: QuantityLine[]): Promise<MissingLine[]> {
     if (lines.length === 0) return [];

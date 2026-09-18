@@ -144,7 +144,12 @@ export class AuthService {
   async me(userId: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new UnauthorizedException('Session invalide.');
-    return this.publicUser(user);
+    return {
+      ...this.publicUser(user),
+      heightCm: decimalToNumber(user.heightCm),
+      weightKg: decimalToNumber(user.weightKg),
+      targetWeightKg: decimalToNumber(user.targetWeightKg),
+    };
   }
 
   async listUsers() {
@@ -178,4 +183,10 @@ export class AuthService {
     });
     return { token, expiresAt, user: this.publicUser(user) };
   }
+}
+
+function decimalToNumber(value: { toString(): string } | number | null | undefined): number | null {
+  if (value == null) return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
 }

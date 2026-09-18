@@ -1,13 +1,14 @@
-export const DEFAULT_TAGS = [
+import { DISH_KIND_LABELS, DISH_KINDS } from '../suggestions/kinds.js';
+
+/** Tags de type de plat : la même liste que le filtre « Proposer un plat ». */
+const DISH_TAGS = DISH_KINDS.map((slug) => ({ slug, label: DISH_KIND_LABELS[slug] }));
+
+const EXTRA_TAGS = [
   { slug: 'viande', label: 'Viande' },
   { slug: 'poisson', label: 'Poisson' },
   { slug: 'fruits-de-mer', label: 'Fruits de mer' },
   { slug: 'vegetarien', label: 'Végétarien' },
   { slug: 'vegan', label: 'Vegan' },
-  { slug: 'salade', label: 'Salade' },
-  { slug: 'soupe', label: 'Soupe' },
-  { slug: 'pates', label: 'Pâtes' },
-  { slug: 'riz', label: 'Riz' },
   { slug: 'burger', label: 'Burger' },
   { slug: 'pizza', label: 'Pizza' },
   { slug: 'fast-food', label: 'Fast-food' },
@@ -15,7 +16,6 @@ export const DEFAULT_TAGS = [
   { slug: 'proteine', label: 'Protéiné' },
   { slug: 'dessert', label: 'Dessert' },
   { slug: 'patisserie', label: 'Pâtisserie' },
-  { slug: 'petit-dejeuner', label: 'Petit-déjeuner' },
   { slug: 'gouter', label: 'Goûter' },
   { slug: 'aperitif', label: 'Apéritif' },
   { slug: 'plat-principal', label: 'Plat principal' },
@@ -23,6 +23,20 @@ export const DEFAULT_TAGS = [
   { slug: 'sauce', label: 'Sauce' },
   { slug: 'autre', label: 'Autre' },
 ] as const;
+
+const TAGS_BY_SLUG = new Map<string, { slug: string; label: string }>();
+for (const tag of [...DISH_TAGS, ...EXTRA_TAGS]) {
+  if (!TAGS_BY_SLUG.has(tag.slug)) TAGS_BY_SLUG.set(tag.slug, { slug: tag.slug, label: tag.label });
+}
+
+export const DEFAULT_TAGS = [...TAGS_BY_SLUG.values()];
+
+export const RECIPE_SOURCES = ['USER', 'CATALOG'] as const;
+export type RecipeSource = (typeof RECIPE_SOURCES)[number];
+export const RECIPE_SOURCE_LABELS: Record<RecipeSource, string> = {
+  USER: 'Personnelle',
+  CATALOG: 'Catalogue',
+};
 
 export const DEFAULT_EQUIPMENT = [
   { slug: 'four', label: 'Four' },

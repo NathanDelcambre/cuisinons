@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="courgette">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="hsl(74 42% 64%)"/>
-      <stop offset="1" stop-color="hsl(114 38% 88%)"/>
-    </linearGradient>
-  </defs>
-  <circle cx="64" cy="64" r="54" fill="url(#g)" />
-  <ellipse cx="64" cy="78" rx="32" ry="20" fill="hsla(0,0%,100%,0.55)"/>
-  <path d="M44 54c8-18 32-18 40 0" fill="none" stroke="hsla(30,20%,25%,0.35)" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="64" cy="50" r="6" fill="hsla(0,0%,100%,0.8)"/>
+  <circle cx="64" cy="64" r="56" fill="#f4f2ef"/>
+  <circle cx="64" cy="64" r="56" fill="none" stroke="#f2cdb8" stroke-width="1.25" opacity=".7"/>
+  <ellipse cx="64" cy="66" rx="16" ry="32" fill="#648374" transform="rotate(-24 64 66)"/>
+    <ellipse cx="60" cy="58" rx="5" ry="12" fill="#c7dad0" opacity=".5" transform="rotate(-24 60 58)"/>
+    <circle cx="78" cy="42" r="5" fill="#4f6a5d"/>
 </svg>

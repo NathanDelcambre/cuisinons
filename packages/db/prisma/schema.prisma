@@ -62,6 +62,14 @@ enum RecipeStatus {
   PUBLISHED
 }
 
+/// USER : fiche créée dans l’app. CATALOG : recette de la maison, semée
+/// une fois pour toutes. Healthy, sauces, bowls… ce sont des tags, pas
+/// des tables à part.
+enum RecipeSource {
+  USER
+  CATALOG
+}
+
 /// Zone de rangement d'un ingredient en stock. FRIDGE, PANTRY et OTHER se
 /// deduisent de la categorie de l'ingredient ; FREEZER et BREAKFAST relevent
 /// d'un choix personnel et ne sont donc jamais attribues automatiquement.
@@ -114,6 +122,9 @@ model User {
   passwordHash      String?
   googleSub         String?   @unique
   passwordChangedAt DateTime?
+  heightCm          Decimal?  @db.Decimal(5, 1)
+  weightKg          Decimal?  @db.Decimal(5, 1)
+  targetWeightKg    Decimal?  @db.Decimal(5, 1)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -124,6 +135,7 @@ model User {
   nutritionGoal              NutritionGoal?
   dailyOverrides             DailyNutritionGoalOverride[]
   optimizationPreference     OptimizationPreference?
+  optimizationUndo           OptimizationUndoSnapshot?
   ingredientFavorites        UserIngredientFavorite[]
   ingredientRecents          UserIngredientRecent[]
   createdMealItems           MealItem[]                    @relation("MealItemAuthor")
@@ -210,6 +222,7 @@ model Recipe {
   name              String
   description       String?
   status            RecipeStatus @default(DRAFT)
+  source            RecipeSource @default(USER)
   authorId          String
   author            User         @relation("RecipeAuthor", fields: [authorId], references: [id])
   servings          Decimal      @db.Decimal(8, 2)
@@ -232,6 +245,7 @@ model Recipe {
   @@index([authorId])
   @@index([updatedAt])
   @@index([status])
+  @@index([source])
 }
 
 model RecipeIngredient {
@@ -445,6 +459,16 @@ model OptimizationPreference {
   allowAutoAdd         Boolean @default(true)
   minPortionMultiplier Decimal @default(0.5) @db.Decimal(4, 2)
   maxPortionMultiplier Decimal @default(2.0) @db.Decimal(4, 2)
+}
+
+model OptimizationUndoSnapshot {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromDate  DateTime @db.Date
+  toDate    DateTime @db.Date
+  payload   Json
+  createdAt DateTime @default(now())
 }
 
 model UserIngredientFavorite {

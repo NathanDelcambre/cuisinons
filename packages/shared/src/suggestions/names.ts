@@ -69,6 +69,28 @@ export function culinaryName(nameFr: string): string {
   return words.join(' ').toLowerCase();
 }
 
+/**
+ * Libellé de cuisine : « Abricot, dénoyauté, cru » → « Abricot ».
+ * On garde seulement les précisions qui changent vraiment le produit (sec, au sirop).
+ */
+export function kitchenLabel(nameFr: string): string {
+  const stripped = nameFr.replace(/\([^)]*\)/g, ' ').replace(/\s+/g, ' ').trim();
+  const base = culinaryName(stripped)
+    .replace(/\bau sirop(?: léger| leger| classique)?\b/gi, 'au sirop')
+    .replace(/\s+/g, ' ')
+    .trim();
+  const folded = foldText(stripped);
+  const baseFolded = foldText(base);
+  const extras: string[] = [];
+  if (/(^| )(sec|secs|seche|sechee|seches|sechees)( |$)/.test(folded) && !baseFolded.includes('sec')) {
+    extras.push('sec');
+  }
+  if (folded.includes('au sirop') && !baseFolded.includes('sirop')) extras.push('au sirop');
+  if (/\bgrille/.test(folded) && !baseFolded.includes('grille')) extras.push('grillé');
+  if (/\bfume/.test(folded) && !baseFolded.includes('fume')) extras.push('fumé');
+  return capitalize([base, ...extras].filter(Boolean).join(' '));
+}
+
 /** « a, b et c ». Une enumeration, pas une liste a puces. */
 export function joinFrench(parts: readonly string[]): string {
   const items = parts.filter((part) => part.length > 0);

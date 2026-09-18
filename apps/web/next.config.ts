@@ -19,9 +19,9 @@ const nextConfig: NextConfig = {
       { source: '/shopping', destination: '/courses', permanent: true },
       { source: '/pantry', destination: '/reserves', permanent: true },
       { source: '/goals', destination: '/objectifs', permanent: true },
+      { source: '/settings/stats', destination: '/profil/statistiques', permanent: true },
       { source: '/settings/security', destination: '/profil/securite', permanent: true },
       { source: '/settings', destination: '/profil', permanent: true },
-      { source: '/dev/icons', destination: '/dev/illustrations', permanent: true },
     ];
   },
   async rewrites() {
@@ -34,9 +34,9 @@ const nextConfig: NextConfig = {
       { source: '/courses', destination: '/shopping' },
       { source: '/reserves', destination: '/pantry' },
       { source: '/objectifs', destination: '/goals' },
+      { source: '/profil/statistiques', destination: '/settings/stats' },
       { source: '/profil/securite', destination: '/settings/security' },
       { source: '/profil', destination: '/settings' },
-      { source: '/dev/illustrations', destination: '/dev/icons' },
     ];
   },
   async headers() {

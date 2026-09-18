@@ -120,11 +120,6 @@ export class ProvisionsController {
     const parsed = z.object({ portionId: z.string().min(1), consumed: z.boolean() }).parse(body);
     return this.provisions.setConsumption(user.id, parsed.portionId, parsed.consumed);
   }
-
-  @Post('/provisions/settle-past')
-  settlePast(@CurrentUser() user: AuthUser) {
-    return this.provisions.settlePastConsumption(user.id);
-  }
 }
 
 /** Minuit UTC du jour courant, comme les dates du planning. */

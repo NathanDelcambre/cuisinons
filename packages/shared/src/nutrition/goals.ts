@@ -3,10 +3,10 @@ export const GOAL_MODES = ['AT_LEAST', 'AT_MOST', 'TARGET', 'NONE'] as const;
 export type GoalMode = (typeof GOAL_MODES)[number];
 
 export const GOAL_MODE_LABELS: Record<GoalMode, string> = {
-  AT_LEAST: 'au moins',
-  AT_MOST: 'au maximum',
-  TARGET: 'environ',
-  NONE: "pas d'objectif",
+  AT_LEAST: 'Au moins',
+  AT_MOST: 'Au maximum',
+  TARGET: 'Environ',
+  NONE: "Pas d'objectif",
 };
 
 export type NutrientGoal = {

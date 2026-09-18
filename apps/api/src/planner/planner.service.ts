@@ -1,10 +1,10 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { MealSlot } from '@cuisinons/db';
+import { MealSlot, Prisma } from '@cuisinons/db';
 import { addDays, startOfWeek } from './dates.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { nutritionForRecipe } from '../nutrition/recipe-nutrition.js';
 import { publicRecipePhotoUrl } from '../recipes/recipe-photo.js';
-import { computeRecipeNutrition, type MacroNutrients, type MealKind } from '@cuisinons/shared';
+import { computeRecipeNutrition, mealsForEater, type MacroNutrients, type MealKind } from '@cuisinons/shared';
 
 @Injectable()
 export class PlannerService {
@@ -34,16 +34,16 @@ export class PlannerService {
       },
       orderBy: [{ date: 'asc' }, { slot: 'asc' }, { sortOrder: 'asc' }],
     });
-    const withPhoto = new Set(
+    const withPhoto = new Map(
       (
         await this.prisma.recipe.findMany({
           where: {
             id: { in: items.map((item) => item.recipeId).filter((id): id is string => Boolean(id)) },
             photoUrl: { not: null },
           },
-          select: { id: true },
+          select: { id: true, photoUrl: true },
         })
-      ).map((row) => row.id),
+      ).map((row) => [row.id, row.photoUrl]),
     );
     return items.map((item) => {
       if (!item.recipe) {
@@ -58,7 +58,7 @@ export class PlannerService {
         ...item,
         recipe: {
           ...item.recipe,
-          photoUrl: publicRecipePhotoUrl(item.recipe.id, withPhoto.has(item.recipe.id), item.recipe.updatedAt),
+          photoUrl: publicRecipePhotoUrl(item.recipe.id, withPhoto.get(item.recipe.id) ?? null, item.recipe.updatedAt),
         },
         nutrition,
       };
@@ -81,6 +81,8 @@ export class PlannerService {
       } else if (input.recipeId) {
         throw new BadRequestException('Pas de recette pour ce type de repas.');
       }
+      const eaters = input.portions.filter((p) => p.portions > 0).map((p) => p.userId);
+      await this.releaseSlot(tx, input.date, input.slot, eaters);
       const count = await tx.mealItem.count({
         where: { date: input.date, slot: input.slot },
       });
@@ -139,6 +141,15 @@ export class PlannerService {
           })),
         });
       }
+      const remaining = await tx.mealParticipantPortion.findMany({ where: { mealItemId: id } });
+      if (remaining.length > 0 && remaining.every((p) => Number(p.portions) <= 0)) {
+        await tx.mealItem.delete({ where: { id } });
+        return { id, deleted: true };
+      }
+      const targetDate = input.date ?? existing.date;
+      const targetSlot = input.slot ?? existing.slot;
+      const eaters = remaining.filter((p) => Number(p.portions) > 0).map((p) => p.userId);
+      await this.releaseSlot(tx, targetDate, targetSlot, eaters, id);
       return tx.mealItem.update({
         where: { id },
         data: {
@@ -158,12 +169,108 @@ export class PlannerService {
     return { ok: true };
   }
 
+  async removeForUser(id: string, userId: string) {
+    const item = await this.prisma.mealItem.findUnique({
+      where: { id },
+      include: { portions: true },
+    });
+    if (!item) throw new NotFoundException('Repas introuvable.');
+    const others = item.portions.filter((p) => p.userId !== userId && Number(p.portions) > 0);
+    if (others.length === 0) return this.remove(id);
+    await this.prisma.mealParticipantPortion.upsert({
+      where: { mealItemId_userId: { mealItemId: id, userId } },
+      update: { portions: 0 },
+      create: { mealItemId: id, userId, portions: 0 },
+    });
+    await this.prisma.mealItem.update({ where: { id }, data: { version: { increment: 1 } } });
+    return { ok: true, scoped: 'me' };
+  }
+
+  async replaceForUser(
+    id: string,
+    userId: string,
+    input: { recipeId: string; portions: number },
+  ) {
+    const item = await this.prisma.mealItem.findUnique({
+      where: { id },
+      include: { portions: true },
+    });
+    if (!item) throw new NotFoundException('Repas introuvable.');
+    const others = item.portions.filter((p) => p.userId !== userId && Number(p.portions) > 0);
+    if (others.length === 0) {
+      return this.updateItem(id, { recipeId: input.recipeId });
+    }
+    const recipe = await this.prisma.recipe.findUnique({ where: { id: input.recipeId } });
+    if (!recipe) throw new NotFoundException('Recette introuvable.');
+    return this.prisma.$transaction(async (tx) => {
+      await this.releaseSlot(tx, item.date, item.slot, [userId]);
+      const users = await tx.user.findMany({ select: { id: true } });
+      return tx.mealItem.create({
+        data: {
+          date: item.date,
+          slot: item.slot,
+          kind: 'RECIPE',
+          recipeId: input.recipeId,
+          createdById: userId,
+          portions: {
+            create: users.map((u) => ({
+              userId: u.id,
+              portions: u.id === userId ? input.portions : 0,
+            })),
+          },
+        },
+        include: { portions: true, recipe: true },
+      });
+    });
+  }
+
+  /**
+   * Un convive ne peut pas occuper deux repas du même créneau. On le retire des
+   * autres lignes ; une ligne qui n'a plus personne est supprimée.
+   */
+  private async releaseSlot(
+    tx: Prisma.TransactionClient,
+    date: Date,
+    slot: MealSlot,
+    userIds: string[],
+    exceptItemId?: string,
+  ) {
+    if (userIds.length === 0) return;
+    const others = await tx.mealItem.findMany({
+      where: {
+        date,
+        slot,
+        ...(exceptItemId ? { id: { not: exceptItemId } } : {}),
+        portions: { some: { userId: { in: userIds }, portions: { gt: 0 } } },
+      },
+      include: { portions: true },
+    });
+    for (const item of others) {
+      for (const userId of userIds) {
+        const portion = item.portions.find((p) => p.userId === userId);
+        if (!portion || Number(portion.portions) <= 0) continue;
+        await tx.mealParticipantPortion.update({
+          where: { mealItemId_userId: { mealItemId: item.id, userId } },
+          data: { portions: 0 },
+        });
+      }
+      const remaining = await tx.mealParticipantPortion.findMany({ where: { mealItemId: item.id } });
+      if (remaining.every((p) => Number(p.portions) <= 0)) {
+        await tx.mealItem.delete({ where: { id: item.id } });
+      } else {
+        await tx.mealItem.update({ where: { id: item.id }, data: { version: { increment: 1 } } });
+      }
+    }
+  }
+
   macrosForUser(
     items: Awaited<ReturnType<PlannerService['getWeek']>>,
     userId: string,
     date: Date,
   ): MacroNutrients {
-    const day = items.filter((item) => item.date.toISOString().slice(0, 10) === date.toISOString().slice(0, 10));
+    const day = mealsForEater(items, userId).filter(
+      (item) => item.date.toISOString().slice(0, 10) === date.toISOString().slice(0, 10),
+    );
     const acc: MacroNutrients = { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
     let fiberOk = true;
     for (const item of day) {

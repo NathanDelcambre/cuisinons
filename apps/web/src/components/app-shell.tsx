@@ -17,7 +17,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import { STORAGE_AREAS, STORAGE_AREA_LABELS, type StorageArea } from '@cuisinons/shared';
-import { buttonClasses, cn, transitions } from '@cuisinons/ui';
+import { buttonClasses, cn, IconButton, transitions } from '@cuisinons/ui';
 import { apiFetch, apiJson } from '@/lib/api';
 import { routes } from '@/lib/routes';
 import { useAuth } from './auth-provider';
@@ -259,11 +259,21 @@ function UserCard({ pathname }: { pathname: string }) {
 }
 
 function MobileHeader() {
+  const { refresh } = useAuth();
+  const router = useRouter();
+
+  async function logout() {
+    await apiFetch('/api/auth/logout', { method: 'POST' });
+    await refresh();
+    router.replace(routes.connexion);
+  }
+
   return (
-    <header className="sticky top-0 z-30 border-b border-white/60 bg-white/70 px-4 py-3 backdrop-blur-xl lg:hidden">
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-white/60 bg-white/70 px-4 py-3 backdrop-blur-xl lg:hidden">
       <Link href={routes.planning} className="inline-flex rounded-2xl">
         <BrandMark size="sm" align="start" />
       </Link>
+      <IconButton icon={LogOut} label="Se déconnecter" variant="ghost" onClick={() => void logout()} />
     </header>
   );
 }

@@ -6,6 +6,7 @@ import {
 } from '../nutrition/goals.js';
 import type { MacroNutrients } from '../nutrition/macros.js';
 import type { MealSlot } from '../planner/slots.js';
+import { slotTagRank } from '../planner/slot-tags.js';
 
 export type OptimizerMealItem = {
   id: string;
@@ -29,6 +30,10 @@ export type OptimizerPrefs = {
   minPortionMultiplier: number;
   maxPortionMultiplier: number;
   allowAutoAdd: boolean;
+  /** Ne touche pas aux portions déjà posées, seulement les créneaux vides. */
+  fillOnly?: boolean;
+  /** Si false, on comble un trou même sans améliorer la pénalité. */
+  requireImprovement?: boolean;
 };
 
 export type PortionChange = {
@@ -63,13 +68,6 @@ export type OptimizerResult = {
   };
   summary: string;
   excludedIncomplete: number;
-};
-
-const SLOT_TAGS: Record<MealSlot, readonly string[]> = {
-  BREAKFAST: ['petit-dejeuner'],
-  LUNCH: ['plat-principal'],
-  SNACK: ['gouter', 'dessert'],
-  DINNER: ['plat-principal'],
 };
 
 function macrosOf(perServing: MacroNutrients, portions: number): MacroTotals {
@@ -116,10 +114,8 @@ function discreteMultipliers(min: number, max: number): number[] {
   return values;
 }
 
-function recipeFitsSlot(recipe: CandidateRecipe, slot: MealSlot): boolean {
-  const wanted = SLOT_TAGS[slot];
-  const tags = recipe.tags.map((t) => t.toLowerCase().normalize('NFD').replace(/\p{M}/gu, ''));
-  return wanted.some((tag) => tags.includes(tag));
+function addScore(recipe: CandidateRecipe, slot: MealSlot, penalty: number): number {
+  return slotTagRank(recipe.tags, slot) * 1_000_000 + penalty;
 }
 
 function buildSummary(result: Omit<OptimizerResult, 'summary'>): string {
@@ -167,34 +163,36 @@ export function optimizeDay(input: {
   );
 
   let currentPenalty = penaltyBefore;
-  let improved = true;
-  while (improved) {
-    improved = false;
-    let bestIndex = -1;
-    let bestPortions = 0;
-    let bestPenalty = currentPenalty;
-    for (let i = 0; i < working.length; i++) {
-      const item = working[i];
-      if (!item) continue;
-      for (const portions of multipliers) {
-        if (Math.abs(portions - item.portions) < 1e-9) continue;
-        const previous = item.portions;
-        item.portions = portions;
-        const penalty = nutritionPenalty(sumWorking(working), input.goals);
-        item.portions = previous;
-        if (penalty + 1e-6 < bestPenalty) {
-          bestPenalty = penalty;
-          bestIndex = i;
-          bestPortions = portions;
+  if (!input.prefs.fillOnly) {
+    let improved = true;
+    while (improved) {
+      improved = false;
+      let bestIndex = -1;
+      let bestPortions = 0;
+      let bestPenalty = currentPenalty;
+      for (let i = 0; i < working.length; i++) {
+        const item = working[i];
+        if (!item) continue;
+        for (const portions of multipliers) {
+          if (Math.abs(portions - item.portions) < 1e-9) continue;
+          const previous = item.portions;
+          item.portions = portions;
+          const penalty = nutritionPenalty(sumWorking(working), input.goals);
+          item.portions = previous;
+          if (penalty + 1e-6 < bestPenalty) {
+            bestPenalty = penalty;
+            bestIndex = i;
+            bestPortions = portions;
+          }
         }
       }
-    }
-    if (bestIndex >= 0) {
-      const item = working[bestIndex];
-      if (item) {
-        item.portions = bestPortions;
-        currentPenalty = bestPenalty;
-        improved = true;
+      if (bestIndex >= 0) {
+        const item = working[bestIndex];
+        if (item) {
+          item.portions = bestPortions;
+          currentPenalty = bestPenalty;
+          improved = true;
+        }
       }
     }
   }
@@ -227,12 +225,15 @@ export function optimizeDay(input: {
 
     for (const slot of emptySlots) {
       let best: SuggestedAdd | null = null;
+      let bestScore = Number.POSITIVE_INFINITY;
       let bestPenalty = currentPenalty;
       for (const recipe of recipes) {
-        if (!recipeFitsSlot(recipe, slot)) continue;
         const delta = macrosOf(recipe.perServing, 1);
         const penalty = nutritionPenalty(addTotals(sumWorking(working), delta), input.goals);
-        if (penalty + 1e-6 < bestPenalty) {
+        if ((input.prefs.requireImprovement ?? true) && penalty + 1e-6 >= currentPenalty) continue;
+        const score = addScore(recipe, slot, penalty);
+        if (score + 1e-6 < bestScore) {
+          bestScore = score;
           bestPenalty = penalty;
           best = {
             recipeId: recipe.id,

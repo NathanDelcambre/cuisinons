@@ -3,13 +3,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { addDays, differenceInCalendarDays, format, isToday, startOfWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCheck, ChevronLeft, ChevronRight, RefreshCw, Trash2, UtensilsCrossed } from 'lucide-react';
+import { useMemo, useState, type ReactNode } from 'react';
+import { Carrot, Check, ChevronLeft, ChevronRight, Clock, CookingPot, RefreshCw, Sparkles, Trash2, UtensilsCrossed, type LucideIcon } from 'lucide-react';
 import {
   Badge,
   Button,
   Card,
   IconButton,
+  MacroRing,
   Meter,
   PageHeader,
   Panel,
@@ -22,20 +23,31 @@ import {
   MEAL_KIND_LABELS,
   MEAL_SLOTS,
   MEAL_SLOT_LABELS,
+  mealsForEater,
+  weekMacroAverages,
   type MealKind,
   type MealSlot,
 } from '@cuisinons/shared';
 import { AddMealDialog } from '@/components/add-meal-dialog';
+import { IngredientIcon } from '@/components/ingredient-icon';
 import { PlannedMealModal } from '@/components/planned-meal-modal';
 import { SlotAddMenu, SLOT_CHROME, type SpecialMealKind } from '@/components/slot-add-menu';
 import { OptimizePanel } from '@/components/optimize-panel';
+import { MacroIcon } from '@/components/macro-icon';
 
 type MealItem = {
   id: string;
   date: string;
   slot: MealSlot;
   kind: MealKind;
-  recipe: { id: string; name: string; photoUrl?: string | null } | null;
+  recipe: {
+    id: string;
+    name: string;
+    photoUrl?: string | null;
+    prepTimeMinutes?: number | null;
+    cookTimeMinutes?: number | null;
+    ingredients?: unknown[];
+  } | null;
   portions: Array<{
     id: string;
     userId: string;
@@ -54,6 +66,7 @@ type Goal = {
   fatValue: string | null;
 };
 
+type MacroTargets = { kcal: number | null; protein: number | null; carbs: number | null; fat: number | null };
 type Macros = { kcal: number; protein: number; carbs: number; fat: number };
 
 function iso(date: Date) {
@@ -69,13 +82,14 @@ export default function PlanningPage() {
     slot: MealSlot;
     replaceItemId?: string;
     recipeId?: string;
+    replaceScope?: 'me' | 'all';
   } | null>(null);
+  const [optimizeOpen, setOptimizeOpen] = useState(false);
   const [detail, setDetail] = useState<MealItem | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const from = iso(weekStart);
   const todayIso = new Date().toISOString().slice(0, 10);
-  const settledWeek = useRef<string | null>(null);
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
 
   const mealsQuery = useQuery({
@@ -87,12 +101,15 @@ export default function PlanningPage() {
     queryFn: () => apiJson<Goal | null>('/api/bff/nutrition-goals'),
   });
   const remove = useMutation({
-    mutationFn: (id: string) => apiJson(`/api/bff/planner/items/${id}`, { method: 'DELETE' }),
+    mutationFn: (input: { id: string; scope?: 'me' | 'all' }) =>
+      apiJson(`/api/bff/planner/items/${input.id}${input.scope === 'me' ? '?scope=me' : ''}`, {
+        method: 'DELETE',
+      }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['planner'] }),
   });
 
   const addKind = useMutation({
-    mutationFn: async (input: { date: string; slot: MealSlot; kind: SpecialMealKind }) => {
+    mutationFn: async (input: { date: string; slot: MealSlot; kind: SpecialMealKind; onlyMe?: boolean }) => {
       const users = await apiJson<Array<{ id: string }>>('/api/bff/users');
       return apiJson('/api/bff/planner/items', {
         method: 'POST',
@@ -100,7 +117,10 @@ export default function PlanningPage() {
           date: input.date,
           slot: input.slot,
           kind: input.kind,
-          portions: users.map((u) => ({ userId: u.id, portions: 1 })),
+          portions: users.map((u) => ({
+            userId: u.id,
+            portions: input.onlyMe ? (u.id === user?.id ? 1 : 0) : 1,
+          })),
         }),
       });
     },
@@ -112,77 +132,21 @@ export default function PlanningPage() {
   // le stock et la liste de courses, qui en decoulent.
   const consume = useMutation({
     mutationFn: (input: { portionId: string; consumed: boolean }) =>
-      apiJson<{ consumed: boolean; missing: Array<{ name: string }> }>(
+      apiJson<{ consumed: boolean }>(
         '/api/bff/provisions/consumption',
         { method: 'POST', body: JSON.stringify(input) },
       ),
-    onSuccess: (data) => {
+    onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['planner'] });
       void queryClient.invalidateQueries({ queryKey: ['pantry'] });
       void queryClient.invalidateQueries({ queryKey: ['shopping'] });
-      setNotice(
-        data.missing.length === 0
-          ? null
-          : `Repas déduit, mais tes réserves ne couvraient pas : ${data.missing
-              .map((line) => line.name)
-              .join(', ')}.`,
-      );
     },
     onError: (error: Error) => setNotice(error.message),
   });
 
-  useEffect(() => {
-    if (!mealsQuery.isSuccess || settledWeek.current === from) return;
-    void apiJson<{ settled: number; missing: Array<{ name: string }> }>(
-      '/api/bff/provisions/settle-past',
-      { method: 'POST' },
-    )
-      .then((data) => {
-        settledWeek.current = from;
-        if (data.settled === 0) return;
-        void queryClient.invalidateQueries({ queryKey: ['planner'] });
-        void queryClient.invalidateQueries({ queryKey: ['pantry'] });
-        void queryClient.invalidateQueries({ queryKey: ['shopping'] });
-        setNotice(
-          data.missing.length === 0
-            ? null
-            : `Repas des jours passés déduits, mais tes réserves ne couvraient pas : ${data.missing
-                .map((line) => line.name)
-                .join(', ')}.`,
-        );
-      })
-      .catch(() => {
-        settledWeek.current = null;
-      });
-  }, [from, mealsQuery.isSuccess, queryClient]);
-
   const selectedDate = days[selectedIndex] ?? days[0]!;
-  const meals = mealsQuery.data ?? [];
-
-  useEffect(() => {
-    if (!mealsQuery.isSuccess || settledWeek.current === from) return;
-    void apiJson<{ settled: number; missing: Array<{ name: string }> }>(
-      '/api/bff/provisions/settle-past',
-      { method: 'POST' },
-    )
-      .then((data) => {
-        settledWeek.current = from;
-        if (data.settled === 0) return;
-        void queryClient.invalidateQueries({ queryKey: ['planner'] });
-        void queryClient.invalidateQueries({ queryKey: ['pantry'] });
-        void queryClient.invalidateQueries({ queryKey: ['shopping'] });
-        setNotice(
-          data.missing.length === 0
-            ? null
-            : `Repas déduit, mais tes réserves ne couvraient pas : ${data.missing
-                .map((line) => line.name)
-                .join(', ')}.`,
-        );
-      })
-      .catch(() => {
-        settledWeek.current = null;
-      });
-  }, [from, mealsQuery.isSuccess, queryClient]);
+  const rawMeals = mealsQuery.data ?? [];
+  const meals = user?.id ? mealsForEater(rawMeals, user.id) : rawMeals;
 
   function macrosFor(date: Date): Macros {
     const key = iso(date);
@@ -198,47 +162,82 @@ export default function PlanningPage() {
     return acc;
   }
 
-  const selectedMacros = macrosFor(selectedDate);
   const goals = goalsQuery.data;
+  const weekAverages = weekMacroAverages({
+    userId: user?.id ?? '',
+    todayIso,
+    meals: meals.map((item) => ({
+      date: item.date,
+      perServing: { ...item.nutrition.perServing, fiber: 0 },
+      portions: item.portions.map((p) => ({
+        userId: p.userId,
+        portions: Number(p.portions),
+        consumedAt: p.consumedAt,
+        skipAutoConsume: p.skipAutoConsume,
+      })),
+    })),
+  });
 
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={`Bonjour ${user?.displayName ?? ''}`}
+        eyebrow={
+          <span className="inline-flex items-center gap-2">
+            <IngredientIcon src="/ingredients/pomme.png" className="size-[18px]" />
+            Bonjour {user?.displayName ?? ''}
+          </span>
+        }
         title={
           <>
             Semaine du {format(weekStart, 'd MMMM', { locale: fr })} au{' '}
             {format(addDays(weekStart, 6), 'd MMMM', { locale: fr })}
           </>
         }
+        actionsClassName="w-full flex-nowrap justify-between"
         actions={
           <>
-            <IconButton
-              icon={ChevronLeft}
-              label="Semaine précédente"
-              onClick={() => {
-                setWeekStart(addDays(weekStart, -7));
-                setSelectedIndex(0);
-              }}
-            />
+            <div className="flex shrink-0 items-center gap-2">
+              <IconButton
+                icon={ChevronLeft}
+                label="Semaine précédente"
+                onClick={() => {
+                  setWeekStart(addDays(weekStart, -7));
+                  setSelectedIndex(0);
+                }}
+              />
+              <Button
+                variant="glass"
+                onClick={() => {
+                  const now = new Date();
+                  const start = startOfWeek(now, { weekStartsOn: 1 });
+                  setWeekStart(start);
+                  setSelectedIndex(differenceInCalendarDays(now, start));
+                }}
+              >
+                Aujourd’hui
+              </Button>
+              <IconButton
+                icon={ChevronRight}
+                label="Semaine suivante"
+                onClick={() => {
+                  setWeekStart(addDays(weekStart, 7));
+                  setSelectedIndex(0);
+                }}
+              />
+            </div>
             <Button
               variant="glass"
-              onClick={() => {
-                const now = new Date();
-                const start = startOfWeek(now, { weekStartsOn: 1 });
-                setWeekStart(start);
-                setSelectedIndex(differenceInCalendarDays(now, start));
-              }}
+              icon={Sparkles}
+              className="hidden shrink-0 lg:inline-flex"
+              onClick={() => setOptimizeOpen(true)}
             >
-              Aujourd’hui
+              Ajustement intelligent
             </Button>
             <IconButton
-              icon={ChevronRight}
-              label="Semaine suivante"
-              onClick={() => {
-                setWeekStart(addDays(weekStart, 7));
-                setSelectedIndex(0);
-              }}
+              icon={Sparkles}
+              label="Ajustement intelligent"
+              className="shrink-0 lg:hidden"
+              onClick={() => setOptimizeOpen(true)}
             />
           </>
         }
@@ -255,35 +254,35 @@ export default function PlanningPage() {
 
       <Panel className="p-5 sm:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          {/* first-letter plutot que capitalize : ce dernier mettrait aussi une
-              majuscule au mois (« Lundi 14 Septembre »). */}
-          <p className="text-sm font-medium text-ink-900 first-letter:uppercase">
-            {format(selectedDate, 'EEEE d MMMM', { locale: fr })}
-          </p>
+          <p className="text-sm font-medium text-ink-900">Moyennes de la semaine</p>
           {goals ? null : (
             <Badge tone="peach">Aucun objectif défini</Badge>
           )}
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Meter label="Calories" value={selectedMacros.kcal} target={num(goals?.caloriesValue)} unit="kcal" tone="peach" />
-          <Meter label="Protéines" value={selectedMacros.protein} target={num(goals?.proteinValue)} unit="g" tone="sage" />
-          <Meter label="Glucides" value={selectedMacros.carbs} target={num(goals?.carbsValue)} unit="g" tone="gold" />
-          <Meter label="Lipides" value={selectedMacros.fat} target={num(goals?.fatValue)} unit="g" tone="tomato" />
+        <div className="grid grid-cols-4 gap-2 md:hidden">
+          <MacroRing label="kcal" planned={weekAverages.planned.kcal} consumed={weekAverages.consumed.kcal} target={num(goals?.caloriesValue)} unit="" tone="peach" icon={<MacroIcon kind="kcal" />} />
+          <MacroRing label="Protéines" planned={weekAverages.planned.protein} consumed={weekAverages.consumed.protein} target={num(goals?.proteinValue)} unit="g" tone="sage" icon={<MacroIcon kind="protein" />} />
+          <MacroRing label="Glucides" planned={weekAverages.planned.carbs} consumed={weekAverages.consumed.carbs} target={num(goals?.carbsValue)} unit="g" tone="gold" icon={<MacroIcon kind="carbs" />} />
+          <MacroRing label="Lipides" planned={weekAverages.planned.fat} consumed={weekAverages.consumed.fat} target={num(goals?.fatValue)} unit="g" tone="tomato" icon={<MacroIcon kind="fat" />} />
+        </div>
+        <div className="hidden md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-4">
+          <Meter label="kcal" value={weekAverages.planned.kcal} consumed={weekAverages.consumed.kcal} target={num(goals?.caloriesValue)} unit="" tone="peach" icon={<MacroIcon kind="kcal" />} />
+          <Meter label="Protéines" value={weekAverages.planned.protein} consumed={weekAverages.consumed.protein} target={num(goals?.proteinValue)} unit="g" tone="sage" icon={<MacroIcon kind="protein" />} />
+          <Meter label="Glucides" value={weekAverages.planned.carbs} consumed={weekAverages.consumed.carbs} target={num(goals?.carbsValue)} unit="g" tone="gold" icon={<MacroIcon kind="carbs" />} />
+          <Meter label="Lipides" value={weekAverages.planned.fat} consumed={weekAverages.consumed.fat} target={num(goals?.fatValue)} unit="g" tone="tomato" icon={<MacroIcon kind="fat" />} />
         </div>
       </Panel>
 
-      <OptimizePanel date={iso(selectedDate)} />
-
       {mealsQuery.isLoading ? (
-        <div className="scrollbar-soft -mx-4 overflow-x-auto scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
+        <div className="-mx-4 overflow-x-auto scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
           <div className="flex w-max gap-3">
             {Array.from({ length: 7 }, (_, i) => (
-              <Skeleton key={i} className="h-[30rem] w-[16.5rem] shrink-0 rounded-2xl" />
+              <Skeleton key={i} className="h-[30rem] w-[20rem] shrink-0 rounded-2xl" />
             ))}
           </div>
         </div>
       ) : (
-        <div className="scrollbar-soft -mx-4 overflow-x-auto overscroll-x-contain scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
+        <div className="-mx-4 overflow-x-auto overscroll-x-contain scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
           <div className="flex w-max items-stretch gap-3">
             {days.map((day, index) => (
               <DayCard
@@ -292,20 +291,27 @@ export default function PlanningPage() {
                 meals={meals}
                 userId={user?.id}
                 macros={macrosFor(day)}
+                targets={{
+                  kcal: num(goals?.caloriesValue),
+                  protein: num(goals?.proteinValue),
+                  carbs: num(goals?.carbsValue),
+                  fat: num(goals?.fatValue),
+                }}
                 selected={index === selectedIndex}
                 onSelect={() => setSelectedIndex(index)}
                 onAddRecipe={(slot) => setDialog({ date: iso(day), slot })}
-                onAddKind={(slot, kind) => addKind.mutate({ date: iso(day), slot, kind })}
+                onAddKind={(slot, kind, onlyMe) => addKind.mutate({ date: iso(day), slot, kind, onlyMe })}
                 onOpenItem={setDetail}
-                onChangeRecipe={(item) =>
+                onChangeRecipe={(item, scope) =>
                   setDialog({
                     date: item.date.slice(0, 10),
                     slot: item.slot,
                     replaceItemId: item.id,
                     recipeId: item.recipe?.id,
+                    replaceScope: scope,
                   })
                 }
-                onRemove={(id) => remove.mutate(id)}
+                onRemove={(id, scope) => remove.mutate({ id, scope })}
                 todayIso={todayIso}
               />
             ))}
@@ -318,6 +324,7 @@ export default function PlanningPage() {
         date={dialog?.date ?? iso(selectedDate)}
         slot={dialog?.slot ?? 'DINNER'}
         replaceItemId={dialog?.replaceItemId}
+        replaceScope={dialog?.replaceScope}
         initialRecipeId={dialog?.recipeId}
         onClose={() => setDialog(null)}
         onAdded={() => queryClient.invalidateQueries({ queryKey: ['planner'] })}
@@ -346,6 +353,12 @@ export default function PlanningPage() {
           setDetail(null);
         }}
       />
+      <OptimizePanel
+        open={optimizeOpen}
+        date={iso(selectedDate)}
+        weekFrom={from}
+        onClose={() => setOptimizeOpen(false)}
+      />
     </div>
   );
 }
@@ -373,6 +386,7 @@ function DayCard({
   meals,
   userId,
   macros,
+  targets,
   selected,
   onSelect,
   onAddRecipe,
@@ -386,13 +400,14 @@ function DayCard({
   meals: MealItem[];
   userId?: string;
   macros: Macros;
+  targets: MacroTargets;
   selected: boolean;
   onSelect?: () => void;
   onAddRecipe: (slot: MealSlot) => void;
-  onAddKind: (slot: MealSlot, kind: SpecialMealKind) => void;
+  onAddKind: (slot: MealSlot, kind: SpecialMealKind, onlyMe?: boolean) => void;
   onOpenItem: (item: MealItem) => void;
-  onChangeRecipe: (item: MealItem) => void;
-  onRemove: (id: string) => void;
+  onChangeRecipe: (item: MealItem, scope?: 'me' | 'all') => void;
+  onRemove: (id: string, scope?: 'me' | 'all') => void;
   todayIso: string;
 }) {
   const key = iso(date);
@@ -401,7 +416,7 @@ function DayCard({
   return (
     <Card
       className={cn(
-        'flex h-[30rem] w-[16.5rem] shrink-0 flex-col p-0 transition duration-300 ease-out-soft',
+        'flex h-[30rem] w-[20rem] shrink-0 flex-col p-0 transition duration-300 ease-out-soft',
         selected && 'ring-2 ring-sage-300',
       )}
     >
@@ -409,12 +424,12 @@ function DayCard({
         type="button"
         onClick={onSelect}
         disabled={!onSelect}
-        className="flex h-14 w-full shrink-0 items-baseline justify-between gap-2 rounded-t-2xl border-b border-white/70 px-4 py-3 text-left transition-colors duration-200 ease-out-soft enabled:hover:bg-white/50"
+        className="flex w-full shrink-0 flex-col gap-1.5 rounded-t-2xl border-b border-white/70 px-4 py-3 text-left transition-colors duration-200 ease-out-soft enabled:hover:bg-white/50"
       >
-        <span className="min-w-0">
+        <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
           <span
             className={cn(
-              'block truncate text-sm font-medium first-letter:uppercase',
+              'text-sm font-medium first-letter:uppercase',
               today ? 'text-sage-600' : 'text-ink-900',
             )}
           >
@@ -422,7 +437,7 @@ function DayCard({
           </span>
           {today ? <span className="text-[11px] font-medium text-sage-500">Aujourd’hui</span> : null}
         </span>
-        {macros.kcal > 0 ? <MacroCounts macros={macros} className="shrink-0 justify-end" /> : null}
+        <MacroCounts macros={macros} />
       </button>
 
       <div className="flex min-h-0 flex-1 flex-col gap-1.5 p-2">
@@ -432,8 +447,9 @@ function DayCard({
             slot={slot}
             items={meals.filter((m) => m.date.slice(0, 10) === key && m.slot === slot)}
             userId={userId}
+            targets={targets}
             onAddRecipe={() => onAddRecipe(slot)}
-            onAddKind={(kind) => onAddKind(slot, kind)}
+            onAddKind={(kind, options) => onAddKind(slot, kind, options?.onlyMe)}
             onOpenItem={onOpenItem}
             onChangeRecipe={onChangeRecipe}
             onRemove={onRemove}
@@ -449,6 +465,7 @@ function SlotSection({
   slot,
   items,
   userId,
+  targets,
   onAddRecipe,
   onAddKind,
   onOpenItem,
@@ -459,11 +476,12 @@ function SlotSection({
   slot: MealSlot;
   items: MealItem[];
   userId?: string;
+  targets: MacroTargets;
   onAddRecipe: () => void;
-  onAddKind: (kind: SpecialMealKind) => void;
+  onAddKind: (kind: SpecialMealKind, options?: { onlyMe?: boolean }) => void;
   onOpenItem: (item: MealItem) => void;
-  onChangeRecipe: (item: MealItem) => void;
-  onRemove: (id: string) => void;
+  onChangeRecipe: (item: MealItem, scope?: 'me' | 'all') => void;
+  onRemove: (id: string, scope?: 'me' | 'all') => void;
   todayIso: string;
 }) {
   const chrome = SLOT_CHROME[slot];
@@ -471,11 +489,16 @@ function SlotSection({
   const label = MEAL_SLOT_LABELS[slot];
 
   return (
-    <div className="flex min-h-0 flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       {items.length === 0 ? (
         <SlotAddMenu slot={slot} variant="empty" onChooseRecipe={onAddRecipe} onChooseKind={onAddKind} />
       ) : (
-        <ul className={cn('min-h-0 space-y-1.5', items.length > 1 && 'scrollbar-soft overflow-y-auto')}>
+        <ul
+          className={cn(
+            'flex min-h-0 flex-1 flex-col gap-1.5',
+            items.length > 1 && 'overflow-y-auto',
+          )}
+        >
           {items.map((item) => {
             const portion = item.portions.find((p) => p.userId === userId);
             const qty = portion ? Number(portion.portions) : 0;
@@ -486,105 +509,61 @@ function SlotSection({
             return (
               <li
                 key={item.id}
-                className="group relative flex min-h-[4.75rem] items-start rounded-xl border border-white/70 bg-white/75 px-2.5 py-2 shadow-soft"
+                className={cn(
+                  'group relative flex min-h-[5.25rem] flex-1 items-center rounded-xl bg-white/75 py-2.5 pl-3.5 pr-2 shadow-[0_0_10px_rgba(28,25,23,0.08),0_2px_8px_rgba(28,25,23,0.08)]',
+                  validated
+                    ? 'border border-sage-500 border-l-[3px] border-l-sage-500'
+                    : cn('border border-white/70', chrome.rail),
+                )}
               >
-                <button
-                  type="button"
-                  onClick={() => onOpenItem(item)}
-                  aria-label={
-                    validated ? `${label}, ${title}, validé` : `${label}, ${title}`
-                  }
-                  className={cn(
-                    'flex min-w-0 flex-1 items-start gap-2 rounded-lg text-left',
-                    validated ? 'pr-6' : null,
-                    'max-md:pr-16',
-                  )}
-                >
-                  <span
-                    aria-hidden
-                    className={cn(
-                      'mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full',
-                      chrome.iconClass,
-                    )}
+                <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => onOpenItem(item)}
+                    aria-label={
+                      validated ? `${label}, ${title}, validé` : `${label}, ${title}`
+                    }
+                    className="flex min-w-0 items-center gap-2.5 rounded-lg pr-24 text-left"
                   >
-                    <SlotIcon className="size-3" />
-                  </span>
-                  {recipe?.photoUrl ? (
-                    <img
-                      src={recipe.photoUrl}
-                      alt=""
-                      width={40}
-                      height={40}
-                      className="size-10 shrink-0 rounded-lg object-cover"
-                      decoding="async"
-                    />
-                  ) : null}
-                  <div className="min-w-0 flex-1">
-                    <p className="line-clamp-1 text-sm font-medium leading-snug text-ink-900">{title}</p>
-                    {recipe ? (
-                      <>
-                        <p className="mt-0.5 text-[11px] text-ink-400">
-                          {qty.toLocaleString('fr-FR')} portion
-                        </p>
-                        <MacroCounts
-                          macros={{
-                            kcal: item.nutrition.perServing.kcal * qty,
-                            protein: item.nutrition.perServing.protein * qty,
-                            carbs: item.nutrition.perServing.carbs * qty,
-                            fat: item.nutrition.perServing.fat * qty,
-                          }}
-                          className="mt-0.5"
-                        />
-                      </>
-                    ) : null}
-                    {recipe && !item.nutrition.complete ? (
-                      <p className="mt-0.5 flex items-center gap-1 text-[11px] text-peach-500">
-                        <UtensilsCrossed className="size-3 shrink-0" aria-hidden />
-                        Incomplet
-                      </p>
-                    ) : null}
-                  </div>
-                </button>
-                {validated ? (
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute right-2 top-2 text-sage-600 transition-opacity duration-150 group-hover:opacity-0 group-focus-within:opacity-0 max-md:hidden"
-                  >
-                    <CheckCheck className="size-4" />
-                  </span>
-                ) : null}
-                <div
-                  className={cn(
-                    'absolute right-1 top-1 flex rounded-lg bg-white/90 shadow-soft',
-                    'pointer-events-none opacity-0 transition-opacity duration-150',
-                    'group-hover:pointer-events-auto group-hover:opacity-100',
-                    'group-focus-within:pointer-events-auto group-focus-within:opacity-100',
-                    'max-md:pointer-events-auto max-md:opacity-100',
-                  )}
-                >
-                  {validated ? (
                     <span
                       aria-hidden
-                      className="hidden size-8 items-center justify-center text-sage-600 max-md:flex"
+                      className={cn(
+                        'flex size-6 shrink-0 items-center justify-center rounded-full',
+                        validated ? 'bg-sage-200 text-sage-800' : chrome.iconClass,
+                      )}
                     >
-                      <CheckCheck className="size-4" />
+                      {validated ? <Check className="size-3.5" strokeWidth={2.75} /> : <SlotIcon className="size-3" />}
                     </span>
+                    <span className="min-w-0 flex-1">
+                      <p className="line-clamp-2 text-sm font-medium leading-snug text-ink-900">{title}</p>
+                      {recipe ? <RecipeMeta recipe={recipe} /> : null}
+                    </span>
+                  </button>
+                  {recipe ? (
+                    <MacroCounts
+                      macros={{
+                        kcal: item.nutrition.perServing.kcal * qty,
+                        protein: item.nutrition.perServing.protein * qty,
+                        carbs: item.nutrition.perServing.carbs * qty,
+                        fat: item.nutrition.perServing.fat * qty,
+                      }}
+                      targets={targets}
+                      className="pr-1 pl-[2.125rem]"
+                    />
                   ) : null}
-                  <IconButton
-                    icon={RefreshCw}
-                    label={`Changer ${title}`}
-                    size="sm"
-                    variant="ghost"
-                    className="size-8 text-ink-400 hover:text-sage-600"
-                    onClick={() => onChangeRecipe(item)}
-                  />
-                  <IconButton
-                    icon={Trash2}
-                    label={`Retirer ${title}`}
-                    size="sm"
-                    variant="ghost"
-                    className="size-8 text-ink-400 hover:text-tomato-500"
-                    onClick={() => onRemove(item.id)}
+                  {recipe && !item.nutrition.complete ? (
+                    <p className="flex items-center gap-1 pl-[2.125rem] text-[11px] text-peach-500">
+                      <UtensilsCrossed className="size-3 shrink-0" aria-hidden />
+                      Incomplet
+                    </p>
+                  ) : null}
+                </div>
+                <div className="absolute right-1.5 top-1.5 flex items-center">
+                  <MealItemActions
+                    title={title}
+                    shared={item.portions.filter((p) => Number(p.portions) > 0).length >= 2}
+                    onChange={(scope) => onChangeRecipe(item, scope)}
+                    onRemove={(scope) => onRemove(item.id, scope)}
                   />
                 </div>
               </li>
@@ -596,6 +575,124 @@ function SlotSection({
   );
 }
 
+function MealItemActions({
+  title,
+  shared,
+  onChange,
+  onRemove,
+}: {
+  title: string;
+  shared: boolean;
+  onChange: (scope?: 'me' | 'all') => void;
+  onRemove: (scope?: 'me' | 'all') => void;
+}) {
+  if (!shared) {
+    return (
+      <>
+        <IconButton
+          icon={RefreshCw}
+          label={`Changer ${title}`}
+          size="sm"
+          variant="ghost"
+          className="size-8 text-ink-400 hover:text-sage-600"
+          onClick={() => onChange('all')}
+        />
+        <IconButton
+          icon={Trash2}
+          label={`Retirer ${title}`}
+          size="sm"
+          variant="ghost"
+          className="size-8 text-ink-400 hover:text-tomato-500"
+          onClick={() => onRemove('all')}
+        />
+      </>
+    );
+  }
+  return (
+    <>
+      <ActionMenu icon={RefreshCw} label={`Changer ${title}`} hoverClass="hover:text-sage-600">
+        <button type="button" className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm" onClick={() => onChange('all')}>
+          Échanger pour tout le monde
+        </button>
+        <button type="button" className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm" onClick={() => onChange('me')}>
+          Échanger pour moi seulement
+        </button>
+      </ActionMenu>
+      <ActionMenu icon={Trash2} label={`Retirer ${title}`} hoverClass="hover:text-tomato-500">
+        <button type="button" className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm text-tomato-500" onClick={() => onRemove('all')}>
+          Supprimer pour tout le monde
+        </button>
+        <button type="button" className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm text-tomato-500" onClick={() => onRemove('me')}>
+          Supprimer pour moi seulement
+        </button>
+      </ActionMenu>
+    </>
+  );
+}
+
+function ActionMenu({
+  icon: Icon,
+  label,
+  hoverClass,
+  children,
+}: {
+  icon: LucideIcon;
+  label: string;
+  hoverClass: string;
+  children: ReactNode;
+}) {
+  return (
+    <details className="relative">
+      <summary
+        className={cn(
+          'flex size-8 cursor-pointer list-none items-center justify-center rounded-lg text-ink-400',
+          hoverClass,
+        )}
+      >
+        <span className="sr-only">{label}</span>
+        <Icon className="size-4" aria-hidden />
+      </summary>
+      <div className="absolute right-0 z-20 mt-1 w-52 rounded-xl border border-white/80 bg-white/95 p-1 shadow-soft">
+        {children}
+      </div>
+    </details>
+  );
+}
+
+function RecipeMeta({
+  recipe,
+}: {
+  recipe: NonNullable<MealItem['recipe']>;
+}) {
+  const ingredientCount = recipe.ingredients?.length ?? 0;
+  const prep = recipe.prepTimeMinutes;
+  const cook = recipe.cookTimeMinutes;
+  if (ingredientCount === 0 && prep == null && cook == null) return null;
+
+  return (
+    <p className="mt-2.5 flex items-center gap-2.5 text-[11px] leading-none text-ink-400">
+      {ingredientCount > 0 ? (
+        <span className="inline-flex items-center gap-0.5">
+          <Carrot className="size-3 shrink-0" aria-hidden />
+          <span className="tabular">{ingredientCount}</span>
+        </span>
+      ) : null}
+      {prep != null && prep > 0 ? (
+        <span className="inline-flex items-center gap-0.5">
+          <Clock className="size-3 shrink-0" aria-hidden />
+          <span className="tabular">{prep} min</span>
+        </span>
+      ) : null}
+      {cook != null && cook > 0 ? (
+        <span className="inline-flex items-center gap-0.5">
+          <CookingPot className="size-3 shrink-0" aria-hidden />
+          <span className="tabular">{cook} min</span>
+        </span>
+      ) : null}
+    </p>
+  );
+}
+
 const MACRO_LINE = [
   { key: 'kcal', suffix: 'kcal', className: 'text-peach-500' },
   { key: 'protein', suffix: 'P', className: 'text-sage-600' },
@@ -603,15 +700,62 @@ const MACRO_LINE = [
   { key: 'fat', suffix: 'L', className: 'text-tomato-500' },
 ] as const;
 
-function MacroCounts({ macros, className }: { macros: Macros; className?: string }) {
-  return (
-    <p className={cn('tabular flex flex-nowrap items-baseline gap-x-1 whitespace-nowrap text-[11px] leading-none', className)}>
-      {MACRO_LINE.map((item) => (
-        <span key={item.key} className={cn('font-bold', item.className)}>
-          {Math.round(macros[item.key])}
-          {item.suffix === 'kcal' ? ' kcal' : ` ${item.suffix}`}
-        </span>
-      ))}
-    </p>
+function MacroCounts({
+  macros,
+  targets,
+  className,
+}: {
+  macros: Macros;
+  targets?: MacroTargets;
+  className?: string;
+}) {
+  const [asPercent, setAsPercent] = useState(false);
+  const canToggle = Boolean(
+    targets && (targets.kcal || targets.protein || targets.carbs || targets.fat),
   );
+  const showPercent = canToggle && asPercent;
+
+  const body = MACRO_LINE.map((item) => {
+    const target = targets?.[item.key] ?? null;
+    const percent = target && target > 0 ? Math.round((macros[item.key] / target) * 100) : null;
+    return (
+      <span key={item.key} className={cn('flex min-w-0 items-center gap-1 whitespace-nowrap font-bold', item.className)}>
+        <MacroIcon kind={item.key} className="size-3 shrink-0" />
+        <span className="tabular">
+          {showPercent ? (percent === null ? '—' : `${String(percent)} %`) : (
+            <>
+              {Math.round(macros[item.key])}
+              {item.suffix === 'kcal' ? ' kcal' : ` ${item.suffix}`}
+            </>
+          )}
+        </span>
+      </span>
+    );
+  });
+
+  const classes = cn(
+    'tabular grid w-full grid-cols-[minmax(0,1.45fr)_repeat(3,minmax(0,1fr))] items-center gap-x-2.5 text-[11px] leading-none',
+    canToggle ? 'cursor-pointer rounded-md text-left' : null,
+    className,
+  );
+
+  if (canToggle) {
+    return (
+      <button
+        type="button"
+        className={classes}
+        aria-pressed={asPercent}
+        aria-label={
+          asPercent
+            ? 'Afficher les quantités'
+            : 'Afficher le pourcentage de l’objectif du jour'
+        }
+        onClick={() => setAsPercent((current) => !current)}
+      >
+        {body}
+      </button>
+    );
+  }
+
+  return <p className={classes}>{body}</p>;
 }

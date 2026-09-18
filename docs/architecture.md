@@ -71,8 +71,9 @@ Quatre décisions à connaître :
    s’ajouterait à chaque génération et l’article grossirait tout seul.
 3. **`consumedAt` sur la portion rend la déduction idempotente** et réversible :
    marquer un repas consommé retire ses ingrédients du stock, annuler les
-   recrédite. Le stock ne descend jamais sous zéro ; un manque est signalé à
-   l’écran, il ne devient pas une dette.
+   recrédite. Le stock ne descend jamais sous zéro. Un manque n’est pas affiché :
+   on déduit ce qu’on a. Les jours passés sont réglés par un **cron Vercel**
+   (`GET /api/cron/settle-past`, 00:10 UTC), pas à l’ouverture du planning.
 4. **Les zones de rangement ne se devinent qu’à moitié.** `defaultStorageArea`
    place au frigo ou au placard d’après la catégorie Ciqual, mais
    « Congélateur » et « Petit déjeuner » sont des habitudes personnelles, pas des
@@ -87,12 +88,17 @@ supplémentaire.
 ## Proposer un plat
 
 Modale sur `/recettes?proposer=1`, module Nest `suggestions`, logique dans
-`packages/shared/src/suggestions`. **Aucun LLM** : on remplit des archétypes
-génériques (poêlée, salade, soupe…) **et 100 plats healthy recensés** (dîners
-légers, méditerranéen, batch cooking) avec le stock personnel. Un plat du
-catalogue ne se propose que si les mots-clés (poulet, saumon, lentilles…)
-matchent un ingrédient en réserve — sinon on retombe sur les archétypes
-génériques. Rien n’est persisté tant que l’utilisateur n’a pas validé.
+`packages/shared/src/suggestions`. **Aucun LLM.** Une seule table `Recipe` :
+les fiches maison (`source = CATALOG`) et celles que vous créez
+(`source = USER`). Healthy, salade, poêlée… ce sont des **tags**, pas des
+types à part.
+
+On compose d’abord avec les recettes du catalogue (leurs ingrédients
+deviennent des filtres sur le stock), puis avec les archétypes génériques
+(poêlée, salade, soupe…) si rien ne matche. Un plat catalogue ne se propose
+que si les noms d’ingrédients de la fiche recoupent une réserve — sinon on
+retombe sur les archétypes. Rien n’est persisté tant que l’utilisateur n’a
+pas validé (une composition générique crée alors une fiche `USER`).
 
 Trois refus volontaires :
 
@@ -108,3 +114,5 @@ Trois refus volontaires :
 ## Données
 
 PostgreSQL (Docker en local, Neon Free en production). Prisma + migrations versionnées. Pas de `db push` en production.
+
+Une recette est une ligne `Recipe`. `source = CATALOG` pour le fonds maison (semé), `USER` pour ce que vous créez. Healthy, type de plat, régime : des tags, pas d’autres tables.

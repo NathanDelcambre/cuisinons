@@ -58,72 +58,120 @@ export const UX_CATEGORY_LABELS: Record<UxCategory, string> = {
   OTHER: 'Autres',
 };
 
-type MappingRule = {
-  category: UxCategory;
-  groupIncludes?: readonly string[];
-  subGroupIncludes?: readonly string[];
-  nameIncludes?: readonly string[];
-};
-
-const RULES: readonly MappingRule[] = [
-  { category: 'EGGS', groupIncludes: ['oeufs', 'œufs'], subGroupIncludes: ['oeufs', 'œufs'] },
-  { category: 'CHEESES', groupIncludes: ['fromages'], subGroupIncludes: ['fromages'] },
-  {
-    category: 'DAIRY',
-    groupIncludes: ['lait', 'produits laitiers', 'ultra-frais'],
-    subGroupIncludes: ['yaourts', 'fromages blancs', 'crèmes', 'laits'],
-  },
-  { category: 'CHARCUTERIE', groupIncludes: ['charcuteries'], subGroupIncludes: ['charcuteries'] },
-  { category: 'MEATS', groupIncludes: ['viandes'], subGroupIncludes: ['viandes', 'volailles'] },
-  { category: 'FISH', groupIncludes: ['poissons'], subGroupIncludes: ['poissons'] },
-  {
-    category: 'SEAFOOD',
-    groupIncludes: ['mollusques', 'crustaces', 'crustacés'],
-    subGroupIncludes: ['mollusques', 'crustaces', 'crustacés', 'fruits de mer'],
-  },
-  { category: 'VEGETABLES', groupIncludes: ['légumes', 'legumes'], subGroupIncludes: ['légumes', 'legumes'] },
-  { category: 'FRUITS', groupIncludes: ['fruits'], subGroupIncludes: ['fruits'] },
-  {
-    category: 'LEGUMES',
-    groupIncludes: ['légumineuses', 'legumineuses'],
-    subGroupIncludes: ['légumineuses', 'haricots', 'lentilles', 'pois chiches'],
-  },
-  {
-    category: 'STARCHES',
-    groupIncludes: ['pommes de terre', 'tubercules'],
-    subGroupIncludes: ['pommes de terre', 'patates', 'manioc'],
-  },
-  {
-    category: 'CEREALS',
-    groupIncludes: ['céréales', 'cereales', 'pates', 'pâtes', 'riz'],
-    subGroupIncludes: ['céréales', 'riz', 'pâtes', 'pates', 'avoine', 'blé'],
-  },
-  { category: 'BAKERY', groupIncludes: ['pains', 'viennoiseries'], subGroupIncludes: ['pains', 'viennoiseries'] },
-  {
-    category: 'PASTRY',
-    groupIncludes: ['biscuits', 'gâteaux', 'gateaux', 'pâtisseries', 'patisseries', 'desserts'],
-    subGroupIncludes: ['biscuits', 'gâteaux', 'pâtisseries', 'glaces'],
-  },
-  { category: 'SUGARS', groupIncludes: ['sucres', 'confiseries', 'chocolat'], subGroupIncludes: ['sucres', 'confiseries', 'chocolat'] },
-  { category: 'FATS', groupIncludes: ['matières grasses', 'matieres grasses', 'huiles'], subGroupIncludes: ['huiles', 'beurres', 'margarines'] },
-  { category: 'NUTS_SEEDS', groupIncludes: ['fruits à coque', 'fruits a coque', 'graines'], subGroupIncludes: ['noix', 'amandes', 'graines'] },
-  { category: 'SPICES', groupIncludes: ['épices', 'epices', 'herbes'], nameIncludes: ['curry', 'paprika', 'cannelle'] },
-  { category: 'AROMATICS', nameIncludes: ['ail', 'oignon', 'échalote', 'echalote', 'persil', 'basilic', 'thym', 'ciboulette'] },
-  { category: 'SAUCES', groupIncludes: ['sauces'], subGroupIncludes: ['sauces'] },
-  { category: 'CONDIMENTS', groupIncludes: ['condiments'], subGroupIncludes: ['condiments', 'moutardes', 'vinaigres'] },
-  { category: 'BEVERAGES', groupIncludes: ['boissons', 'eaux', 'alcools'], subGroupIncludes: ['boissons', 'jus', 'sodas', 'cafés', 'thés'] },
-  {
-    category: 'VEGETARIAN_PRODUCTS',
-    groupIncludes: ['produits végétariens', 'produits vegetariens'],
-    nameIncludes: ['tofu', 'seitan', 'tempeh', 'steak végétal'],
-  },
-  { category: 'PREPARATIONS', groupIncludes: ['plats composés', 'plats composes', 'entrées'], subGroupIncludes: ['plats', 'soupes', 'salades composées'] },
-  { category: 'PROCESSED', groupIncludes: ['produits transformés', 'produits transformes', 'snacks'] },
+/**
+ * Sous-groupes Ciqual 2025, du plus precis au plus large.
+ * On ne matche JAMAIS le groupe parent « fruits, légumes, légumineuses et
+ * oléagineux » ni « viandes, oeufs, poissons » : ils mélangent trop de rayons.
+ */
+const SUBGROUP_KEYS: ReadonlyArray<readonly [string, UxCategory]> = [
+  ['fruits a coque et graines oleagineuses', 'NUTS_SEEDS'],
+  ['fruits', 'FRUITS'],
+  ['legumineuses', 'LEGUMES'],
+  ['legumes', 'VEGETABLES'],
+  ['pommes de terre et autres tubercules', 'STARCHES'],
+  ['algues', 'VEGETABLES'],
+  ['charcuteries', 'CHARCUTERIE'],
+  ['viandes crues', 'MEATS'],
+  ['viandes cuites', 'MEATS'],
+  ['autres produits a base de viande', 'MEATS'],
+  ['mollusques et crustaces', 'SEAFOOD'],
+  ['produits a base de poissons', 'FISH'],
+  ['poissons crus', 'FISH'],
+  ['poissons cuits', 'FISH'],
+  ['oeufs', 'EGGS'],
+  ['fromages', 'CHEESES'],
+  ['laits', 'DAIRY'],
+  ['cremes et specialites a base de creme', 'DAIRY'],
+  ['produits laitiers frais', 'DAIRY'],
+  ['pates, riz et cereales', 'CEREALS'],
+  ['farines', 'CEREALS'],
+  ['cereales de petit-dejeuner', 'CEREALS'],
+  ['barres cerealieres', 'CEREALS'],
+  ['pains et assimiles', 'BAKERY'],
+  ['viennoiseries', 'BAKERY'],
+  ['pates a tarte', 'BAKERY'],
+  ['biscuits aperitifs', 'PROCESSED'],
+  ['gateaux et patisseries', 'PASTRY'],
+  ['biscuits sucres', 'PASTRY'],
+  ['desserts glaces', 'PASTRY'],
+  ['glaces', 'PASTRY'],
+  ['sorbets', 'PASTRY'],
+  ['chocolats', 'SUGARS'],
+  ['confitures', 'SUGARS'],
+  ['confiseries', 'SUGARS'],
+  ['sucres, miels', 'SUGARS'],
+  ['huiles de poissons', 'FATS'],
+  ['huiles et graisses vegetales', 'FATS'],
+  ['margarines', 'FATS'],
+  ['beurres', 'FATS'],
+  ['autres matieres grasses', 'FATS'],
+  ['herbes', 'AROMATICS'],
+  ['epices', 'SPICES'],
+  ['sauces', 'SAUCES'],
+  ['condiments', 'CONDIMENTS'],
+  ['sels', 'CONDIMENTS'],
+  ['ingredients pour vegetariens', 'VEGETARIAN_PRODUCTS'],
+  ['tartinables vegetariens', 'VEGETARIAN_PRODUCTS'],
+  ['boissons sans alcool', 'BEVERAGES'],
+  ['boisson alcoolisees', 'BEVERAGES'],
+  ['eaux', 'BEVERAGES'],
+  ['plats composes', 'PREPARATIONS'],
+  ['sandwichs', 'PREPARATIONS'],
+  ['soupes', 'PREPARATIONS'],
+  ['pizzas, tartes et crepes salees', 'PREPARATIONS'],
+  ['salades composees et crudites', 'PREPARATIONS'],
+  ['feuilletees et autres entrees', 'PREPARATIONS'],
+  ['aides culinaires', 'OTHER'],
+  ['denrees destinees a une alimentation particuliere', 'OTHER'],
+  ['laits et boissons infantiles', 'OTHER'],
+  ['petits pots sales', 'OTHER'],
+  ['desserts infantiles', 'OTHER'],
+  ['cereales et biscuits infantiles', 'OTHER'],
 ];
 
-function includesAny(haystack: string, needles: readonly string[] | undefined): boolean {
-  if (!needles) return false;
-  return needles.some((needle) => haystack.includes(needle));
+/** Fallback si le sous-groupe est vide : groupes Ciqual simples, jamais les groupes mixtes. */
+const GROUP_KEYS: ReadonlyArray<readonly [string, UxCategory]> = [
+  ['fromages', 'CHEESES'],
+  ['viandes cuites', 'MEATS'],
+  ['viandes crues', 'MEATS'],
+  ['charcuteries', 'CHARCUTERIE'],
+  ['poissons', 'FISH'],
+  ['oeufs', 'EGGS'],
+  ['legumineuses', 'LEGUMES'],
+  ['legumes', 'VEGETABLES'],
+  ['fruits a coque', 'NUTS_SEEDS'],
+  ['fruits', 'FRUITS'],
+  ['produits laitiers', 'DAIRY'],
+  ['matieres grasses', 'FATS'],
+  ['produits cerealier', 'CEREALS'],
+  ['pains', 'BAKERY'],
+  ['glaces et sorbets', 'PASTRY'],
+  ['produits sucres', 'SUGARS'],
+  ['eaux et autres boissons', 'BEVERAGES'],
+  ['entrees et plats composes', 'PREPARATIONS'],
+  ['aliments infantiles', 'OTHER'],
+];
+
+function fold(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/œ/g, 'oe')
+    .replace(/æ/g, 'ae');
+}
+
+/** Égalité ou préfixe (« fromages et alternatives »), pas un includes qui croise les rayons. */
+function keyed(haystack: string, key: string): boolean {
+  const h = fold(haystack);
+  return h === key || h.startsWith(`${key} `) || h.startsWith(`${key} et `);
+}
+
+function lookup(haystack: string, table: ReadonlyArray<readonly [string, UxCategory]>): UxCategory | null {
+  for (const [key, category] of table) {
+    if (keyed(haystack, key)) return category;
+  }
+  return null;
 }
 
 export function mapCiqualToUxCategory(input: {
@@ -131,18 +179,13 @@ export function mapCiqualToUxCategory(input: {
   subGroupName?: string | null;
   foodName?: string | null;
 }): UxCategory {
-  const group = input.groupName.toLowerCase();
-  const sub = (input.subGroupName ?? '').toLowerCase();
-  const name = (input.foodName ?? '').toLowerCase();
-  for (const rule of RULES) {
-    if (
-      includesAny(group, rule.groupIncludes) ||
-      includesAny(sub, rule.subGroupIncludes) ||
-      includesAny(name, rule.nameIncludes)
-    ) {
-      return rule.category;
-    }
+  const sub = input.subGroupName?.trim() ?? '';
+  if (sub.length > 0) {
+    const fromSub = lookup(sub, SUBGROUP_KEYS);
+    if (fromSub) return fromSub;
   }
+  const fromGroup = lookup(input.groupName, GROUP_KEYS);
+  if (fromGroup) return fromGroup;
   return 'OTHER';
 }
 

@@ -1,0 +1,4932 @@
+[
+  {
+    "slug": "pomme",
+    "fr": "pomme",
+    "en": "a whole red apple with a short brown stem and a sage-green leaf"
+  },
+  {
+    "slug": "pomme-golden",
+    "fr": "pomme golden",
+    "en": "a whole yellow Golden apple"
+  },
+  {
+    "slug": "pomme-granny",
+    "fr": "pomme granny smith",
+    "en": "a whole bright green Granny Smith apple"
+  },
+  {
+    "slug": "poire",
+    "fr": "poire",
+    "en": "a green-yellow pear with a short brown stem"
+  },
+  {
+    "slug": "poire-williams",
+    "fr": "poire Williams",
+    "en": "a yellow Williams pear"
+  },
+  {
+    "slug": "banane",
+    "fr": "banane",
+    "en": "a ripe yellow banana, slightly curved"
+  },
+  {
+    "slug": "banane-plantain",
+    "fr": "banane plantain",
+    "en": "a large green plantain banana"
+  },
+  {
+    "slug": "fraise",
+    "fr": "fraise",
+    "en": "a red strawberry with sage-green calyx"
+  },
+  {
+    "slug": "fraise-des-bois",
+    "fr": "fraise des bois",
+    "en": "a small wild strawberry with green calyx"
+  },
+  {
+    "slug": "framboise",
+    "fr": "framboise",
+    "en": "a cluster of red raspberries"
+  },
+  {
+    "slug": "myrtille",
+    "fr": "myrtille",
+    "en": "a small pile of blueberries"
+  },
+  {
+    "slug": "mure",
+    "fr": "mûre",
+    "en": "a glossy dark blackberry"
+  },
+  {
+    "slug": "cassis",
+    "fr": "cassis",
+    "en": "a cluster of blackcurrants"
+  },
+  {
+    "slug": "groseille",
+    "fr": "groseille",
+    "en": "a cluster of red currants"
+  },
+  {
+    "slug": "groseille-a-maquereau",
+    "fr": "groseille à maquereau",
+    "en": "a green gooseberry"
+  },
+  {
+    "slug": "cerise",
+    "fr": "cerise",
+    "en": "two red cherries with stems"
+  },
+  {
+    "slug": "griotte",
+    "fr": "griotte",
+    "en": "a dark sour cherry"
+  },
+  {
+    "slug": "orange",
+    "fr": "orange",
+    "en": "a whole round orange citrus fruit"
+  },
+  {
+    "slug": "orange-sanguine",
+    "fr": "orange sanguine",
+    "en": "a blood orange with deep red blush"
+  },
+  {
+    "slug": "mandarine",
+    "fr": "mandarine",
+    "en": "a small mandarin orange with loose peel"
+  },
+  {
+    "slug": "clementine",
+    "fr": "clémentine",
+    "en": "a small clementine"
+  },
+  {
+    "slug": "citron",
+    "fr": "citron",
+    "en": "a bright yellow lemon"
+  },
+  {
+    "slug": "citron-vert",
+    "fr": "citron vert",
+    "en": "a green lime"
+  },
+  {
+    "slug": "pamplemousse",
+    "fr": "pamplemousse",
+    "en": "a pink grapefruit"
+  },
+  {
+    "slug": "pomelo",
+    "fr": "pomelo",
+    "en": "a large pale-yellow pomelo"
+  },
+  {
+    "slug": "yuzu",
+    "fr": "yuzu",
+    "en": "a knobbly yellow yuzu citrus"
+  },
+  {
+    "slug": "bergamote",
+    "fr": "bergamote",
+    "en": "a yellow-green bergamot citrus"
+  },
+  {
+    "slug": "kumquat",
+    "fr": "kumquat",
+    "en": "a small oval orange kumquat"
+  },
+  {
+    "slug": "avocat",
+    "fr": "avocat",
+    "en": "a whole dark-green avocado"
+  },
+  {
+    "slug": "mangue",
+    "fr": "mangue",
+    "en": "a ripe orange-yellow mango"
+  },
+  {
+    "slug": "ananas",
+    "fr": "ananas",
+    "en": "a pineapple with sage-green crown"
+  },
+  {
+    "slug": "kiwi",
+    "fr": "kiwi",
+    "en": "a brown fuzzy kiwi fruit"
+  },
+  {
+    "slug": "kiwi-jaune",
+    "fr": "kiwi jaune",
+    "en": "a golden kiwi fruit"
+  },
+  {
+    "slug": "raisin",
+    "fr": "raisin",
+    "en": "a small bunch of purple grapes"
+  },
+  {
+    "slug": "raisin-blanc",
+    "fr": "raisin blanc",
+    "en": "a small bunch of green grapes"
+  },
+  {
+    "slug": "raisin-sec",
+    "fr": "raisin sec",
+    "en": "a small pile of raisins"
+  },
+  {
+    "slug": "peche",
+    "fr": "pêche",
+    "en": "a fuzzy peach with a rosy blush"
+  },
+  {
+    "slug": "nectarine",
+    "fr": "nectarine",
+    "en": "a smooth-skinned nectarine"
+  },
+  {
+    "slug": "abricot",
+    "fr": "abricot",
+    "en": "an orange apricot with a crease"
+  },
+  {
+    "slug": "prune",
+    "fr": "prune",
+    "en": "a purple plum"
+  },
+  {
+    "slug": "prune-reine-claude",
+    "fr": "reine-claude",
+    "en": "a green Reine-Claude plum"
+  },
+  {
+    "slug": "pruneau",
+    "fr": "pruneau",
+    "en": "a dark wrinkled prune"
+  },
+  {
+    "slug": "figue",
+    "fr": "figue",
+    "en": "a purple fig"
+  },
+  {
+    "slug": "figue-sechee",
+    "fr": "figue séchée",
+    "en": "a dried fig"
+  },
+  {
+    "slug": "datte",
+    "fr": "datte",
+    "en": "a few Medjool dates"
+  },
+  {
+    "slug": "grenade",
+    "fr": "grenade",
+    "en": "a whole pomegranate"
+  },
+  {
+    "slug": "melon",
+    "fr": "melon",
+    "en": "a cantaloupe melon with netted skin"
+  },
+  {
+    "slug": "melon-charentais",
+    "fr": "melon charentais",
+    "en": "a Charentais melon with green stripes"
+  },
+  {
+    "slug": "pasteque",
+    "fr": "pastèque",
+    "en": "a round watermelon with green rind"
+  },
+  {
+    "slug": "papaye",
+    "fr": "papaye",
+    "en": "an orange papaya"
+  },
+  {
+    "slug": "goyave",
+    "fr": "goyave",
+    "en": "a green guava fruit"
+  },
+  {
+    "slug": "fruit-de-la-passion",
+    "fr": "fruit de la passion",
+    "en": "a wrinkled purple passion fruit"
+  },
+  {
+    "slug": "litchi",
+    "fr": "litchi",
+    "en": "a few lychees with pink-red shells"
+  },
+  {
+    "slug": "ramboutan",
+    "fr": "ramboutan",
+    "en": "a rambutan with reddish spiky skin"
+  },
+  {
+    "slug": "longane",
+    "fr": "longane",
+    "en": "a few brown longans"
+  },
+  {
+    "slug": "noix-de-coco",
+    "fr": "noix de coco",
+    "en": "a brown coconut, cracked slightly"
+  },
+  {
+    "slug": "kaki",
+    "fr": "kaki",
+    "en": "an orange persimmon"
+  },
+  {
+    "slug": "coing",
+    "fr": "coing",
+    "en": "a yellow quince"
+  },
+  {
+    "slug": "physalis",
+    "fr": "physalis",
+    "en": "a physalis in its papery husk"
+  },
+  {
+    "slug": "carambole",
+    "fr": "carambole",
+    "en": "a yellow starfruit"
+  },
+  {
+    "slug": "fruit-du-dragon",
+    "fr": "fruit du dragon",
+    "en": "a pink dragon fruit"
+  },
+  {
+    "slug": "mangoustan",
+    "fr": "mangoustan",
+    "en": "a purple mangosteen"
+  },
+  {
+    "slug": "jackfruit",
+    "fr": "jacquier",
+    "en": "a large green jackfruit"
+  },
+  {
+    "slug": "durian",
+    "fr": "durian",
+    "en": "a spiky durian fruit"
+  },
+  {
+    "slug": "tamarin",
+    "fr": "tamarin",
+    "en": "brown tamarind pods"
+  },
+  {
+    "slug": "jujube",
+    "fr": "jujube",
+    "en": "a few reddish jujube fruits"
+  },
+  {
+    "slug": "figue-de-barbarie",
+    "fr": "figue de Barbarie",
+    "en": "a prickly pear cactus fruit"
+  },
+  {
+    "slug": "airelle",
+    "fr": "airelle",
+    "en": "a small pile of lingonberries"
+  },
+  {
+    "slug": "canneberge",
+    "fr": "canneberge",
+    "en": "a small pile of cranberries"
+  },
+  {
+    "slug": "sureau",
+    "fr": "baie de sureau",
+    "en": "a cluster of elderberries"
+  },
+  {
+    "slug": "argousier",
+    "fr": "argousier",
+    "en": "orange sea buckthorn berries"
+  },
+  {
+    "slug": "goji",
+    "fr": "baie de goji",
+    "en": "a small pile of red goji berries"
+  },
+  {
+    "slug": "acai",
+    "fr": "açaí",
+    "en": "a small pile of dark açaí berries"
+  },
+  {
+    "slug": "rhubarbe",
+    "fr": "rhubarbe",
+    "en": "a few pink-red rhubarb stalks"
+  },
+  {
+    "slug": "olive",
+    "fr": "olive",
+    "en": "a small pile of green olives"
+  },
+  {
+    "slug": "olive-noire",
+    "fr": "olive noire",
+    "en": "a small pile of black olives"
+  },
+  {
+    "slug": "tomate-cerise",
+    "fr": "tomate cerise",
+    "en": "a few red cherry tomatoes on the vine"
+  },
+  {
+    "slug": "olive-verte",
+    "fr": "olive verte",
+    "en": "a few green olives with pits"
+  },
+  {
+    "slug": "carotte",
+    "fr": "carotte",
+    "en": "an orange carrot with short green tops"
+  },
+  {
+    "slug": "carotte-violette",
+    "fr": "carotte violette",
+    "en": "a purple carrot"
+  },
+  {
+    "slug": "tomate",
+    "fr": "tomate",
+    "en": "a ripe round red tomato with a green calyx"
+  },
+  {
+    "slug": "tomate-coeur-de-boeuf",
+    "fr": "tomate cœur de bœuf",
+    "en": "a large ribbed heirloom tomato"
+  },
+  {
+    "slug": "tomate-sechee",
+    "fr": "tomate séchée",
+    "en": "a few sun-dried tomatoes"
+  },
+  {
+    "slug": "oignon",
+    "fr": "oignon",
+    "en": "a whole brown onion with papery skin"
+  },
+  {
+    "slug": "oignon-rouge",
+    "fr": "oignon rouge",
+    "en": "a whole red onion"
+  },
+  {
+    "slug": "oignon-blanc",
+    "fr": "oignon blanc",
+    "en": "a whole white onion"
+  },
+  {
+    "slug": "oignon-nouveau",
+    "fr": "oignon nouveau",
+    "en": "a spring onion with green tops"
+  },
+  {
+    "slug": "ail",
+    "fr": "ail",
+    "en": "a garlic bulb with white-cream cloves"
+  },
+  {
+    "slug": "ail-des-ours",
+    "fr": "ail des ours",
+    "en": "wild garlic leaves, sage green"
+  },
+  {
+    "slug": "echalote",
+    "fr": "échalote",
+    "en": "a shallot with copper-pink papery skin"
+  },
+  {
+    "slug": "poireau",
+    "fr": "poireau",
+    "en": "a leek with white stem and green leaves"
+  },
+  {
+    "slug": "courgette",
+    "fr": "courgette",
+    "en": "a green zucchini"
+  },
+  {
+    "slug": "courgette-jaune",
+    "fr": "courgette jaune",
+    "en": "a yellow zucchini"
+  },
+  {
+    "slug": "aubergine",
+    "fr": "aubergine",
+    "en": "a glossy purple eggplant"
+  },
+  {
+    "slug": "poivron",
+    "fr": "poivron",
+    "en": "a red bell pepper"
+  },
+  {
+    "slug": "poivron-jaune",
+    "fr": "poivron jaune",
+    "en": "a yellow bell pepper"
+  },
+  {
+    "slug": "poivron-vert",
+    "fr": "poivron vert",
+    "en": "a green bell pepper"
+  },
+  {
+    "slug": "poivron-orange",
+    "fr": "poivron orange",
+    "en": "an orange bell pepper"
+  },
+  {
+    "slug": "piment",
+    "fr": "piment",
+    "en": "a red chili pepper"
+  },
+  {
+    "slug": "piment-doux",
+    "fr": "piment doux",
+    "en": "a mild red pepper"
+  },
+  {
+    "slug": "piment-oiseau",
+    "fr": "piment oiseau",
+    "en": "a small bird's eye chili"
+  },
+  {
+    "slug": "piment-jalapeno",
+    "fr": "jalapeño",
+    "en": "a green jalapeño pepper"
+  },
+  {
+    "slug": "piment-padron",
+    "fr": "piment Padrón",
+    "en": "a few small green Padrón peppers"
+  },
+  {
+    "slug": "brocoli",
+    "fr": "brocoli",
+    "en": "a broccoli floret, sage green"
+  },
+  {
+    "slug": "chou-fleur",
+    "fr": "chou-fleur",
+    "en": "a white cauliflower head"
+  },
+  {
+    "slug": "chou",
+    "fr": "chou",
+    "en": "a round green cabbage"
+  },
+  {
+    "slug": "chou-rouge",
+    "fr": "chou rouge",
+    "en": "a round red cabbage"
+  },
+  {
+    "slug": "chou-de-bruxelles",
+    "fr": "chou de Bruxelles",
+    "en": "a few Brussels sprouts"
+  },
+  {
+    "slug": "chou-kale",
+    "fr": "chou kale",
+    "en": "a bunch of curly kale"
+  },
+  {
+    "slug": "chou-rave",
+    "fr": "chou-rave",
+    "en": "a pale kohlrabi bulb with stems"
+  },
+  {
+    "slug": "chou-chinois",
+    "fr": "chou chinois",
+    "en": "a napa cabbage"
+  },
+  {
+    "slug": "pak-choi",
+    "fr": "pak-choï",
+    "en": "a bok choy with white stems"
+  },
+  {
+    "slug": "epinard",
+    "fr": "épinard",
+    "en": "a bunch of spinach leaves, dark sage green"
+  },
+  {
+    "slug": "salade",
+    "fr": "salade",
+    "en": "a head of green lettuce"
+  },
+  {
+    "slug": "laitue",
+    "fr": "laitue",
+    "en": "a round butter lettuce"
+  },
+  {
+    "slug": "roquette",
+    "fr": "roquette",
+    "en": "a bunch of arugula leaves"
+  },
+  {
+    "slug": "mache",
+    "fr": "mâche",
+    "en": "a small bunch of lamb's lettuce"
+  },
+  {
+    "slug": "iceberg",
+    "fr": "salade iceberg",
+    "en": "a crisp iceberg lettuce head"
+  },
+  {
+    "slug": "endive",
+    "fr": "endive",
+    "en": "a pale Belgian endive"
+  },
+  {
+    "slug": "chicoree",
+    "fr": "chicorée",
+    "en": "a head of curly chicory"
+  },
+  {
+    "slug": "cresson",
+    "fr": "cresson",
+    "en": "a bunch of watercress"
+  },
+  {
+    "slug": "blette",
+    "fr": "blette",
+    "en": "Swiss chard with red stems"
+  },
+  {
+    "slug": "oseille",
+    "fr": "oseille",
+    "en": "a bunch of sorrel leaves"
+  },
+  {
+    "slug": "concombre",
+    "fr": "concombre",
+    "en": "a whole cucumber, sage green"
+  },
+  {
+    "slug": "concombre-libanais",
+    "fr": "concombre libanais",
+    "en": "a short Lebanese cucumber"
+  },
+  {
+    "slug": "cornichon",
+    "fr": "cornichon",
+    "en": "a few small pickles"
+  },
+  {
+    "slug": "champignon",
+    "fr": "champignon",
+    "en": "a white button mushroom"
+  },
+  {
+    "slug": "champignon-paris",
+    "fr": "champignon de Paris",
+    "en": "a brown cremini mushroom"
+  },
+  {
+    "slug": "shiitake",
+    "fr": "shiitake",
+    "en": "a few shiitake mushrooms"
+  },
+  {
+    "slug": "pleurote",
+    "fr": "pleurote",
+    "en": "an oyster mushroom cluster"
+  },
+  {
+    "slug": "cepe",
+    "fr": "cèpe",
+    "en": "a porcini mushroom with a thick stem"
+  },
+  {
+    "slug": "girolle",
+    "fr": "girolle",
+    "en": "a few golden chanterelles"
+  },
+  {
+    "slug": "morille",
+    "fr": "morille",
+    "en": "a morel mushroom with honeycomb cap"
+  },
+  {
+    "slug": "truffe",
+    "fr": "truffe",
+    "en": "a black truffle"
+  },
+  {
+    "slug": "haricot-vert",
+    "fr": "haricot vert",
+    "en": "a handful of green beans"
+  },
+  {
+    "slug": "haricot-beurre",
+    "fr": "haricot beurre",
+    "en": "a handful of yellow wax beans"
+  },
+  {
+    "slug": "petit-pois",
+    "fr": "petit pois",
+    "en": "a few green peas in a small pile"
+  },
+  {
+    "slug": "pois-mange-tout",
+    "fr": "pois mange-tout",
+    "en": "a few snow peas"
+  },
+  {
+    "slug": "edamame",
+    "fr": "edamame",
+    "en": "a few green edamame pods"
+  },
+  {
+    "slug": "feve",
+    "fr": "fève",
+    "en": "a few broad beans in pods"
+  },
+  {
+    "slug": "mais",
+    "fr": "maïs",
+    "en": "an ear of yellow corn"
+  },
+  {
+    "slug": "mais-doux",
+    "fr": "maïs doux",
+    "en": "a few yellow sweetcorn kernels"
+  },
+  {
+    "slug": "fenouil",
+    "fr": "fenouil",
+    "en": "a fennel bulb with fronds"
+  },
+  {
+    "slug": "betterave",
+    "fr": "betterave",
+    "en": "a whole red beetroot with short stems"
+  },
+  {
+    "slug": "betterave-chioggia",
+    "fr": "betterave chioggia",
+    "en": "a Chioggia beet with pink rings"
+  },
+  {
+    "slug": "celeri",
+    "fr": "céleri",
+    "en": "a bunch of celery stalks"
+  },
+  {
+    "slug": "celeri-rave",
+    "fr": "céleri-rave",
+    "en": "a knobbly celeriac root"
+  },
+  {
+    "slug": "navet",
+    "fr": "navet",
+    "en": "a white turnip with purple shoulders"
+  },
+  {
+    "slug": "radis",
+    "fr": "radis",
+    "en": "a bunch of red radishes"
+  },
+  {
+    "slug": "radis-noir",
+    "fr": "radis noir",
+    "en": "a black radish"
+  },
+  {
+    "slug": "daikon",
+    "fr": "daikon",
+    "en": "a long white daikon radish"
+  },
+  {
+    "slug": "asperge",
+    "fr": "asperge",
+    "en": "a bundle of green asparagus"
+  },
+  {
+    "slug": "asperge-blanche",
+    "fr": "asperge blanche",
+    "en": "a bundle of white asparagus"
+  },
+  {
+    "slug": "artichaut",
+    "fr": "artichaut",
+    "en": "a green globe artichoke"
+  },
+  {
+    "slug": "potiron",
+    "fr": "potiron",
+    "en": "an orange pumpkin"
+  },
+  {
+    "slug": "potimarron",
+    "fr": "potimarron",
+    "en": "a red kuri squash"
+  },
+  {
+    "slug": "butternut",
+    "fr": "butternut",
+    "en": "a beige butternut squash"
+  },
+  {
+    "slug": "courge-spaghetti",
+    "fr": "courge spaghetti",
+    "en": "a yellow spaghetti squash"
+  },
+  {
+    "slug": "patisson",
+    "fr": "pâtisson",
+    "en": "a white pattypan squash"
+  },
+  {
+    "slug": "pomme-de-terre",
+    "fr": "pomme de terre",
+    "en": "a russet potato"
+  },
+  {
+    "slug": "pomme-de-terre-grenaille",
+    "fr": "pomme de terre grenaille",
+    "en": "a few small new potatoes"
+  },
+  {
+    "slug": "patate-douce",
+    "fr": "patate douce",
+    "en": "an orange sweet potato"
+  },
+  {
+    "slug": "topinambour",
+    "fr": "topinambour",
+    "en": "a knobbly Jerusalem artichoke"
+  },
+  {
+    "slug": "panais",
+    "fr": "panais",
+    "en": "a creamy parsnip"
+  },
+  {
+    "slug": "rutabaga",
+    "fr": "rutabaga",
+    "en": "a yellow-purple rutabaga"
+  },
+  {
+    "slug": "salsifis",
+    "fr": "salsifis",
+    "en": "a few salsify roots"
+  },
+  {
+    "slug": "manioc",
+    "fr": "manioc",
+    "en": "a cassava root"
+  },
+  {
+    "slug": "igname",
+    "fr": "igname",
+    "en": "a yam tuber"
+  },
+  {
+    "slug": "taro",
+    "fr": "taro",
+    "en": "a taro corm"
+  },
+  {
+    "slug": "gombo",
+    "fr": "gombo",
+    "en": "a few okra pods"
+  },
+  {
+    "slug": "pousse-soja",
+    "fr": "pousse de soja",
+    "en": "a handful of bean sprouts"
+  },
+  {
+    "slug": "pousse-bambou",
+    "fr": "pousse de bambou",
+    "en": "a few bamboo shoots"
+  },
+  {
+    "slug": "coeur-de-palmier",
+    "fr": "cœur de palmier",
+    "en": "a few hearts of palm"
+  },
+  {
+    "slug": "ciboule",
+    "fr": "ciboule",
+    "en": "a bunch of scallions"
+  },
+  {
+    "slug": "pourpier",
+    "fr": "pourpier",
+    "en": "a bunch of purslane"
+  },
+  {
+    "slug": "cardon",
+    "fr": "cardon",
+    "en": "a cardoon stalk"
+  },
+  {
+    "slug": "brocoli-rabe",
+    "fr": "brocoli rabe",
+    "en": "a bunch of broccoli rabe"
+  },
+  {
+    "slug": "wasabi-frais",
+    "fr": "wasabi frais",
+    "en": "a green wasabi rhizome"
+  },
+  {
+    "slug": "raifort",
+    "fr": "raifort",
+    "en": "a horseradish root"
+  },
+  {
+    "slug": "gingembre",
+    "fr": "gingembre",
+    "en": "a knobbly ginger root"
+  },
+  {
+    "slug": "curcuma-frais",
+    "fr": "curcuma frais",
+    "en": "a fresh turmeric rhizome, orange"
+  },
+  {
+    "slug": "galanga",
+    "fr": "galanga",
+    "en": "a galangal root"
+  },
+  {
+    "slug": "citronnelle",
+    "fr": "citronnelle",
+    "en": "lemongrass stalks"
+  },
+  {
+    "slug": "feuille-de-laurier",
+    "fr": "feuille de laurier",
+    "en": "a few dried bay leaves"
+  },
+  {
+    "slug": "algue-nori",
+    "fr": "nori",
+    "en": "a sheet of nori seaweed"
+  },
+  {
+    "slug": "algue-wakame",
+    "fr": "wakame",
+    "en": "a small pile of wakame seaweed"
+  },
+  {
+    "slug": "salicorne",
+    "fr": "salicorne",
+    "en": "a bunch of samphire"
+  },
+  {
+    "slug": "tomate-ananas",
+    "fr": "tomate ananas",
+    "en": "a yellow-red pineapple tomato"
+  },
+  {
+    "slug": "poivron-corne",
+    "fr": "poivron corne",
+    "en": "a long pointed red pepper"
+  },
+  {
+    "slug": "oignon-jaune",
+    "fr": "oignon jaune",
+    "en": "a yellow storage onion"
+  },
+  {
+    "slug": "ail-noir",
+    "fr": "ail noir",
+    "en": "a bulb of black garlic"
+  },
+  {
+    "slug": "chou-fleur-violet",
+    "fr": "chou-fleur violet",
+    "en": "a purple cauliflower"
+  },
+  {
+    "slug": "chou-romanesco",
+    "fr": "chou romanesco",
+    "en": "a green romanesco cauliflower"
+  },
+  {
+    "slug": "brocoli-chinois",
+    "fr": "brocoli chinois",
+    "en": "Chinese broccoli with thick stems"
+  },
+  {
+    "slug": "haricot-coco",
+    "fr": "haricot coco",
+    "en": "a few fresh white coco beans in pods"
+  },
+  {
+    "slug": "petit-pois-casse",
+    "fr": "petit pois cassé",
+    "en": "a small pile of split green peas"
+  },
+  {
+    "slug": "basilic",
+    "fr": "basilic",
+    "en": "a basil sprig with sage-green leaves"
+  },
+  {
+    "slug": "basilic-thai",
+    "fr": "basilic thaï",
+    "en": "a Thai basil sprig with purple stems"
+  },
+  {
+    "slug": "persil",
+    "fr": "persil",
+    "en": "a bunch of flat-leaf parsley"
+  },
+  {
+    "slug": "persil-frise",
+    "fr": "persil frisé",
+    "en": "a bunch of curly parsley"
+  },
+  {
+    "slug": "coriandre",
+    "fr": "coriandre",
+    "en": "a cilantro sprig"
+  },
+  {
+    "slug": "menthe",
+    "fr": "menthe",
+    "en": "a mint sprig"
+  },
+  {
+    "slug": "menthe-poivree",
+    "fr": "menthe poivrée",
+    "en": "a peppermint sprig"
+  },
+  {
+    "slug": "thym",
+    "fr": "thym",
+    "en": "a few thyme sprigs"
+  },
+  {
+    "slug": "romarin",
+    "fr": "romarin",
+    "en": "a rosemary sprig"
+  },
+  {
+    "slug": "origan",
+    "fr": "origan",
+    "en": "an oregano sprig"
+  },
+  {
+    "slug": "sarriette",
+    "fr": "sarriette",
+    "en": "a savory herb sprig"
+  },
+  {
+    "slug": "marjolaine",
+    "fr": "marjolaine",
+    "en": "a marjoram sprig"
+  },
+  {
+    "slug": "estragon",
+    "fr": "estragon",
+    "en": "a tarragon sprig"
+  },
+  {
+    "slug": "ciboulette",
+    "fr": "ciboulette",
+    "en": "a bunch of chives"
+  },
+  {
+    "slug": "aneth",
+    "fr": "aneth",
+    "en": "a dill sprig with feathery fronds"
+  },
+  {
+    "slug": "cerfeuil",
+    "fr": "cerfeuil",
+    "en": "a chervil sprig"
+  },
+  {
+    "slug": "sauge",
+    "fr": "sauge",
+    "en": "a sage sprig with velvety leaves"
+  },
+  {
+    "slug": "laurier",
+    "fr": "laurier",
+    "en": "a few fresh bay leaves"
+  },
+  {
+    "slug": "verveine",
+    "fr": "verveine",
+    "en": "a lemon verbena sprig"
+  },
+  {
+    "slug": "stevia",
+    "fr": "stévia",
+    "en": "a stevia sprig"
+  },
+  {
+    "slug": "poivre",
+    "fr": "poivre",
+    "en": "a small pile of black peppercorns"
+  },
+  {
+    "slug": "poivre-blanc",
+    "fr": "poivre blanc",
+    "en": "a small pile of white peppercorns"
+  },
+  {
+    "slug": "poivre-vert",
+    "fr": "poivre vert",
+    "en": "a small pile of green peppercorns"
+  },
+  {
+    "slug": "poivre-sichuan",
+    "fr": "poivre de Sichuan",
+    "en": "a small pile of Sichuan peppercorns"
+  },
+  {
+    "slug": "poivre-long",
+    "fr": "poivre long",
+    "en": "a few long pepper spikes"
+  },
+  {
+    "slug": "sel",
+    "fr": "sel",
+    "en": "a small pile of coarse sea salt crystals"
+  },
+  {
+    "slug": "sel-fin",
+    "fr": "sel fin",
+    "en": "a small pile of fine salt"
+  },
+  {
+    "slug": "fleur-de-sel",
+    "fr": "fleur de sel",
+    "en": "delicate fleur de sel flakes"
+  },
+  {
+    "slug": "sel-rose",
+    "fr": "sel rose",
+    "en": "a small pile of pink Himalayan salt"
+  },
+  {
+    "slug": "cumin",
+    "fr": "cumin",
+    "en": "a small pile of cumin seeds"
+  },
+  {
+    "slug": "curcuma",
+    "fr": "curcuma",
+    "en": "a small pile of golden turmeric powder"
+  },
+  {
+    "slug": "curry",
+    "fr": "curry",
+    "en": "a small pile of yellow curry powder"
+  },
+  {
+    "slug": "paprika",
+    "fr": "paprika",
+    "en": "a small pile of red paprika powder"
+  },
+  {
+    "slug": "paprika-fume",
+    "fr": "paprika fumé",
+    "en": "a small pile of smoked paprika"
+  },
+  {
+    "slug": "piment-espelette",
+    "fr": "piment d'Espelette",
+    "en": "a small pile of Espelette pepper powder"
+  },
+  {
+    "slug": "piment-cayenne",
+    "fr": "piment de Cayenne",
+    "en": "a small pile of cayenne powder"
+  },
+  {
+    "slug": "harissa",
+    "fr": "harissa",
+    "en": "a dollop of red harissa paste"
+  },
+  {
+    "slug": "cannelle",
+    "fr": "cannelle",
+    "en": "a few cinnamon sticks"
+  },
+  {
+    "slug": "vanille",
+    "fr": "vanille",
+    "en": "two dark vanilla beans"
+  },
+  {
+    "slug": "clou-de-girofle",
+    "fr": "clou de girofle",
+    "en": "a small pile of cloves"
+  },
+  {
+    "slug": "muscade",
+    "fr": "muscade",
+    "en": "a whole nutmeg"
+  },
+  {
+    "slug": "cardamome",
+    "fr": "cardamome",
+    "en": "a few green cardamom pods"
+  },
+  {
+    "slug": "anis",
+    "fr": "anis",
+    "en": "a small pile of anise seeds"
+  },
+  {
+    "slug": "anis-etoile",
+    "fr": "anis étoilé",
+    "en": "a star anise"
+  },
+  {
+    "slug": "fenouil-graine",
+    "fr": "graine de fenouil",
+    "en": "a small pile of fennel seeds"
+  },
+  {
+    "slug": "coriandre-graine",
+    "fr": "graine de coriandre",
+    "en": "a small pile of coriander seeds"
+  },
+  {
+    "slug": "moutarde-graine",
+    "fr": "graine de moutarde",
+    "en": "a small pile of mustard seeds"
+  },
+  {
+    "slug": "graine-de-lin",
+    "fr": "graine de lin",
+    "en": "a small pile of brown flax seeds"
+  },
+  {
+    "slug": "graine-de-chia",
+    "fr": "graine de chia",
+    "en": "a small pile of chia seeds"
+  },
+  {
+    "slug": "graine-de-sesame",
+    "fr": "graine de sésame",
+    "en": "a small pile of sesame seeds"
+  },
+  {
+    "slug": "sesame-noir",
+    "fr": "sésame noir",
+    "en": "a small pile of black sesame seeds"
+  },
+  {
+    "slug": "graine-de-courge",
+    "fr": "graine de courge",
+    "en": "a small pile of pumpkin seeds"
+  },
+  {
+    "slug": "graine-de-tournesol",
+    "fr": "graine de tournesol",
+    "en": "a small pile of sunflower seeds"
+  },
+  {
+    "slug": "pavot",
+    "fr": "graine de pavot",
+    "en": "a small pile of poppy seeds"
+  },
+  {
+    "slug": "nigelle",
+    "fr": "nigelle",
+    "en": "a small pile of nigella seeds"
+  },
+  {
+    "slug": "fenugrec",
+    "fr": "fenugrec",
+    "en": "a small pile of fenugreek seeds"
+  },
+  {
+    "slug": "sumac",
+    "fr": "sumac",
+    "en": "a small pile of red sumac"
+  },
+  {
+    "slug": "zaatar",
+    "fr": "zaatar",
+    "en": "a small pile of za'atar blend"
+  },
+  {
+    "slug": "ras-el-hanout",
+    "fr": "ras el hanout",
+    "en": "a small pile of ras el hanout"
+  },
+  {
+    "slug": "garam-masala",
+    "fr": "garam masala",
+    "en": "a small pile of garam masala"
+  },
+  {
+    "slug": "cinq-epices",
+    "fr": "cinq épices",
+    "en": "a small pile of five-spice powder"
+  },
+  {
+    "slug": "herbes-de-provence",
+    "fr": "herbes de Provence",
+    "en": "a small pile of herbes de Provence"
+  },
+  {
+    "slug": "bouquet-garni",
+    "fr": "bouquet garni",
+    "en": "a tied bouquet garni of herbs"
+  },
+  {
+    "slug": "safran",
+    "fr": "safran",
+    "en": "a few saffron threads"
+  },
+  {
+    "slug": "wasabi",
+    "fr": "wasabi",
+    "en": "a small mound of green wasabi paste"
+  },
+  {
+    "slug": "poudre-ail",
+    "fr": "poudre d'ail",
+    "en": "a small pile of garlic powder"
+  },
+  {
+    "slug": "poudre-oignon",
+    "fr": "poudre d'oignon",
+    "en": "a small pile of onion powder"
+  },
+  {
+    "slug": "piment-doux-graine",
+    "fr": "graine de piment",
+    "en": "a few dried red chili flakes"
+  },
+  {
+    "slug": "baie-de-genevrier",
+    "fr": "baie de genévrier",
+    "en": "a small pile of juniper berries"
+  },
+  {
+    "slug": "feuille-de-kaffir",
+    "fr": "feuille de kaffir",
+    "en": "a few kaffir lime leaves"
+  },
+  {
+    "slug": "epice",
+    "fr": "mélange d'épices",
+    "en": "a small ceramic bowl of mixed warm spices"
+  },
+  {
+    "slug": "poulet",
+    "fr": "poulet",
+    "en": "a roasted chicken thigh with golden skin"
+  },
+  {
+    "slug": "poulet-entier",
+    "fr": "poulet entier",
+    "en": "a whole roasted chicken"
+  },
+  {
+    "slug": "blanc-de-poulet",
+    "fr": "blanc de poulet",
+    "en": "a raw chicken breast"
+  },
+  {
+    "slug": "cuisse-de-poulet",
+    "fr": "cuisse de poulet",
+    "en": "a raw chicken drumstick"
+  },
+  {
+    "slug": "aile-de-poulet",
+    "fr": "aile de poulet",
+    "en": "a raw chicken wing"
+  },
+  {
+    "slug": "dinde",
+    "fr": "dinde",
+    "en": "a roasted turkey slice"
+  },
+  {
+    "slug": "blanc-de-dinde",
+    "fr": "blanc de dinde",
+    "en": "a turkey breast fillet"
+  },
+  {
+    "slug": "boeuf",
+    "fr": "bœuf",
+    "en": "a raw beef steak, marbled"
+  },
+  {
+    "slug": "steak",
+    "fr": "steak",
+    "en": "a grilled beef steak with grill marks"
+  },
+  {
+    "slug": "entrecote",
+    "fr": "entrecôte",
+    "en": "a raw ribeye steak"
+  },
+  {
+    "slug": "faux-filet",
+    "fr": "faux-filet",
+    "en": "a raw sirloin steak"
+  },
+  {
+    "slug": "filet-de-boeuf",
+    "fr": "filet de bœuf",
+    "en": "a raw beef tenderloin"
+  },
+  {
+    "slug": "bavette",
+    "fr": "bavette",
+    "en": "a raw flank steak"
+  },
+  {
+    "slug": "hampe",
+    "fr": "hampe",
+    "en": "a raw hanger steak"
+  },
+  {
+    "slug": "onglet",
+    "fr": "onglet",
+    "en": "a raw onglet steak"
+  },
+  {
+    "slug": "rumsteck",
+    "fr": "rumsteck",
+    "en": "a raw rump steak"
+  },
+  {
+    "slug": "bourguignon",
+    "fr": "bœuf bourguignon",
+    "en": "cubes of stewing beef"
+  },
+  {
+    "slug": "hache-boeuf",
+    "fr": "bœuf haché",
+    "en": "a mound of raw ground beef"
+  },
+  {
+    "slug": "rosbif",
+    "fr": "rosbif",
+    "en": "a slice of roast beef"
+  },
+  {
+    "slug": "veau",
+    "fr": "veau",
+    "en": "a pale veal escalope"
+  },
+  {
+    "slug": "escalope-veau",
+    "fr": "escalope de veau",
+    "en": "a thin veal cutlet"
+  },
+  {
+    "slug": "blanquette",
+    "fr": "veau à blanquette",
+    "en": "pale veal stew cubes"
+  },
+  {
+    "slug": "os-a-moelle",
+    "fr": "os à moelle",
+    "en": "a roasted marrow bone"
+  },
+  {
+    "slug": "porc",
+    "fr": "porc",
+    "en": "a raw pork chop"
+  },
+  {
+    "slug": "cote-de-porc",
+    "fr": "côte de porc",
+    "en": "a pork rib chop with bone"
+  },
+  {
+    "slug": "filet-mignon",
+    "fr": "filet mignon",
+    "en": "a pork tenderloin"
+  },
+  {
+    "slug": "roti-de-porc",
+    "fr": "rôti de porc",
+    "en": "a pork roast tied with string"
+  },
+  {
+    "slug": "echine",
+    "fr": "échine de porc",
+    "en": "a pork shoulder roast"
+  },
+  {
+    "slug": "travers-de-porc",
+    "fr": "travers de porc",
+    "en": "a rack of pork ribs"
+  },
+  {
+    "slug": "hache-porc",
+    "fr": "porc haché",
+    "en": "a mound of ground pork"
+  },
+  {
+    "slug": "agneau",
+    "fr": "agneau",
+    "en": "a lamb chop with bone"
+  },
+  {
+    "slug": "gigot",
+    "fr": "gigot d'agneau",
+    "en": "a leg of lamb"
+  },
+  {
+    "slug": "souris-d-agneau",
+    "fr": "souris d'agneau",
+    "en": "a lamb shank"
+  },
+  {
+    "slug": "cotelette-agneau",
+    "fr": "côtelette d'agneau",
+    "en": "a lamb rib chop"
+  },
+  {
+    "slug": "epaule-agneau",
+    "fr": "épaule d'agneau",
+    "en": "a lamb shoulder roast"
+  },
+  {
+    "slug": "canard",
+    "fr": "canard",
+    "en": "a roasted duck breast with skin"
+  },
+  {
+    "slug": "magret",
+    "fr": "magret de canard",
+    "en": "a duck magret with fat cap"
+  },
+  {
+    "slug": "confit-de-canard",
+    "fr": "confit de canard",
+    "en": "a duck confit leg"
+  },
+  {
+    "slug": "oie",
+    "fr": "oie",
+    "en": "a roasted goose drumstick"
+  },
+  {
+    "slug": "pintade",
+    "fr": "pintade",
+    "en": "a guinea fowl breast"
+  },
+  {
+    "slug": "caille",
+    "fr": "caille",
+    "en": "a small roasted quail"
+  },
+  {
+    "slug": "lapin",
+    "fr": "lapin",
+    "en": "a rabbit saddle"
+  },
+  {
+    "slug": "chevreuil",
+    "fr": "chevreuil",
+    "en": "a venison steak"
+  },
+  {
+    "slug": "sanglier",
+    "fr": "sanglier",
+    "en": "a wild boar steak"
+  },
+  {
+    "slug": "cerf",
+    "fr": "cerf",
+    "en": "a deer steak"
+  },
+  {
+    "slug": "foie-de-veau",
+    "fr": "foie de veau",
+    "en": "a slice of calf liver"
+  },
+  {
+    "slug": "foie-de-volaille",
+    "fr": "foie de volaille",
+    "en": "chicken livers"
+  },
+  {
+    "slug": "rognon",
+    "fr": "rognon",
+    "en": "a few lamb kidneys"
+  },
+  {
+    "slug": "coeur-de-boeuf-abats",
+    "fr": "cœur de bœuf",
+    "en": "a beef heart cut"
+  },
+  {
+    "slug": "langue-de-boeuf",
+    "fr": "langue de bœuf",
+    "en": "a cooked beef tongue slice"
+  },
+  {
+    "slug": "tripe",
+    "fr": "tripe",
+    "en": "a piece of cooked tripe"
+  },
+  {
+    "slug": "boudin-noir",
+    "fr": "boudin noir",
+    "en": "a black pudding sausage"
+  },
+  {
+    "slug": "boudin-blanc",
+    "fr": "boudin blanc",
+    "en": "a white boudin sausage"
+  },
+  {
+    "slug": "andouille",
+    "fr": "andouille",
+    "en": "an andouille sausage"
+  },
+  {
+    "slug": "andouille-de-guemene",
+    "fr": "andouille de Guémené",
+    "en": "a smoked andouille"
+  },
+  {
+    "slug": "saucisse",
+    "fr": "saucisse",
+    "en": "a few raw sausages"
+  },
+  {
+    "slug": "saucisse-de-toulouse",
+    "fr": "saucisse de Toulouse",
+    "en": "a Toulouse sausage coil"
+  },
+  {
+    "slug": "saucisse-de-morteau",
+    "fr": "saucisse de Morteau",
+    "en": "a smoked Morteau sausage"
+  },
+  {
+    "slug": "merguez",
+    "fr": "merguez",
+    "en": "a few red merguez sausages"
+  },
+  {
+    "slug": "chipolata",
+    "fr": "chipolata",
+    "en": "a few thin chipolata sausages"
+  },
+  {
+    "slug": "knack",
+    "fr": "knack",
+    "en": "a few knackwurst sausages"
+  },
+  {
+    "slug": "hot-dog",
+    "fr": "saucisse hot-dog",
+    "en": "a frankfurter sausage"
+  },
+  {
+    "slug": "chorizo",
+    "fr": "chorizo",
+    "en": "a cured chorizo sausage"
+  },
+  {
+    "slug": "chorizo-doux",
+    "fr": "chorizo doux",
+    "en": "a mild chorizo"
+  },
+  {
+    "slug": "salami",
+    "fr": "salami",
+    "en": "a salami log with a few slices"
+  },
+  {
+    "slug": "saucisson",
+    "fr": "saucisson",
+    "en": "a dry-cured saucisson"
+  },
+  {
+    "slug": "saucisson-sec",
+    "fr": "saucisson sec",
+    "en": "a hanging dry sausage"
+  },
+  {
+    "slug": "jambon",
+    "fr": "jambon",
+    "en": "a folded slice of cooked ham"
+  },
+  {
+    "slug": "jambon-blanc",
+    "fr": "jambon blanc",
+    "en": "a slice of cooked white ham"
+  },
+  {
+    "slug": "jambon-cru",
+    "fr": "jambon cru",
+    "en": "thin slices of cured ham"
+  },
+  {
+    "slug": "jambon-de-bayonne",
+    "fr": "jambon de Bayonne",
+    "en": "Bayonne ham slices"
+  },
+  {
+    "slug": "jambon-iberique",
+    "fr": "jambon ibérique",
+    "en": "Iberian ham slices"
+  },
+  {
+    "slug": "prosciutto",
+    "fr": "prosciutto",
+    "en": "thin prosciutto slices"
+  },
+  {
+    "slug": "lardon",
+    "fr": "lardon",
+    "en": "a small pile of bacon lardons"
+  },
+  {
+    "slug": "lard",
+    "fr": "lard",
+    "en": "a slab of pork fatback"
+  },
+  {
+    "slug": "bacon",
+    "fr": "bacon",
+    "en": "a few strips of bacon"
+  },
+  {
+    "slug": "pancetta",
+    "fr": "pancetta",
+    "en": "a few slices of pancetta"
+  },
+  {
+    "slug": "poitrine-fumee",
+    "fr": "poitrine fumée",
+    "en": "smoked pork belly"
+  },
+  {
+    "slug": "pate",
+    "fr": "pâté",
+    "en": "a slice of country pâté"
+  },
+  {
+    "slug": "pate-de-campagne",
+    "fr": "pâté de campagne",
+    "en": "a rustic country pâté terrine"
+  },
+  {
+    "slug": "rillettes",
+    "fr": "rillettes",
+    "en": "a small pot of rillettes"
+  },
+  {
+    "slug": "terrine",
+    "fr": "terrine",
+    "en": "a slice of terrine"
+  },
+  {
+    "slug": "foie-gras",
+    "fr": "foie gras",
+    "en": "a slice of foie gras"
+  },
+  {
+    "slug": "coppa",
+    "fr": "coppa",
+    "en": "thin slices of coppa"
+  },
+  {
+    "slug": "bresaola",
+    "fr": "bresaola",
+    "en": "thin slices of bresaola"
+  },
+  {
+    "slug": "mortadelle",
+    "fr": "mortadelle",
+    "en": "a slice of mortadella with pistachios"
+  },
+  {
+    "slug": "guanciale",
+    "fr": "guanciale",
+    "en": "a piece of guanciale"
+  },
+  {
+    "slug": "speck",
+    "fr": "speck",
+    "en": "thin slices of speck"
+  },
+  {
+    "slug": "jambonneau",
+    "fr": "jambonneau",
+    "en": "a cooked ham hock"
+  },
+  {
+    "slug": "jarret",
+    "fr": "jarret",
+    "en": "a veal shank ossobuco cut"
+  },
+  {
+    "slug": "paleron",
+    "fr": "paleron",
+    "en": "a beef chuck roast"
+  },
+  {
+    "slug": "gite",
+    "fr": "gîte",
+    "en": "a beef shank cut"
+  },
+  {
+    "slug": "queue-de-boeuf",
+    "fr": "queue de bœuf",
+    "en": "an oxtail piece"
+  },
+  {
+    "slug": "steak-hache",
+    "fr": "steak haché",
+    "en": "a raw hamburger patty"
+  },
+  {
+    "slug": "kefta",
+    "fr": "kefta",
+    "en": "a few raw kefta meatballs"
+  },
+  {
+    "slug": "boulette",
+    "fr": "boulette de viande",
+    "en": "a few meatballs"
+  },
+  {
+    "slug": "saumon",
+    "fr": "saumon",
+    "en": "a raw salmon fillet, coral-pink"
+  },
+  {
+    "slug": "saumon-fume",
+    "fr": "saumon fumé",
+    "en": "folded slices of smoked salmon"
+  },
+  {
+    "slug": "truite",
+    "fr": "truite",
+    "en": "a whole trout with speckled skin"
+  },
+  {
+    "slug": "truite-fumee",
+    "fr": "truite fumée",
+    "en": "slices of smoked trout"
+  },
+  {
+    "slug": "thon",
+    "fr": "thon",
+    "en": "a raw tuna steak, deep red"
+  },
+  {
+    "slug": "thon-en-boite",
+    "fr": "thon en boîte",
+    "en": "an open tin of canned tuna"
+  },
+  {
+    "slug": "cabillaud",
+    "fr": "cabillaud",
+    "en": "a white cod fillet"
+  },
+  {
+    "slug": "colin",
+    "fr": "colin",
+    "en": "a hake fillet"
+  },
+  {
+    "slug": "lieu",
+    "fr": "lieu noir",
+    "en": "a pollock fillet"
+  },
+  {
+    "slug": "merlu",
+    "fr": "merlu",
+    "en": "a merlu fillet"
+  },
+  {
+    "slug": "merlan",
+    "fr": "merlan",
+    "en": "a whiting fillet"
+  },
+  {
+    "slug": "eglefin",
+    "fr": "églefin",
+    "en": "a haddock fillet"
+  },
+  {
+    "slug": "sole",
+    "fr": "sole",
+    "en": "a whole Dover sole"
+  },
+  {
+    "slug": "limande",
+    "fr": "limande",
+    "en": "a dab flatfish"
+  },
+  {
+    "slug": "turbot",
+    "fr": "turbot",
+    "en": "a whole turbot"
+  },
+  {
+    "slug": "barbue",
+    "fr": "barbue",
+    "en": "a brill flatfish"
+  },
+  {
+    "slug": "raie",
+    "fr": "raie",
+    "en": "a skate wing"
+  },
+  {
+    "slug": "lotte",
+    "fr": "lotte",
+    "en": "a monkfish tail"
+  },
+  {
+    "slug": "baudroie",
+    "fr": "baudroie",
+    "en": "a monkfish fillet"
+  },
+  {
+    "slug": "bar",
+    "fr": "bar",
+    "en": "a whole sea bass"
+  },
+  {
+    "slug": "loup-de-mer",
+    "fr": "loup de mer",
+    "en": "a Mediterranean sea bass"
+  },
+  {
+    "slug": "daurade",
+    "fr": "daurade",
+    "en": "a whole gilt-head bream"
+  },
+  {
+    "slug": "dorade-grise",
+    "fr": "dorade grise",
+    "en": "a grey sea bream"
+  },
+  {
+    "slug": "rouget",
+    "fr": "rouget",
+    "en": "a red mullet"
+  },
+  {
+    "slug": "maquereau",
+    "fr": "maquereau",
+    "en": "a whole mackerel with striped skin"
+  },
+  {
+    "slug": "sardine",
+    "fr": "sardine",
+    "en": "a few sardines"
+  },
+  {
+    "slug": "anchois",
+    "fr": "anchois",
+    "en": "a few salted anchovy fillets"
+  },
+  {
+    "slug": "hareng",
+    "fr": "hareng",
+    "en": "a whole herring"
+  },
+  {
+    "slug": "hareng-fume",
+    "fr": "hareng fumé",
+    "en": "a smoked herring"
+  },
+  {
+    "slug": "sprat",
+    "fr": "sprat",
+    "en": "a few sprats"
+  },
+  {
+    "slug": "espadon",
+    "fr": "espadon",
+    "en": "a swordfish steak"
+  },
+  {
+    "slug": "thon-blanc",
+    "fr": "thon blanc",
+    "en": "an albacore tuna steak"
+  },
+  {
+    "slug": "bonite",
+    "fr": "bonite",
+    "en": "a bonito steak"
+  },
+  {
+    "slug": "anguille",
+    "fr": "anguille",
+    "en": "a whole eel"
+  },
+  {
+    "slug": "brochet",
+    "fr": "brochet",
+    "en": "a pike fillet"
+  },
+  {
+    "slug": "carpe",
+    "fr": "carpe",
+    "en": "a whole carp"
+  },
+  {
+    "slug": "sandre",
+    "fr": "sandre",
+    "en": "a zander fillet"
+  },
+  {
+    "slug": "perche",
+    "fr": "perche",
+    "en": "a perch fillet"
+  },
+  {
+    "slug": "tilapia",
+    "fr": "tilapia",
+    "en": "a tilapia fillet"
+  },
+  {
+    "slug": "pangasius",
+    "fr": "pangasius",
+    "en": "a pangasius fillet"
+  },
+  {
+    "slug": "fletan",
+    "fr": "flétan",
+    "en": "a halibut steak"
+  },
+  {
+    "slug": "saint-pierre",
+    "fr": "saint-pierre",
+    "en": "a John Dory"
+  },
+  {
+    "slug": "grondin",
+    "fr": "grondin",
+    "en": "a gurnard fish"
+  },
+  {
+    "slug": "congre",
+    "fr": "congre",
+    "en": "a conger eel steak"
+  },
+  {
+    "slug": "lieu-jaune",
+    "fr": "lieu jaune",
+    "en": "a pollack fillet"
+  },
+  {
+    "slug": "crevette",
+    "fr": "crevette",
+    "en": "a few cooked pink shrimp"
+  },
+  {
+    "slug": "crevette-grise",
+    "fr": "crevette grise",
+    "en": "a few grey shrimp"
+  },
+  {
+    "slug": "gambas",
+    "fr": "gambas",
+    "en": "a few large prawns"
+  },
+  {
+    "slug": "langoustine",
+    "fr": "langoustine",
+    "en": "a langoustine"
+  },
+  {
+    "slug": "homard",
+    "fr": "homard",
+    "en": "a whole lobster"
+  },
+  {
+    "slug": "langouste",
+    "fr": "langouste",
+    "en": "a spiny lobster"
+  },
+  {
+    "slug": "crabe",
+    "fr": "crabe",
+    "en": "a whole crab"
+  },
+  {
+    "slug": "tourteau",
+    "fr": "tourteau",
+    "en": "a brown crab"
+  },
+  {
+    "slug": "araignee-de-mer",
+    "fr": "araignée de mer",
+    "en": "a spider crab"
+  },
+  {
+    "slug": "etrille",
+    "fr": "étrille",
+    "en": "a velvet swimming crab"
+  },
+  {
+    "slug": "moule",
+    "fr": "moule",
+    "en": "a few black mussels"
+  },
+  {
+    "slug": "moule-de-bouchot",
+    "fr": "moule de bouchot",
+    "en": "small bouchot mussels"
+  },
+  {
+    "slug": "huitre",
+    "fr": "huître",
+    "en": "an oyster on the half shell"
+  },
+  {
+    "slug": "palourde",
+    "fr": "palourde",
+    "en": "a few clams"
+  },
+  {
+    "slug": "coque",
+    "fr": "coque",
+    "en": "a few cockles"
+  },
+  {
+    "slug": "bulot",
+    "fr": "bulot",
+    "en": "a few whelks"
+  },
+  {
+    "slug": "bigorneau",
+    "fr": "bigorneau",
+    "en": "a few periwinkles"
+  },
+  {
+    "slug": "saint-jacques",
+    "fr": "saint-jacques",
+    "en": "a scallop in its shell"
+  },
+  {
+    "slug": "noix-saint-jacques",
+    "fr": "noix de saint-jacques",
+    "en": "a few scallop meats"
+  },
+  {
+    "slug": "calamar",
+    "fr": "calamar",
+    "en": "a whole squid"
+  },
+  {
+    "slug": "encornet",
+    "fr": "encornet",
+    "en": "a cleaned squid tube"
+  },
+  {
+    "slug": "poulpe",
+    "fr": "poulpe",
+    "en": "an octopus tentacle"
+  },
+  {
+    "slug": "seiche",
+    "fr": "seiche",
+    "en": "a cuttlefish"
+  },
+  {
+    "slug": "oursin",
+    "fr": "oursin",
+    "en": "a sea urchin"
+  },
+  {
+    "slug": "caviar",
+    "fr": "caviar",
+    "en": "a small tin of caviar"
+  },
+  {
+    "slug": "oeufs-de-lompe",
+    "fr": "œufs de lompe",
+    "en": "a small jar of lumpfish roe"
+  },
+  {
+    "slug": "surimi",
+    "fr": "surimi",
+    "en": "a few sticks of surimi"
+  },
+  {
+    "slug": "cuisse-de-grenouille",
+    "fr": "cuisse de grenouille",
+    "en": "a few frog legs"
+  },
+  {
+    "slug": "escargot",
+    "fr": "escargot",
+    "en": "a few cooked snails in shells"
+  },
+  {
+    "slug": "oeuf",
+    "fr": "œuf",
+    "en": "a whole brown egg"
+  },
+  {
+    "slug": "oeuf-blanc",
+    "fr": "œuf blanc",
+    "en": "a whole white egg"
+  },
+  {
+    "slug": "oeuf-de-caille",
+    "fr": "œuf de caille",
+    "en": "a few speckled quail eggs"
+  },
+  {
+    "slug": "oeuf-de-cane",
+    "fr": "œuf de cane",
+    "en": "a large duck egg"
+  },
+  {
+    "slug": "blanc-d-oeuf",
+    "fr": "blanc d'œuf",
+    "en": "a small bowl of egg whites"
+  },
+  {
+    "slug": "jaune-d-oeuf",
+    "fr": "jaune d'œuf",
+    "en": "a small bowl of egg yolks"
+  },
+  {
+    "slug": "lait",
+    "fr": "lait",
+    "en": "a glass bottle of milk"
+  },
+  {
+    "slug": "lait-ecreme",
+    "fr": "lait écrémé",
+    "en": "a bottle of skim milk"
+  },
+  {
+    "slug": "lait-demi-ecreme",
+    "fr": "lait demi-écrémé",
+    "en": "a bottle of semi-skimmed milk"
+  },
+  {
+    "slug": "lait-entier",
+    "fr": "lait entier",
+    "en": "a bottle of whole milk"
+  },
+  {
+    "slug": "lait-de-chevre",
+    "fr": "lait de chèvre",
+    "en": "a bottle of goat milk"
+  },
+  {
+    "slug": "lait-de-brebis",
+    "fr": "lait de brebis",
+    "en": "a bottle of sheep milk"
+  },
+  {
+    "slug": "lait-concentre",
+    "fr": "lait concentré",
+    "en": "a small can of condensed milk"
+  },
+  {
+    "slug": "lait-en-poudre",
+    "fr": "lait en poudre",
+    "en": "a small pile of milk powder"
+  },
+  {
+    "slug": "yaourt",
+    "fr": "yaourt",
+    "en": "a pot of plain yogurt"
+  },
+  {
+    "slug": "yaourt-grec",
+    "fr": "yaourt grec",
+    "en": "a pot of thick Greek yogurt"
+  },
+  {
+    "slug": "yaourt-a-boire",
+    "fr": "yaourt à boire",
+    "en": "a drinking yogurt bottle"
+  },
+  {
+    "slug": "skyr",
+    "fr": "skyr",
+    "en": "a pot of skyr"
+  },
+  {
+    "slug": "fromage-blanc",
+    "fr": "fromage blanc",
+    "en": "a bowl of fromage blanc"
+  },
+  {
+    "slug": "faisselle",
+    "fr": "faisselle",
+    "en": "a faisselle in its strainer"
+  },
+  {
+    "slug": "petit-suisse",
+    "fr": "petit-suisse",
+    "en": "a small petit-suisse"
+  },
+  {
+    "slug": "creme",
+    "fr": "crème fraîche",
+    "en": "a dollop of crème fraîche"
+  },
+  {
+    "slug": "creme-liquide",
+    "fr": "crème liquide",
+    "en": "a small pitcher of pouring cream"
+  },
+  {
+    "slug": "creme-epaisse",
+    "fr": "crème épaisse",
+    "en": "a pot of thick cream"
+  },
+  {
+    "slug": "creme-fouettee",
+    "fr": "crème fouettée",
+    "en": "a swirl of whipped cream"
+  },
+  {
+    "slug": "beurre",
+    "fr": "beurre",
+    "en": "a block of butter"
+  },
+  {
+    "slug": "beurre-doux",
+    "fr": "beurre doux",
+    "en": "a block of unsalted butter"
+  },
+  {
+    "slug": "beurre-sale",
+    "fr": "beurre salé",
+    "en": "a block of salted butter with sea salt"
+  },
+  {
+    "slug": "beurre-clarifie",
+    "fr": "beurre clarifié",
+    "en": "a jar of clarified butter"
+  },
+  {
+    "slug": "ghee",
+    "fr": "ghee",
+    "en": "a jar of golden ghee"
+  },
+  {
+    "slug": "fromage",
+    "fr": "fromage",
+    "en": "a wedge of yellow cheese"
+  },
+  {
+    "slug": "emmental",
+    "fr": "emmental",
+    "en": "a wedge of Emmental with holes"
+  },
+  {
+    "slug": "comte",
+    "fr": "comté",
+    "en": "a wedge of Comté"
+  },
+  {
+    "slug": "beaufort",
+    "fr": "beaufort",
+    "en": "a wedge of Beaufort"
+  },
+  {
+    "slug": "gruyere",
+    "fr": "gruyère",
+    "en": "a wedge of Gruyère"
+  },
+  {
+    "slug": "abondance",
+    "fr": "abondance",
+    "en": "a wedge of Abondance"
+  },
+  {
+    "slug": "tomme",
+    "fr": "tomme",
+    "en": "a wheel of tomme cheese"
+  },
+  {
+    "slug": "cantal",
+    "fr": "cantal",
+    "en": "a wedge of Cantal"
+  },
+  {
+    "slug": "salers",
+    "fr": "salers",
+    "en": "a wedge of Salers"
+  },
+  {
+    "slug": "laguiole",
+    "fr": "laguiole",
+    "en": "a wedge of Laguiole"
+  },
+  {
+    "slug": "cheddar",
+    "fr": "cheddar",
+    "en": "a wedge of cheddar"
+  },
+  {
+    "slug": "gouda",
+    "fr": "gouda",
+    "en": "a round of Gouda"
+  },
+  {
+    "slug": "edam",
+    "fr": "edam",
+    "en": "a red-waxed Edam"
+  },
+  {
+    "slug": "mimolette",
+    "fr": "mimolette",
+    "en": "an orange Mimolette"
+  },
+  {
+    "slug": "parmesan",
+    "fr": "parmesan",
+    "en": "a chunk of Parmesan"
+  },
+  {
+    "slug": "pecorino",
+    "fr": "pecorino",
+    "en": "a wedge of pecorino"
+  },
+  {
+    "slug": "mozzarella",
+    "fr": "mozzarella",
+    "en": "a ball of mozzarella in whey"
+  },
+  {
+    "slug": "burrata",
+    "fr": "burrata",
+    "en": "a creamy burrata"
+  },
+  {
+    "slug": "stracciatella",
+    "fr": "stracciatella",
+    "en": "a bowl of stracciatella"
+  },
+  {
+    "slug": "ricotta",
+    "fr": "ricotta",
+    "en": "a bowl of ricotta"
+  },
+  {
+    "slug": "mascarpone",
+    "fr": "mascarpone",
+    "en": "a pot of mascarpone"
+  },
+  {
+    "slug": "feta",
+    "fr": "feta",
+    "en": "a block of feta in brine"
+  },
+  {
+    "slug": "halloumi",
+    "fr": "halloumi",
+    "en": "a block of halloumi"
+  },
+  {
+    "slug": "chevre",
+    "fr": "chèvre",
+    "en": "a fresh goat cheese log"
+  },
+  {
+    "slug": "crottin",
+    "fr": "crottin de chèvre",
+    "en": "a small crottin of goat cheese"
+  },
+  {
+    "slug": "rocamadour",
+    "fr": "rocamadour",
+    "en": "a small Rocamadour cheese"
+  },
+  {
+    "slug": "sainte-maure",
+    "fr": "sainte-maure",
+    "en": "a Sainte-Maure goat log"
+  },
+  {
+    "slug": "valencay",
+    "fr": "valençay",
+    "en": "a pyramid of Valençay"
+  },
+  {
+    "slug": "camembert",
+    "fr": "camembert",
+    "en": "a round Camembert in its wooden box"
+  },
+  {
+    "slug": "brie",
+    "fr": "brie",
+    "en": "a wedge of Brie"
+  },
+  {
+    "slug": "coulommiers",
+    "fr": "coulommiers",
+    "en": "a Coulommiers cheese"
+  },
+  {
+    "slug": "pont-leveque",
+    "fr": "pont-l'évêque",
+    "en": "a square Pont-l'Évêque"
+  },
+  {
+    "slug": "livarot",
+    "fr": "livarot",
+    "en": "a Livarot with raffia bands"
+  },
+  {
+    "slug": "munster",
+    "fr": "munster",
+    "en": "a round Munster"
+  },
+  {
+    "slug": "epoisses",
+    "fr": "époisses",
+    "en": "a round Époisses"
+  },
+  {
+    "slug": "maroilles",
+    "fr": "maroilles",
+    "en": "a square Maroilles"
+  },
+  {
+    "slug": "reblochon",
+    "fr": "reblochon",
+    "en": "a round Reblochon"
+  },
+  {
+    "slug": "mont-d-or",
+    "fr": "mont d'or",
+    "en": "a Mont d'Or in its spruce box"
+  },
+  {
+    "slug": "vacherin",
+    "fr": "vacherin",
+    "en": "a Vacherin cheese"
+  },
+  {
+    "slug": "bleu",
+    "fr": "bleu",
+    "en": "a wedge of blue cheese"
+  },
+  {
+    "slug": "roquefort",
+    "fr": "roquefort",
+    "en": "a wedge of Roquefort"
+  },
+  {
+    "slug": "fourme-d-ambert",
+    "fr": "fourme d'Ambert",
+    "en": "a round Fourme d'Ambert"
+  },
+  {
+    "slug": "bleu-d-auvergne",
+    "fr": "bleu d'Auvergne",
+    "en": "a wedge of Bleu d'Auvergne"
+  },
+  {
+    "slug": "gorgonzola",
+    "fr": "gorgonzola",
+    "en": "a wedge of Gorgonzola"
+  },
+  {
+    "slug": "stilton",
+    "fr": "stilton",
+    "en": "a wedge of Stilton"
+  },
+  {
+    "slug": "raclette",
+    "fr": "raclette",
+    "en": "slices of raclette cheese"
+  },
+  {
+    "slug": "fondue",
+    "fr": "fromage à fondue",
+    "en": "a pot of melted cheese fondue"
+  },
+  {
+    "slug": "kiri",
+    "fr": "fromage fondu",
+    "en": "a small processed cheese portion"
+  },
+  {
+    "slug": "babybel",
+    "fr": "babybel",
+    "en": "a small red-waxed cheese"
+  },
+  {
+    "slug": "fromage-rape",
+    "fr": "fromage râpé",
+    "en": "a small pile of grated cheese"
+  },
+  {
+    "slug": "creme-de-gruyere",
+    "fr": "crème de gruyère",
+    "en": "a pot of cheese spread"
+  },
+  {
+    "slug": "riz",
+    "fr": "riz",
+    "en": "a small mound of uncooked white rice"
+  },
+  {
+    "slug": "riz-basmati",
+    "fr": "riz basmati",
+    "en": "a mound of basmati rice"
+  },
+  {
+    "slug": "riz-thai",
+    "fr": "riz thaï",
+    "en": "a mound of jasmine rice"
+  },
+  {
+    "slug": "riz-complet",
+    "fr": "riz complet",
+    "en": "a mound of brown rice"
+  },
+  {
+    "slug": "riz-rouge",
+    "fr": "riz rouge",
+    "en": "a mound of red rice"
+  },
+  {
+    "slug": "riz-noir",
+    "fr": "riz noir",
+    "en": "a mound of black rice"
+  },
+  {
+    "slug": "riz-gluant",
+    "fr": "riz gluant",
+    "en": "a mound of sticky rice"
+  },
+  {
+    "slug": "riz-sauvage",
+    "fr": "riz sauvage",
+    "en": "a mound of wild rice"
+  },
+  {
+    "slug": "risotto",
+    "fr": "riz arborio",
+    "en": "a mound of arborio rice"
+  },
+  {
+    "slug": "pates",
+    "fr": "pâtes",
+    "en": "a nest of uncooked tagliatelle"
+  },
+  {
+    "slug": "spaghetti",
+    "fr": "spaghetti",
+    "en": "a bundle of uncooked spaghetti"
+  },
+  {
+    "slug": "penne",
+    "fr": "penne",
+    "en": "a small pile of penne pasta"
+  },
+  {
+    "slug": "fusilli",
+    "fr": "fusilli",
+    "en": "a small pile of fusilli"
+  },
+  {
+    "slug": "farfalle",
+    "fr": "farfalle",
+    "en": "a small pile of farfalle"
+  },
+  {
+    "slug": "macaroni",
+    "fr": "macaroni",
+    "en": "a small pile of macaroni"
+  },
+  {
+    "slug": "linguine",
+    "fr": "linguine",
+    "en": "a bundle of linguine"
+  },
+  {
+    "slug": "tagliatelle",
+    "fr": "tagliatelle",
+    "en": "a nest of tagliatelle"
+  },
+  {
+    "slug": "fettuccine",
+    "fr": "fettuccine",
+    "en": "a nest of fettuccine"
+  },
+  {
+    "slug": "lasagne",
+    "fr": "lasagne",
+    "en": "a few lasagna sheets"
+  },
+  {
+    "slug": "ravioli",
+    "fr": "ravioli",
+    "en": "a few fresh ravioli"
+  },
+  {
+    "slug": "tortellini",
+    "fr": "tortellini",
+    "en": "a few tortellini"
+  },
+  {
+    "slug": "gnocchi",
+    "fr": "gnocchi",
+    "en": "a small pile of gnocchi"
+  },
+  {
+    "slug": "orzo",
+    "fr": "orzo",
+    "en": "a small pile of orzo pasta"
+  },
+  {
+    "slug": "pates-completes",
+    "fr": "pâtes complètes",
+    "en": "a pile of wholewheat pasta"
+  },
+  {
+    "slug": "nouilles",
+    "fr": "nouilles",
+    "en": "a nest of egg noodles"
+  },
+  {
+    "slug": "nouilles-riz",
+    "fr": "nouilles de riz",
+    "en": "a nest of rice noodles"
+  },
+  {
+    "slug": "nouilles-soba",
+    "fr": "nouilles soba",
+    "en": "a nest of soba noodles"
+  },
+  {
+    "slug": "nouilles-udon",
+    "fr": "nouilles udon",
+    "en": "a nest of udon noodles"
+  },
+  {
+    "slug": "vermicelle",
+    "fr": "vermicelle",
+    "en": "a nest of vermicelli"
+  },
+  {
+    "slug": "quinoa",
+    "fr": "quinoa",
+    "en": "a small mound of quinoa"
+  },
+  {
+    "slug": "quinoa-rouge",
+    "fr": "quinoa rouge",
+    "en": "a mound of red quinoa"
+  },
+  {
+    "slug": "avoine",
+    "fr": "avoine",
+    "en": "a small pile of rolled oats"
+  },
+  {
+    "slug": "flocons-d-avoine",
+    "fr": "flocons d'avoine",
+    "en": "a pile of oat flakes"
+  },
+  {
+    "slug": "son-d-avoine",
+    "fr": "son d'avoine",
+    "en": "a pile of oat bran"
+  },
+  {
+    "slug": "semoule",
+    "fr": "semoule",
+    "en": "a small mound of couscous semolina"
+  },
+  {
+    "slug": "couscous",
+    "fr": "couscous",
+    "en": "a mound of steamed couscous"
+  },
+  {
+    "slug": "boulgour",
+    "fr": "boulgour",
+    "en": "a mound of bulgur"
+  },
+  {
+    "slug": "ebly",
+    "fr": "épeautre perlé",
+    "en": "a mound of pearled spelt"
+  },
+  {
+    "slug": "epeautre",
+    "fr": "épeautre",
+    "en": "a mound of spelt grains"
+  },
+  {
+    "slug": "orge",
+    "fr": "orge",
+    "en": "a mound of pearl barley"
+  },
+  {
+    "slug": "sarrasin",
+    "fr": "sarrasin",
+    "en": "a mound of buckwheat groats"
+  },
+  {
+    "slug": "kasha",
+    "fr": "kasha",
+    "en": "a mound of toasted buckwheat"
+  },
+  {
+    "slug": "millet",
+    "fr": "millet",
+    "en": "a mound of millet"
+  },
+  {
+    "slug": "amarante",
+    "fr": "amarante",
+    "en": "a mound of amaranth"
+  },
+  {
+    "slug": "teff",
+    "fr": "teff",
+    "en": "a mound of teff grain"
+  },
+  {
+    "slug": "polenta",
+    "fr": "polenta",
+    "en": "a mound of yellow polenta"
+  },
+  {
+    "slug": "mais-semoule",
+    "fr": "semoule de maïs",
+    "en": "a mound of cornmeal"
+  },
+  {
+    "slug": "farine",
+    "fr": "farine",
+    "en": "a small mound of white flour"
+  },
+  {
+    "slug": "farine-complete",
+    "fr": "farine complète",
+    "en": "a mound of wholewheat flour"
+  },
+  {
+    "slug": "farine-seigle",
+    "fr": "farine de seigle",
+    "en": "a mound of rye flour"
+  },
+  {
+    "slug": "farine-sarrasin",
+    "fr": "farine de sarrasin",
+    "en": "a mound of buckwheat flour"
+  },
+  {
+    "slug": "farine-pois-chiche",
+    "fr": "farine de pois chiche",
+    "en": "a mound of chickpea flour"
+  },
+  {
+    "slug": "farine-riz",
+    "fr": "farine de riz",
+    "en": "a mound of rice flour"
+  },
+  {
+    "slug": "farine-mais",
+    "fr": "farine de maïs",
+    "en": "a mound of corn flour"
+  },
+  {
+    "slug": "fecule-de-mais",
+    "fr": "fécule de maïs",
+    "en": "a small pile of cornstarch"
+  },
+  {
+    "slug": "fecule-de-pomme-de-terre",
+    "fr": "fécule de pomme de terre",
+    "en": "a pile of potato starch"
+  },
+  {
+    "slug": "levure",
+    "fr": "levure",
+    "en": "a small cube of fresh yeast"
+  },
+  {
+    "slug": "levure-chimique",
+    "fr": "levure chimique",
+    "en": "a small pile of baking powder"
+  },
+  {
+    "slug": "levure-boulanger",
+    "fr": "levure de boulanger",
+    "en": "a small pile of dry baker's yeast"
+  },
+  {
+    "slug": "bicarbonate",
+    "fr": "bicarbonate",
+    "en": "a small pile of baking soda"
+  },
+  {
+    "slug": "pain",
+    "fr": "pain",
+    "en": "a rustic loaf of bread"
+  },
+  {
+    "slug": "baguette",
+    "fr": "baguette",
+    "en": "a French baguette"
+  },
+  {
+    "slug": "pain-complet",
+    "fr": "pain complet",
+    "en": "a wholewheat loaf"
+  },
+  {
+    "slug": "pain-de-mie",
+    "fr": "pain de mie",
+    "en": "a sliced sandwich loaf"
+  },
+  {
+    "slug": "pain-aux-cereales",
+    "fr": "pain aux céréales",
+    "en": "a seeded grain loaf"
+  },
+  {
+    "slug": "pain-de-seigle",
+    "fr": "pain de seigle",
+    "en": "a dark rye loaf"
+  },
+  {
+    "slug": "pain-au-levain",
+    "fr": "pain au levain",
+    "en": "a sourdough boule"
+  },
+  {
+    "slug": "ciabatta",
+    "fr": "ciabatta",
+    "en": "a ciabatta loaf"
+  },
+  {
+    "slug": "focaccia",
+    "fr": "focaccia",
+    "en": "a square of focaccia with herbs"
+  },
+  {
+    "slug": "pita",
+    "fr": "pain pita",
+    "en": "a pita bread"
+  },
+  {
+    "slug": "naan",
+    "fr": "naan",
+    "en": "a naan bread"
+  },
+  {
+    "slug": "tortilla",
+    "fr": "tortilla",
+    "en": "a stack of wheat tortillas"
+  },
+  {
+    "slug": "galette-sarrasin",
+    "fr": "galette de sarrasin",
+    "en": "a buckwheat galette"
+  },
+  {
+    "slug": "crepe",
+    "fr": "crêpe",
+    "en": "a folded crêpe"
+  },
+  {
+    "slug": "brioche",
+    "fr": "brioche",
+    "en": "a golden brioche"
+  },
+  {
+    "slug": "croissant",
+    "fr": "croissant",
+    "en": "a golden croissant"
+  },
+  {
+    "slug": "pain-au-chocolat",
+    "fr": "pain au chocolat",
+    "en": "a pain au chocolat"
+  },
+  {
+    "slug": "chausson-aux-pommes",
+    "fr": "chausson aux pommes",
+    "en": "an apple turnover"
+  },
+  {
+    "slug": "pain-brioche",
+    "fr": "pain brioché",
+    "en": "a brioche bun"
+  },
+  {
+    "slug": "bagel",
+    "fr": "bagel",
+    "en": "a bagel with sesame seeds"
+  },
+  {
+    "slug": "muffin-anglais",
+    "fr": "muffin anglais",
+    "en": "an English muffin"
+  },
+  {
+    "slug": "biscotte",
+    "fr": "biscotte",
+    "en": "a few rusks"
+  },
+  {
+    "slug": "cracker",
+    "fr": "cracker",
+    "en": "a few crackers"
+  },
+  {
+    "slug": "chapelure",
+    "fr": "chapelure",
+    "en": "a small pile of breadcrumbs"
+  },
+  {
+    "slug": "panko",
+    "fr": "panko",
+    "en": "a small pile of panko breadcrumbs"
+  },
+  {
+    "slug": "crouton",
+    "fr": "croûton",
+    "en": "a few toasted croutons"
+  },
+  {
+    "slug": "galette-de-riz",
+    "fr": "galette de riz",
+    "en": "a few rice cakes"
+  },
+  {
+    "slug": "wrap",
+    "fr": "wrap",
+    "en": "a rolled wrap"
+  },
+  {
+    "slug": "blini",
+    "fr": "blini",
+    "en": "a few small blinis"
+  },
+  {
+    "slug": "bao",
+    "fr": "bao",
+    "en": "a steamed bao bun"
+  },
+  {
+    "slug": "lentille",
+    "fr": "lentille",
+    "en": "a small pile of green lentils"
+  },
+  {
+    "slug": "lentille-corail",
+    "fr": "lentille corail",
+    "en": "a pile of red lentils"
+  },
+  {
+    "slug": "lentille-beluga",
+    "fr": "lentille beluga",
+    "en": "a pile of black beluga lentils"
+  },
+  {
+    "slug": "lentille-puy",
+    "fr": "lentille du Puy",
+    "en": "a pile of Puy lentils"
+  },
+  {
+    "slug": "pois-chiche",
+    "fr": "pois chiche",
+    "en": "a small pile of chickpeas"
+  },
+  {
+    "slug": "pois-casse",
+    "fr": "pois cassé",
+    "en": "a pile of yellow split peas"
+  },
+  {
+    "slug": "haricot-sec",
+    "fr": "haricot sec",
+    "en": "a pile of dried white beans"
+  },
+  {
+    "slug": "haricot-blanc",
+    "fr": "haricot blanc",
+    "en": "a pile of white beans"
+  },
+  {
+    "slug": "haricot-rouge",
+    "fr": "haricot rouge",
+    "en": "a pile of red kidney beans"
+  },
+  {
+    "slug": "haricot-noir",
+    "fr": "haricot noir",
+    "en": "a pile of black beans"
+  },
+  {
+    "slug": "haricot-flageolet",
+    "fr": "flageolet",
+    "en": "a pile of green flageolet beans"
+  },
+  {
+    "slug": "mogette",
+    "fr": "mogette",
+    "en": "a pile of mogette beans"
+  },
+  {
+    "slug": "tarbais",
+    "fr": "haricot tarbais",
+    "en": "a pile of Tarbais beans"
+  },
+  {
+    "slug": "azuki",
+    "fr": "haricot azuki",
+    "en": "a pile of red azuki beans"
+  },
+  {
+    "slug": "mungo",
+    "fr": "haricot mungo",
+    "en": "a pile of mung beans"
+  },
+  {
+    "slug": "soja",
+    "fr": "soja",
+    "en": "a pile of soybeans"
+  },
+  {
+    "slug": "tofu",
+    "fr": "tofu",
+    "en": "a block of white tofu"
+  },
+  {
+    "slug": "tofu-soyeux",
+    "fr": "tofu soyeux",
+    "en": "a block of silken tofu"
+  },
+  {
+    "slug": "tofu-fume",
+    "fr": "tofu fumé",
+    "en": "a block of smoked tofu"
+  },
+  {
+    "slug": "tempeh",
+    "fr": "tempeh",
+    "en": "a block of tempeh"
+  },
+  {
+    "slug": "seitan",
+    "fr": "seitan",
+    "en": "a piece of seitan"
+  },
+  {
+    "slug": "proteine-de-soja",
+    "fr": "protéine de soja",
+    "en": "a pile of textured soy protein"
+  },
+  {
+    "slug": "hummus",
+    "fr": "houmous",
+    "en": "a bowl of hummus with olive oil"
+  },
+  {
+    "slug": "falafel",
+    "fr": "falafel",
+    "en": "a few falafel balls"
+  },
+  {
+    "slug": "lait-de-soja",
+    "fr": "lait de soja",
+    "en": "a carton of soy milk"
+  },
+  {
+    "slug": "edamame-graine",
+    "fr": "graine d'edamame",
+    "en": "a pile of shelled edamame"
+  },
+  {
+    "slug": "lupin",
+    "fr": "lupin",
+    "en": "a pile of lupin beans"
+  },
+  {
+    "slug": "amande",
+    "fr": "amande",
+    "en": "a small pile of almonds"
+  },
+  {
+    "slug": "amande-effilee",
+    "fr": "amande effilée",
+    "en": "a pile of slivered almonds"
+  },
+  {
+    "slug": "noix",
+    "fr": "noix",
+    "en": "a few walnut halves"
+  },
+  {
+    "slug": "noix-de-pecan",
+    "fr": "noix de pécan",
+    "en": "a few pecan halves"
+  },
+  {
+    "slug": "noix-de-cajou",
+    "fr": "noix de cajou",
+    "en": "a small pile of cashews"
+  },
+  {
+    "slug": "noix-du-bresil",
+    "fr": "noix du Brésil",
+    "en": "a few Brazil nuts"
+  },
+  {
+    "slug": "noix-de-macadamia",
+    "fr": "noix de macadamia",
+    "en": "a few macadamia nuts"
+  },
+  {
+    "slug": "noisette",
+    "fr": "noisette",
+    "en": "a small pile of hazelnuts"
+  },
+  {
+    "slug": "cacahuete",
+    "fr": "cacahuète",
+    "en": "a small pile of peanuts"
+  },
+  {
+    "slug": "pistache",
+    "fr": "pistache",
+    "en": "a small pile of pistachios"
+  },
+  {
+    "slug": "pignon",
+    "fr": "pignon de pin",
+    "en": "a small pile of pine nuts"
+  },
+  {
+    "slug": "chataigne",
+    "fr": "châtaigne",
+    "en": "a few roasted chestnuts"
+  },
+  {
+    "slug": "marron",
+    "fr": "marron",
+    "en": "a few peeled marrons"
+  },
+  {
+    "slug": "puree-d-amande",
+    "fr": "purée d'amande",
+    "en": "a jar of almond butter"
+  },
+  {
+    "slug": "puree-de-noisette",
+    "fr": "purée de noisette",
+    "en": "a jar of hazelnut butter"
+  },
+  {
+    "slug": "beurre-de-cacahuete",
+    "fr": "beurre de cacahuète",
+    "en": "a jar of peanut butter"
+  },
+  {
+    "slug": "tahini",
+    "fr": "tahini",
+    "en": "a jar of tahini"
+  },
+  {
+    "slug": "lait-d-amande",
+    "fr": "lait d'amande",
+    "en": "a carton of almond milk"
+  },
+  {
+    "slug": "lait-de-noisette",
+    "fr": "lait de noisette",
+    "en": "a carton of hazelnut milk"
+  },
+  {
+    "slug": "lait-d-avoine",
+    "fr": "lait d'avoine",
+    "en": "a carton of oat milk"
+  },
+  {
+    "slug": "lait-de-riz",
+    "fr": "lait de riz",
+    "en": "a carton of rice milk"
+  },
+  {
+    "slug": "lait-de-coco",
+    "fr": "lait de coco",
+    "en": "a can of coconut milk"
+  },
+  {
+    "slug": "creme-de-coco",
+    "fr": "crème de coco",
+    "en": "a can of coconut cream"
+  },
+  {
+    "slug": "noix-de-coco-rapee",
+    "fr": "noix de coco râpée",
+    "en": "a pile of shredded coconut"
+  },
+  {
+    "slug": "chips-de-coco",
+    "fr": "chips de coco",
+    "en": "a few toasted coconut chips"
+  },
+  {
+    "slug": "melange-etudiant",
+    "fr": "mélange étudiant",
+    "en": "a small pile of mixed nuts and raisins"
+  },
+  {
+    "slug": "noix-de-cajou-grillee",
+    "fr": "cajou grillée",
+    "en": "roasted cashews"
+  },
+  {
+    "slug": "amande-grillee",
+    "fr": "amande grillée",
+    "en": "roasted almonds"
+  },
+  {
+    "slug": "huile",
+    "fr": "huile",
+    "en": "a glass bottle of golden cooking oil"
+  },
+  {
+    "slug": "huile-olive",
+    "fr": "huile d'olive",
+    "en": "a green glass bottle of olive oil"
+  },
+  {
+    "slug": "huile-olive-extra",
+    "fr": "huile d'olive extra vierge",
+    "en": "a bottle of extra-virgin olive oil"
+  },
+  {
+    "slug": "huile-tournesol",
+    "fr": "huile de tournesol",
+    "en": "a bottle of sunflower oil"
+  },
+  {
+    "slug": "huile-colza",
+    "fr": "huile de colza",
+    "en": "a bottle of rapeseed oil"
+  },
+  {
+    "slug": "huile-noix",
+    "fr": "huile de noix",
+    "en": "a bottle of walnut oil"
+  },
+  {
+    "slug": "huile-sesame",
+    "fr": "huile de sésame",
+    "en": "a bottle of sesame oil"
+  },
+  {
+    "slug": "huile-coco",
+    "fr": "huile de coco",
+    "en": "a jar of coconut oil"
+  },
+  {
+    "slug": "huile-arachide",
+    "fr": "huile d'arachide",
+    "en": "a bottle of peanut oil"
+  },
+  {
+    "slug": "huile-pepin-raisin",
+    "fr": "huile de pépins de raisin",
+    "en": "a bottle of grapeseed oil"
+  },
+  {
+    "slug": "huile-avocat",
+    "fr": "huile d'avocat",
+    "en": "a bottle of avocado oil"
+  },
+  {
+    "slug": "huile-lin",
+    "fr": "huile de lin",
+    "en": "a bottle of flaxseed oil"
+  },
+  {
+    "slug": "huile-cameline",
+    "fr": "huile de cameline",
+    "en": "a bottle of camelina oil"
+  },
+  {
+    "slug": "graisse-de-canard",
+    "fr": "graisse de canard",
+    "en": "a jar of duck fat"
+  },
+  {
+    "slug": "saindoux",
+    "fr": "saindoux",
+    "en": "a jar of lard"
+  },
+  {
+    "slug": "margarine",
+    "fr": "margarine",
+    "en": "a block of margarine"
+  },
+  {
+    "slug": "moutarde",
+    "fr": "moutarde",
+    "en": "a small pot of Dijon mustard"
+  },
+  {
+    "slug": "moutarde-a-l-ancienne",
+    "fr": "moutarde à l'ancienne",
+    "en": "a pot of wholegrain mustard"
+  },
+  {
+    "slug": "vinaigre",
+    "fr": "vinaigre",
+    "en": "a glass bottle of red wine vinegar"
+  },
+  {
+    "slug": "vinaigre-balsamique",
+    "fr": "vinaigre balsamique",
+    "en": "a bottle of balsamic vinegar"
+  },
+  {
+    "slug": "vinaigre-cidre",
+    "fr": "vinaigre de cidre",
+    "en": "a bottle of apple cider vinegar"
+  },
+  {
+    "slug": "vinaigre-riz",
+    "fr": "vinaigre de riz",
+    "en": "a bottle of rice vinegar"
+  },
+  {
+    "slug": "vinaigre-xeres",
+    "fr": "vinaigre de Xérès",
+    "en": "a bottle of sherry vinegar"
+  },
+  {
+    "slug": "sauce-soja",
+    "fr": "sauce soja",
+    "en": "a bottle of soy sauce"
+  },
+  {
+    "slug": "sauce-soja-sucree",
+    "fr": "sauce soja sucrée",
+    "en": "a bottle of sweet soy sauce"
+  },
+  {
+    "slug": "nuoc-mam",
+    "fr": "nuoc-mâm",
+    "en": "a bottle of fish sauce"
+  },
+  {
+    "slug": "sauce-huitre",
+    "fr": "sauce d'huître",
+    "en": "a bottle of oyster sauce"
+  },
+  {
+    "slug": "sauce-worcestershire",
+    "fr": "worcestershire",
+    "en": "a bottle of Worcestershire sauce"
+  },
+  {
+    "slug": "tabasco",
+    "fr": "tabasco",
+    "en": "a small bottle of Tabasco"
+  },
+  {
+    "slug": "sriracha",
+    "fr": "sriracha",
+    "en": "a bottle of sriracha"
+  },
+  {
+    "slug": "ketchup",
+    "fr": "ketchup",
+    "en": "a bottle of ketchup"
+  },
+  {
+    "slug": "mayonnaise",
+    "fr": "mayonnaise",
+    "en": "a jar of mayonnaise"
+  },
+  {
+    "slug": "aioli",
+    "fr": "aïoli",
+    "en": "a bowl of aïoli"
+  },
+  {
+    "slug": "tartare",
+    "fr": "sauce tartare",
+    "en": "a bowl of tartare sauce"
+  },
+  {
+    "slug": "bearnaise",
+    "fr": "béarnaise",
+    "en": "a bowl of béarnaise"
+  },
+  {
+    "slug": "hollandaise",
+    "fr": "hollandaise",
+    "en": "a bowl of hollandaise"
+  },
+  {
+    "slug": "pesto",
+    "fr": "pesto",
+    "en": "a jar of green pesto"
+  },
+  {
+    "slug": "pesto-rosso",
+    "fr": "pesto rosso",
+    "en": "a jar of red pesto"
+  },
+  {
+    "slug": "coulis-tomate",
+    "fr": "coulis de tomate",
+    "en": "a jar of tomato coulis"
+  },
+  {
+    "slug": "puree-de-tomate",
+    "fr": "purée de tomate",
+    "en": "a can of tomato puree"
+  },
+  {
+    "slug": "concentre-de-tomate",
+    "fr": "concentré de tomate",
+    "en": "a small can of tomato paste"
+  },
+  {
+    "slug": "sauce-tomate",
+    "fr": "sauce tomate",
+    "en": "a jar of tomato sauce"
+  },
+  {
+    "slug": "passata",
+    "fr": "passata",
+    "en": "a bottle of passata"
+  },
+  {
+    "slug": "sauce-carbonara",
+    "fr": "sauce carbonara",
+    "en": "a jar of carbonara sauce"
+  },
+  {
+    "slug": "sauce-bolognaise",
+    "fr": "sauce bolognaise",
+    "en": "a jar of bolognese sauce"
+  },
+  {
+    "slug": "veloute",
+    "fr": "velouté",
+    "en": "a bowl of velouté soup"
+  },
+  {
+    "slug": "bouillon",
+    "fr": "bouillon",
+    "en": "a steaming bowl of broth"
+  },
+  {
+    "slug": "cube-bouillon",
+    "fr": "cube de bouillon",
+    "en": "a few stock cubes"
+  },
+  {
+    "slug": "fond-de-veau",
+    "fr": "fond de veau",
+    "en": "a jar of veal stock"
+  },
+  {
+    "slug": "fumet-de-poisson",
+    "fr": "fumet de poisson",
+    "en": "a jar of fish fumet"
+  },
+  {
+    "slug": "capre",
+    "fr": "câpre",
+    "en": "a small pile of capers"
+  },
+  {
+    "slug": "cornichon-aigre",
+    "fr": "cornichon aigre-doux",
+    "en": "a few pickled gherkins"
+  },
+  {
+    "slug": "oignon-pickle",
+    "fr": "oignon au vinaigre",
+    "en": "a few pickled onions"
+  },
+  {
+    "slug": "olive-casher",
+    "fr": "olive casher",
+    "en": "a few cracked olives"
+  },
+  {
+    "slug": "anchoiade",
+    "fr": "anchoïade",
+    "en": "a bowl of anchoïade"
+  },
+  {
+    "slug": "tapenade",
+    "fr": "tapenade",
+    "en": "a bowl of tapenade"
+  },
+  {
+    "slug": "caviar-d-aubergine",
+    "fr": "caviar d'aubergine",
+    "en": "a bowl of eggplant caviar"
+  },
+  {
+    "slug": "guacamole",
+    "fr": "guacamole",
+    "en": "a bowl of guacamole"
+  },
+  {
+    "slug": "salsa",
+    "fr": "salsa",
+    "en": "a bowl of tomato salsa"
+  },
+  {
+    "slug": "tzatziki",
+    "fr": "tzatziki",
+    "en": "a bowl of tzatziki"
+  },
+  {
+    "slug": "raita",
+    "fr": "raita",
+    "en": "a bowl of raita"
+  },
+  {
+    "slug": "chimichurri",
+    "fr": "chimichurri",
+    "en": "a bowl of chimichurri"
+  },
+  {
+    "slug": "sauce-bbq",
+    "fr": "sauce barbecue",
+    "en": "a bottle of barbecue sauce"
+  },
+  {
+    "slug": "sauce-chili",
+    "fr": "sauce chili",
+    "en": "a bottle of chili sauce"
+  },
+  {
+    "slug": "sauce-aigre-douce",
+    "fr": "sauce aigre-douce",
+    "en": "a bowl of sweet and sour sauce"
+  },
+  {
+    "slug": "sauce-teriyaki",
+    "fr": "sauce teriyaki",
+    "en": "a bottle of teriyaki"
+  },
+  {
+    "slug": "miso",
+    "fr": "miso",
+    "en": "a small bowl of miso paste"
+  },
+  {
+    "slug": "pate-de-curry",
+    "fr": "pâte de curry",
+    "en": "a small bowl of curry paste"
+  },
+  {
+    "slug": "pate-de-curry-rouge",
+    "fr": "pâte de curry rouge",
+    "en": "red curry paste"
+  },
+  {
+    "slug": "pate-de-curry-vert",
+    "fr": "pâte de curry verte",
+    "en": "green curry paste"
+  },
+  {
+    "slug": "gomashio",
+    "fr": "gomashio",
+    "en": "a small pile of gomashio"
+  },
+  {
+    "slug": "gomasio",
+    "fr": "gomasio",
+    "en": "a small pile of sesame salt"
+  },
+  {
+    "slug": "dashi",
+    "fr": "dashi",
+    "en": "a small packet of dashi flakes"
+  },
+  {
+    "slug": "mirin",
+    "fr": "mirin",
+    "en": "a bottle of mirin"
+  },
+  {
+    "slug": "sake-cuisine",
+    "fr": "saké de cuisine",
+    "en": "a bottle of cooking sake"
+  },
+  {
+    "slug": "vin-blanc-cuisine",
+    "fr": "vin blanc de cuisine",
+    "en": "a small bottle of cooking white wine"
+  },
+  {
+    "slug": "vin-rouge-cuisine",
+    "fr": "vin rouge de cuisine",
+    "en": "a small bottle of cooking red wine"
+  },
+  {
+    "slug": "porto",
+    "fr": "porto",
+    "en": "a small glass of port"
+  },
+  {
+    "slug": "cognac-cuisine",
+    "fr": "cognac",
+    "en": "a small glass of cognac"
+  },
+  {
+    "slug": "calvados",
+    "fr": "calvados",
+    "en": "a small glass of calvados"
+  },
+  {
+    "slug": "armagnac",
+    "fr": "armagnac",
+    "en": "a small glass of armagnac"
+  },
+  {
+    "slug": "rhum",
+    "fr": "rhum",
+    "en": "a small glass of rum"
+  },
+  {
+    "slug": "vin",
+    "fr": "vin",
+    "en": "a glass of red wine"
+  },
+  {
+    "slug": "vin-blanc",
+    "fr": "vin blanc",
+    "en": "a glass of white wine"
+  },
+  {
+    "slug": "vin-rose",
+    "fr": "vin rosé",
+    "en": "a glass of rosé"
+  },
+  {
+    "slug": "champagne",
+    "fr": "champagne",
+    "en": "a champagne flute"
+  },
+  {
+    "slug": "cidre",
+    "fr": "cidre",
+    "en": "a glass of cider"
+  },
+  {
+    "slug": "biere",
+    "fr": "bière",
+    "en": "a glass of beer with foam"
+  },
+  {
+    "slug": "eau",
+    "fr": "eau",
+    "en": "a clear glass of water"
+  },
+  {
+    "slug": "eau-gazeuse",
+    "fr": "eau gazeuse",
+    "en": "a glass of sparkling water"
+  },
+  {
+    "slug": "cafe",
+    "fr": "café",
+    "en": "a cup of coffee"
+  },
+  {
+    "slug": "cafe-grain",
+    "fr": "grain de café",
+    "en": "a small pile of coffee beans"
+  },
+  {
+    "slug": "the",
+    "fr": "thé",
+    "en": "a cup of tea with a tea bag"
+  },
+  {
+    "slug": "the-vert",
+    "fr": "thé vert",
+    "en": "a cup of green tea"
+  },
+  {
+    "slug": "the-noir",
+    "fr": "thé noir",
+    "en": "a cup of black tea"
+  },
+  {
+    "slug": "infusion",
+    "fr": "infusion",
+    "en": "a cup of herbal infusion"
+  },
+  {
+    "slug": "chocolat-chaud",
+    "fr": "chocolat chaud",
+    "en": "a cup of hot chocolate"
+  },
+  {
+    "slug": "jus-d-orange",
+    "fr": "jus d'orange",
+    "en": "a glass of orange juice"
+  },
+  {
+    "slug": "jus-de-pomme",
+    "fr": "jus de pomme",
+    "en": "a glass of apple juice"
+  },
+  {
+    "slug": "jus-de-citron",
+    "fr": "jus de citron",
+    "en": "a small glass of lemon juice"
+  },
+  {
+    "slug": "jus-de-tomate",
+    "fr": "jus de tomate",
+    "en": "a glass of tomato juice"
+  },
+  {
+    "slug": "smoothie",
+    "fr": "smoothie",
+    "en": "a glass of berry smoothie"
+  },
+  {
+    "slug": "lait-chocolat",
+    "fr": "lait chocolaté",
+    "en": "a glass of chocolate milk"
+  },
+  {
+    "slug": "kombucha",
+    "fr": "kombucha",
+    "en": "a bottle of kombucha"
+  },
+  {
+    "slug": "kefir",
+    "fr": "kéfir",
+    "en": "a glass of kefir"
+  },
+  {
+    "slug": "sirop",
+    "fr": "sirop",
+    "en": "a bottle of fruit syrup"
+  },
+  {
+    "slug": "sirop-erable",
+    "fr": "sirop d'érable",
+    "en": "a bottle of maple syrup"
+  },
+  {
+    "slug": "sirop-agave",
+    "fr": "sirop d'agave",
+    "en": "a bottle of agave syrup"
+  },
+  {
+    "slug": "miel",
+    "fr": "miel",
+    "en": "a jar of honey with a wooden dipper"
+  },
+  {
+    "slug": "miel-de-chataignier",
+    "fr": "miel de châtaignier",
+    "en": "a jar of dark chestnut honey"
+  },
+  {
+    "slug": "sucre",
+    "fr": "sucre",
+    "en": "a small mound of white sugar"
+  },
+  {
+    "slug": "sucre-roux",
+    "fr": "sucre roux",
+    "en": "a mound of brown sugar"
+  },
+  {
+    "slug": "cassonade",
+    "fr": "cassonade",
+    "en": "a mound of cassonade"
+  },
+  {
+    "slug": "vergeoise",
+    "fr": "vergeoise",
+    "en": "a mound of vergeoise sugar"
+  },
+  {
+    "slug": "sucre-glace",
+    "fr": "sucre glace",
+    "en": "a mound of icing sugar"
+  },
+  {
+    "slug": "sucre-vanille",
+    "fr": "sucre vanillé",
+    "en": "a small pile of vanilla sugar"
+  },
+  {
+    "slug": "cassonade-complete",
+    "fr": "sucre complet",
+    "en": "a mound of unrefined sugar"
+  },
+  {
+    "slug": "muscovado",
+    "fr": "muscovado",
+    "en": "a mound of muscovado sugar"
+  },
+  {
+    "slug": "stevia-poudre",
+    "fr": "stévia en poudre",
+    "en": "a small pile of stevia powder"
+  },
+  {
+    "slug": "aspartame",
+    "fr": "édulcorant",
+    "en": "a few sweetener tablets"
+  },
+  {
+    "slug": "chocolat",
+    "fr": "chocolat",
+    "en": "a bar of dark chocolate, broken"
+  },
+  {
+    "slug": "chocolat-noir",
+    "fr": "chocolat noir",
+    "en": "a bar of dark chocolate"
+  },
+  {
+    "slug": "chocolat-lait",
+    "fr": "chocolat au lait",
+    "en": "a bar of milk chocolate"
+  },
+  {
+    "slug": "chocolat-blanc",
+    "fr": "chocolat blanc",
+    "en": "a bar of white chocolate"
+  },
+  {
+    "slug": "cacao",
+    "fr": "cacao",
+    "en": "a small pile of cocoa powder"
+  },
+  {
+    "slug": "cacao-en-poudre",
+    "fr": "cacao non sucré",
+    "en": "unsweetened cocoa powder"
+  },
+  {
+    "slug": "pepite-chocolat",
+    "fr": "pépite de chocolat",
+    "en": "a small pile of chocolate chips"
+  },
+  {
+    "slug": "pate-a-tartiner",
+    "fr": "pâte à tartiner",
+    "en": "a jar of chocolate hazelnut spread"
+  },
+  {
+    "slug": "confiture",
+    "fr": "confiture",
+    "en": "a jar of strawberry jam"
+  },
+  {
+    "slug": "confiture-abricot",
+    "fr": "confiture d'abricot",
+    "en": "a jar of apricot jam"
+  },
+  {
+    "slug": "marmelade",
+    "fr": "marmelade",
+    "en": "a jar of orange marmalade"
+  },
+  {
+    "slug": "gelee",
+    "fr": "gelée",
+    "en": "a jar of redcurrant jelly"
+  },
+  {
+    "slug": "compote",
+    "fr": "compote",
+    "en": "a pot of apple compote"
+  },
+  {
+    "slug": "coulis-fruits",
+    "fr": "coulis de fruits",
+    "en": "a small pitcher of berry coulis"
+  },
+  {
+    "slug": "pate-de-fruit",
+    "fr": "pâte de fruit",
+    "en": "a few fruit jellies"
+  },
+  {
+    "slug": "nougat",
+    "fr": "nougat",
+    "en": "a piece of nougat"
+  },
+  {
+    "slug": "caramel",
+    "fr": "caramel",
+    "en": "a small pot of caramel"
+  },
+  {
+    "slug": "caramel-beurre-sale",
+    "fr": "caramel beurre salé",
+    "en": "a pot of salted butter caramel"
+  },
+  {
+    "slug": "pate-d-amande",
+    "fr": "pâte d'amande",
+    "en": "a log of almond paste"
+  },
+  {
+    "slug": "marzipan",
+    "fr": "massepain",
+    "en": "a piece of marzipan"
+  },
+  {
+    "slug": "creme-de-marron",
+    "fr": "crème de marron",
+    "en": "a tin of chestnut cream"
+  },
+  {
+    "slug": "speculoos",
+    "fr": "speculoos",
+    "en": "a few speculoos biscuits"
+  },
+  {
+    "slug": "sables",
+    "fr": "sablé",
+    "en": "a few shortbread biscuits"
+  },
+  {
+    "slug": "madeleine",
+    "fr": "madeleine",
+    "en": "a golden madeleine"
+  },
+  {
+    "slug": "financier",
+    "fr": "financier",
+    "en": "a few financiers"
+  },
+  {
+    "slug": "macaron",
+    "fr": "macaron",
+    "en": "a few colorful macarons"
+  },
+  {
+    "slug": "eclair",
+    "fr": "éclair",
+    "en": "a chocolate éclair"
+  },
+  {
+    "slug": "choux",
+    "fr": "chou à la crème",
+    "en": "a cream puff"
+  },
+  {
+    "slug": "profiterole",
+    "fr": "profiterole",
+    "en": "a profiterole with chocolate"
+  },
+  {
+    "slug": "tarte",
+    "fr": "tarte",
+    "en": "a slice of fruit tart"
+  },
+  {
+    "slug": "tarte-tatin",
+    "fr": "tarte tatin",
+    "en": "a tarte tatin"
+  },
+  {
+    "slug": "clafoutis",
+    "fr": "clafoutis",
+    "en": "a cherry clafoutis in a dish"
+  },
+  {
+    "slug": "flan",
+    "fr": "flan",
+    "en": "a slice of Parisian flan"
+  },
+  {
+    "slug": "creme-brulee",
+    "fr": "crème brûlée",
+    "en": "a crème brûlée with caramelized top"
+  },
+  {
+    "slug": "mousse-chocolat",
+    "fr": "mousse au chocolat",
+    "en": "a pot of chocolate mousse"
+  },
+  {
+    "slug": "tiramisu",
+    "fr": "tiramisu",
+    "en": "a glass of tiramisu"
+  },
+  {
+    "slug": "panna-cotta",
+    "fr": "panna cotta",
+    "en": "a panna cotta with berry coulis"
+  },
+  {
+    "slug": "glace",
+    "fr": "glace",
+    "en": "a scoop of vanilla ice cream"
+  },
+  {
+    "slug": "sorbet",
+    "fr": "sorbet",
+    "en": "a scoop of fruit sorbet"
+  },
+  {
+    "slug": "granite",
+    "fr": "granité",
+    "en": "a glass of granita"
+  },
+  {
+    "slug": "yaourt-glace",
+    "fr": "yaourt glacé",
+    "en": "a cup of frozen yogurt"
+  },
+  {
+    "slug": "cookie",
+    "fr": "cookie",
+    "en": "a chocolate chip cookie"
+  },
+  {
+    "slug": "brownie",
+    "fr": "brownie",
+    "en": "a square of brownie"
+  },
+  {
+    "slug": "muffin",
+    "fr": "muffin",
+    "en": "a blueberry muffin"
+  },
+  {
+    "slug": "pancake",
+    "fr": "pancake",
+    "en": "a small stack of pancakes"
+  },
+  {
+    "slug": "gaufre",
+    "fr": "gaufre",
+    "en": "a Belgian waffle"
+  },
+  {
+    "slug": "donut",
+    "fr": "donut",
+    "en": "a glazed doughnut"
+  },
+  {
+    "slug": "chouquette",
+    "fr": "chouquette",
+    "en": "a few chouquettes with pearl sugar"
+  },
+  {
+    "slug": "cannele",
+    "fr": "cannelé",
+    "en": "a few canelés"
+  },
+  {
+    "slug": "kouign-amann",
+    "fr": "kouign-amann",
+    "en": "a kouign-amann"
+  },
+  {
+    "slug": "pain-d-epices",
+    "fr": "pain d'épices",
+    "en": "a slice of gingerbread"
+  },
+  {
+    "slug": "galette-des-rois",
+    "fr": "galette des rois",
+    "en": "a galette des rois"
+  },
+  {
+    "slug": "buche",
+    "fr": "bûche de Noël",
+    "en": "a Yule log cake"
+  },
+  {
+    "slug": "millefeuille",
+    "fr": "millefeuille",
+    "en": "a millefeuille pastry"
+  },
+  {
+    "slug": "paris-brest",
+    "fr": "Paris-Brest",
+    "en": "a Paris-Brest pastry"
+  },
+  {
+    "slug": "saint-honore",
+    "fr": "saint-honoré",
+    "en": "a saint-honoré pastry"
+  },
+  {
+    "slug": "opera",
+    "fr": "opéra",
+    "en": "a slice of opéra cake"
+  },
+  {
+    "slug": "foret-noire",
+    "fr": "forêt-noire",
+    "en": "a slice of Black Forest cake"
+  },
+  {
+    "slug": "cheesecake",
+    "fr": "cheesecake",
+    "en": "a slice of cheesecake"
+  },
+  {
+    "slug": "carrot-cake",
+    "fr": "carrot cake",
+    "en": "a slice of carrot cake"
+  },
+  {
+    "slug": "bouillon-de-volaille",
+    "fr": "bouillon de volaille",
+    "en": "a steaming mug of chicken broth"
+  },
+  {
+    "slug": "soupe",
+    "fr": "soupe",
+    "en": "a bowl of vegetable soup"
+  },
+  {
+    "slug": "potage",
+    "fr": "potage",
+    "en": "a bowl of smooth potage"
+  },
+  {
+    "slug": "minestrone",
+    "fr": "minestrone",
+    "en": "a bowl of minestrone"
+  },
+  {
+    "slug": "gazpacho",
+    "fr": "gaspacho",
+    "en": "a glass of gazpacho"
+  },
+  {
+    "slug": "veloute-potiron",
+    "fr": "velouté de potiron",
+    "en": "a bowl of pumpkin soup"
+  },
+  {
+    "slug": "soupe-a-l-oignon",
+    "fr": "soupe à l'oignon",
+    "en": "a bowl of French onion soup with cheese"
+  },
+  {
+    "slug": "pho",
+    "fr": "phở",
+    "en": "a steaming bowl of phở"
+  },
+  {
+    "slug": "ramen",
+    "fr": "ramen",
+    "en": "a bowl of ramen with egg"
+  },
+  {
+    "slug": "udon-bol",
+    "fr": "bol d'udon",
+    "en": "a bowl of udon soup"
+  },
+  {
+    "slug": "risotto-prepare",
+    "fr": "risotto",
+    "en": "a plate of creamy risotto"
+  },
+  {
+    "slug": "paella",
+    "fr": "paella",
+    "en": "a small paella pan"
+  },
+  {
+    "slug": "couscous-plat",
+    "fr": "plat de couscous",
+    "en": "a plate of couscous with vegetables"
+  },
+  {
+    "slug": "tajine",
+    "fr": "tajine",
+    "en": "a Moroccan tagine dish"
+  },
+  {
+    "slug": "chili",
+    "fr": "chili",
+    "en": "a bowl of chili con carne"
+  },
+  {
+    "slug": "curry-plat",
+    "fr": "curry",
+    "en": "a bowl of curry with rice"
+  },
+  {
+    "slug": "dahl",
+    "fr": "dahl",
+    "en": "a bowl of lentil dahl"
+  },
+  {
+    "slug": "ratatouille",
+    "fr": "ratatouille",
+    "en": "a bowl of ratatouille"
+  },
+  {
+    "slug": "piperade",
+    "fr": "pipérade",
+    "en": "a bowl of piperade"
+  },
+  {
+    "slug": "brandade",
+    "fr": "brandade",
+    "en": "a dish of brandade"
+  },
+  {
+    "slug": "aligot",
+    "fr": "aligot",
+    "en": "a stretchy aligot of mashed potato and cheese"
+  },
+  {
+    "slug": "gratin-dauphinois",
+    "fr": "gratin dauphinois",
+    "en": "a dish of gratin dauphinois"
+  },
+  {
+    "slug": "hachis-parmentier",
+    "fr": "hachis parmentier",
+    "en": "a dish of hachis parmentier"
+  },
+  {
+    "slug": "lasagnes-plat",
+    "fr": "lasagnes",
+    "en": "a portion of lasagne"
+  },
+  {
+    "slug": "pizza",
+    "fr": "pizza",
+    "en": "a small Margherita pizza"
+  },
+  {
+    "slug": "quiche",
+    "fr": "quiche",
+    "en": "a slice of quiche Lorraine"
+  },
+  {
+    "slug": "tarte-salee",
+    "fr": "tarte salée",
+    "en": "a savory tart"
+  },
+  {
+    "slug": "tourte",
+    "fr": "tourte",
+    "en": "a meat pie"
+  },
+  {
+    "slug": "empanada",
+    "fr": "empanada",
+    "en": "a few empanadas"
+  },
+  {
+    "slug": "samosa",
+    "fr": "samosa",
+    "en": "a few samosas"
+  },
+  {
+    "slug": "nem",
+    "fr": "nem",
+    "en": "a few fried spring rolls"
+  },
+  {
+    "slug": "rouleau-de-printemps",
+    "fr": "rouleau de printemps",
+    "en": "a fresh spring roll"
+  },
+  {
+    "slug": "gyoza",
+    "fr": "gyoza",
+    "en": "a few gyoza dumplings"
+  },
+  {
+    "slug": "dim-sum",
+    "fr": "dim sum",
+    "en": "a few dim sum dumplings"
+  },
+  {
+    "slug": "nugget",
+    "fr": "nugget de poulet",
+    "en": "a few chicken nuggets"
+  },
+  {
+    "slug": "cordon-bleu",
+    "fr": "cordon bleu",
+    "en": "a cordon bleu cutlet"
+  },
+  {
+    "slug": "escalope-milanaise",
+    "fr": "escalope milanaise",
+    "en": "a breaded escalope"
+  },
+  {
+    "slug": "fish-and-chips",
+    "fr": "fish and chips",
+    "en": "battered fish with fries"
+  },
+  {
+    "slug": "frites",
+    "fr": "frites",
+    "en": "a pile of French fries"
+  },
+  {
+    "slug": "chips",
+    "fr": "chips",
+    "en": "a small pile of potato chips"
+  },
+  {
+    "slug": "puree",
+    "fr": "purée",
+    "en": "a bowl of mashed potatoes"
+  },
+  {
+    "slug": "puree-de-carotte",
+    "fr": "purée de carotte",
+    "en": "a bowl of carrot puree"
+  },
+  {
+    "slug": "compotee",
+    "fr": "compotée",
+    "en": "a bowl of onion compote"
+  },
+  {
+    "slug": "confit-d-oignon",
+    "fr": "confit d'oignon",
+    "en": "a jar of onion confit"
+  },
+  {
+    "slug": "chutney",
+    "fr": "chutney",
+    "en": "a jar of chutney"
+  },
+  {
+    "slug": "pickle",
+    "fr": "pickle",
+    "en": "a jar of mixed pickles"
+  },
+  {
+    "slug": "kimchi",
+    "fr": "kimchi",
+    "en": "a bowl of kimchi"
+  },
+  {
+    "slug": "choucroute",
+    "fr": "choucroute",
+    "en": "a pile of sauerkraut"
+  },
+  {
+    "slug": "conserve-thon",
+    "fr": "conserve de thon",
+    "en": "a tin of tuna"
+  },
+  {
+    "slug": "conserve-sardine",
+    "fr": "conserve de sardine",
+    "en": "a tin of sardines"
+  },
+  {
+    "slug": "conserve-maquereau",
+    "fr": "conserve de maquereau",
+    "en": "a tin of mackerel"
+  },
+  {
+    "slug": "sardine-huile",
+    "fr": "sardine à l'huile",
+    "en": "sardines in oil"
+  },
+  {
+    "slug": "anchois-huile",
+    "fr": "anchois à l'huile",
+    "en": "anchovies in oil"
+  },
+  {
+    "slug": "maquereau-vin-blanc",
+    "fr": "maquereau au vin blanc",
+    "en": "mackerel in white wine"
+  },
+  {
+    "slug": "foie-de-morue",
+    "fr": "foie de morue",
+    "en": "a tin of cod liver"
+  },
+  {
+    "slug": "rillettes-poisson",
+    "fr": "rillettes de poisson",
+    "en": "a pot of fish rillettes"
+  },
+  {
+    "slug": "tarama",
+    "fr": "tarama",
+    "en": "a bowl of tarama"
+  },
+  {
+    "slug": "oeufs-de-poisson",
+    "fr": "œufs de poisson",
+    "en": "a small jar of fish roe"
+  },
+  {
+    "slug": "gelatine",
+    "fr": "gélatine",
+    "en": "a few gelatin sheets"
+  },
+  {
+    "slug": "agar-agar",
+    "fr": "agar-agar",
+    "en": "a small pile of agar-agar"
+  },
+  {
+    "slug": "pectine",
+    "fr": "pectine",
+    "en": "a small pile of pectin"
+  },
+  {
+    "slug": "amidon",
+    "fr": "amidon",
+    "en": "a small pile of starch"
+  },
+  {
+    "slug": "arrow-root",
+    "fr": "arrow-root",
+    "en": "a small pile of arrowroot"
+  },
+  {
+    "slug": "colorant",
+    "fr": "colorant alimentaire",
+    "en": "a few drops of food coloring in a dish"
+  },
+  {
+    "slug": "arome-vanille",
+    "fr": "arôme vanille",
+    "en": "a small bottle of vanilla extract"
+  },
+  {
+    "slug": "eau-de-fleur-d-oranger",
+    "fr": "eau de fleur d'oranger",
+    "en": "a bottle of orange blossom water"
+  },
+  {
+    "slug": "eau-de-rose",
+    "fr": "eau de rose",
+    "en": "a bottle of rose water"
+  },
+  {
+    "slug": "rhum-arrange",
+    "fr": "rhum arrangé",
+    "en": "a bottle of rum with spices"
+  },
+  {
+    "slug": "kirsch",
+    "fr": "kirsch",
+    "en": "a small glass of kirsch"
+  },
+  {
+    "slug": "grand-marnier",
+    "fr": "Grand Marnier",
+    "en": "a small glass of Grand Marnier"
+  },
+  {
+    "slug": "cointreau",
+    "fr": "Cointreau",
+    "en": "a small glass of Cointreau"
+  },
+  {
+    "slug": "amaretto",
+    "fr": "amaretto",
+    "en": "a small glass of amaretto"
+  },
+  {
+    "slug": "whisky",
+    "fr": "whisky",
+    "en": "a small glass of whisky"
+  },
+  {
+    "slug": "vodka",
+    "fr": "vodka",
+    "en": "a small glass of vodka"
+  },
+  {
+    "slug": "gin",
+    "fr": "gin",
+    "en": "a small glass of gin"
+  },
+  {
+    "slug": "tequila",
+    "fr": "tequila",
+    "en": "a small glass of tequila"
+  },
+  {
+    "slug": "pastis",
+    "fr": "pastis",
+    "en": "a glass of pastis with water"
+  },
+  {
+    "slug": "absinthe",
+    "fr": "absinthe",
+    "en": "a glass of absinthe"
+  },
+  {
+    "slug": "liqueur-de-cassis",
+    "fr": "crème de cassis",
+    "en": "a small glass of crème de cassis"
+  },
+  {
+    "slug": "limonade",
+    "fr": "limonade",
+    "en": "a glass of lemonade"
+  },
+  {
+    "slug": "cola",
+    "fr": "cola",
+    "en": "a glass of cola with ice"
+  },
+  {
+    "slug": "tonic",
+    "fr": "tonic",
+    "en": "a glass of tonic water"
+  },
+  {
+    "slug": "ginger-ale",
+    "fr": "ginger ale",
+    "en": "a glass of ginger ale"
+  },
+  {
+    "slug": "ice-tea",
+    "fr": "thé glacé",
+    "en": "a glass of iced tea"
+  },
+  {
+    "slug": "boisson-vegetale",
+    "fr": "boisson végétale",
+    "en": "a carton of plant milk"
+  },
+  {
+    "slug": "whey",
+    "fr": "whey",
+    "en": "a scoop of whey protein powder"
+  },
+  {
+    "slug": "whey-chocolat",
+    "fr": "whey chocolat",
+    "en": "a scoop of chocolate whey"
+  },
+  {
+    "slug": "whey-vanille",
+    "fr": "whey vanille",
+    "en": "a scoop of vanilla whey"
+  },
+  {
+    "slug": "proteine-vegetale",
+    "fr": "protéine végétale",
+    "en": "a scoop of plant protein"
+  },
+  {
+    "slug": "barre-proteinee",
+    "fr": "barre protéinée",
+    "en": "a protein bar"
+  },
+  {
+    "slug": "barre-cereales",
+    "fr": "barre de céréales",
+    "en": "a cereal bar"
+  },
+  {
+    "slug": "muesli",
+    "fr": "muesli",
+    "en": "a bowl of muesli"
+  },
+  {
+    "slug": "granola",
+    "fr": "granola",
+    "en": "a small pile of granola"
+  },
+  {
+    "slug": "cereales-petit-dejeuner",
+    "fr": "céréales",
+    "en": "a bowl of breakfast cereal"
+  },
+  {
+    "slug": "flocons-de-mais",
+    "fr": "flocons de maïs",
+    "en": "corn flakes in a bowl"
+  },
+  {
+    "slug": "porridge",
+    "fr": "porridge",
+    "en": "a bowl of porridge"
+  },
+  {
+    "slug": "lait-ribot",
+    "fr": "lait ribot",
+    "en": "a glass of buttermilk"
+  },
+  {
+    "slug": "babeurre",
+    "fr": "babeurre",
+    "en": "a glass of buttermilk"
+  },
+  {
+    "slug": "creme-aigrie",
+    "fr": "crème aigre",
+    "en": "a pot of sour cream"
+  },
+  {
+    "slug": "fromage-frais",
+    "fr": "fromage frais",
+    "en": "a pot of fresh cheese"
+  },
+  {
+    "slug": "kefir-de-lait",
+    "fr": "kéfir de lait",
+    "en": "a glass of milk kefir"
+  },
+  {
+    "slug": "lait-fermente",
+    "fr": "lait fermenté",
+    "en": "a glass of fermented milk"
+  },
+  {
+    "slug": "yaourt-a-la-grecque",
+    "fr": "yaourt à la grecque",
+    "en": "thick strained yogurt"
+  },
+  {
+    "slug": "labneh",
+    "fr": "labneh",
+    "en": "a bowl of labneh with olive oil"
+  },
+  {
+    "slug": "quark",
+    "fr": "quark",
+    "en": "a pot of quark"
+  },
+  {
+    "slug": "skyr-nature",
+    "fr": "skyr nature",
+    "en": "a pot of plain skyr"
+  },
+  {
+    "slug": "cottage-cheese",
+    "fr": "cottage cheese",
+    "en": "a bowl of cottage cheese"
+  },
+  {
+    "slug": "ricotta-salee",
+    "fr": "ricotta salée",
+    "en": "a wedge of salted ricotta"
+  },
+  {
+    "slug": "paneer",
+    "fr": "paneer",
+    "en": "a block of paneer"
+  },
+  {
+    "slug": "quark-allemand",
+    "fr": "quark allemand",
+    "en": "a pot of German quark"
+  },
+  {
+    "slug": "creme-patissiere",
+    "fr": "crème pâtissière",
+    "en": "a bowl of pastry cream"
+  },
+  {
+    "slug": "creme-anglaise",
+    "fr": "crème anglaise",
+    "en": "a pitcher of crème anglaise"
+  },
+  {
+    "slug": "ganache",
+    "fr": "ganache",
+    "en": "a bowl of chocolate ganache"
+  },
+  {
+    "slug": "meringue",
+    "fr": "meringue",
+    "en": "a few meringue kisses"
+  },
+  {
+    "slug": "pavlova",
+    "fr": "pavlova",
+    "en": "a mini pavlova with berries"
+  },
+  {
+    "slug": "ile-flottante",
+    "fr": "île flottante",
+    "en": "île flottante with caramel"
+  },
+  {
+    "slug": "riz-au-lait",
+    "fr": "riz au lait",
+    "en": "a bowl of rice pudding"
+  },
+  {
+    "slug": "semoule-au-lait",
+    "fr": "semoule au lait",
+    "en": "a bowl of semolina pudding"
+  },
+  {
+    "slug": "tapioca",
+    "fr": "tapioca",
+    "en": "a bowl of tapioca pudding"
+  },
+  {
+    "slug": "perle-de-tapioca",
+    "fr": "perle de tapioca",
+    "en": "a pile of tapioca pearls"
+  },
+  {
+    "slug": "agar",
+    "fr": "agar",
+    "en": "a small pile of agar powder"
+  },
+  {
+    "slug": "konjac",
+    "fr": "konjac",
+    "en": "a block of konjac"
+  },
+  {
+    "slug": "shirataki",
+    "fr": "shirataki",
+    "en": "a pile of shirataki noodles"
+  },
+  {
+    "slug": "spiruline",
+    "fr": "spiruline",
+    "en": "a small pile of spirulina powder"
+  },
+  {
+    "slug": "levure-de-biere",
+    "fr": "levure de bière",
+    "en": "a small pile of nutritional yeast"
+  },
+  {
+    "slug": "germe-de-ble",
+    "fr": "germe de blé",
+    "en": "a small pile of wheat germ"
+  },
+  {
+    "slug": "son-de-ble",
+    "fr": "son de blé",
+    "en": "a small pile of wheat bran"
+  },
+  {
+    "slug": "psyllium",
+    "fr": "psyllium",
+    "en": "a small pile of psyllium husk"
+  },
+  {
+    "slug": "malt",
+    "fr": "malt",
+    "en": "a small pile of malted barley"
+  },
+  {
+    "slug": "extrait-de-malt",
+    "fr": "extrait de malt",
+    "en": "a jar of malt extract"
+  },
+  {
+    "slug": "sirop-de-glucose",
+    "fr": "sirop de glucose",
+    "en": "a jar of glucose syrup"
+  },
+  {
+    "slug": "miel-cremeux",
+    "fr": "miel crémeux",
+    "en": "a jar of creamy honey"
+  },
+  {
+    "slug": "palme",
+    "fr": "huile de palme",
+    "en": "a jar of palm oil"
+  },
+  {
+    "slug": "saindoux-bloc",
+    "fr": "bloc de saindoux",
+    "en": "a block of lard"
+  },
+  {
+    "slug": "graisse-d-oie",
+    "fr": "graisse d'oie",
+    "en": "a jar of goose fat"
+  },
+  {
+    "slug": "huile-de-palme",
+    "fr": "huile de palme",
+    "en": "a bottle of palm oil"
+  },
+  {
+    "slug": "shortening",
+    "fr": "shortening",
+    "en": "a block of vegetable shortening"
+  },
+  {
+    "slug": "suif",
+    "fr": "suif",
+    "en": "a jar of beef tallow"
+  },
+  {
+    "slug": "huile-de-pepin-de-courge",
+    "fr": "huile de pépins de courge",
+    "en": "a bottle of pumpkin seed oil"
+  },
+  {
+    "slug": "huile-de-noisette",
+    "fr": "huile de noisette",
+    "en": "a bottle of hazelnut oil"
+  },
+  {
+    "slug": "huile-de-pistache",
+    "fr": "huile de pistache",
+    "en": "a bottle of pistachio oil"
+  },
+  {
+    "slug": "beurre-de-cacao",
+    "fr": "beurre de cacao",
+    "en": "a block of cocoa butter"
+  },
+  {
+    "slug": "cacao-beurre",
+    "fr": "copeaux de beurre de cacao",
+    "en": "cocoa butter shavings"
+  }
+]

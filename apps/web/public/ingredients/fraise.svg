@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="fraise">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="hsl(170 42% 64%)"/>
-      <stop offset="1" stop-color="hsl(210 38% 88%)"/>
-    </linearGradient>
-  </defs>
-  <circle cx="64" cy="64" r="54" fill="url(#g)" />
-  <ellipse cx="64" cy="78" rx="28" ry="20" fill="hsla(0,0%,100%,0.55)"/>
-  <path d="M44 54c8-18 32-18 40 0" fill="none" stroke="hsla(30,20%,25%,0.35)" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="60" cy="50" r="6" fill="hsla(0,0%,100%,0.8)"/>
+  <circle cx="64" cy="64" r="56" fill="#f4f2ef"/>
+  <circle cx="64" cy="64" r="56" fill="none" stroke="#f2cdb8" stroke-width="1.25" opacity=".7"/>
+  <path d="M64 36c14 4 26 20 24 36-2 18-16 30-24 30s-22-12-24-30c-2-16 10-32 24-36z" fill="#c45c4a"/>
+    <path d="M50 40c8-10 20-10 28 0-8 4-20 4-28 0z" fill="#648374"/>
+    <circle cx="58" cy="58" r="2" fill="#c9a06a"/><circle cx="70" cy="62" r="2" fill="#c9a06a"/>
+    <circle cx="62" cy="72" r="2" fill="#c9a06a"/>
 </svg>

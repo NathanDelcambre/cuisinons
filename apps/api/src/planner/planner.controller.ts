@@ -8,6 +8,18 @@ import { PlannerService } from './planner.service.js';
 import { maxFutureDate, parseIsoDate } from './dates.js';
 import { ForbiddenException } from '@nestjs/common';
 
+const portionLine = z.object({ userId: z.string(), portions: z.number().min(0).max(6) });
+
+function assertSomePortions(portions: Array<{ portions: number }>, ctx: z.RefinementCtx) {
+  if (!portions.some((line) => line.portions > 0)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Au moins une personne doit garder une portion.',
+      path: ['portions'],
+    });
+  }
+}
+
 @Controller()
 @UseGuards(InternalJwtGuard)
 export class PlannerController {
@@ -27,7 +39,7 @@ export class PlannerController {
         slot: z.enum(MEAL_SLOTS),
         kind: z.enum(MEAL_KINDS).optional(),
         recipeId: z.string().min(1).optional(),
-        portions: z.array(z.object({ userId: z.string(), portions: z.number().positive().max(6) })),
+        portions: z.array(portionLine),
       })
       .superRefine((val, ctx) => {
         const kind = val.kind ?? 'RECIPE';
@@ -45,6 +57,7 @@ export class PlannerController {
             path: ['recipeId'],
           });
         }
+        assertSomePortions(val.portions, ctx);
       })
       .parse(body);
     const date = parseIsoDate(parsed.date);
@@ -70,9 +83,10 @@ export class PlannerController {
         recipeId: z.string().min(1).optional(),
         kind: z.enum(MEAL_KINDS).optional(),
         version: z.number().int().optional(),
-        portions: z
-          .array(z.object({ userId: z.string(), portions: z.number().positive().max(6) }))
-          .optional(),
+        portions: z.array(portionLine).optional(),
+      })
+      .superRefine((val, ctx) => {
+        if (val.portions) assertSomePortions(val.portions, ctx);
       })
       .parse(body);
     return this.planner.updateItem(id, {
@@ -86,7 +100,26 @@ export class PlannerController {
   }
 
   @Delete('/planner/items/:id')
-  remove(@Param('id') id: string) {
+  remove(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Query('scope') scope?: string,
+  ) {
+    if (scope === 'me') return this.planner.removeForUser(id, user.id);
     return this.planner.remove(id);
+  }
+
+  @Post('/planner/items/:id/replace-for-me')
+  replaceForMe(@CurrentUser() user: AuthUser, @Param('id') id: string, @Body() body: unknown) {
+    const parsed = z
+      .object({
+        recipeId: z.string().min(1),
+        portions: z.number().min(0.5).max(6).optional(),
+      })
+      .parse(body);
+    return this.planner.replaceForUser(id, user.id, {
+      recipeId: parsed.recipeId,
+      portions: parsed.portions ?? 1,
+    });
   }
 }

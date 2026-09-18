@@ -1,9 +1,16 @@
-import { Body, Controller, Get, Inject, NotFoundException, Put, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Inject, NotFoundException, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
-import { GOAL_MODES } from '@cuisinons/shared';
+import {
+  BODY_HEIGHT_CM,
+  BODY_WEIGHT_KG,
+  GOAL_MODES,
+  estimateDailyMacros,
+  nutritionGoalsFromEstimate,
+} from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthUser } from '../auth/internal-jwt.guard.js';
+import { NutritionService } from './nutrition.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { PlannerService } from '../planner/planner.service.js';
 import { parseIsoDate } from '../planner/dates.js';
@@ -23,12 +30,19 @@ const goalSchema = z.object({
   fatTolerance: z.number().nonnegative().nullable(),
 });
 
+const bodyEstimateSchema = z.object({
+  heightCm: z.number().min(BODY_HEIGHT_CM.min).max(BODY_HEIGHT_CM.max),
+  weightKg: z.number().min(BODY_WEIGHT_KG.min).max(BODY_WEIGHT_KG.max),
+  targetWeightKg: z.number().min(BODY_WEIGHT_KG.min).max(BODY_WEIGHT_KG.max).nullable(),
+});
+
 @Controller()
 @UseGuards(InternalJwtGuard)
 export class NutritionController {
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(PlannerService) private readonly planner: PlannerService,
+    @Inject(NutritionService) private readonly nutrition: NutritionService,
   ) {}
 
   @Get('/nutrition-goals')
@@ -61,6 +75,30 @@ export class NutritionController {
     });
   }
 
+  @Post('/nutrition-goals/from-body')
+  async fromBody(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    const input = bodyEstimateSchema.parse(body);
+    const macros = estimateDailyMacros(input);
+    if (!macros) throw new BadRequestException('Mesures invalides.');
+    const goals = nutritionGoalsFromEstimate(macros);
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          heightCm: input.heightCm,
+          weightKg: input.weightKg,
+          targetWeightKg: input.targetWeightKg,
+        },
+      }),
+      this.prisma.nutritionGoal.upsert({
+        where: { userId: user.id },
+        update: goals,
+        create: { userId: user.id, ...goals },
+      }),
+    ]);
+    return { macros, goals };
+  }
+
   @Put('/nutrition-goals/day')
   putDay(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     const parsed = goalSchema.extend({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }).parse(body);
@@ -77,5 +115,10 @@ export class NutritionController {
     const day = parseIsoDate(date);
     const items = await this.planner.getWeek(day);
     return this.planner.macrosForUser(items, user.id, day);
+  }
+
+  @Get('/nutrition/stats')
+  stats(@Query('period') period?: string, @Query('date') date?: string) {
+    return this.nutrition.stats(period, date);
   }
 }

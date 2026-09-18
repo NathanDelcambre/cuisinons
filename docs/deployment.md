@@ -27,6 +27,8 @@ Variables :
 - `AUTH_COOKIE_NAME_SESSION=cuisinons_session` (préfixé `__Host-` automatiquement)
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`
 
+Le cron Hobby (1× / jour, 00:10 UTC) appelle `GET /api/cron/settle-past` : déduction des repas des jours passés, sans ouvrir l’app et sans bandeau. Pas de secret à ajouter.
+
 ## Vercel — API (NestJS)
 
 Racine : `apps/api`. Entrée serverless : `api/index.ts`. `vercel.json` réécrit `/(.*)` vers `/api`, et Nest route sur l’URL d’origine.
@@ -41,9 +43,24 @@ Variables : `DATABASE_URL`, `PASSWORD_PEPPER`, `AUTH_SECRET`, `INTERNAL_API_SECR
 
 ## Google OAuth
 
-- Origine JS autorisée : `https://<web>.vercel.app` et `http://localhost:3600`
-- Redirect : `http://localhost:3600/api/auth/google/callback`
-- Redirect prod : `https://<web>.vercel.app/api/auth/google/callback`
+Le code construit le callback depuis `NEXT_PUBLIC_APP_URL` (`/api/auth/google/callback`).
+Il n’y a pas de second callback hardcodé : c’est l’origine de l’env qui compte.
+
+Dans Google Cloud Console (client OAuth Web), coller **exactement** :
+
+Origines JavaScript autorisées :
+
+- `http://localhost:3600`
+- `https://<web>.vercel.app`
+- `https://<TON_DOMAINE_CUSTOM>` — même origin que `NEXT_PUBLIC_APP_URL` une fois collé dans Vercel. Ne pas inventer le host : le coller depuis le DNS / Vercel.
+
+URI de redirection autorisés :
+
+- `http://localhost:3600/api/auth/google/callback`
+- `https://<web>.vercel.app/api/auth/google/callback`
+- `https://<TON_DOMAINE_CUSTOM>/api/auth/google/callback`
+
+`NEXT_PUBLIC_APP_URL` (web) et `WEB_ORIGIN` (API) doivent matcher ce DNS HTTPS. Le cookie de session `__Host-` n’est envoyé qu’en HTTPS sur ce host (`AUTH_COOKIE_SECURE=true`). Sans l’origine + le redirect du domaine custom, OAuth casse en prod.
 
 ## Latence
 
@@ -69,14 +86,18 @@ d’inactivité, donc la première requête d’une session paie le réveil du c
 
 Toujours `prisma migrate deploy`. Jamais `prisma db push` en production.
 
-Le seed est rejouable (upserts) et sert aussi à publier le catalogue de recettes
-en production. Depuis la racine, avec `DATABASE_URL` pointé sur Neon :
+Séquence prod, depuis la racine, avec `DATABASE_URL` (et `DIRECT_URL` si besoin) pointé sur Neon :
 
 ```powershell
 $env:DATABASE_URL = '<url pooled Neon>'
+$env:DIRECT_URL = '<url directe Neon>'
 $env:PASSWORD_PEPPER = '<pepper>'
+pnpm --filter @cuisinons/db migrate:deploy
+pnpm --filter @cuisinons/db import-ciqual
 pnpm --filter @cuisinons/db seed
 ```
+
+L’import Ciqual pose les 3483 aliments. Le seed est rejouable (upserts) : il publie le catalogue officiel (fiches `official-*` + photos `/recipes/{id}.png`) et relance `applyDedicatedIcons`, qui pointe `iconUrl` vers `/ingredients/{slug}.png`. Photos et pictos sont servis par le projet web Vercel (`apps/web/public/`). Sans cette séquence après un ajout d’assets, les anciennes URLs en base ne se mettent pas à jour — l’API sert toutefois `/recipes/{id}.png` pour toute fiche `official-*`.
 
 Il ne recrée pas les comptes existants et ne touche pas aux repas déjà planifiés.
 

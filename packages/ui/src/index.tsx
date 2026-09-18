@@ -12,6 +12,7 @@ export { Switch } from './switch';
 export { Segmented, type SegmentedOption } from './segmented';
 export { Modal } from './modal';
 export { Meter } from './meter';
+export { MacroRing } from './macro-ring';
 export { EmptyState } from './empty-state';
 export { PageHeader } from './page-header';
 export { NavRow } from './row';

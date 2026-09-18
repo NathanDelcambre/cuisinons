@@ -1,7 +1,6 @@
 import type { UxCategory } from '../ciqual/ux-categories.js';
 import { capitalize, complementDe, culinaryName, joinFrench } from './names.js';
 import type { CulinaryRole, Diet } from './roles.js';
-import { HEALTHY_RECIPES, type CookMethod, type NameFilter, type RecipeSpec } from './catalog.js';
 import { DISH_KINDS, DISH_KIND_LABELS, type DishKind } from './kinds.js';
 
 export { DISH_KINDS, DISH_KIND_LABELS, type DishKind };
@@ -72,9 +71,9 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     equipmentSlugs: ['poele', 'couteau'],
     baseTagSlugs: ['plat-principal', 'healthy'],
     needs: [
-      { role: 'protein', required: true, gramsPerServing: 120, maxItems: 1 },
-      { role: 'vegetable', required: true, gramsPerServing: 150, maxItems: 2 },
-      { role: 'fat', required: false, gramsPerServing: 8, maxItems: 1, minRatio: 0.4 },
+      { role: 'protein', required: true, gramsPerServing: 130, maxItems: 1 },
+      { role: 'vegetable', required: true, gramsPerServing: 180, maxItems: 2 },
+      { role: 'fat', required: false, gramsPerServing: 10, maxItems: 1, minRatio: 0.4 },
       { role: 'aromatic', required: false, gramsPerServing: 20, maxItems: 2, minRatio: 0.3 },
     ],
     title: (picked) =>
@@ -116,9 +115,9 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     equipmentSlugs: ['saladier', 'couteau'],
     baseTagSlugs: ['salade', 'healthy'],
     needs: [
-      { role: 'vegetable', required: true, gramsPerServing: 120, maxItems: 3 },
-      { role: 'protein', required: false, gramsPerServing: 80, maxItems: 1, minRatio: 0.5 },
-      { role: 'fat', required: false, gramsPerServing: 8, maxItems: 1, minRatio: 0.4 },
+      { role: 'vegetable', required: true, gramsPerServing: 180, maxItems: 3 },
+      { role: 'protein', required: false, gramsPerServing: 120, maxItems: 1, minRatio: 0.5 },
+      { role: 'fat', required: false, gramsPerServing: 10, maxItems: 1, minRatio: 0.4 },
       { role: 'condiment', required: false, gramsPerServing: 10, maxItems: 1, minRatio: 0.3 },
     ],
     title: (picked) => {
@@ -158,9 +157,9 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     equipmentSlugs: ['casserole', 'couteau'],
     baseTagSlugs: ['soupe', 'healthy'],
     needs: [
-      { role: 'vegetable', required: true, gramsPerServing: 200, maxItems: 3 },
+      { role: 'vegetable', required: true, gramsPerServing: 220, maxItems: 3 },
       { role: 'aromatic', required: false, gramsPerServing: 30, maxItems: 2, minRatio: 0.3 },
-      { role: 'starch', required: false, gramsPerServing: 40, maxItems: 1, minRatio: 0.4 },
+      { role: 'starch', required: false, gramsPerServing: 50, maxItems: 1, minRatio: 0.4 },
       { role: 'fat', required: false, gramsPerServing: 5, maxItems: 1, minRatio: 0.3 },
     ],
     title: (picked) => capitalize(`soupe ${complementDe(named(ofRole(picked, 'vegetable')))}`),
@@ -195,8 +194,8 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     equipmentSlugs: ['poele', 'fouet'],
     baseTagSlugs: ['plat-principal', 'vegetarien'],
     needs: [
-      { role: 'egg', required: true, gramsPerServing: 100, maxItems: 1, nameIncludes: ['oeuf'] },
-      { role: 'vegetable', required: false, gramsPerServing: 80, maxItems: 2, minRatio: 0.4 },
+      { role: 'egg', required: true, gramsPerServing: 120, maxItems: 1, nameIncludes: ['oeuf'] },
+      { role: 'vegetable', required: false, gramsPerServing: 120, maxItems: 2, minRatio: 0.4 },
       { role: 'dairy', required: false, gramsPerServing: 20, maxItems: 1, minRatio: 0.4 },
       { role: 'fat', required: false, gramsPerServing: 5, maxItems: 1, minRatio: 0.3 },
     ],
@@ -233,9 +232,9 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     equipmentSlugs: ['casserole', 'couteau'],
     baseTagSlugs: ['plat-principal', 'healthy'],
     needs: [
-      { role: 'starch', required: true, gramsPerServing: 90, maxItems: 1 },
-      { role: 'protein', required: true, gramsPerServing: 100, maxItems: 1 },
-      { role: 'vegetable', required: true, gramsPerServing: 100, maxItems: 2 },
+      { role: 'starch', required: true, gramsPerServing: 100, maxItems: 1 },
+      { role: 'protein', required: true, gramsPerServing: 130, maxItems: 1 },
+      { role: 'vegetable', required: true, gramsPerServing: 150, maxItems: 2 },
       { role: 'fat', required: false, gramsPerServing: 6, maxItems: 1, minRatio: 0.3 },
     ],
     title: (picked) =>
@@ -267,10 +266,10 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     equipmentSlugs: ['four', 'moule'],
     baseTagSlugs: ['plat-principal'],
     needs: [
-      { role: 'vegetable', required: true, gramsPerServing: 180, maxItems: 2 },
-      { role: 'dairy', required: true, gramsPerServing: 40, maxItems: 2 },
-      { role: 'protein', required: false, gramsPerServing: 80, maxItems: 1, minRatio: 0.5 },
-      { role: 'starch', required: false, gramsPerServing: 60, maxItems: 1, minRatio: 0.4 },
+      { role: 'vegetable', required: true, gramsPerServing: 200, maxItems: 2 },
+      { role: 'dairy', required: true, gramsPerServing: 50, maxItems: 2 },
+      { role: 'protein', required: false, gramsPerServing: 120, maxItems: 1, minRatio: 0.5 },
+      { role: 'starch', required: false, gramsPerServing: 80, maxItems: 1, minRatio: 0.4 },
     ],
     title: (picked) => capitalize(`gratin ${complementDe(named(ofRole(picked, 'vegetable')))}`),
     description: () => 'Gratin au four, lié avec un produit laitier du frigo.',
@@ -303,13 +302,13 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
       {
         role: 'starch',
         required: true,
-        gramsPerServing: 90,
+        gramsPerServing: 100,
         maxItems: 1,
         nameIncludes: ['pate', 'spaghetti', 'tagliatelle', 'penne', 'nouille', 'lasagne', 'macaroni', 'fusilli'],
       },
-      { role: 'vegetable', required: false, gramsPerServing: 80, maxItems: 2, minRatio: 0.4 },
-      { role: 'protein', required: false, gramsPerServing: 80, maxItems: 1, minRatio: 0.5 },
-      { role: 'fat', required: false, gramsPerServing: 8, maxItems: 1, minRatio: 0.3 },
+      { role: 'vegetable', required: false, gramsPerServing: 120, maxItems: 2, minRatio: 0.4 },
+      { role: 'protein', required: false, gramsPerServing: 120, maxItems: 1, minRatio: 0.5 },
+      { role: 'fat', required: false, gramsPerServing: 10, maxItems: 1, minRatio: 0.3 },
     ],
     requireAny: ['vegetable', 'protein'],
     title: (picked) => {
@@ -346,11 +345,11 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     equipmentSlugs: ['casserole', 'poele'],
     baseTagSlugs: ['riz', 'plat-principal'],
     needs: [
-      { role: 'starch', required: true, gramsPerServing: 90, maxItems: 1, nameIncludes: ['riz'] },
-      { role: 'vegetable', required: true, gramsPerServing: 100, maxItems: 2 },
-      { role: 'protein', required: false, gramsPerServing: 90, maxItems: 1, minRatio: 0.5 },
+      { role: 'starch', required: true, gramsPerServing: 100, maxItems: 1, nameIncludes: ['riz'] },
+      { role: 'vegetable', required: true, gramsPerServing: 150, maxItems: 2 },
+      { role: 'protein', required: false, gramsPerServing: 130, maxItems: 1, minRatio: 0.5 },
       { role: 'aromatic', required: false, gramsPerServing: 20, maxItems: 1, minRatio: 0.3 },
-      { role: 'fat', required: false, gramsPerServing: 8, maxItems: 1, minRatio: 0.3 },
+      { role: 'fat', required: false, gramsPerServing: 10, maxItems: 1, minRatio: 0.3 },
     ],
     title: (picked) => {
       const protein = ofRole(picked, 'protein');
@@ -408,146 +407,5 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
   },
 ];
 
-function roleFilter(filter: NameFilter | undefined, role: CulinaryRole, grams: number): RoleNeed | null {
-  if (filter === undefined) return null;
-  const maxItems = role === 'vegetable' || role === 'fruit' ? 2 : 1;
-  if (filter === true) return { role, required: true, gramsPerServing: grams, maxItems };
-  return { role, required: true, gramsPerServing: grams, maxItems, nameIncludes: filter };
-}
-
-function cooked(method: CookMethod): boolean {
-  return method !== 'salad' && method !== 'breakfast';
-}
-
-function stepsFor(spec: RecipeSpec, picked: readonly PickedIngredient[]) {
-  const veg = named(ofRole(picked, 'vegetable'));
-  const protein = named(ofRole(picked, 'protein'));
-  const starch = named(ofRole(picked, 'starch'));
-  const fat = named(ofRole(picked, 'fat'));
-  const dairy = named(ofRole(picked, 'dairy'));
-  const fruit = named(ofRole(picked, 'fruit'));
-  const extra = joinFrench([protein, veg, starch].filter(Boolean));
-  switch (spec.method) {
-    case 'skillet':
-      return [
-        { description: veg ? `Couper ${veg}.` : 'Préparer les ingrédients.', durationMinutes: 8 },
-        {
-          description: fat ? `Saisir ${protein || extra} dans ${fat}.` : `Saisir ${protein || extra} à la poêle.`,
-          durationMinutes: 10,
-        },
-        { description: veg && protein ? `Ajouter ${veg} et poursuivre.` : 'Cuire jusqu’à coloration.', durationMinutes: 8 },
-        { description: 'Assaisonner et servir.', durationMinutes: null },
-      ];
-    case 'wok':
-      return [
-        { description: starch ? `Cuire ${starch} si besoin, réserver.` : `Couper ${veg || extra}.`, durationMinutes: 8 },
-        { description: `Faire sauter ${extra} à feu vif.`, durationMinutes: 8 },
-        { description: 'Servir aussitôt.', durationMinutes: null },
-      ];
-    case 'oven':
-      return [
-        { description: `Préchauffer le four à 190 °C. Couper ${veg || extra}.`, durationMinutes: 10 },
-        { description: `Enfourner ${extra}.`, durationMinutes: spec.cook },
-        { description: 'Vérifier la cuisson et servir.', durationMinutes: null },
-      ];
-    case 'parcel':
-      return [
-        { description: `Préchauffer le four à 180 °C. Répartir ${extra} dans une papillote.`, durationMinutes: 8 },
-        { description: 'Fermer et enfourner.', durationMinutes: spec.cook },
-        { description: 'Ouvrir à table pour garder les jus.', durationMinutes: null },
-      ];
-    case 'salad':
-      return [
-        { description: `Couper ${veg || extra}.`, durationMinutes: 10 },
-        { description: `Mélanger ${extra}${dairy ? ` et ${dairy}` : ''}.`, durationMinutes: 3 },
-        { description: 'Assaisonner et servir frais.', durationMinutes: null },
-      ];
-    case 'soup':
-      return [
-        { description: `Couper ${veg || extra}.`, durationMinutes: 8 },
-        { description: 'Couvrir d’eau ou de bouillon, laisser mijoter.', durationMinutes: Math.max(12, spec.cook) },
-        { description: 'Mixer ou servir en morceaux.', durationMinutes: 2 },
-      ];
-    case 'curry':
-    case 'stew':
-      return [
-        { description: `Faire revenir ${joinFrench([protein, veg].filter(Boolean)) || extra}.`, durationMinutes: 8 },
-        { description: starch ? `Ajouter ${starch} et laisser mijoter.` : 'Laisser mijoter à couvert.', durationMinutes: spec.cook },
-        { description: 'Rectifier l’assaisonnement et servir.', durationMinutes: null },
-      ];
-    case 'bake':
-      return [
-        { description: `Préchauffer le four à 180 °C. Ranger ${veg || extra} dans un plat.`, durationMinutes: 10 },
-        { description: dairy ? `Napper de ${dairy} et enfourner.` : 'Enfourner.', durationMinutes: spec.cook },
-      ];
-    case 'omelette':
-      return [
-        { description: dairy ? `Battre les œufs avec ${dairy}.` : 'Battre les œufs.', durationMinutes: 2 },
-        { description: veg ? `Faire revenir ${veg}, verser les œufs.` : 'Cuire les œufs à feu moyen.', durationMinutes: spec.cook },
-      ];
-    case 'bowl':
-      return [
-        { description: starch ? `Cuire ${starch}.` : 'Préparer la base.', durationMinutes: 12 },
-        { description: `Dresser ${extra}.`, durationMinutes: 8 },
-      ];
-    case 'pasta':
-      return [
-        { description: `Cuire ${starch || 'les pâtes'}.`, durationMinutes: 10 },
-        { description: `Préparer ${joinFrench([protein, veg].filter(Boolean)) || extra}.`, durationMinutes: 8 },
-        { description: 'Mélanger et servir.', durationMinutes: 2 },
-      ];
-    case 'rice':
-      return [
-        { description: `Cuire ${starch || 'le riz'}.`, durationMinutes: 12 },
-        { description: `Faire sauter ${extra}.`, durationMinutes: 10 },
-      ];
-    case 'breakfast':
-      return [
-        {
-          description: `Assembler ${joinFrench([starch, dairy, fruit].filter(Boolean)) || extra} dans un bol.`,
-          durationMinutes: 5,
-        },
-      ];
-  }
-}
-
-function fromSpec(spec: RecipeSpec): Archetype {
-  const needs: RoleNeed[] = [];
-  const proteinNeed = roleFilter(spec.protein, 'protein', 110);
-  const vegNeed = roleFilter(spec.vegetable, 'vegetable', 140);
-  const starchNeed = roleFilter(spec.starch, 'starch', 80);
-  if (proteinNeed) needs.push(proteinNeed);
-  if (spec.egg) {
-    needs.push({
-      role: 'egg',
-      required: true,
-      gramsPerServing: 100,
-      maxItems: 1,
-      nameIncludes: ['oeuf'],
-    });
-  }
-  if (vegNeed) needs.push(vegNeed);
-  if (starchNeed) needs.push(starchNeed);
-  if (spec.dairy) needs.push({ role: 'dairy', required: true, gramsPerServing: 70, maxItems: 1, minRatio: 0.4 });
-  if (spec.fruit) needs.push({ role: 'fruit', required: true, gramsPerServing: 100, maxItems: 2 });
-  if (cooked(spec.method)) {
-    needs.push({ role: 'fat', required: false, gramsPerServing: 8, maxItems: 1, minRatio: 0.3 });
-    needs.push({ role: 'aromatic', required: false, gramsPerServing: 15, maxItems: 1, minRatio: 0.3 });
-  }
-  return {
-    id: spec.id,
-    kind: spec.kind,
-    diets: spec.diets,
-    prepTimeMinutes: spec.prep,
-    cookTimeMinutes: spec.cook,
-    equipmentSlugs: spec.equipment,
-    baseTagSlugs: spec.tags,
-    needs,
-    title: () => spec.label,
-    description: (picked) =>
-      `Inspiré des assiettes healthy (${spec.source}). Composé avec tes réserves : ${named(picked)}.`,
-    steps: (picked) => stepsFor(spec, picked),
-  };
-}
-
-export const ARCHETYPES: readonly Archetype[] = [...GENERIC_ARCHETYPES, ...HEALTHY_RECIPES.map(fromSpec)];
+/** Patrons de composition (poêlée, salade…). Les fiches nommées viennent de la table Recipe. */
+export const ARCHETYPES: readonly Archetype[] = GENERIC_ARCHETYPES;

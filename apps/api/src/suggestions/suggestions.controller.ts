@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Inject, Post, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { DIETS, DISH_KINDS } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
@@ -22,6 +22,10 @@ export class SuggestionsController {
   /** Lecture seule : rien n'est persisté tant que le client n'appelle pas POST /recipes. */
   @Post('/suggestions')
   preview(@CurrentUser() user: AuthUser, @Body() body: unknown) {
-    return this.suggestions.preview(user.id, previewSchema.parse(body ?? {}));
+    const parsed = previewSchema.safeParse(body ?? {});
+    if (!parsed.success) {
+      throw new BadRequestException('Filtres de proposition invalides.');
+    }
+    return this.suggestions.preview(user.id, parsed.data);
   }
 }

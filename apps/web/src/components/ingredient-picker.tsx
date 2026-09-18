@@ -1,10 +1,12 @@
 'use client';
 
-import { UX_CATEGORIES, UX_CATEGORY_LABELS, type UxCategory } from '@cuisinons/shared';
-import { useEffect, useRef, useState } from 'react';
-import { Carrot } from 'lucide-react';
+import { UX_CATEGORIES, UX_CATEGORY_LABELS, kitchenLabel, type UxCategory } from '@cuisinons/shared';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Carrot, Loader2 } from 'lucide-react';
 import { Chip, EmptyState, Modal, SearchInput, cn } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
+import { CategoryIcon } from '@/components/category-icon';
+import { IngredientIcon } from '@/components/ingredient-icon';
 
 type Ingredient = {
   id: string;
@@ -12,6 +14,8 @@ type Ingredient = {
   iconUrl: string | null;
   uxCategory: UxCategory;
 };
+
+type SearchPage = { items: Ingredient[]; nextCursor: string | null };
 
 export function IngredientPicker({
   open,
@@ -25,28 +29,94 @@ export function IngredientPicker({
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<string>('');
   const [items, setItems] = useState<Ingredient[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [active, setActive] = useState(0);
   const listRef = useRef<HTMLUListElement>(null);
+  const sentinelRef = useRef<HTMLLIElement>(null);
+  const nextCursorRef = useRef<string | null>(null);
+  const loadingRef = useRef(false);
+  const genRef = useRef(0);
+
+  const fetchPage = useCallback(
+    async (input: { query: string; category: string; cursor: string | null; signal: AbortSignal; reset: boolean }) => {
+      if (loadingRef.current && !input.reset) return;
+      const gen = genRef.current;
+      loadingRef.current = true;
+      setLoading(true);
+      const params = new URLSearchParams();
+      if (input.query) params.set('q', input.query);
+      if (input.category) params.set('category', input.category);
+      if (input.cursor) params.set('cursor', input.cursor);
+      try {
+        const data = await apiJson<SearchPage>(`/api/bff/ingredients?${params.toString()}`, {
+          signal: input.signal,
+        });
+        if (input.signal.aborted || gen !== genRef.current) return;
+        setItems((current) => (input.reset ? data.items : [...current, ...data.items]));
+        setNextCursor(data.nextCursor);
+        nextCursorRef.current = data.nextCursor;
+        if (input.reset) setActive(0);
+      } catch (error) {
+        if (input.signal.aborted || (error instanceof DOMException && error.name === 'AbortError')) return;
+      } finally {
+        if (gen === genRef.current) {
+          loadingRef.current = false;
+          setLoading(false);
+        }
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!open) return;
-    // Anti-rebond : la recherche part apres 180 ms sans frappe.
+    const controller = new AbortController();
+    genRef.current += 1;
+    loadingRef.current = false;
+    setItems([]);
+    setNextCursor(null);
+    nextCursorRef.current = null;
     const handle = setTimeout(() => {
-      const params = new URLSearchParams();
-      if (query) params.set('q', query);
-      if (category) params.set('category', category);
-      void apiJson<{ items: Ingredient[] }>(`/api/bff/ingredients?${params.toString()}`).then((data) => {
-        setItems(data.items);
-        setActive(0);
+      void fetchPage({
+        query,
+        category,
+        cursor: null,
+        signal: controller.signal,
+        reset: true,
       });
     }, 180);
-    return () => clearTimeout(handle);
-  }, [open, query, category]);
+    return () => {
+      clearTimeout(handle);
+      controller.abort();
+    };
+  }, [open, query, category, fetchPage]);
 
-  // Garde la ligne selectionnee au clavier dans la zone visible.
   useEffect(() => {
     listRef.current?.children[active]?.scrollIntoView({ block: 'nearest' });
   }, [active]);
+
+  useEffect(() => {
+    if (!open || !nextCursor) return;
+    const root = listRef.current;
+    const sentinel = sentinelRef.current;
+    if (!root || !sentinel) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries[0]?.isIntersecting || !nextCursorRef.current || loadingRef.current) return;
+        void fetchPage({
+          query,
+          category,
+          cursor: nextCursorRef.current,
+          signal: new AbortController().signal,
+          reset: false,
+        });
+      },
+      { root, rootMargin: '120px' },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [open, nextCursor, query, category, fetchPage, items.length]);
 
   return (
     <Modal open={open} title="Choisir un ingrédient" onClose={onClose}>
@@ -54,7 +124,7 @@ export function IngredientPicker({
         autoFocus
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Rechercher (insensible aux accents)"
+        placeholder="Rechercher un ingrédient"
         aria-label="Rechercher un ingrédient"
         onKeyDown={(e) => {
           if (e.key === 'ArrowDown') {
@@ -81,13 +151,14 @@ export function IngredientPicker({
               selected={category === option.value}
               onClick={() => setCategory(option.value)}
             >
+              {option.value ? <CategoryIcon category={option.value} className="size-4" /> : null}
               {option.label}
             </Chip>
           ),
         )}
       </div>
 
-      {items.length === 0 ? (
+      {items.length === 0 && !loading ? (
         <EmptyState
           icon={Carrot}
           title="Aucun ingrédient"
@@ -107,17 +178,17 @@ export function IngredientPicker({
                   index === active ? 'bg-ink-900 font-medium text-white' : 'text-ink-700 hover:bg-white/80',
                 )}
               >
-                {item.iconUrl ? (
-                  <img src={item.iconUrl} alt="" width={28} height={28} className="size-7 shrink-0" />
-                ) : (
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-white/30">
-                    <Carrot className="size-4 opacity-60" aria-hidden />
-                  </span>
-                )}
-                <span className="min-w-0 truncate">{item.nameFr}</span>
+                <IngredientIcon src={item.iconUrl} />
+                <span className="min-w-0 truncate">{kitchenLabel(item.nameFr)}</span>
               </button>
             </li>
           ))}
+          <li ref={sentinelRef} className="h-4" aria-hidden />
+          {loading ? (
+            <li className="flex justify-center py-2 text-ink-400">
+              <Loader2 className="size-4 animate-spin" aria-label="Chargement" />
+            </li>
+          ) : null}
         </ul>
       )}
     </Modal>

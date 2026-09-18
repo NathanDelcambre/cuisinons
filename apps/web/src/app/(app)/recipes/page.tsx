@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
-import { ChefHat, Flame, Plus, Sparkles, Star } from 'lucide-react';
+import { ChefHat, Plus, Sparkles, Star } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -21,6 +21,9 @@ import { apiJson } from '@/lib/api';
 import { recetteIdFromSearch, routes, withSearch } from '@/lib/routes';
 import { RecipeModal } from '@/components/recipe-modal';
 import { SuggestDishModal } from '@/components/suggest-dish-modal';
+import { Avatar } from '@/components/avatar';
+import { MacroIcon } from '@/components/macro-icon';
+import { avatarUrlForEmail, RECIPE_SOURCE_LABELS } from '@cuisinons/shared';
 
 type Macros = { kcal: number; protein: number; carbs: number; fat: number };
 
@@ -28,7 +31,9 @@ type Recipe = {
   id: string;
   name: string;
   photoUrl?: string | null;
-  author: { displayName: string };
+  source?: 'USER' | 'CATALOG';
+  servings: string;
+  author: { displayName: string; email?: string };
   nutrition: { perServing: Macros; per100g: Macros | null };
   rating: { average: number | null; count: number };
   tags: Array<{ tag: { slug: string; label: string } }>;
@@ -203,24 +208,26 @@ function RecipesInner() {
       />
 
       <form
-        className="flex flex-wrap items-center gap-3"
+        className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center"
         onSubmit={(e) => {
           e.preventDefault();
           update({ q: draft });
         }}
       >
-        <div className="w-80 max-w-full shrink-0">
+        <div className="w-full md:w-80 md:max-w-full md:shrink-0">
           <SearchInput
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Rechercher une recette"
             aria-label="Rechercher une recette"
+            className="h-11"
           />
         </div>
+        <div className="grid w-full grid-cols-2 gap-3 md:flex md:w-auto md:contents">
         <Select
           value={tag}
           aria-label="Filtrer par catégorie"
-          className="w-[13.5rem] max-w-full shrink-0"
+          className="h-11 min-h-11 w-full md:w-[13.5rem] md:max-w-full md:shrink-0"
           options={[
             { value: '', label: 'Toutes les catégories' },
             ...(tags.data ?? []).map((t) => ({ value: t.slug || t.id, label: t.label })),
@@ -230,11 +237,12 @@ function RecipesInner() {
         <Select
           value={sort}
           aria-label="Trier"
-          className="w-[13.5rem] max-w-full shrink-0"
+          className="h-11 min-h-11 w-full md:w-[13.5rem] md:max-w-full md:shrink-0"
           options={SORTS}
           onChange={(next) => update({ sort: next })}
         />
-        <div className="flex h-11 items-center rounded-full bg-sage-100/80 px-3.5 ring-1 ring-inset ring-sage-200/80">
+        </div>
+        <div className="flex h-11 items-center self-start rounded-full bg-sage-100/80 px-3.5 ring-1 ring-inset ring-sage-200/80">
           <Switch
             label="Pour 100 g"
             checked={per100g}
@@ -302,7 +310,21 @@ function RecipesInner() {
                     </h2>
                     <Rating average={recipe.rating.average} count={recipe.rating.count} />
                   </div>
-                  <p className="mt-1 truncate text-sm text-ink-500">par {recipe.author.displayName}</p>
+                  <p className="mt-1 flex min-w-0 items-center gap-2 truncate text-sm text-ink-500">
+                    <Avatar
+                      name={recipe.author.displayName}
+                      src={recipe.author.email ? avatarUrlForEmail(recipe.author.email) : null}
+                      className="size-5 rounded-full text-[9px]"
+                    />
+                    <span className="truncate">
+                      {recipe.source === 'CATALOG'
+                        ? RECIPE_SOURCE_LABELS.CATALOG
+                        : `Proposé par ${recipe.author.displayName}`}
+                    </span>
+                    <span className="shrink-0 text-ink-400">
+                      · {Number(recipe.servings).toLocaleString('fr-FR')} pers.
+                    </span>
+                  </p>
 
                   <RecipeMacros
                     macros={per100g ? recipe.nutrition.per100g : recipe.nutrition.perServing}
@@ -343,16 +365,27 @@ function RecipeMacros({ macros, per100g }: { macros: Macros | null; per100g: boo
     <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
       <p className="tabular flex flex-nowrap items-center gap-x-3 overflow-hidden text-sm text-ink-700">
         <span className="flex shrink-0 items-center gap-1.5">
-          <Flame className="size-3.5 text-peach-500" aria-hidden />
+          <MacroIcon kind="kcal" />
           {Math.round(macros.kcal)} kcal
         </span>
-        <span className="shrink-0 font-bold text-sage-600">{Math.round(macros.protein)} P</span>
-        <span className="shrink-0 font-bold text-ink-800">{Math.round(macros.carbs)} G</span>
-        <span className="shrink-0 font-bold text-tomato-500">{Math.round(macros.fat)} L</span>
+        <span className="flex shrink-0 items-center gap-1 font-bold text-sage-600">
+          <MacroIcon kind="protein" />
+          {Math.round(macros.protein)} P
+        </span>
+        <span className="flex shrink-0 items-center gap-1 font-bold text-ink-800">
+          <MacroIcon kind="carbs" />
+          {Math.round(macros.carbs)} G
+        </span>
+        <span className="flex shrink-0 items-center gap-1 font-bold text-tomato-500">
+          <MacroIcon kind="fat" />
+          {Math.round(macros.fat)} L
+        </span>
       </p>
       {per100g ? (
         <span className="text-[11px] font-medium text-sage-600">/ 100 g</span>
-      ) : null}
+      ) : (
+        <span className="text-[11px] font-medium text-ink-400">/ pers.</span>
+      )}
     </div>
   );
 }

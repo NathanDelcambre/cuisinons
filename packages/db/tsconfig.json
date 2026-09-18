@@ -9,5 +9,5 @@
     "types": ["node"]
   },
   "include": ["src", "prisma"],
-  "exclude": ["src/generated"]
+  "exclude": ["src/generated", "src/_peek-ciqual.ts"]
 }

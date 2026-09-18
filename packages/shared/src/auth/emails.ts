@@ -55,7 +55,7 @@ export function avatarUrlForEmail(email: string): string | null {
     case 'nathan.delcambre@gmail.com':
       return '/avatars/nathan.jpg';
     case 'jade.peroch@gmail.com':
-      return '/avatars/jade.jpg';
+      return '/avatars/jade.jpg?v=4';
     default:
       return null;
   }

@@ -5,8 +5,21 @@ const DATA_URL = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=\s]+)$/;
 
 export type RecipePhoto = { mime: string; bytes: Buffer };
 
-export function publicRecipePhotoUrl(id: string, hasPhoto: boolean, updatedAt: Date): string | null {
-  if (!hasPhoto) return null;
+export function isPublicPhotoPath(stored: string): boolean {
+  return stored.startsWith('/') && !stored.startsWith('data:');
+}
+
+export function publicRecipePhotoUrl(
+  id: string,
+  storedOrHasPhoto: string | boolean | null | undefined,
+  updatedAt: Date,
+): string | null {
+  if (id.startsWith('official-')) return `/recipes/${id}.png`;
+  if (typeof storedOrHasPhoto === 'string') {
+    if (isPublicPhotoPath(storedOrHasPhoto)) return storedOrHasPhoto;
+    return `/api/bff/recipes/${id}/photo?v=${String(updatedAt.getTime())}`;
+  }
+  if (!storedOrHasPhoto) return null;
   return `/api/bff/recipes/${id}/photo?v=${String(updatedAt.getTime())}`;
 }
 
