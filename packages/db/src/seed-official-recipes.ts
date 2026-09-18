@@ -6,7 +6,7 @@ import {
   pickHealthyIngredient,
 } from '@cuisinons/shared';
 import { prisma } from './client';
-import { refreshRecipeNutritionSnapshot, refreshMissingNutritionSnapshots } from './recipe-nutrition';
+import { refreshRecipeNutritionSnapshot, refreshMissingNutritionSnapshots } from './refresh-nutrition';
 
 const WHEY_CODE = 900010;
 const WHEY_VANILLE_CODE = 900011;

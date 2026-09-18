@@ -1,6 +1,6 @@
 import './load-env';
 import { prisma } from './client';
-import { refreshMissingNutritionSnapshots, refreshRecipeNutritionSnapshot } from './recipe-nutrition';
+import { refreshMissingNutritionSnapshots, refreshRecipeNutritionSnapshot } from './refresh-nutrition';
 
 async function main() {
   const catalog = await prisma.recipe.findMany({

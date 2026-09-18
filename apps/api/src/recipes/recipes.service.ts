@@ -1,10 +1,5 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import {
-  Prisma,
-  QuantityUnit,
-  nutritionFromSnapshot,
-  refreshRecipeNutritionSnapshot,
-} from '@cuisinons/db';
+import { Prisma, QuantityUnit, nutritionFromSnapshot } from '@cuisinons/db';
 import {
   resolveGrams,
   type QuantityUnit as SharedUnit,
@@ -13,6 +8,7 @@ import {
 } from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { nutritionForRecipe } from '../nutrition/recipe-nutrition.js';
+import { persistRecipeNutritionSnapshot } from '../nutrition/persist-snapshot.js';
 import { decodePhotoDataUrl, publicRecipePhotoUrl, type RecipePhoto } from './recipe-photo.js';
 
 export type RecipeWriteInput = {
@@ -226,7 +222,7 @@ export class RecipesService {
       const nutrition = nutritionForRecipe(byRecipe.get(id) ?? [], servingsById.get(id) ?? 1);
       map.set(id, nutrition);
     }
-    void Promise.all(missing.map((id) => refreshRecipeNutritionSnapshot(this.prisma, id))).catch(() => undefined);
+    void Promise.all(missing.map((id) => persistRecipeNutritionSnapshot(this.prisma, id))).catch(() => undefined);
     return map;
   }
 
@@ -373,7 +369,7 @@ export class RecipesService {
     });
     if (!recipe) throw new NotFoundException('Recette introuvable.');
     if (!nutritionFromSnapshot(recipe.nutritionSnapshot)) {
-      void refreshRecipeNutritionSnapshot(this.prisma, id).catch(() => undefined);
+      void persistRecipeNutritionSnapshot(this.prisma, id).catch(() => undefined);
     }
     const photos = await this.photoUrlById([recipe.id], new Map([[recipe.id, recipe.updatedAt]]));
     return this.serialize(recipe, photos.get(recipe.id) ?? null);
@@ -432,7 +428,7 @@ export class RecipesService {
       });
       return recipe.id;
     });
-    await refreshRecipeNutritionSnapshot(this.prisma, created);
+    await persistRecipeNutritionSnapshot(this.prisma, created);
     return this.get(created);
   }
 
@@ -485,7 +481,7 @@ export class RecipesService {
         },
       });
     });
-    await refreshRecipeNutritionSnapshot(this.prisma, id);
+    await persistRecipeNutritionSnapshot(this.prisma, id);
     return this.get(id);
   }
 

@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { recipeWriteSchema } from '../src/recipes/recipe-write.js';
 import { publicRecipePhotoUrl } from '../src/recipes/recipe-photo.js';
@@ -62,6 +65,16 @@ describe('photo publique', () => {
 
   it('sert le PNG d’une idée healthy', () => {
     expect(publicRecipePhotoUrl('official-h42', null, new Date())).toBe('/recipes/official-h42.png');
+  });
+});
+
+describe('frontière CJS Prisma / ESM shared', () => {
+  it('le client @cuisinons/db chargé par l’API ne require pas shared', () => {
+    const dist = resolve(dirname(fileURLToPath(import.meta.url)), '../../../packages/db/dist');
+    const index = readFileSync(resolve(dist, 'index.js'), 'utf8');
+    const snapshot = readFileSync(resolve(dist, 'recipe-nutrition.js'), 'utf8');
+    expect(index).not.toMatch(/@cuisinons\/shared/);
+    expect(snapshot).not.toMatch(/@cuisinons\/shared/);
   });
 });
 
