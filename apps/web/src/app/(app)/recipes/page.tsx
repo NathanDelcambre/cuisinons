@@ -15,7 +15,6 @@ import {
   SearchInput,
   Segmented,
   Skeleton,
-  Switch,
   buttonClasses,
 } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
@@ -58,7 +57,6 @@ type Filters = {
   q: string;
   tag: string;
   sort: string;
-  basis: 'serving' | '100g';
   view: RecipeListView;
 };
 
@@ -67,7 +65,6 @@ function filtersFromSearch(params: { get(name: string): string | null }): Filter
     q: params.get('q') ?? '',
     tag: params.get('tag') ?? '',
     sort: params.get('sort') ?? 'date',
-    basis: params.get('basis') === '100g' ? '100g' : 'serving',
     view: params.get('vue') === 'idees' ? 'ideas' : 'mine',
   };
 }
@@ -80,8 +77,7 @@ function RecipesInner() {
   const suggestOpen = params.has('proposer');
   const [filters, setFilters] = useState(fromUrl);
   const [draft, setDraft] = useState(fromUrl.q);
-  const { q, tag, sort, basis, view } = filters;
-  const per100g = basis === '100g';
+  const { q, tag, sort, view } = filters;
   const ideas = view === 'ideas';
 
   useEffect(() => {
@@ -107,10 +103,10 @@ function RecipesInner() {
   }, [params, router]);
 
   const recipes = useQuery({
-    queryKey: ['recipes', q, tag, sort, basis, view],
+    queryKey: ['recipes', q, tag, sort, view],
     queryFn: () =>
       apiJson<Recipe[]>(
-        `/api/bff/recipes?q=${encodeURIComponent(q)}&tag=${encodeURIComponent(tag)}&sort=${sort}&basis=${basis}&view=${view}`,
+        `/api/bff/recipes?q=${encodeURIComponent(q)}&tag=${encodeURIComponent(tag)}&sort=${sort}&view=${view}`,
       ),
     staleTime: 120_000,
   });
@@ -128,7 +124,6 @@ function RecipesInner() {
         q: merged.q,
         tag: merged.tag,
         sort: merged.sort === 'date' ? '' : merged.sort,
-        basis: merged.basis === 'serving' ? '' : merged.basis,
         vue: merged.view === 'ideas' ? 'idees' : '',
       };
       for (const [k, v] of Object.entries(encoded)) {
@@ -192,14 +187,18 @@ function RecipesInner() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow={
-          list.length > 0
-            ? ideas
-              ? `${String(list.length)} idée${list.length > 1 ? 's' : ''}`
-              : `${String(list.length)} recette${list.length > 1 ? 's' : ''}`
-            : undefined
+        title={
+          <span className="inline-flex flex-wrap items-baseline gap-x-3">
+            Recettes
+            {list.length > 0 ? (
+              <span className="text-sm font-normal tracking-normal text-ink-400">
+                {ideas
+                  ? `${String(list.length)} idée${list.length > 1 ? 's' : ''}`
+                  : `${String(list.length)} recette${list.length > 1 ? 's' : ''}`}
+              </span>
+            ) : null}
+          </span>
         }
-        title="Recettes"
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Button type="button" variant="glass" icon={Sparkles} onClick={openSuggest}>
@@ -247,14 +246,6 @@ function RecipesInner() {
           options={SORTS}
           onChange={(next) => update({ sort: next })}
         />
-        </div>
-        <div className="flex h-11 items-center self-start rounded-full bg-sage-100/80 px-3.5 ring-1 ring-inset ring-sage-200/80">
-          <Switch
-            label="Pour 100 g"
-            checked={per100g}
-            onChange={(on) => update({ basis: on ? '100g' : 'serving' })}
-            className="gap-2.5"
-          />
         </div>
         <Segmented
           label="Vue des recettes"
@@ -341,10 +332,7 @@ function RecipesInner() {
                     </span>
                   </p>
 
-                  <RecipeMacros
-                    macros={per100g ? recipe.nutrition.per100g : recipe.nutrition.perServing}
-                    per100g={per100g}
-                  />
+                  <RecipeMacros macros={recipe.nutrition.perServing} />
 
                   <OverflowBadges
                     className="mt-4"
@@ -364,13 +352,9 @@ function RecipesInner() {
   );
 }
 
-function RecipeMacros({ macros, per100g }: { macros: Macros | null; per100g: boolean }) {
+function RecipeMacros({ macros }: { macros: Macros | null }) {
   if (!macros) {
-    return (
-      <p className="mt-4 text-sm text-ink-400">
-        Poids indisponible{per100g ? ' pour 100 g' : ''}
-      </p>
-    );
+    return <p className="mt-4 text-sm text-ink-400">Poids indisponible</p>;
   }
   return (
     <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -392,11 +376,7 @@ function RecipeMacros({ macros, per100g }: { macros: Macros | null; per100g: boo
           {Math.round(macros.fat)} L
         </span>
       </p>
-      {per100g ? (
-        <span className="text-[11px] font-medium text-sage-600">/ 100 g</span>
-      ) : (
-        <span className="text-[11px] font-medium text-ink-400">/ pers.</span>
-      )}
+      <span className="text-[11px] font-medium text-ink-400">/ pers.</span>
     </div>
   );
 }

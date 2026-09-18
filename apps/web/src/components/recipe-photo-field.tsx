@@ -82,12 +82,12 @@ export function RecipePhotoField({
             void applyFile(e.dataTransfer.files[0]);
           }}
           className={cn(
-            'flex aspect-[16/10] w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-ink-200 bg-white/50 px-4 text-center transition duration-200 ease-out-soft hover:border-sage-400 hover:bg-white/80',
+            'flex min-h-[7.5rem] w-full flex-col items-center justify-center gap-1.5 rounded-2xl border border-dashed border-ink-200 bg-white/50 px-4 py-5 text-center transition duration-200 ease-out-soft hover:border-sage-400 hover:bg-white/80',
             busy && 'opacity-70',
           )}
         >
-          <span className="flex size-11 items-center justify-center rounded-full bg-sage-100 text-sage-700">
-            <ImagePlus className="size-5" aria-hidden />
+          <span className="flex size-8 items-center justify-center rounded-full bg-sage-100 text-sage-700">
+            <ImagePlus className="size-4" aria-hidden />
           </span>
           <span className="text-sm font-medium text-ink-900">
             {busy ? 'Compression…' : 'Ajouter une photo'}
