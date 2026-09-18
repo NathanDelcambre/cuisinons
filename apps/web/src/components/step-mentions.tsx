@@ -2,12 +2,195 @@
 
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { insertIngredientToken, parseStepMentions } from '@cuisinons/shared';
-import { Textarea, cn } from '@cuisinons/ui';
+import { cn } from '@cuisinons/ui';
 
 export type StepIngredientOption = {
   id: string;
   name: string;
 };
+
+const CHIP =
+  'mx-0.5 inline-flex align-baseline rounded-md bg-sage-100 px-1.5 py-0.5 text-sage-700';
+
+function tokenFor(id: string) {
+  return `[[ing:${id}]]`;
+}
+
+function nameOf(id: string, ingredients: StepIngredientOption[]) {
+  return ingredients.find((item) => item.id === id)?.name ?? 'Ingrédient';
+}
+
+function createChip(id: string, name: string) {
+  const span = document.createElement('span');
+  span.dataset.ingredientId = id;
+  span.contentEditable = 'false';
+  span.className = CHIP;
+  span.textContent = name;
+  return span;
+}
+
+function serializeEditor(root: HTMLElement): string {
+  let out = '';
+  const walk = (node: Node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      out += node.textContent ?? '';
+      return;
+    }
+    if (!(node instanceof HTMLElement)) return;
+    if (node.dataset.ingredientId) {
+      out += tokenFor(node.dataset.ingredientId);
+      return;
+    }
+    if (node.tagName === 'BR') {
+      out += '\n';
+      return;
+    }
+    if ((node.tagName === 'DIV' || node.tagName === 'P') && out.length > 0 && !out.endsWith('\n')) {
+      out += '\n';
+    }
+    for (const child of Array.from(node.childNodes)) walk(child);
+  };
+  for (const child of Array.from(root.childNodes)) walk(child);
+  return out.replace(/^\n/, '');
+}
+
+function nodeSerializedLength(node: Node): number {
+  if (node.nodeType === Node.TEXT_NODE) return node.textContent?.length ?? 0;
+  if (!(node instanceof HTMLElement)) return 0;
+  if (node.dataset.ingredientId) return tokenFor(node.dataset.ingredientId).length;
+  if (node.tagName === 'BR') return 1;
+  let total = 0;
+  for (const child of Array.from(node.childNodes)) total += nodeSerializedLength(child);
+  return total;
+}
+
+function offsetAt(root: HTMLElement, container: Node, offset: number): number {
+  if (container === root) {
+    let total = 0;
+    for (let i = 0; i < offset && i < root.childNodes.length; i += 1) {
+      const child = root.childNodes[i];
+      if (child) total += nodeSerializedLength(child);
+    }
+    return total;
+  }
+  let total = 0;
+  const visit = (node: Node): boolean => {
+    if (node === container) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        total += offset;
+        return true;
+      }
+      for (let i = 0; i < offset; i += 1) {
+        const child = node.childNodes[i];
+        if (child) total += nodeSerializedLength(child);
+      }
+      return true;
+    }
+    if (node.nodeType === Node.TEXT_NODE) {
+      total += node.textContent?.length ?? 0;
+      return false;
+    }
+    if (node instanceof HTMLElement && node.dataset.ingredientId) {
+      total += tokenFor(node.dataset.ingredientId).length;
+      return false;
+    }
+    if (node instanceof HTMLElement && node.tagName === 'BR') {
+      total += 1;
+      return false;
+    }
+    for (const child of Array.from(node.childNodes)) {
+      if (visit(child)) return true;
+    }
+    return false;
+  };
+  visit(root);
+  return total;
+}
+
+function selectionOffsets(root: HTMLElement): { start: number; end: number } {
+  const sel = window.getSelection();
+  const fallback = serializeEditor(root).length;
+  if (!sel || sel.rangeCount === 0 || !sel.anchorNode || !root.contains(sel.anchorNode)) {
+    return { start: fallback, end: fallback };
+  }
+  const range = sel.getRangeAt(0);
+  const a = offsetAt(root, range.startContainer, range.startOffset);
+  const b = offsetAt(root, range.endContainer, range.endOffset);
+  return { start: Math.min(a, b), end: Math.max(a, b) };
+}
+
+function setCaretOffset(root: HTMLElement, target: number) {
+  const sel = window.getSelection();
+  if (!sel) return;
+  let remaining = Math.max(0, target);
+  const place = (node: Node, offset: number) => {
+    const range = document.createRange();
+    range.setStart(node, offset);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  };
+  const visit = (node: Node): boolean => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const len = node.textContent?.length ?? 0;
+      if (remaining <= len) {
+        place(node, remaining);
+        return true;
+      }
+      remaining -= len;
+      return false;
+    }
+    if (node instanceof HTMLElement && node.dataset.ingredientId) {
+      const len = tokenFor(node.dataset.ingredientId).length;
+      if (remaining <= len) {
+        const range = document.createRange();
+        range.setStartAfter(node);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        return true;
+      }
+      remaining -= len;
+      return false;
+    }
+    if (node instanceof HTMLElement && node.tagName === 'BR') {
+      if (remaining <= 1) {
+        const range = document.createRange();
+        range.setStartAfter(node);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        return true;
+      }
+      remaining -= 1;
+      return false;
+    }
+    for (const child of Array.from(node.childNodes)) {
+      if (visit(child)) return true;
+    }
+    return false;
+  };
+  if (!visit(root)) {
+    const range = document.createRange();
+    range.selectNodeContents(root);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+}
+
+function paintEditor(root: HTMLElement, value: string, ingredients: StepIngredientOption[]) {
+  root.replaceChildren();
+  const parts = parseStepMentions(value);
+  if (parts.length === 0) return;
+  for (const part of parts) {
+    if (part.type === 'text') {
+      root.append(part.value);
+    } else {
+      root.append(createChip(part.id, nameOf(part.id, ingredients)));
+    }
+  }
+}
 
 export function StepDescriptionField({
   value,
@@ -22,10 +205,11 @@ export function StepDescriptionField({
   label: string;
   placeholder?: string;
 }) {
-  const areaRef = useRef<HTMLTextAreaElement>(null);
+  const editorRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [highlight, setHighlight] = useState(0);
+  const ingredientKey = ingredients.map((item) => `${item.id}:${item.name}`).join('|');
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase();
@@ -33,63 +217,120 @@ export function StepDescriptionField({
   }, [ingredients, query]);
 
   useLayoutEffect(() => {
+    const el = editorRef.current;
+    if (!el) return;
+    if (serializeEditor(el) === value) {
+      for (const chip of Array.from(el.querySelectorAll<HTMLElement>('[data-ingredient-id]'))) {
+        const id = chip.dataset.ingredientId;
+        if (!id) continue;
+        const nextName = nameOf(id, ingredients);
+        if (chip.textContent !== nextName) chip.textContent = nextName;
+      }
+      el.dataset.empty = value.length === 0 ? 'true' : 'false';
+      return;
+    }
+    const restore = document.activeElement === el;
+    const caret = restore ? selectionOffsets(el).start : null;
+    paintEditor(el, value, ingredients);
+    el.dataset.empty = value.length === 0 ? 'true' : 'false';
+    if (restore && caret !== null) setCaretOffset(el, caret);
+  }, [value, ingredientKey, ingredients]);
+
+  useLayoutEffect(() => {
     if (open) setHighlight(0);
   }, [open, query]);
 
+  function emitFromEditor() {
+    const el = editorRef.current;
+    if (!el) return '';
+    const next = serializeEditor(el);
+    el.dataset.empty = next.length === 0 ? 'true' : 'false';
+    onChange(next);
+    return next;
+  }
+
   function pick(id: string) {
-    const el = areaRef.current;
-    const cursor = el?.selectionStart ?? value.length;
-    const next = insertIngredientToken(value, cursor, id);
+    const el = editorRef.current;
+    if (!el) return;
+    el.focus();
+    const cursor = selectionOffsets(el).end;
+    const next = insertIngredientToken(serializeEditor(el), cursor, id);
     onChange(next.text);
+    paintEditor(el, next.text, ingredients);
+    el.dataset.empty = next.text.length === 0 ? 'true' : 'false';
     setOpen(false);
     setQuery('');
     requestAnimationFrame(() => {
-      el?.focus();
-      el?.setSelectionRange(next.cursor, next.cursor);
+      el.focus();
+      setCaretOffset(el, next.cursor);
     });
   }
 
   return (
     <div className="relative min-w-0 flex-1">
-      <Textarea
-        ref={areaRef}
-        value={value}
+      <div
+        ref={editorRef}
+        role="textbox"
+        aria-multiline="true"
         aria-label={label}
-        placeholder={placeholder}
-        onChange={(e) => {
-          const next = e.target.value;
-          const cursor = e.target.selectionStart ?? next.length;
-          const typedSlash = next[cursor - 1] === '/' && value.length < next.length;
-          onChange(next);
-          if (typedSlash && ingredients.length > 0) {
+        contentEditable
+        suppressContentEditableWarning
+        data-placeholder={placeholder}
+        data-empty={value.length === 0 ? 'true' : 'false'}
+        className={cn(
+          'min-h-24 w-full whitespace-pre-wrap rounded-xl border border-ink-200 bg-ink-100 px-4 py-3 text-base text-ink-900 transition duration-200 ease-out-soft',
+          'hover:border-ink-300 hover:bg-white focus:border-sage-300 focus:bg-white focus:outline-none',
+          'data-[empty=true]:before:pointer-events-none data-[empty=true]:before:text-ink-400 data-[empty=true]:before:content-[attr(data-placeholder)]',
+        )}
+        onInput={() => {
+          const el = editorRef.current;
+          if (!el) return;
+          const next = emitFromEditor();
+          const caret = selectionOffsets(el).start;
+          const typedSlash = next[caret - 1] === '/' && ingredients.length > 0;
+          if (typedSlash) {
             setOpen(true);
             setQuery('');
           } else if (open && !next.includes('/')) {
             setOpen(false);
           }
         }}
+        onPaste={(event) => {
+          event.preventDefault();
+          const el = editorRef.current;
+          if (!el) return;
+          const pasted = event.clipboardData.getData('text/plain');
+          const { start, end } = selectionOffsets(el);
+          const current = serializeEditor(el);
+          const next = `${current.slice(0, start)}${pasted}${current.slice(end)}`;
+          onChange(next);
+          paintEditor(el, next, ingredients);
+          el.dataset.empty = next.length === 0 ? 'true' : 'false';
+          setCaretOffset(el, start + pasted.length);
+        }}
         onKeyDown={(e) => {
-          if (!open) return;
-          if (e.key === 'Escape') {
-            e.preventDefault();
-            setOpen(false);
-            return;
-          }
-          if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            setHighlight((h) => Math.min(filtered.length - 1, h + 1));
-            return;
-          }
-          if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            setHighlight((h) => Math.max(0, h - 1));
-            return;
-          }
-          if (e.key === 'Enter') {
-            const target = filtered[highlight];
-            if (target) {
+          if (open) {
+            if (e.key === 'Escape') {
               e.preventDefault();
-              pick(target.id);
+              setOpen(false);
+              return;
+            }
+            if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              setHighlight((h) => Math.min(filtered.length - 1, h + 1));
+              return;
+            }
+            if (e.key === 'ArrowUp') {
+              e.preventDefault();
+              setHighlight((h) => Math.max(0, h - 1));
+              return;
+            }
+            if (e.key === 'Enter') {
+              const target = filtered[highlight];
+              if (target) {
+                e.preventDefault();
+                pick(target.id);
+              }
             }
           }
         }}
@@ -147,7 +388,7 @@ export function StepMentionPreview({
       {parseStepMentions(description).map((part, index) => {
         if (part.type === 'text') return <span key={index}>{part.value}</span>;
         const item = byId.get(part.id);
-        if (!item) return <span key={index}>{part.id}</span>;
+        if (!item) return <span key={index}>Ingrédient</span>;
         const qty = (item.quantity * factor).toLocaleString('fr-FR');
         const tip = `${item.name} · ${qty} ${item.unitLabel}`;
         return (

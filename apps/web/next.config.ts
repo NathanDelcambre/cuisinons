@@ -14,7 +14,11 @@ const nextConfig: NextConfig = {
       { source: '/recipes/suggest', destination: '/recettes?proposer=1', permanent: true },
       { source: '/recettes/proposer', destination: '/recettes?proposer=1', permanent: true },
       { source: '/recipes/:id/edit', destination: '/recettes/:id/modifier', permanent: true },
-      { source: '/recipes/:id', destination: '/recettes/:id', permanent: true },
+      {
+        source: '/recipes/:id((?!.*\\.png$).*)',
+        destination: '/recettes/:id',
+        permanent: true,
+      },
       { source: '/recipes', destination: '/recettes', permanent: true },
       { source: '/shopping', destination: '/courses', permanent: true },
       { source: '/pantry', destination: '/reserves', permanent: true },

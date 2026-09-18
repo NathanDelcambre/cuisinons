@@ -3,7 +3,7 @@ import { parseStepMentions, insertIngredientToken, scaleMentionQuantity, mention
 import { compareRecipesForSlot } from '../src/planner/slot-tags.js';
 import { weekMacroAverages } from '../src/nutrition/planned-consumed.js';
 import { aggregateUserStats } from '../src/nutrition/stats.js';
-import { buildHealthyOfficialSpecs, HEALTHY_OFFICIAL_COUNT, OFFICIAL_RECIPE_COUNT, HANDCRAFTED_OFFICIAL_COUNT, IDEAS_RECIPE_IDS, IDEAS_RECIPE_COUNT, isIdeasRecipeId } from '../src/suggestions/official-healthy.js';
+import { buildHealthyOfficialSpecs, HEALTHY_INGREDIENTS, HEALTHY_OFFICIAL_COUNT, OFFICIAL_RECIPE_COUNT, HANDCRAFTED_OFFICIAL_COUNT, IDEAS_RECIPE_IDS, IDEAS_RECIPE_COUNT, isIdeasRecipeId, isPreparedFoodName, pickHealthyIngredient } from '../src/suggestions/official-healthy.js';
 import { HEALTHY_RECIPES } from '../src/suggestions/catalog.js';
 import { DISH_KINDS } from '../src/suggestions/kinds.js';
 import { categoryIconUrl } from '../src/ciqual/category-icons.js';
@@ -117,18 +117,18 @@ describe('statistiques nutrition', () => {
 describe('catalogue healthy officiel', () => {
   it('produit une fiche par spec, avec au moins 2 ingrédients', () => {
     const specs = buildHealthyOfficialSpecs();
-    expect(HEALTHY_RECIPES).toHaveLength(100);
+    expect(HEALTHY_RECIPES).toHaveLength(200);
     expect(specs).toHaveLength(HEALTHY_OFFICIAL_COUNT);
     expect(OFFICIAL_RECIPE_COUNT).toBe(HANDCRAFTED_OFFICIAL_COUNT + HEALTHY_OFFICIAL_COUNT);
-    expect(new Set(specs.map((s) => s.id)).size).toBe(100);
+    expect(new Set(specs.map((s) => s.id)).size).toBe(200);
     expect(specs.every((s) => s.id.startsWith('official-h'))).toBe(true);
     expect(specs.every((s) => s.ingredients.length >= 2)).toBe(true);
     expect(specs.every((s) => s.tagSlugs.includes('healthy'))).toBe(true);
     expect(specs.every((s) => DISH_KINDS.some((kind) => s.tagSlugs.includes(kind)))).toBe(true);
     expect(specs.every((s) => s.steps.length >= 2)).toBe(true);
-    expect(OFFICIAL_RECIPE_COUNT).toBe(122);
-    expect(IDEAS_RECIPE_IDS).toHaveLength(100);
-    expect(IDEAS_RECIPE_COUNT).toBe(100);
+    expect(OFFICIAL_RECIPE_COUNT).toBe(222);
+    expect(IDEAS_RECIPE_IDS).toHaveLength(200);
+    expect(IDEAS_RECIPE_COUNT).toBe(200);
     expect(IDEAS_RECIPE_IDS.every((id) => id.startsWith('official-h'))).toBe(true);
     expect(isIdeasRecipeId('official-h01')).toBe(true);
     expect(isIdeasRecipeId('official-vinaigrette-crudites')).toBe(false);
@@ -156,6 +156,22 @@ describe('catalogue healthy officiel', () => {
     expect(specs.some((s) => s.tagSlugs.includes('petit-dejeuner') && s.tagSlugs.includes('gouter'))).toBe(
       true,
     );
+    const lentilSoup = specs.find((s) => s.id === 'official-h98');
+    expect(lentilSoup?.ingredients.find((line) => line.key === 'lentils')?.grams).toBe(280);
+    expect(Object.values(HEALTHY_INGREDIENTS).every((ref) => ref.code != null && ref.code > 0)).toBe(true);
+  });
+
+  it('ignore les plats Ciqual tout-prêts au matching par nom', () => {
+    expect(isPreparedFoodName('soupe a la carotte preemballee a rechauffer')).toBe(true);
+    expect(isPreparedFoodName('carotte crue')).toBe(false);
+    const picked = pickHealthyIngredient(
+      [
+        { ciqualCode: 25913, nameNormalized: 'soupe a la carotte preemballee a rechauffer' },
+        { ciqualCode: 20009, nameNormalized: 'carotte crue' },
+      ],
+      { key: 'carrot', code: null, names: ['carotte'] },
+    );
+    expect(picked?.ciqualCode).toBe(20009);
   });
 });
 

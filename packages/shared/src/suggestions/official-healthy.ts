@@ -1,3 +1,4 @@
+import { normalizeSearchText } from '../search/normalize.js';
 import type { QuantityUnit } from '../nutrition/units.js';
 import { HEALTHY_RECIPES, type CookMethod, type NameFilter, type RecipeSpec } from './catalog.js';
 
@@ -74,31 +75,31 @@ export const HEALTHY_INGREDIENTS: Record<string, IngredientRef> = {
   paprika: { key: 'paprika', code: 11049, names: ['paprika'] },
   provence: { key: 'provence', code: 11060, names: ['herbes de provence'] },
   soy: { key: 'soy', code: 11104, names: ['sauce soja'] },
-  mustard: { key: 'mustard', code: null, names: ['moutarde'] },
+  mustard: { key: 'mustard', code: 11013, names: ['moutarde'] },
   chicken: { key: 'chicken', code: 36017, names: ['poulet, filet'] },
-  turkey: { key: 'turkey', code: null, names: ['dinde, escalope', 'dinde, viande'] },
-  pork: { key: 'pork', code: null, names: ['porc, filet mignon', 'filet mignon'] },
-  salmon: { key: 'salmon', code: null, names: ['saumon, cru'] },
-  cod: { key: 'cod', code: null, names: ['cabillaud, cru'] },
-  hake: { key: 'hake', code: null, names: ['merlu, cru'] },
-  pollock: { key: 'pollock', code: null, names: ['lieu, cru'] },
-  trout: { key: 'trout', code: null, names: ['truite, crue', 'truite, cru'] },
-  tuna: { key: 'tuna', code: null, names: ['thon, cru', 'thon au naturel'] },
-  sardine: { key: 'sardine', code: null, names: ['sardine, crue', 'sardine'] },
-  mackerel: { key: 'mackerel', code: null, names: ['maquereau, cru'] },
-  shrimp: { key: 'shrimp', code: null, names: ['crevette'] },
-  mussels: { key: 'mussels', code: null, names: ['moule'] },
-  lentils: { key: 'lentils', code: null, names: ['lentille, cuite', 'lentilles vertes'] },
-  chickpeas: { key: 'chickpeas', code: null, names: ['pois chiche, cuit'] },
-  whiteBeans: { key: 'whiteBeans', code: null, names: ['haricot blanc, cuit'] },
-  tofu: { key: 'tofu', code: null, names: ['tofu'] },
+  turkey: { key: 'turkey', code: 36304, names: ['dinde, escalope', 'dinde, viande'] },
+  pork: { key: 'pork', code: 28204, names: ['porc, filet mignon', 'filet mignon'] },
+  salmon: { key: 'salmon', code: 26036, names: ['saumon, cru'] },
+  cod: { key: 'cod', code: 26043, names: ['cabillaud, cru'] },
+  hake: { key: 'hake', code: 26044, names: ['merlu, cru'] },
+  pollock: { key: 'pollock', code: 26134, names: ['lieu, cru'] },
+  trout: { key: 'trout', code: 27009, names: ['truite, crue', 'truite, cru'] },
+  tuna: { key: 'tuna', code: 26053, names: ['thon, cru', 'thon au naturel'] },
+  sardine: { key: 'sardine', code: 26065, names: ['sardine, crue', 'sardine'] },
+  mackerel: { key: 'mackerel', code: 26051, names: ['maquereau, cru'] },
+  shrimp: { key: 'shrimp', code: 10007, names: ['crevette'] },
+  mussels: { key: 'mussels', code: 10014, names: ['moule'] },
+  lentils: { key: 'lentils', code: 20360, names: ['lentille, cuite', 'lentilles vertes'] },
+  chickpeas: { key: 'chickpeas', code: 20507, names: ['pois chiche, cuit'] },
+  whiteBeans: { key: 'whiteBeans', code: 20502, names: ['haricot blanc, cuit'] },
+  tofu: { key: 'tofu', code: 20904, names: ['tofu'] },
   egg: { key: 'egg', code: 22000, names: ['oeuf de poule'] },
-  rice: { key: 'rice', code: 9100, names: ['riz blanc'] },
-  quinoa: { key: 'quinoa', code: null, names: ['quinoa, cuit', 'quinoa'] },
-  pasta: { key: 'pasta', code: null, names: ['pates cuites', 'spaghetti'] },
-  couscous: { key: 'couscous', code: null, names: ['semoule de ble', 'couscous'] },
+  rice: { key: 'rice', code: 9104, names: ['riz blanc, cuit'] },
+  quinoa: { key: 'quinoa', code: 9341, names: ['quinoa, cuit', 'quinoa'] },
+  pasta: { key: 'pasta', code: 9811, names: ['pates cuites', 'spaghetti'] },
+  couscous: { key: 'couscous', code: 9610, names: ['semoule de ble', 'couscous'] },
   oats: { key: 'oats', code: 32140, names: ['flocons d avoine'] },
-  potato: { key: 'potato', code: null, names: ['pomme de terre'] },
+  potato: { key: 'potato', code: 4008, names: ['pomme de terre'] },
   sweetPotato: { key: 'sweetPotato', code: 4101, names: ['patate douce'] },
   tomato: { key: 'tomato', code: 20192, names: ['tomate'] },
   zucchini: { key: 'zucchini', code: 20020, names: ['courgette'] },
@@ -106,30 +107,67 @@ export const HEALTHY_INGREDIENTS: Record<string, IngredientRef> = {
   bellPepper: { key: 'bellPepper', code: 20041, names: ['poivron'] },
   cucumber: { key: 'cucumber', code: 20019, names: ['concombre'] },
   onion: { key: 'onion', code: 20034, names: ['oignon'] },
-  carrot: { key: 'carrot', code: null, names: ['carotte'] },
-  cauliflower: { key: 'cauliflower', code: null, names: ['chou-fleur'] },
-  cabbage: { key: 'cabbage', code: null, names: ['chou, cru'] },
-  beet: { key: 'beet', code: null, names: ['betterave'] },
-  pumpkin: { key: 'pumpkin', code: null, names: ['potiron', 'butternut'] },
-  asparagus: { key: 'asparagus', code: null, names: ['asperge'] },
-  artichoke: { key: 'artichoke', code: null, names: ['artichaut'] },
-  mushroom: { key: 'mushroom', code: null, names: ['champignon'] },
-  greenBean: { key: 'greenBean', code: null, names: ['haricot vert'] },
-  salad: { key: 'salad', code: null, names: ['salade verte', 'laitue'] },
+  carrot: { key: 'carrot', code: 20009, names: ['carotte'] },
+  cauliflower: { key: 'cauliflower', code: 20016, names: ['chou-fleur'] },
+  cabbage: { key: 'cabbage', code: 20069, names: ['chou, cru'] },
+  beet: { key: 'beet', code: 20091, names: ['betterave'] },
+  pumpkin: { key: 'pumpkin', code: 20044, names: ['potiron', 'butternut'] },
+  asparagus: { key: 'asparagus', code: 20279, names: ['asperge'] },
+  artichoke: { key: 'artichoke', code: 20052, names: ['artichaut'] },
+  mushroom: { key: 'mushroom', code: 20056, names: ['champignon'] },
+  greenBean: { key: 'greenBean', code: 20061, names: ['haricot vert'] },
+  salad: { key: 'salad', code: 20012, names: ['salade verte', 'laitue'] },
+  spinach: { key: 'spinach', code: 20059, names: ['epinard'] },
   avocado: { key: 'avocado', code: 13004, names: ['avocat'] },
-  banana: { key: 'banana', code: null, names: ['banane'] },
-  orange: { key: 'orange', code: null, names: ['orange'] },
+  banana: { key: 'banana', code: 13005, names: ['banane'] },
+  orange: { key: 'orange', code: 13034, names: ['orange'] },
   feta: { key: 'feta', code: 12066, names: ['feta'] },
-  goat: { key: 'goat', code: null, names: ['fromage de chevre'] },
+  goat: { key: 'goat', code: 12805, names: ['fromage de chevre'] },
   yogurt: { key: 'yogurt', code: 19644, names: ['fromage blanc'] },
   milk: { key: 'milk', code: 19041, names: ['lait demi-ecreme'] },
-  coconutMilk: { key: 'coconutMilk', code: null, names: ['lait de coco'] },
-  walnut: { key: 'walnut', code: null, names: ['noix'] },
-  olive: { key: 'olive', code: null, names: ['olive'] },
-  ginger: { key: 'ginger', code: null, names: ['gingembre'] },
-  basil: { key: 'basil', code: null, names: ['basilic'] },
+  coconutMilk: { key: 'coconutMilk', code: 18041, names: ['lait de coco'] },
+  walnut: { key: 'walnut', code: 15005, names: ['noix'] },
+  olive: { key: 'olive', code: 13033, names: ['olive'] },
+  ginger: { key: 'ginger', code: 11074, names: ['gingembre'] },
+  basil: { key: 'basil', code: 11033, names: ['basilic'] },
   water: { key: 'water', code: 18066, names: ['eau'] },
 };
+
+/** Plats Ciqual tout-prêts : jamais utilisés pour composer une recette maison. */
+const PREPARED_FOOD_RE =
+  /\b(preemball|soupe |soupe a|potage|veloute|gratin |carbonara|pane |deshydrat|galette|aligot|salade de |salade vegetarienne|petit sale|puree |appertis|couscous au |tripes|pave aux|lasagne|quiche|pizza)\b/;
+
+export function isPreparedFoodName(nameNormalized: string): boolean {
+  return PREPARED_FOOD_RE.test(` ${nameNormalized} `);
+}
+
+export function pickHealthyIngredient<T extends { ciqualCode: number; nameNormalized: string }>(
+  catalog: T[],
+  ref: IngredientRef,
+): T | null {
+  if (ref.code != null) {
+    const byCode = catalog.find((item) => item.ciqualCode === ref.code);
+    if (byCode) return byCode;
+  }
+  let best: { item: T; score: number } | null = null;
+  for (const name of ref.names) {
+    const needle = normalizeSearchText(name);
+    if (!needle) continue;
+    for (const item of catalog) {
+      if (item.ciqualCode >= 900000) continue;
+      if (isPreparedFoodName(item.nameNormalized)) continue;
+      if (!item.nameNormalized.includes(needle)) continue;
+      let score = 0;
+      if (item.nameNormalized.startsWith(needle)) score += 40;
+      if (/\bcru[es]?\b/.test(item.nameNormalized)) score += 15;
+      if (item.nameNormalized.includes('cuit a l eau') || item.nameNormalized.includes('bouilli')) score += 20;
+      const words = item.nameNormalized.split(/\s+/).filter(Boolean).length;
+      score += Math.max(0, 16 - words);
+      if (!best || score > best.score) best = { item, score };
+    }
+  }
+  return best?.item ?? null;
+}
 
 const PHOTO_BY_METHOD: Record<CookMethod, string> = {
   skillet: 'skillet',
@@ -227,6 +265,7 @@ function vegKeys(spec: RecipeSpec): string[] {
   if (matches(tokens, ['asperge'])) push('asparagus');
   if (matches(tokens, ['artichaut'])) push('artichoke');
   if (matches(tokens, ['champignon'])) push('mushroom');
+  if (matches(tokens, ['epinard', 'épinard'])) push('spinach');
   if (matches(tokens, ['haricot'])) push('greenBean');
   if (spec.vegetable === true && keys.length === 0) {
     push('zucchini');
@@ -281,6 +320,8 @@ function vegGramsPerPerson(key: string): number {
     case 'artichoke':
       return 120;
     case 'mushroom':
+      return 120;
+    case 'spinach':
       return 120;
     case 'greenBean':
       return 160;

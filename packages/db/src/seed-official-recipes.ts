@@ -3,6 +3,7 @@ import {
   buildHealthyOfficialSpecs,
   HEALTHY_INGREDIENTS,
   OFFICIAL_RECIPE_COUNT,
+  pickHealthyIngredient,
 } from '@cuisinons/shared';
 import { prisma } from './client';
 
@@ -809,17 +810,11 @@ function rewriteStepKeys(description: string, keyToId: Map<string, string>): str
 
 type CatalogIngredient = { id: string; ciqualCode: number; nameNormalized: string; nameFr: string };
 
-function resolveByRef(catalog: CatalogIngredient[], ref: { code: number | null; names: readonly string[] }): CatalogIngredient | null {
-  if (ref.code) {
-    const byCode = catalog.find((item) => item.ciqualCode === ref.code);
-    if (byCode) return byCode;
-  }
-  for (const name of ref.names) {
-    const needle = normalizeSearchText(name);
-    const found = catalog.find((item) => item.nameNormalized.includes(needle) && item.ciqualCode < 900000);
-    if (found) return found;
-  }
-  return null;
+function resolveByRef(
+  catalog: CatalogIngredient[],
+  ref: { key: string; code: number | null; names: readonly string[] },
+): CatalogIngredient | null {
+  return pickHealthyIngredient(catalog, ref);
 }
 
 async function upsertOfficialRecipe(
@@ -932,7 +927,10 @@ export async function seedOfficialRecipes(authorId: string) {
       const ref = HEALTHY_INGREDIENTS[line.key];
       if (!ref) continue;
       const found = resolveByRef(catalog, ref);
-      if (!found) continue;
+      if (!found) {
+        console.warn(`Healthy ${spec.id}: ${line.key} introuvable (Ciqual ${String(ref.code)}).`);
+        continue;
+      }
       keyToId.set(line.key, found.id);
       resolved.push({
         code: found.ciqualCode,
