@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { recipeWriteSchema } from '../src/recipes/recipe-write.js';
 import { publicRecipePhotoUrl } from '../src/recipes/recipe-photo.js';
+import { nutritionFromSnapshot } from '@cuisinons/db';
 
 const base = {
   name: 'Test',
@@ -61,5 +62,17 @@ describe('photo publique', () => {
 
   it('sert le PNG d’une idée healthy', () => {
     expect(publicRecipePhotoUrl('official-h42', null, new Date())).toBe('/recipes/official-h42.png');
+  });
+});
+
+describe('snapshot macros', () => {
+  it('lit un snapshot JSON dénormalisé', () => {
+    const snapshot = nutritionFromSnapshot({
+      perServing: { kcal: 400, protein: 16, carbs: 40, fat: 10, fiber: 8 },
+      per100g: null,
+      complete: true,
+    });
+    expect(snapshot?.perServing.protein).toBe(16);
+    expect(nutritionFromSnapshot(null)).toBeNull();
   });
 });

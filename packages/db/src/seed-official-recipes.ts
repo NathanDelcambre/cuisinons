@@ -6,6 +6,7 @@ import {
   pickHealthyIngredient,
 } from '@cuisinons/shared';
 import { prisma } from './client';
+import { refreshRecipeNutritionSnapshot, refreshMissingNutritionSnapshots } from './recipe-nutrition';
 
 const WHEY_CODE = 900010;
 const WHEY_VANILLE_CODE = 900011;
@@ -973,4 +974,14 @@ export async function seedOfficialRecipes(authorId: string) {
   } else {
     console.log(`Recettes officielles : ${String(seeded)} fiches publiées.`);
   }
+
+  const catalogIds = await prisma.recipe.findMany({
+    where: { source: 'CATALOG' },
+    select: { id: true },
+  });
+  for (const row of catalogIds) {
+    await refreshRecipeNutritionSnapshot(prisma, row.id);
+  }
+  const extra = await refreshMissingNutritionSnapshots(prisma);
+  console.log(`Macros dénormalisées : ${String(catalogIds.length + extra)} fiches.`);
 }

@@ -18,6 +18,7 @@
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
     "seed": "tsx src/seed.ts",
+    "backfill-nutrition": "tsx src/backfill-nutrition.ts",
     "import-ciqual": "tsx src/import-ciqual.ts",
     "auth:bootstrap": "tsx src/auth-bootstrap.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",

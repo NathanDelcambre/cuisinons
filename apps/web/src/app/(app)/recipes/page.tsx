@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 import { ChefHat, Plus, Sparkles, Star } from 'lucide-react';
@@ -22,6 +22,7 @@ import { apiJson } from '@/lib/api';
 import { recetteIdFromSearch, routes, withSearch } from '@/lib/routes';
 import { RecipeModal } from '@/components/recipe-modal';
 import { SuggestDishModal } from '@/components/suggest-dish-modal';
+import { RecipeCover } from '@/components/recipe-cover';
 import { Avatar } from '@/components/avatar';
 import { MacroIcon } from '@/components/macro-icon';
 import { avatarUrlForEmail, RECIPE_SOURCE_LABELS, type RecipeListView } from '@cuisinons/shared';
@@ -79,7 +80,6 @@ function RecipesInner() {
   const suggestOpen = params.has('proposer');
   const [filters, setFilters] = useState(fromUrl);
   const [draft, setDraft] = useState(fromUrl.q);
-  const queryClient = useQueryClient();
   const { q, tag, sort, basis, view } = filters;
   const per100g = basis === '100g';
   const ideas = view === 'ideas';
@@ -112,10 +112,12 @@ function RecipesInner() {
       apiJson<Recipe[]>(
         `/api/bff/recipes?q=${encodeURIComponent(q)}&tag=${encodeURIComponent(tag)}&sort=${sort}&basis=${basis}&view=${view}`,
       ),
+    staleTime: 120_000,
   });
   const tags = useQuery({
     queryKey: ['tags'],
     queryFn: () => apiJson<Array<{ id: string; slug: string; label: string }>>('/api/bff/tags'),
+    staleTime: 300_000,
   });
 
   function update(next: Partial<Filters>) {
@@ -183,13 +185,6 @@ function RecipesInner() {
     sp.set('recette', id);
     sp.delete('recipe');
     router.replace(withSearch(routes.recettes, sp), { scroll: false });
-  }
-
-  function prefetchRecipe(id: string) {
-    void queryClient.prefetchQuery({
-      queryKey: ['recipe', id],
-      queryFn: () => apiJson(`/api/bff/recipes/${id}`),
-    });
   }
 
   const list = recipes.data ?? [];
@@ -317,23 +312,10 @@ function RecipesInner() {
               <button
                 type="button"
                 onClick={() => openRecipe(recipe.id)}
-                onPointerEnter={() => prefetchRecipe(recipe.id)}
                 className="block h-full w-full rounded-2xl text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500"
               >
                 <CardLink className="flex h-full flex-col overflow-hidden p-0">
-                  {recipe.photoUrl ? (
-                    <img
-                      src={recipe.photoUrl}
-                      alt=""
-                      className="aspect-[16/10] w-full shrink-0 object-cover"
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ) : (
-                    <div className="flex aspect-[16/10] shrink-0 items-center justify-center bg-sage-100/60">
-                      <ChefHat className="size-8 text-sage-400" aria-hidden />
-                    </div>
-                  )}
+                  <RecipeCover src={recipe.photoUrl} />
                   <div className="flex flex-1 flex-col p-5">
                   <div className="flex items-start justify-between gap-3">
                     <h2 className="line-clamp-2 min-h-[2.75em] font-display text-lg font-semibold leading-snug tracking-[-0.02em] text-ink-900">

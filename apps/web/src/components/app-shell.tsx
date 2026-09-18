@@ -87,23 +87,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
  * courses met la barre a jour sans requete supplementaire.
  */
 function useProvisionsSummary() {
-  const pantry = useQuery({
-    queryKey: ['pantry'],
-    queryFn: () => apiJson<{ area: StorageArea }[]>('/api/bff/pantry'),
+  const summary = useQuery({
+    queryKey: ['provisions-summary'],
+    queryFn: () =>
+      apiJson<{ counts: Partial<Record<StorageArea, number>>; toBuy: number }>('/api/bff/provisions/summary'),
     staleTime: 30_000,
   });
-  const shopping = useQuery({
-    queryKey: ['shopping'],
-    queryFn: () => apiJson<{ items: { checked: boolean }[] } | null>('/api/bff/shopping/list'),
-    staleTime: 30_000,
-  });
-
   const counts = new Map<StorageArea, number>();
-  for (const item of pantry.data ?? []) {
-    counts.set(item.area, (counts.get(item.area) ?? 0) + 1);
+  for (const [area, n] of Object.entries(summary.data?.counts ?? {})) {
+    counts.set(area as StorageArea, n);
   }
-  const toBuy = (shopping.data?.items ?? []).filter((item) => !item.checked).length;
-  return { counts, toBuy };
+  return { counts, toBuy: summary.data?.toBuy ?? 0 };
 }
 
 function DesktopSidebar({ pathname }: { pathname: string }) {

@@ -44,7 +44,10 @@ export default function PantryPage() {
     queryFn: () => apiJson<PantryItem[]>('/api/bff/pantry'),
   });
 
-  const refresh = () => queryClient.invalidateQueries({ queryKey: ['pantry'] });
+  const refresh = () => {
+    void queryClient.invalidateQueries({ queryKey: ['pantry'] });
+    void queryClient.invalidateQueries({ queryKey: ['provisions-summary'] });
+  };
 
   const add = useMutation({
     mutationFn: (input: {

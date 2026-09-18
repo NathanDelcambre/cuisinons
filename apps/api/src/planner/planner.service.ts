@@ -1,8 +1,8 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { MealSlot, Prisma } from '@cuisinons/db';
 import { addDays, startOfWeek } from './dates.js';
+import { nutritionFromSnapshot } from '@cuisinons/db';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { nutritionForRecipe } from '../nutrition/recipe-nutrition.js';
 import { publicRecipePhotoUrl } from '../recipes/recipe-photo.js';
 import { computeRecipeNutrition, mealsForEater, type MacroNutrients, type MealKind } from '@cuisinons/shared';
 
@@ -22,11 +22,15 @@ export class PlannerService {
       where: { date: { gte: start, lte: end } },
       include: {
         recipe: {
-          omit: { photoUrl: true },
-          include: {
-            ingredients: { include: { ingredient: true } },
-            tags: { include: { tag: true } },
-            author: { select: { displayName: true } },
+          select: {
+            id: true,
+            name: true,
+            servings: true,
+            prepTimeMinutes: true,
+            cookTimeMinutes: true,
+            updatedAt: true,
+            nutritionSnapshot: true,
+            _count: { select: { ingredients: true } },
           },
         },
         portions: { include: { user: { select: { id: true, displayName: true } } } },
@@ -34,30 +38,35 @@ export class PlannerService {
       },
       orderBy: [{ date: 'asc' }, { slot: 'asc' }, { sortOrder: 'asc' }],
     });
+    const customPhotoIds = items
+      .map((item) => item.recipeId)
+      .filter((id): id is string => typeof id === 'string' && !id.startsWith('official-'));
     const withPhoto = new Map(
-      (
-        await this.prisma.recipe.findMany({
-          where: {
-            id: { in: items.map((item) => item.recipeId).filter((id): id is string => Boolean(id)) },
-            photoUrl: { not: null },
-          },
-          select: { id: true, photoUrl: true },
-        })
-      ).map((row) => [row.id, row.photoUrl]),
+      customPhotoIds.length === 0
+        ? []
+        : (
+            await this.prisma.recipe.findMany({
+              where: { id: { in: customPhotoIds }, photoUrl: { not: null } },
+              select: { id: true, photoUrl: true },
+            })
+          ).map((row) => [row.id, row.photoUrl]),
     );
     return items.map((item) => {
       if (!item.recipe) {
         return { ...item, recipe: null, nutrition: computeRecipeNutrition([], 1) };
       }
-      const nutrition = nutritionForRecipe(
-        item.recipe.ingredients,
-        Number(item.recipe.servings),
-        item.recipe.finalCookedWeight,
-      );
+      const nutrition =
+        nutritionFromSnapshot(item.recipe.nutritionSnapshot) ?? computeRecipeNutrition([], Number(item.recipe.servings));
       return {
         ...item,
         recipe: {
-          ...item.recipe,
+          id: item.recipe.id,
+          name: item.recipe.name,
+          servings: item.recipe.servings,
+          prepTimeMinutes: item.recipe.prepTimeMinutes,
+          cookTimeMinutes: item.recipe.cookTimeMinutes,
+          updatedAt: item.recipe.updatedAt,
+          ingredientCount: item.recipe._count.ingredients,
           photoUrl: publicRecipePhotoUrl(item.recipe.id, withPhoto.get(item.recipe.id) ?? null, item.recipe.updatedAt),
         },
         nutrition,

@@ -53,7 +53,8 @@ export class IngredientsService {
         dedicatedIcon: true,
         groupName: true,
       },
-      orderBy: { nameFr: 'asc' },
+      orderBy: [{ dedicatedIcon: 'desc' }, { nameFr: 'asc' }],
+      take: query.length > 0 ? 200 : 400,
     });
     const collapsed = collapseKitchenIngredients(pool, (item) => ({
       dedicatedIcon: item.dedicatedIcon,

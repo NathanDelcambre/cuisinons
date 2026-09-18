@@ -12,3 +12,9 @@ export type {
   ShoppingItemOrigin,
 } from '../generated/client';
 export { prisma } from './client';
+export {
+  refreshRecipeNutritionSnapshot,
+  refreshMissingNutritionSnapshots,
+  nutritionFromSnapshot,
+  INGREDIENT_MACRO_SELECT,
+} from './recipe-nutrition';

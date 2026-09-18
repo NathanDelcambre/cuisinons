@@ -26,6 +26,7 @@ import {
 import { apiJson } from '@/lib/api';
 import { routes } from '@/lib/routes';
 import { useAuth } from './auth-provider';
+import { RecipeCover } from './recipe-cover';
 import {
   MEAL_SLOTS,
   MEAL_SLOT_LABELS,
@@ -236,11 +237,10 @@ function RecipeModalBody({
       <div className="relative">
         {data.photoUrl ? (
           <>
-            <img
+            <RecipeCover
               src={data.photoUrl}
-              alt=""
-              className="aspect-[16/9] min-h-40 w-full object-cover sm:aspect-[2/1] sm:min-h-52"
-              decoding="async"
+              eager
+              className="aspect-[16/9] min-h-40 sm:aspect-[2/1] sm:min-h-52"
             />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[rgba(255,252,247,0.97)] to-transparent" />
           </>

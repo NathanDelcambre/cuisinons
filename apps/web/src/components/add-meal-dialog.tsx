@@ -50,6 +50,7 @@ export function AddMealDialog({
     queryFn: () =>
       apiJson<Recipe[]>(`/api/bff/recipes?q=${encodeURIComponent(query)}&slot=${slot}`),
     enabled: open,
+    staleTime: 120_000,
   });
   const users = useQuery({
     queryKey: ['users'],

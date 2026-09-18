@@ -1,6 +1,16 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, QuantityUnit } from '@cuisinons/db';
-import { resolveGrams, type QuantityUnit as SharedUnit, compareRecipesForSlot } from '@cuisinons/shared';
+import {
+  Prisma,
+  QuantityUnit,
+  nutritionFromSnapshot,
+  refreshRecipeNutritionSnapshot,
+} from '@cuisinons/db';
+import {
+  resolveGrams,
+  type QuantityUnit as SharedUnit,
+  compareRecipesForSlot,
+  type RecipeNutrition,
+} from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { nutritionForRecipe } from '../nutrition/recipe-nutrition.js';
 import { decodePhotoDataUrl, publicRecipePhotoUrl, type RecipePhoto } from './recipe-photo.js';
@@ -29,12 +39,52 @@ export type RecipeWriteInput = {
 
 const recipeInclude = {
   author: { select: { id: true, displayName: true, email: true } },
-  ingredients: { include: { ingredient: { include: { conversions: true } } }, orderBy: { sortOrder: 'asc' as const } },
-  steps: { orderBy: { stepNumber: 'asc' as const } },
-  tags: { include: { tag: true } },
-  equipment: { include: { equipment: true } },
-  ratings: { include: { user: { select: { id: true, displayName: true } } } },
+  ingredients: {
+    select: {
+      ingredientId: true,
+      quantity: true,
+      unit: true,
+      grams: true,
+      gramsManual: true,
+      displayQuantity: true,
+      estimated: true,
+      sortOrder: true,
+      ingredient: {
+        select: {
+          id: true,
+          nameFr: true,
+          iconUrl: true,
+          uxCategory: true,
+          energyKcal: true,
+          proteinG: true,
+          carbG: true,
+          fatG: true,
+          fiberG: true,
+          conversions: { select: { unit: true, gramsPerUnit: true } },
+        },
+      },
+    },
+    orderBy: { sortOrder: 'asc' as const },
+  },
+  steps: { select: { stepNumber: true, description: true, durationMinutes: true }, orderBy: { stepNumber: 'asc' as const } },
+  tags: { select: { tag: { select: { id: true, slug: true, label: true } } } },
+  equipment: { select: { equipment: { select: { id: true, slug: true, label: true } } } },
+  ratings: { select: { stars: true, user: { select: { id: true, displayName: true } } } },
 } satisfies Prisma.RecipeInclude;
+
+const listSelect = {
+  id: true,
+  name: true,
+  source: true,
+  servings: true,
+  updatedAt: true,
+  prepTimeMinutes: true,
+  cookTimeMinutes: true,
+  nutritionSnapshot: true,
+  author: { select: { id: true, displayName: true, email: true } },
+  tags: { select: { tag: { select: { slug: true, label: true } } } },
+  ratings: { select: { stars: true } },
+} satisfies Prisma.RecipeSelect;
 
 @Injectable()
 export class RecipesService {
@@ -76,39 +126,131 @@ export class RecipesService {
     return { photoUrl: input.photoDataUrl };
   }
 
+  private ratingSummary(ratings: Array<{ stars: number }>) {
+    const average =
+      ratings.length === 0 ? null : ratings.reduce((sum, r) => sum + r.stars, 0) / ratings.length;
+    return { average, count: ratings.length };
+  }
+
   private serialize(
     recipe: Omit<Prisma.RecipeGetPayload<{ include: typeof recipeInclude }>, 'photoUrl'>,
     photoUrl: string | null,
   ) {
-    const nutrition = nutritionForRecipe(
-      recipe.ingredients,
-      Number(recipe.servings),
-      recipe.finalCookedWeight,
-    );
+    const nutrition =
+      nutritionFromSnapshot(recipe.nutritionSnapshot) ??
+      nutritionForRecipe(recipe.ingredients, Number(recipe.servings), recipe.finalCookedWeight);
     const ratings = recipe.ratings;
-    const average =
-      ratings.length === 0 ? null : ratings.reduce((sum, r) => sum + r.stars, 0) / ratings.length;
     return {
-      ...recipe,
+      id: recipe.id,
+      name: recipe.name,
+      description: recipe.description,
+      status: recipe.status,
+      source: recipe.source,
+      authorId: recipe.authorId,
+      author: recipe.author,
+      servings: recipe.servings,
+      prepTimeMinutes: recipe.prepTimeMinutes,
+      cookTimeMinutes: recipe.cookTimeMinutes,
+      finalCookedWeight: recipe.finalCookedWeight,
+      version: recipe.version,
+      createdAt: recipe.createdAt,
+      updatedAt: recipe.updatedAt,
+      ingredients: recipe.ingredients,
+      steps: recipe.steps,
+      tags: recipe.tags,
+      equipment: recipe.equipment,
       photoUrl,
       nutrition,
-      rating: { average, count: ratings.length, ratings },
+      rating: { ...this.ratingSummary(ratings), ratings },
     };
   }
 
+  private serializeCard(
+    recipe: Prisma.RecipeGetPayload<{ select: typeof listSelect }>,
+    photoUrl: string | null,
+    nutrition: RecipeNutrition,
+  ) {
+    return {
+      id: recipe.id,
+      name: recipe.name,
+      source: recipe.source,
+      servings: recipe.servings,
+      updatedAt: recipe.updatedAt,
+      prepTimeMinutes: recipe.prepTimeMinutes,
+      cookTimeMinutes: recipe.cookTimeMinutes,
+      author: recipe.author,
+      tags: recipe.tags,
+      photoUrl,
+      nutrition: {
+        perServing: nutrition.perServing,
+        per100g: nutrition.per100g,
+        complete: nutrition.complete,
+      },
+      rating: this.ratingSummary(recipe.ratings),
+    };
+  }
+
+  private async nutritionForIds(
+    recipes: Array<{
+      id: string;
+      servings: Prisma.Decimal;
+      nutritionSnapshot: Prisma.JsonValue | null;
+    }>,
+  ): Promise<Map<string, RecipeNutrition>> {
+    const map = new Map<string, RecipeNutrition>();
+    const missing: string[] = [];
+    for (const recipe of recipes) {
+      const snapshot = nutritionFromSnapshot(recipe.nutritionSnapshot);
+      if (snapshot) map.set(recipe.id, snapshot);
+      else missing.push(recipe.id);
+    }
+    if (missing.length === 0) return map;
+    const lines = await this.prisma.recipeIngredient.findMany({
+      where: { recipeId: { in: missing } },
+      select: {
+        recipeId: true,
+        grams: true,
+        ingredient: {
+          select: { energyKcal: true, proteinG: true, carbG: true, fatG: true, fiberG: true },
+        },
+      },
+    });
+    const byRecipe = new Map<string, typeof lines>();
+    for (const line of lines) {
+      const bucket = byRecipe.get(line.recipeId) ?? [];
+      bucket.push(line);
+      byRecipe.set(line.recipeId, bucket);
+    }
+    const servingsById = new Map(recipes.map((recipe) => [recipe.id, Number(recipe.servings)]));
+    for (const id of missing) {
+      const nutrition = nutritionForRecipe(byRecipe.get(id) ?? [], servingsById.get(id) ?? 1);
+      map.set(id, nutrition);
+    }
+    void Promise.all(missing.map((id) => refreshRecipeNutritionSnapshot(this.prisma, id))).catch(() => undefined);
+    return map;
+  }
+
   private async photoUrlById(ids: string[], updatedAtById: Map<string, Date>) {
-    if (ids.length === 0) return new Map<string, string | null>();
+    const map = new Map<string, string | null>();
+    const custom: string[] = [];
+    for (const id of ids) {
+      if (id.startsWith('official-')) {
+        map.set(id, publicRecipePhotoUrl(id, null, updatedAtById.get(id) ?? new Date()));
+      } else {
+        custom.push(id);
+      }
+    }
+    if (custom.length === 0) return map;
     const publicRows = await this.prisma.recipe.findMany({
-      where: { id: { in: ids }, photoUrl: { startsWith: '/' } },
+      where: { id: { in: custom }, photoUrl: { startsWith: '/' } },
       select: { id: true, photoUrl: true },
     });
     const stored = new Map(publicRows.map((row) => [row.id, row.photoUrl]));
-    const map = new Map<string, string | null>();
     const missing: string[] = [];
-    for (const id of ids) {
+    for (const id of custom) {
       const url = publicRecipePhotoUrl(id, stored.get(id) ?? null, updatedAtById.get(id) ?? new Date());
       if (url) map.set(id, url);
-      else if (!stored.has(id)) missing.push(id);
+      else missing.push(id);
     }
     if (missing.length > 0) {
       const dataRows = await this.prisma.recipe.findMany({
@@ -154,15 +296,23 @@ export class RecipesService {
     }
     const recipes = await this.prisma.recipe.findMany({
       where,
-      include: recipeInclude,
-      omit: { photoUrl: true },
+      select: listSelect,
       orderBy: { updatedAt: 'desc' },
     });
-    const photos = await this.photoUrlById(
-      recipes.map((recipe) => recipe.id),
-      new Map(recipes.map((recipe) => [recipe.id, recipe.updatedAt])),
+    const [photos, nutritionById] = await Promise.all([
+      this.photoUrlById(
+        recipes.map((recipe) => recipe.id),
+        new Map(recipes.map((recipe) => [recipe.id, recipe.updatedAt])),
+      ),
+      this.nutritionForIds(recipes),
+    ]);
+    const serialized = recipes.map((recipe) =>
+      this.serializeCard(
+        recipe,
+        photos.get(recipe.id) ?? null,
+        nutritionById.get(recipe.id) ?? nutritionForRecipe([], Number(recipe.servings)),
+      ),
     );
-    const serialized = recipes.map((r) => this.serialize(r, photos.get(r.id) ?? null));
     const basis = input.basis ?? 'serving';
     const pick = (r: (typeof serialized)[number], key: 'kcal' | 'protein' | 'carbs') => {
       if (basis === '100g') return r.nutrition.per100g?.[key] ?? 0;
@@ -222,6 +372,9 @@ export class RecipesService {
       omit: { photoUrl: true },
     });
     if (!recipe) throw new NotFoundException('Recette introuvable.');
+    if (!nutritionFromSnapshot(recipe.nutritionSnapshot)) {
+      void refreshRecipeNutritionSnapshot(this.prisma, id).catch(() => undefined);
+    }
     const photos = await this.photoUrlById([recipe.id], new Map([[recipe.id, recipe.updatedAt]]));
     return this.serialize(recipe, photos.get(recipe.id) ?? null);
   }
@@ -279,6 +432,7 @@ export class RecipesService {
       });
       return recipe.id;
     });
+    await refreshRecipeNutritionSnapshot(this.prisma, created);
     return this.get(created);
   }
 
@@ -331,6 +485,7 @@ export class RecipesService {
         },
       });
     });
+    await refreshRecipeNutritionSnapshot(this.prisma, id);
     return this.get(id);
   }
 

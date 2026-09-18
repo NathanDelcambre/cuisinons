@@ -50,6 +50,31 @@ export class ProvisionsService {
     }));
   }
 
+  async summary(userId: string) {
+    const [areas, active] = await Promise.all([
+      this.prisma.pantryItem.groupBy({
+        by: ['area'],
+        where: { userId },
+        _count: { _all: true },
+      }),
+      this.prisma.shoppingList.findFirst({
+        where: { userId, completedAt: null },
+        orderBy: { createdAt: 'desc' },
+        select: { id: true },
+      }),
+    ]);
+    const counts: Partial<Record<StorageArea, number>> = {};
+    for (const row of areas) {
+      counts[row.area] = row._count._all;
+    }
+    const toBuy = active
+      ? await this.prisma.shoppingListItem.count({
+          where: { listId: active.id, checked: false },
+        })
+      : 0;
+    return { counts, toBuy };
+  }
+
   /** Ajoute au stock : une deuxieme entree du meme ingredient s'y cumule. */
   async addPantryItem(
     userId: string,

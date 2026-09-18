@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import {
   optimizeDay,
   mealsForEater,
+  computeRecipeNutrition,
   type NutritionGoals,
   type GoalMode,
   type MealSlot,
@@ -10,7 +11,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { PlannerService } from '../planner/planner.service.js';
 import { addDays, parseIsoDate, startOfWeek } from '../planner/dates.js';
-import { nutritionForRecipe } from '../nutrition/recipe-nutrition.js';
+import { nutritionFromSnapshot } from '@cuisinons/db';
 
 function toGoal(mode: GoalMode, value: unknown, tolerance: unknown) {
   return {
@@ -89,18 +90,15 @@ export class OptimizationService {
   private async publishedRecipes() {
     const recipes = await this.prisma.recipe.findMany({
       where: { status: 'PUBLISHED' },
-      omit: { photoUrl: true },
-      include: {
-        ingredients: { include: { ingredient: true } },
-        tags: { include: { tag: true } },
+      select: {
+        id: true,
+        name: true,
+        nutritionSnapshot: true,
+        tags: { select: { tag: { select: { slug: true } } } },
       },
     });
     return recipes.map((recipe) => {
-      const nutrition = nutritionForRecipe(
-        recipe.ingredients,
-        Number(recipe.servings),
-        recipe.finalCookedWeight,
-      );
+      const nutrition = nutritionFromSnapshot(recipe.nutritionSnapshot) ?? computeRecipeNutrition([], 1);
       return {
         id: recipe.id,
         name: recipe.name,

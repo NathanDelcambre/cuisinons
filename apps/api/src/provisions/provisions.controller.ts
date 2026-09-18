@@ -28,6 +28,11 @@ export class ProvisionsController {
     return this.provisions.listPantry(user.id);
   }
 
+  @Get('/provisions/summary')
+  summary(@CurrentUser() user: AuthUser) {
+    return this.provisions.summary(user.id);
+  }
+
   @Post('/pantry/items')
   addPantry(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     const parsed = z

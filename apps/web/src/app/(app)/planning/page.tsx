@@ -46,7 +46,7 @@ type MealItem = {
     photoUrl?: string | null;
     prepTimeMinutes?: number | null;
     cookTimeMinutes?: number | null;
-    ingredients?: unknown[];
+    ingredientCount?: number;
   } | null;
   portions: Array<{
     id: string;
@@ -149,6 +149,7 @@ export default function PlanningPage() {
       void queryClient.invalidateQueries({ queryKey: ['planner'] });
       void queryClient.invalidateQueries({ queryKey: ['pantry'] });
       void queryClient.invalidateQueries({ queryKey: ['shopping'] });
+      void queryClient.invalidateQueries({ queryKey: ['provisions-summary'] });
     },
     onError: (error: Error) => setNotice(error.message),
   });
@@ -759,7 +760,7 @@ function RecipeMeta({
 }: {
   recipe: NonNullable<MealItem['recipe']>;
 }) {
-  const ingredientCount = recipe.ingredients?.length ?? 0;
+  const ingredientCount = recipe.ingredientCount ?? 0;
   const prep = recipe.prepTimeMinutes;
   const cook = recipe.cookTimeMinutes;
   if (ingredientCount === 0 && prep == null && cook == null) return null;

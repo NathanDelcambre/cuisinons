@@ -31,16 +31,43 @@ export class SuggestionsService {
     const [pantry, tags, equipment, catalogRows] = await Promise.all([
       this.prisma.pantryItem.findMany({
         where: { userId },
-        include: { ingredient: { include: { conversions: true } } },
+        select: {
+          ingredientId: true,
+          quantity: true,
+          unit: true,
+          ingredient: {
+            select: {
+              nameFr: true,
+              iconUrl: true,
+              uxCategory: true,
+              energyKcal: true,
+              proteinG: true,
+              carbG: true,
+              fatG: true,
+              fiberG: true,
+              conversions: { select: { unit: true, gramsPerUnit: true } },
+            },
+          },
+        },
       }),
       this.prisma.tag.findMany({ select: { id: true, slug: true } }),
       this.prisma.equipment.findMany({ select: { id: true, slug: true } }),
       this.prisma.recipe.findMany({
         where: { source: 'CATALOG', status: 'PUBLISHED' },
-        include: {
-          ingredients: { include: { ingredient: true }, orderBy: { sortOrder: 'asc' } },
-          tags: { include: { tag: true } },
-          equipment: { include: { equipment: true } },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          prepTimeMinutes: true,
+          cookTimeMinutes: true,
+          ingredients: {
+            select: {
+              ingredient: { select: { nameFr: true, uxCategory: true } },
+            },
+            orderBy: { sortOrder: 'asc' },
+          },
+          tags: { select: { tag: { select: { slug: true } } } },
+          equipment: { select: { equipment: { select: { slug: true } } } },
         },
       }),
     ]);

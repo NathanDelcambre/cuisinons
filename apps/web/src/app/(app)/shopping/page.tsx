@@ -68,6 +68,7 @@ export default function ShoppingPage() {
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: ['shopping'] });
     void queryClient.invalidateQueries({ queryKey: ['pantry'] });
+    void queryClient.invalidateQueries({ queryKey: ['provisions-summary'] });
   };
 
   const generate = useMutation({

@@ -230,6 +230,8 @@ model Recipe {
   cookTimeMinutes   Int?
   photoUrl          String?
   finalCookedWeight Decimal?     @db.Decimal(12, 4)
+  /** Macros dénormalisées : les listes ne joignent plus les ingrédients Ciqual. */
+  nutritionSnapshot Json?
   version           Int          @default(1)
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt

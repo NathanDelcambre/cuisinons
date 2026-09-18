@@ -9,7 +9,8 @@ import {
 } from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { parseIsoDate, startOfWeek, addDays } from '../planner/dates.js';
-import { nutritionForRecipe } from './recipe-nutrition.js';
+import { nutritionFromSnapshot } from '@cuisinons/db';
+import { computeRecipeNutrition } from '@cuisinons/shared';
 
 function bounds(period: StatsPeriod, date: Date): { from: Date; to: Date } {
   if (period === 'day') return { from: date, to: date };
@@ -44,15 +45,21 @@ export class NutritionService {
     });
     const items = await this.prisma.mealItem.findMany({
       where: { date: { gte: from, lte: to } },
-      include: {
-        recipe: { include: { ingredients: { include: { ingredient: true } } } },
-        portions: true,
+      select: {
+        date: true,
+        slot: true,
+        recipeId: true,
+        recipe: { select: { name: true, servings: true, nutritionSnapshot: true } },
+        portions: {
+          select: { userId: true, portions: true, consumedAt: true, skipAutoConsume: true },
+        },
       },
     });
 
     const meals = items.map((item) => {
       const nutrition = item.recipe
-        ? nutritionForRecipe(item.recipe.ingredients, Number(item.recipe.servings), item.recipe.finalCookedWeight)
+        ? nutritionFromSnapshot(item.recipe.nutritionSnapshot) ??
+          computeRecipeNutrition([], Number(item.recipe.servings))
         : { perServing: { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 } };
       return {
         date: item.date.toISOString(),
