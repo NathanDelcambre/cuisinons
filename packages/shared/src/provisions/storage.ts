@@ -12,6 +12,8 @@ export const STORAGE_AREA_LABELS: Record<StorageArea, string> = {
   OTHER: 'Autres',
 };
 
+/** Pictos Lucide : `apps/web/src/components/storage-area-icon.tsx`. */
+
 const FRIDGE_CATEGORIES: ReadonlySet<UxCategory> = new Set<UxCategory>([
   'MEATS',
   'FISH',

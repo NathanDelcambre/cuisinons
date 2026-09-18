@@ -32,7 +32,6 @@ import {
 import { apiJson } from '@/lib/api';
 import { IngredientPicker } from '@/components/ingredient-picker';
 import { IngredientIcon } from '@/components/ingredient-icon';
-import { QuantityDialog, type PickedIngredient } from '@/components/quantity-dialog';
 import {
   GenerateShoppingModal,
   type GenerateShoppingInput,
@@ -59,7 +58,6 @@ export default function ShoppingPage() {
   const queryClient = useQueryClient();
   const [generateOpen, setGenerateOpen] = useState(false);
   const [picker, setPicker] = useState(false);
-  const [picked, setPicked] = useState<PickedIngredient | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   const list = useQuery({
@@ -130,7 +128,7 @@ export default function ShoppingPage() {
       }),
     onSuccess: (data) => {
       queryClient.setQueryData(['shopping'], data);
-      setPicked(null);
+      setPicker(false);
     },
   });
 
@@ -264,22 +262,17 @@ export default function ShoppingPage() {
       />
       <IngredientPicker
         open={picker}
-        onPick={(ingredient) => {
-          setPicked(ingredient);
-          setPicker(false);
-        }}
-        onClose={() => setPicker(false)}
-      />
-      <QuantityDialog
-        ingredient={picked}
-        pending={add.isPending}
-        error={add.error instanceof Error ? add.error.message : null}
         onClose={() => {
           add.reset();
-          setPicked(null);
+          setPicker(false);
         }}
-        onConfirm={({ quantity, unit }) => {
-          if (picked) add.mutate({ ingredientId: picked.id, quantity, unit });
+        quantity={{
+          pending: add.isPending,
+          error: add.error instanceof Error ? add.error.message : null,
+          onBack: () => add.reset(),
+          onConfirm: (ingredient, { quantity, unit }) => {
+            add.mutate({ ingredientId: ingredient.id, quantity, unit });
+          },
         }}
       />
     </div>

@@ -35,7 +35,7 @@ export function PageHeader({
           </div>
           {actions ? <div className={cn('shrink-0', actionsClassName)}>{actions}</div> : null}
         </div>
-        {description ? <p className="max-w-prose text-sm text-ink-500">{description}</p> : null}
+        {description ? <div className="max-w-prose text-sm text-ink-500">{description}</div> : null}
       </header>
     );
   }
@@ -46,7 +46,7 @@ export function PageHeader({
         <h1 className="font-display text-[1.75rem] font-semibold tracking-[-0.03em] text-ink-900 sm:text-[2rem]">
           {title}
         </h1>
-        {description ? <p className="mt-2 max-w-prose text-sm text-ink-500">{description}</p> : null}
+        {description ? <div className="mt-2 text-sm text-ink-500">{description}</div> : null}
       </div>
       {actions ? (
         <div className={cn('flex shrink-0 flex-wrap items-center gap-2', actionsClassName)}>{actions}</div>

@@ -47,7 +47,6 @@ export function MacroRing({
 }) {
   const hasTarget = target !== null && target > 0;
   const plannedRatio = hasTarget ? planned / target : planned > 0 ? 1 : 0;
-  const consumedRatio = hasTarget ? consumed / target : consumed > 0 ? 1 : 0;
   const colors = TONES[tone];
   const plannedLabel = Math.round(planned);
   const consumedLabel = Math.round(consumed);
@@ -60,10 +59,8 @@ export function MacroRing({
     >
       <div className="relative size-16">
         <svg viewBox="0 0 72 72" className="size-16" aria-hidden>
-          <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(45,36,28,0.08)" strokeWidth="5" />
-          <circle cx="36" cy="36" r="22" fill="none" stroke="rgba(45,36,28,0.06)" strokeWidth="4" />
-          <path d={arc(36, 36, 30, plannedRatio)} fill="none" stroke={colors.planned} strokeWidth="5" strokeLinecap="round" />
-          <path d={arc(36, 36, 22, consumedRatio)} fill="none" stroke={colors.consumed} strokeWidth="4" strokeLinecap="round" />
+          <circle cx="36" cy="36" r="28" fill="none" stroke="rgba(45,36,28,0.08)" strokeWidth="6" />
+          <path d={arc(36, 36, 28, plannedRatio)} fill="none" stroke={colors.planned} strokeWidth="6" strokeLinecap="round" />
         </svg>
         <p
           className={cn(

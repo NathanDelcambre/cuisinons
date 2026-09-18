@@ -13,11 +13,11 @@ export const SLOT_CHROME: Record<
 > = {
   BREAKFAST: {
     icon: Sunrise,
-    border: 'border-peach-300/80 hover:border-peach-400',
-    tint: 'bg-peach-200/25 hover:bg-peach-200/45',
-    iconClass: 'bg-peach-200/80 text-peach-500',
-    labelClass: 'text-peach-500',
-    rail: 'border-l-[3px] border-l-peach-400',
+    border: 'border-gold-400/80 hover:border-gold-500',
+    tint: 'bg-gold-200/55 hover:bg-gold-200/80',
+    iconClass: 'bg-gold-300 text-gold-500',
+    labelClass: 'text-gold-500',
+    rail: 'border-l-[3px] border-l-gold-400',
   },
   LUNCH: {
     icon: Sun,

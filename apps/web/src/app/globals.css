@@ -40,6 +40,12 @@
   --color-peach-400: #e8b298;
   --color-peach-500: #d9946f;
 
+  /* Gold : soleil du matin, plus sourd qu'un jaune fluo. */
+  --color-gold-200: #f4ead3;
+  --color-gold-300: #e6d4a8;
+  --color-gold-400: #d2b56e;
+  --color-gold-500: #b8943f;
+
   /* Tomato : erreurs et actions destructrices. */
   --color-tomato-100: #f7e3df;
   --color-tomato-400: #d97767;

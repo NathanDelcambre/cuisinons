@@ -25,9 +25,7 @@ import {
 import { apiJson } from '@/lib/api';
 import { IngredientPicker } from '@/components/ingredient-picker';
 import { IngredientIcon } from '@/components/ingredient-icon';
-import { QuantityDialog, type PickedIngredient } from '@/components/quantity-dialog';
-
-const AREA_OPTIONS = STORAGE_AREAS.map((value) => ({ value, label: STORAGE_AREA_LABELS[value] }));
+import { StorageAreaIcon, storageAreaOptions } from '@/components/storage-area-icon';
 
 type PantryItem = {
   id: string;
@@ -40,7 +38,6 @@ type PantryItem = {
 export default function PantryPage() {
   const queryClient = useQueryClient();
   const [picker, setPicker] = useState(false);
-  const [picked, setPicked] = useState<PickedIngredient | null>(null);
 
   const pantry = useQuery({
     queryKey: ['pantry'],
@@ -57,7 +54,7 @@ export default function PantryPage() {
       area?: StorageArea;
     }) => apiJson('/api/bff/pantry/items', { method: 'POST', body: JSON.stringify(input) }),
     onSuccess: () => {
-      setPicked(null);
+      setPicker(false);
       void refresh();
     },
   });
@@ -112,28 +109,26 @@ export default function PantryPage() {
         <div className="space-y-8">
           {STORAGE_AREAS.map((area) => {
             const rows = items.filter((item) => item.area === area);
+            if (rows.length === 0) return null;
             return (
               // L'ancre permet a la sidebar de pointer directement sur la zone.
               <section key={area} id={area} className="scroll-mt-24 space-y-2">
-                <h2 className="flex items-baseline gap-2 px-1">
+                <h2 className="flex items-center gap-2 px-1">
+                  <StorageAreaIcon area={area} className="size-5 text-ink-500" />
                   <span className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
                     {STORAGE_AREA_LABELS[area]}
                   </span>
                   <span className="tabular text-sm text-ink-500">{rows.length}</span>
                 </h2>
-                {rows.length === 0 ? (
-                  <p className="px-1 text-sm text-ink-400">Rien pour l’instant.</p>
-                ) : (
-                  rows.map((item) => (
-                    <PantryRow
-                      key={item.id}
-                      item={item}
-                      onQuantity={(quantity) => patch.mutate({ id: item.id, quantity })}
-                      onArea={(next) => patch.mutate({ id: item.id, area: next })}
-                      onRemove={() => remove.mutate(item.id)}
-                    />
-                  ))
-                )}
+                {rows.map((item) => (
+                  <PantryRow
+                    key={item.id}
+                    item={item}
+                    onQuantity={(quantity) => patch.mutate({ id: item.id, quantity })}
+                    onArea={(next) => patch.mutate({ id: item.id, area: next })}
+                    onRemove={() => remove.mutate(item.id)}
+                  />
+                ))}
               </section>
             );
           })}
@@ -142,23 +137,18 @@ export default function PantryPage() {
 
       <IngredientPicker
         open={picker}
-        onPick={(ingredient) => {
-          setPicked(ingredient);
-          setPicker(false);
-        }}
-        onClose={() => setPicker(false)}
-      />
-      <QuantityDialog
-        ingredient={picked}
-        withArea
-        pending={add.isPending}
-        error={add.error instanceof Error ? add.error.message : null}
         onClose={() => {
           add.reset();
-          setPicked(null);
+          setPicker(false);
         }}
-        onConfirm={({ quantity, unit, area }) => {
-          if (picked) add.mutate({ ingredientId: picked.id, quantity, unit, area });
+        quantity={{
+          withArea: true,
+          pending: add.isPending,
+          error: add.error instanceof Error ? add.error.message : null,
+          onBack: () => add.reset(),
+          onConfirm: (ingredient, { quantity, unit, area }) => {
+            add.mutate({ ingredientId: ingredient.id, quantity, unit, area });
+          },
         }}
       />
     </div>
@@ -182,9 +172,9 @@ function PantryRow({
       <span className="min-w-0 flex-1 truncate text-sm text-ink-900">{kitchenLabel(item.ingredient.nameFr)}</span>
       <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
       <Select
-        className="h-11 min-h-11 min-w-0 flex-1 sm:w-36 sm:flex-none sm:shrink-0 pl-3 text-[13px]"
+        className="h-11 min-h-11 min-w-0 flex-1 sm:w-44 sm:flex-none sm:shrink-0 pl-3 text-[13px]"
         value={item.area}
-        options={AREA_OPTIONS}
+        options={storageAreaOptions()}
         aria-label={`Rangement de ${kitchenLabel(item.ingredient.nameFr)}`}
         onChange={onArea}
       />

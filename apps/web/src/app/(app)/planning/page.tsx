@@ -73,6 +73,15 @@ function iso(date: Date) {
   return format(date, 'yyyy-MM-dd');
 }
 
+function weekRangeLabel(start: Date) {
+  const end = addDays(start, 6);
+  const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+  if (sameMonth) {
+    return `${format(start, 'd', { locale: fr })} – ${format(end, 'd MMMM', { locale: fr })}`;
+  }
+  return `${format(start, 'd MMMM', { locale: fr })} – ${format(end, 'd MMMM', { locale: fr })}`;
+}
+
 export default function PlanningPage() {
   const { user } = useAuth();
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
@@ -183,48 +192,39 @@ export default function PlanningPage() {
       <PageHeader
         eyebrow={
           <span className="inline-flex items-center gap-2">
-            <IngredientIcon src="/ingredients/pomme.png" className="size-[18px]" />
+            <IngredientIcon bare src="/ingredients/pomme.png" className="size-6" />
             Bonjour {user?.displayName ?? ''}
           </span>
         }
-        title={
-          <>
-            Semaine du {format(weekStart, 'd MMMM', { locale: fr })} au{' '}
-            {format(addDays(weekStart, 6), 'd MMMM', { locale: fr })}
-          </>
+        title="Planning"
+        description={
+          <div className="flex flex-wrap items-center gap-2 text-ink-900">
+            <IconButton
+              icon={ChevronLeft}
+              label="Semaine précédente"
+              onClick={() => setWeekStart(addDays(weekStart, -7))}
+            />
+            <span className="min-w-0 text-sm font-medium">{weekRangeLabel(weekStart)}</span>
+            <IconButton
+              icon={ChevronRight}
+              label="Semaine suivante"
+              onClick={() => setWeekStart(addDays(weekStart, 7))}
+            />
+            <Button
+              variant="glass"
+              onClick={() => {
+                const now = new Date();
+                const start = startOfWeek(now, { weekStartsOn: 1 });
+                setWeekStart(start);
+                setSelectedIndex(differenceInCalendarDays(now, start));
+              }}
+            >
+              Aujourd’hui
+            </Button>
+          </div>
         }
-        actionsClassName="w-full flex-nowrap justify-between"
         actions={
           <>
-            <div className="flex shrink-0 items-center gap-2">
-              <IconButton
-                icon={ChevronLeft}
-                label="Semaine précédente"
-                onClick={() => {
-                  setWeekStart(addDays(weekStart, -7));
-                  setSelectedIndex(0);
-                }}
-              />
-              <Button
-                variant="glass"
-                onClick={() => {
-                  const now = new Date();
-                  const start = startOfWeek(now, { weekStartsOn: 1 });
-                  setWeekStart(start);
-                  setSelectedIndex(differenceInCalendarDays(now, start));
-                }}
-              >
-                Aujourd’hui
-              </Button>
-              <IconButton
-                icon={ChevronRight}
-                label="Semaine suivante"
-                onClick={() => {
-                  setWeekStart(addDays(weekStart, 7));
-                  setSelectedIndex(0);
-                }}
-              />
-            </div>
             <Button
               variant="glass"
               icon={Sparkles}
@@ -433,7 +433,7 @@ function DayCard({
               today ? 'text-sage-600' : 'text-ink-900',
             )}
           >
-            {format(date, 'EEEE d', { locale: fr })}
+            {format(date, 'EEEE d MMMM', { locale: fr })}
           </span>
           {today ? <span className="text-[11px] font-medium text-sage-500">Aujourd’hui</span> : null}
         </span>
@@ -506,17 +506,32 @@ function SlotSection({
             const kind = item.kind ?? 'RECIPE';
             const recipe = kind === 'RECIPE' ? item.recipe : null;
             const title = recipe?.name ?? MEAL_KIND_LABELS[kind];
+            const photoUrl = recipe?.photoUrl ?? null;
             return (
               <li
                 key={item.id}
                 className={cn(
-                  'group relative flex min-h-[5.25rem] flex-1 items-center rounded-xl bg-white/75 py-2.5 pl-3.5 pr-2 shadow-[0_0_10px_rgba(28,25,23,0.08),0_2px_8px_rgba(28,25,23,0.08)]',
+                  'group relative flex min-h-[5.25rem] flex-1 items-stretch overflow-hidden rounded-xl bg-white/75 pr-2 shadow-[0_0_10px_rgba(28,25,23,0.08),0_2px_8px_rgba(28,25,23,0.08)]',
+                  photoUrl ? 'py-0 pl-0' : 'items-center py-2.5 pl-3.5',
                   validated
                     ? 'border border-sage-500 border-l-[3px] border-l-sage-500'
                     : cn('border border-white/70', chrome.rail),
                 )}
               >
-                <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2.5">
+                {photoUrl ? (
+                  <img
+                    src={photoUrl}
+                    alt=""
+                    className="w-[4.5rem] shrink-0 self-stretch object-cover"
+                    decoding="async"
+                  />
+                ) : null}
+                <div
+                  className={cn(
+                    'flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2.5',
+                    photoUrl && 'py-2.5 pl-3',
+                  )}
+                >
                   <button
                     type="button"
                     onClick={() => onOpenItem(item)}
@@ -652,7 +667,7 @@ function ActionMenu({
         <span className="sr-only">{label}</span>
         <Icon className="size-4" aria-hidden />
       </summary>
-      <div className="absolute right-0 z-20 mt-1 w-52 rounded-xl border border-white/80 bg-white/95 p-1 shadow-soft">
+      <div className="glass-raised absolute right-0 z-40 mt-1 w-52 rounded-xl p-1 shadow-lift">
         {children}
       </div>
     </details>

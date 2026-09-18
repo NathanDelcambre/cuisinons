@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import {
   CalendarPlus,
+  ChefHat,
   Clock,
   Pencil,
   Star,
@@ -211,13 +212,15 @@ function RecipeModalBody({
             <img
               src={data.photoUrl}
               alt=""
-              className="aspect-[16/9] w-full object-cover sm:aspect-[2/1]"
+              className="aspect-[16/9] min-h-40 w-full object-cover sm:aspect-[2/1] sm:min-h-52"
               decoding="async"
             />
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[rgba(255,252,247,0.97)] to-transparent" />
           </>
         ) : (
-          <div className="h-4 sm:h-5" />
+          <div className="flex min-h-40 items-center justify-center bg-ink-900/[0.04] sm:min-h-48">
+            <ChefHat className="size-10 text-ink-300" aria-hidden />
+          </div>
         )}
         <IconButton
           icon={X}

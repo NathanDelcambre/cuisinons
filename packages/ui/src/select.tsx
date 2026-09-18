@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
+  type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
@@ -18,6 +19,7 @@ import { transitions } from './motion';
 export type SelectOption<T extends string = string> = {
   value: T;
   label: string;
+  icon?: ReactNode;
 };
 
 type MenuPos = {
@@ -221,13 +223,17 @@ export function Select<T extends string>({
         onClick={() => !disabled && setOpen((current) => !current)}
         onKeyDown={onKeyDown}
         className={cn(
-          'flex h-11 min-h-11 min-w-0 w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/80 bg-white/75 pl-4 pr-3 text-left text-sm text-ink-900 shadow-soft transition duration-200 ease-out-soft hover:bg-white/90 focus:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500 disabled:cursor-not-allowed disabled:opacity-55',
+          'flex h-11 min-h-11 min-w-0 w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/80 bg-white/75 pr-3 text-left text-sm text-ink-900 shadow-soft transition duration-200 ease-out-soft hover:bg-white/90 focus:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500 disabled:cursor-not-allowed disabled:opacity-55',
+          selected?.icon ? 'pl-3' : 'pl-4',
           open && 'bg-white ring-2 ring-sage-300',
           className,
         )}
       >
-        <span className={cn('min-w-0 flex-1 truncate', !selected && 'text-ink-400')}>
-          {selected?.label ?? placeholder}
+        <span className={cn('flex min-w-0 flex-1 items-center gap-2', !selected && 'text-ink-400')}>
+          {selected?.icon ? (
+            <span className="flex size-4 shrink-0 items-center justify-center text-ink-500">{selected.icon}</span>
+          ) : null}
+          <span className="min-w-0 truncate">{selected?.label ?? placeholder}</span>
         </span>
         <ChevronDown
           aria-hidden
@@ -288,7 +294,14 @@ export function Select<T extends string>({
                           active && 'font-medium text-ink-900',
                         )}
                       >
-                        <span className="min-w-0 truncate">{option.label}</span>
+                        <span className="flex min-w-0 flex-1 items-center gap-2">
+                          {option.icon ? (
+                            <span className="flex size-4 shrink-0 items-center justify-center text-ink-500">
+                              {option.icon}
+                            </span>
+                          ) : null}
+                          <span className="min-w-0 truncate">{option.label}</span>
+                        </span>
                         {active ? <Check className="size-3.5 shrink-0 text-sage-600" aria-hidden /> : null}
                       </div>
                     );

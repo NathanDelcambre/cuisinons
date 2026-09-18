@@ -23,6 +23,7 @@ import { routes } from '@/lib/routes';
 import { useAuth } from './auth-provider';
 import { Avatar } from './avatar';
 import { BrandMark } from './brand-mark';
+import { StorageAreaIcon } from './storage-area-icon';
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
 
@@ -198,7 +199,10 @@ function PantryStatus({ counts }: { counts: Map<StorageArea, number> }) {
             href={`${routes.reserves}#${area}`}
             className="flex min-h-8 items-center justify-between gap-2 rounded-lg px-2 text-[13px] text-ink-500 transition-colors duration-200 ease-out-soft hover:text-ink-900"
           >
-            <span className="truncate">{STORAGE_AREA_LABELS[area]}</span>
+            <span className="flex min-w-0 items-center gap-1.5">
+              <StorageAreaIcon area={area} className="size-3.5 shrink-0" />
+              <span className="truncate">{STORAGE_AREA_LABELS[area]}</span>
+            </span>
             <span className="tabular shrink-0 text-xs text-ink-400">{counts.get(area)}</span>
           </Link>
         </li>
