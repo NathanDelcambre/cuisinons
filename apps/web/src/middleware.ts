@@ -10,7 +10,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/api/auth/google') ||
     pathname === '/favicon.ico' ||
     pathname.startsWith('/icon') ||
-    pathname.startsWith('/apple-icon')
+    pathname.startsWith('/apple-icon') ||
+    (pathname.startsWith('/recipes/') && pathname.endsWith('.png'))
   ) {
     return NextResponse.next();
   }
