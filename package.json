@@ -25,6 +25,7 @@
     "db:migrate:deploy": "pnpm --filter @cuisinons/db migrate:deploy",
     "db:seed": "pnpm --filter @cuisinons/db seed",
     "db:import-ciqual": "pnpm --filter @cuisinons/db import-ciqual",
+    "db:import-open-food-facts": "pnpm --filter @cuisinons/db import-open-food-facts",
     "auth:bootstrap": "pnpm --filter @cuisinons/db auth:bootstrap",
     "db:generate": "pnpm --filter @cuisinons/db generate"
   },

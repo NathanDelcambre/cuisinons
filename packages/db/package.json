@@ -20,6 +20,7 @@
     "seed": "tsx src/seed.ts",
     "backfill-nutrition": "tsx src/backfill-nutrition.ts",
     "import-ciqual": "tsx src/import-ciqual.ts",
+    "import-open-food-facts": "tsx src/import-open-food-facts.ts",
     "auth:bootstrap": "tsx src/auth-bootstrap.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit"

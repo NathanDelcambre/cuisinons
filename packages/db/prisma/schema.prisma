@@ -454,6 +454,62 @@ model ShoppingListItem {
   @@unique([listId, ingredientId, unit])
 }
 
+/// Projection locale et volontairement bornee du dump Open Food Facts. Le
+/// serveur applicatif ne contacte jamais Open Food Facts pendant une requete.
+model OpenFoodProduct {
+  barcode         String          @id
+  name            String
+  normalizedName  String
+  searchText      String
+  brand           String?
+  imageUrl        String?
+  packageQuantity Decimal?        @db.Decimal(12, 4)
+  packageUnit     String?
+  categories      String[]        @default([])
+  nutriScore      String?
+  novaGroup       Int?
+  popularity      Int             @default(0)
+  isStaple        Boolean         @default(false)
+  sourceUpdatedAt DateTime?
+  importBatchId   String
+  importedAt      DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  prices          OpenFoodPrice[]
+
+  @@index([normalizedName])
+  @@index([isStaple, popularity(sort: Desc)])
+  @@index([importBatchId])
+}
+
+model OpenFoodPrice {
+  id             String          @id @default(cuid())
+  productBarcode String
+  product        OpenFoodProduct @relation(fields: [productBarcode], references: [barcode], onDelete: Cascade)
+  retailer       Retailer
+  locationId     Int
+  storeName      String?
+  price          Decimal         @db.Decimal(10, 2)
+  currency       String          @default("EUR")
+  observedAt     DateTime        @db.Date
+  importBatchId  String
+  importedAt     DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@unique([productBarcode, retailer])
+  @@index([retailer, productBarcode])
+  @@index([importBatchId])
+}
+
+model OpenFoodImport {
+  id           String    @id
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+  productCount Int       @default(0)
+  priceCount   Int       @default(0)
+  status       String    @default("RUNNING")
+  error        String?
+}
+
 model NutritionGoal {
   id                String           @id @default(cuid())
   userId            String           @unique

@@ -685,20 +685,20 @@ export class ProvisionsService {
       select: { id: true, nameFr: true },
     });
     const names = new Map(ingredients.map((ingredient) => [ingredient.id, ingredient.nameFr]));
-    // Séquentiel volontairement : une liste peut contenir beaucoup de lignes et
-    // l'API communautaire ne doit pas recevoir une rafale de requêtes.
-    for (const line of lines) {
-      const name = names.get(line.ingredientId);
-      if (!name) continue;
-      const offers = await this.products.findOffers(name, retailer);
-      const selected = selectProductOffer({
-        neededQuantity: line.quantity,
-        neededUnit: line.unit,
-        offers,
-        economical,
-      });
-      if (selected) result.set(`${line.ingredientId}|${line.unit}`, selected);
-    }
+    await Promise.all(
+      lines.map(async (line) => {
+        const name = names.get(line.ingredientId);
+        if (!name) return;
+        const offers = await this.products.findOffers(name, retailer);
+        const selected = selectProductOffer({
+          neededQuantity: line.quantity,
+          neededUnit: line.unit,
+          offers,
+          economical,
+        });
+        if (selected) result.set(`${line.ingredientId}|${line.unit}`, selected);
+      }),
+    );
     return result;
   }
 
