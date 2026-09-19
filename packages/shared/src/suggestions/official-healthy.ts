@@ -1,5 +1,6 @@
-import { normalizeSearchText } from '../search/normalize.js';
+﻿import { normalizeSearchText } from '../search/normalize.js';
 import type { QuantityUnit } from '../nutrition/units.js';
+import { joinFrench } from './names.js';
 import { HEALTHY_RECIPES, type CookMethod, type NameFilter, type RecipeSpec } from './catalog.js';
 
 export type IngredientRef = {
@@ -221,30 +222,112 @@ function matches(tokens: string[], needles: readonly string[]): boolean {
   return tokens.some((token) => needles.some((needle) => token.includes(needle) || needle.includes(token)));
 }
 
-function proteinKey(spec: RecipeSpec): string | null {
+const PROTEIN_FROM_NAME: Array<{ needles: readonly string[]; key: string }> = [
+  { needles: ['porc', 'mignon'], key: 'pork' },
+  { needles: ['poulet'], key: 'chicken' },
+  { needles: ['dinde'], key: 'turkey' },
+  { needles: ['saumon'], key: 'salmon' },
+  { needles: ['cabillaud'], key: 'cod' },
+  { needles: ['merlu'], key: 'hake' },
+  { needles: ['lieu', 'colin'], key: 'pollock' },
+  { needles: ['truite'], key: 'trout' },
+  { needles: ['thon'], key: 'tuna' },
+  { needles: ['sardine'], key: 'sardine' },
+  { needles: ['maquereau'], key: 'mackerel' },
+  { needles: ['crevette'], key: 'shrimp' },
+  { needles: ['moule'], key: 'mussels' },
+  { needles: ['lentille'], key: 'lentils' },
+  { needles: ['pois chiche', 'pois-chiche'], key: 'chickpeas' },
+  { needles: ['haricot'], key: 'whiteBeans' },
+  { needles: ['tofu'], key: 'tofu' },
+  { needles: ['noix'], key: 'walnut' },
+  { needles: ['poisson'], key: 'pollock' },
+];
+
+const FISH_PROTEIN_KEYS = ['salmon', 'cod', 'hake', 'pollock', 'trout', 'tuna', 'sardine', 'mackerel'] as const;
+
+function proteinFromText(text: string): string | null {
+  const folded = normalizeSearchText(text);
+  if (!folded) return null;
+  for (const row of PROTEIN_FROM_NAME) {
+    if (row.needles.some((needle) => folded.includes(normalizeSearchText(needle)))) return row.key;
+  }
+  return null;
+}
+
+function addProteinsFromLabel(label: string, keys: string[]): void {
+  const folded = normalizeSearchText(label);
+  if (!folded) return;
+  for (const row of PROTEIN_FROM_NAME) {
+    if (row.needles.includes('poisson')) continue;
+    if (row.needles.some((needle) => folded.includes(normalizeSearchText(needle))) && !keys.includes(row.key)) {
+      keys.push(row.key);
+    }
+  }
+  const hasFish = keys.some((key) => (FISH_PROTEIN_KEYS as readonly string[]).includes(key));
+  if (!hasFish && folded.includes('poisson')) keys.push('pollock');
+}
+
+function isWhiteBag(tokens: string[]): boolean {
+  return tokens.length >= 2 && tokens.every((token) => token.includes('poulet') || token.includes('dinde'));
+}
+
+function isFishBag(tokens: string[]): boolean {
+  if (tokens.length < 2) return false;
+  return tokens.every((token) => {
+    const key = proteinFromText(token);
+    return Boolean(
+      (key && (FISH_PROTEIN_KEYS as readonly string[]).includes(key)) ||
+        token.includes('daurade') ||
+        token.includes('dorade') ||
+        token.includes('poisson'),
+    );
+  });
+}
+
+function isLegumeBag(tokens: string[]): boolean {
+  return (
+    tokens.length >= 2 &&
+    tokens.every((token) =>
+      ['lentille', 'pois chiche', 'pois-chiche', 'haricot', 'tofu'].some(
+        (needle) => token.includes(needle) || needle.includes(token),
+      ),
+    )
+  );
+}
+
+function proteinKeys(spec: RecipeSpec): string[] {
   const vegan = spec.diets.includes('vegan');
+  const keys: string[] = [];
+  addProteinsFromLabel(spec.label, keys);
+  if (keys.includes('chicken') && keys.includes('turkey')) {
+    const label = normalizeSearchText(spec.label);
+    if (label.includes('dinde') && !label.includes('poulet')) {
+      keys.splice(keys.indexOf('chicken'), 1);
+    } else {
+      keys.splice(keys.indexOf('turkey'), 1);
+    }
+  }
+  if (keys.length > 0) return keys;
+
   const tokens = tokensOf(spec.protein);
-  if (matches(tokens, ['porc', 'mignon'])) return 'pork';
-  if (matches(tokens, ['dinde'])) return 'turkey';
-  if (matches(tokens, ['poulet'])) return 'chicken';
-  if (matches(tokens, ['saumon'])) return 'salmon';
-  if (matches(tokens, ['cabillaud'])) return 'cod';
-  if (matches(tokens, ['merlu'])) return 'hake';
-  if (matches(tokens, ['lieu', 'colin'])) return 'pollock';
-  if (matches(tokens, ['truite'])) return 'trout';
-  if (matches(tokens, ['thon'])) return 'tuna';
-  if (matches(tokens, ['sardine'])) return 'sardine';
-  if (matches(tokens, ['maquereau'])) return 'mackerel';
-  if (matches(tokens, ['crevette'])) return 'shrimp';
-  if (matches(tokens, ['moule'])) return 'mussels';
-  if (matches(tokens, ['lentille'])) return 'lentils';
-  if (matches(tokens, ['pois chiche', 'pois-chiche'])) return 'chickpeas';
-  if (matches(tokens, ['haricot'])) return 'whiteBeans';
-  if (matches(tokens, ['tofu'])) return 'tofu';
-  if (matches(tokens, ['noix'])) return 'walnut';
-  if (spec.protein === true) return vegan ? 'chickpeas' : 'chicken';
-  if (vegan) return 'lentils';
-  return spec.diets.includes('vegetarian') ? 'lentils' : null;
+  if (isWhiteBag(tokens)) keys.push('chicken');
+  else if (isFishBag(tokens)) keys.push('pollock');
+  else if (isLegumeBag(tokens)) keys.push(vegan ? 'chickpeas' : 'lentils');
+  else {
+    for (const token of tokens) {
+      const key = proteinFromText(token);
+      if (key && !keys.includes(key)) keys.push(key);
+    }
+  }
+  if (keys.length > 0) return keys;
+  if (spec.protein === true) return [vegan ? 'chickpeas' : 'chicken'];
+  if (vegan || spec.diets.includes('vegetarian')) return ['lentils'];
+  return [];
+}
+
+function proteinKey(spec: RecipeSpec): string | null {
+  return proteinKeys(spec)[0] ?? null;
 }
 
 function vegKeys(spec: RecipeSpec): string[] {
@@ -374,89 +457,459 @@ function uniqueLines(lines: OfficialLine[]): OfficialLine[] {
   return result;
 }
 
+const PROTEIN_STEP_KEYS = [
+  'chicken',
+  'turkey',
+  'pork',
+  'salmon',
+  'cod',
+  'hake',
+  'pollock',
+  'trout',
+  'tuna',
+  'sardine',
+  'mackerel',
+  'shrimp',
+  'mussels',
+  'lentils',
+  'chickpeas',
+  'whiteBeans',
+  'tofu',
+  'walnut',
+  'egg',
+] as const;
+
+const VEG_STEP_KEYS = [
+  'tomato',
+  'zucchini',
+  'eggplant',
+  'bellPepper',
+  'cucumber',
+  'carrot',
+  'cauliflower',
+  'cabbage',
+  'beet',
+  'pumpkin',
+  'asparagus',
+  'artichoke',
+  'mushroom',
+  'spinach',
+  'greenBean',
+  'salad',
+  'onion',
+  'garlic',
+] as const;
+
+const STARCH_STEP_KEYS = ['rice', 'quinoa', 'pasta', 'couscous', 'oats', 'potato', 'sweetPotato'] as const;
+const OIL_STEP_KEYS = ['oliveOil', 'sunflowerOil'] as const;
+const SALT_STEP_KEYS = ['salt', 'pepper'] as const;
+const AROMA_STEP_KEYS = ['lemon', 'paprika', 'provence', 'soy', 'mustard', 'ginger', 'basil'] as const;
+
+function pickKeys(keys: readonly string[], pool: readonly string[]): string[] {
+  return pool.filter((key) => keys.includes(key));
+}
+
+function mentionList(keys: readonly string[]): string {
+  return joinFrench(keys.map(mention));
+}
+
+function finishSteps(
+  keys: string[],
+  steps: Array<{ description: string; durationMinutes?: number } | null | undefined>,
+): Array<{ description: string; durationMinutes?: number }> {
+  const kept = steps.filter(
+    (step): step is { description: string; durationMinutes?: number } => Boolean(step?.description),
+  );
+  const blob = kept.map((step) => step.description).join(' ');
+  const missing = keys.filter((key) => !blob.includes(`[[ing:${key}]]`));
+  if (missing.length === 0) return kept;
+  return [
+    ...kept,
+    {
+      description: `Incorporer ${mentionList(missing)} en fin de préparation, mélanger, goûter, puis servir.`,
+      durationMinutes: 2,
+    },
+  ];
+}
+
+function isFishProtein(keys: readonly string[]): boolean {
+  return keys.some((key) => (FISH_PROTEIN_KEYS as readonly string[]).includes(key));
+}
+
+function donenessOf(proteins: readonly string[]): string {
+  if (proteins.includes('shrimp')) return 'les crevettes sont roses et recroquevillées';
+  if (proteins.includes('mussels')) return 'les moules sont ouvertes (jeter celles qui restent fermées)';
+  if (isFishProtein(proteins)) return 'la chair est opaque et se détache à la fourchette';
+  if (proteins.includes('tofu')) return 'le tofu est doré';
+  if (proteins.some((key) => ['lentils', 'chickpeas', 'whiteBeans'].includes(key))) {
+    return 'c’est bien chaud tout au centre';
+  }
+  return 'la viande est cuite à cœur (le jus qui s’écoule est clair)';
+}
+
+function skilletTimeOf(proteins: readonly string[]): string {
+  if (proteins.includes('shrimp') || proteins.includes('mussels')) return '2 à 3 min';
+  if (isFishProtein(proteins)) return '3 à 4 min par face';
+  if (proteins.some((key) => ['lentils', 'chickpeas', 'whiteBeans', 'tofu'].includes(key))) {
+    return '4 à 5 min en remuant';
+  }
+  return '6 à 8 min par face';
+}
+
+function ovenCelsius(spec: RecipeSpec): number {
+  if (spec.method === 'parcel' || spec.method === 'bake') return 180;
+  return 200;
+}
+
 function stepsFor(spec: RecipeSpec, keys: string[]): Array<{ description: string; durationMinutes?: number }> {
-  const first = keys[0] ? mention(keys[0]) : 'les ingrédients';
-  const veg = keys.find((key) =>
-    ['tomato', 'zucchini', 'eggplant', 'bellPepper', 'cucumber', 'carrot', 'salad', 'onion'].includes(key),
-  );
-  const vegText = veg ? mention(veg) : 'les légumes';
-  const oil = keys.includes('oliveOil') ? mention('oliveOil') : 'un filet d’huile';
-  const protein = keys.find((key) =>
-    ['chicken', 'turkey', 'pork', 'salmon', 'cod', 'hake', 'pollock', 'trout', 'tuna', 'sardine', 'mackerel', 'shrimp', 'lentils', 'chickpeas', 'tofu'].includes(key),
-  );
-  const proteinText = protein ? mention(protein) : first;
+  const proteins = pickKeys(keys, PROTEIN_STEP_KEYS);
+  const vegs = pickKeys(keys, VEG_STEP_KEYS);
+  const starches = pickKeys(keys, STARCH_STEP_KEYS);
+  const oils = pickKeys(keys, OIL_STEP_KEYS);
+  const salts = pickKeys(keys, SALT_STEP_KEYS);
+  const aromas = pickKeys(keys, AROMA_STEP_KEYS);
+  const classified = new Set([...proteins, ...vegs, ...starches, ...oils, ...salts, ...aromas]);
+  const extras = keys.filter((key) => !classified.has(key));
+  const oilText = oils.length ? mentionList(oils) : 'un filet d’huile';
+  const vegText = mentionList(vegs);
+  const proteinText = mentionList(proteins);
+  const starchText = mentionList(starches);
+  const extraText = mentionList(extras);
+  const aromaText = mentionList(aromas);
+  const saltText = mentionList(salts);
+  const proteinVeg = mentionList([...proteins, ...vegs]) || 'les ingrédients';
+  const cutText = mentionList([...proteins, ...vegs, ...starches]) || proteinVeg;
+  const seasonText = mentionList([...oils, ...aromas, ...extras, ...salts]) || oilText;
+  const dressText = mentionList([...oils, ...aromas, ...salts]) || oilText;
+  const marinadeText = mentionList([...oils, ...aromas, ...salts]) || oilText;
+  const cook = spec.cook || 15;
+  const otherProteins = proteins.filter((key) => key !== 'egg');
+  const garnishText = mentionList([...vegs, ...extras, ...otherProteins]);
+  const eggText = proteins.includes('egg') ? mention('egg') : proteinText || mention('egg');
+  const label = spec.label.toLowerCase();
+  const rawProtein = /ceviche|tartare/.test(label);
+  const pancake = /pancake|galette/.test(label);
+  const doneness = donenessOf(proteins);
+  const skilletTime = skilletTimeOf(proteins);
+  const celsius = ovenCelsius(spec);
 
   switch (spec.method) {
     case 'salad':
-      return [
-        { description: `Laver et tailler ${vegText}. Essuyer pour qu’ils restent croquants.`, durationMinutes: 8 },
-        { description: `Réunir ${proteinText} et les autres ingrédients dans un saladier.`, durationMinutes: 4 },
-        { description: `Assaisonner avec ${oil}, ${mention('lemon')}, ${mention('salt')} et ${mention('pepper')}. Mélanger juste avant de servir.`, durationMinutes: 3 },
-      ];
+      return finishSteps(keys, [
+        {
+          description: vegText
+            ? `Laver ${vegText} à l’eau froide, bien les essuyer (essoreuse à salade ou papier absorbant) pour qu’ils restent croquants, puis les tailler.`
+            : `Préparer ${proteinVeg} : laver, essuyer, tailler en morceaux réguliers.`,
+          durationMinutes: 8,
+        },
+        rawProtein || !proteinText
+          ? {
+              description: proteinText
+                ? `Couper ${proteinText} en dés. Les faire mariner 10 min avec ${mentionList([...aromas, ...salts]) || saltText || 'un peu de sel'}, au frais.`
+                : `Préparer ${mentionList([...starches, ...extras]) || 'le reste des ingrédients'}.`,
+              durationMinutes: 10,
+            }
+          : {
+              description: `Sécher ${proteinText}. Chauffer ${oilText} dans une poêle, cuire ${skilletTime} à feu moyen, jusqu’à ce que ${doneness}. Laisser reposer 3 min, puis émincer.`,
+              durationMinutes: Math.max(8, Math.min(cook || 12, 16)),
+            },
+        starchText
+          ? {
+              description: `Cuire ${starchText} dans une eau ${salts.includes('salt') ? `avec ${mention('salt')}` : 'légèrement salée'} selon le paquet, égoutter, laisser tiédir.`,
+              durationMinutes: 15,
+            }
+          : null,
+        {
+          description: `Dans un bol, fouetter ${dressText} jusqu’à ce que la vinaigrette soit liée. Goûter, ajuster.`,
+          durationMinutes: 3,
+        },
+        {
+          description: `Dans un saladier, réunir ${mentionList([...proteins, ...vegs, ...starches, ...extras]) || proteinVeg}. Napper de vinaigrette, mélanger délicatement juste avant de servir, pour ne pas ramollir les feuilles.`,
+          durationMinutes: 4,
+        },
+      ]);
     case 'soup':
-      return [
-        { description: `Émincer ${mention('onion')} et ${vegText}.`, durationMinutes: 6 },
-        { description: `Faire suer dans ${oil}, puis mouiller avec ${mention('water')}. Ajouter ${proteinText}.`, durationMinutes: 8 },
-        { description: `Laisser mijoter jusqu’à ce que tout soit tendre, mixer si tu veux un velouté, rectifier ${mention('salt')} et ${mention('pepper')}.`, durationMinutes: spec.cook || 20 },
-      ];
+      return finishSteps(keys, [
+        {
+          description: `Éplucher et tailler ${vegText || proteinVeg} en morceaux réguliers (plus fins si tu veux mixer ensuite).`,
+          durationMinutes: 8,
+        },
+        {
+          description: `Chauffer ${oilText} dans une casserole à feu moyen. Faire suer ${vegs.includes('onion') ? mention('onion') : vegText || 'les légumes'} 5 min sans les laisser colorer.`,
+          durationMinutes: 5,
+        },
+        mentionList([...proteins, ...starches])
+          ? {
+              description: `Ajouter ${mentionList([...proteins, ...starches])}, mélanger 2 min pour les enrober de matière grasse.`,
+              durationMinutes: 2,
+            }
+          : null,
+        {
+          description: `Mouiller avec ${extraText || 'de l’eau à hauteur'}. Porter à ébullition, puis laisser mijoter à couvert ${String(spec.cook || 20)} min, jusqu’à ce que tout soit tendre.`,
+          durationMinutes: spec.cook || 20,
+        },
+        {
+          description: `Mixer pour un velouté, ou laisser en morceaux. Rectifier avec ${mentionList([...aromas, ...salts]) || saltText}. Servir bien chaud.`,
+          durationMinutes: 4,
+        },
+      ]);
     case 'curry':
     case 'stew':
-      return [
-        { description: `Faire revenir ${mention('onion')} dans ${oil} jusqu’à ce qu’il dore.`, durationMinutes: 5 },
-        { description: `Ajouter ${proteinText} et ${vegText}, puis les épices.`, durationMinutes: 6 },
-        { description: `Mijoter à couvert, goûter, ajuster ${mention('salt')}. Servir bien chaud.`, durationMinutes: spec.cook || 20 },
-      ];
+      return finishSteps(keys, [
+        {
+          description: `Tailler ${cutText} en morceaux réguliers. Réserver chaque élément à part.`,
+          durationMinutes: 8,
+        },
+        {
+          description: `Chauffer ${oilText} dans une casserole. Faire revenir ${vegs.includes('onion') ? mention('onion') : vegText || 'les aromates'} 5 min, jusqu’à ce qu’ils dore légèrement.`,
+          durationMinutes: 5,
+        },
+        proteinText
+          ? {
+              description: `Ajouter ${proteinText}, saisir ${skilletTime} pour bien colorer. ${aromaText ? `Parsemer ${aromaText}, remuer 1 min pour que les épices cuisent sans brûler.` : ''}`,
+              durationMinutes: 6,
+            }
+          : aromaText
+            ? {
+                description: `Ajouter ${aromaText}, remuer 1 min à feu moyen pour que les épices s’ouvrent.`,
+                durationMinutes: 1,
+              }
+            : null,
+        {
+          description: `Ajouter ${mentionList([...vegs, ...starches]) || vegText || 'le reste'}${extraText ? ` et ${extraText}` : ''}. Porter à petit frémissement, couvrir.`,
+          durationMinutes: 3,
+        },
+        {
+          description: `Mijoter ${String(spec.cook || 20)} min à feu doux, en remuant de temps en temps. C’est prêt quand ${doneness} et que la sauce a un peu réduit. Goûter, ajuster ${saltText || 'l’assaisonnement'}. Servir bien chaud.`,
+          durationMinutes: spec.cook || 20,
+        },
+      ]);
     case 'wok':
-      return [
-        { description: `Tailler ${vegText} et ${proteinText} en morceaux réguliers.`, durationMinutes: 8 },
-        { description: `Chauffer le wok avec ${oil}, saisir ${proteinText} à feu vif.`, durationMinutes: 5 },
-        { description: `Ajouter ${vegText} et ${mention('soy')}, sauter encore quelques minutes. Servir tout de suite.`, durationMinutes: spec.cook || 8 },
-      ];
+      return finishSteps(keys, [
+        {
+          description: `Tailler ${cutText} en lamelles ou en dés réguliers, de même taille pour une cuisson homogène. Préparer ${mentionList([...aromas, ...extras]) || 'la sauce'} à portée de main : le wok va vite.`,
+          durationMinutes: 10,
+        },
+        starchText
+          ? {
+              description: `Cuire ${starchText} selon le paquet (eau bouillante ${salts.includes('salt') ? `avec ${mention('salt')}` : ''}), égoutter, réserver.`,
+              durationMinutes: 10,
+            }
+          : null,
+        {
+          description: `Chauffer le wok à feu vif jusqu’à ce qu’il fume légèrement, puis ajouter ${oilText}. ${proteinText ? `Saisir ${proteinText} ${skilletTime}, réserver.` : 'Enrober le fond d’huile.'}`,
+          durationMinutes: 5,
+        },
+        {
+          description: `Jeter ${vegText || 'les légumes'} dans le wok, sauter 3 à 4 min en remuant sans cesse : ils doivent rester croquants.`,
+          durationMinutes: 4,
+        },
+        {
+          description: `Remettre ${mentionList([...proteins, ...starches]) || 'le tout'}${aromaText || extraText ? `, ajouter ${mentionList([...aromas, ...extras])}` : ''}. Sauter encore 2 min. Goûter, ajuster ${saltText || 'l’assaisonnement'}. Servir tout de suite.`,
+          durationMinutes: spec.cook || 4,
+        },
+      ]);
     case 'pasta':
-      return [
-        { description: `Cuire ${mention('pasta')} dans une grande eau salée, puis égoutter.`, durationMinutes: 10 },
-        { description: `Pendant ce temps, faire revenir ${proteinText} et ${vegText} dans ${oil}.`, durationMinutes: 8 },
-        { description: `Mélanger les pâtes à la poêlée, poivrer, servir.`, durationMinutes: 2 },
-      ];
+      return finishSteps(keys, [
+        {
+          description: `Porter une grande casserole d’eau à ébullition${salts.includes('salt') ? `, ajouter ${mention('salt')}` : ''}.`,
+          durationMinutes: 5,
+        },
+        {
+          description: `Cuire ${starchText || 'les pâtes'} al dente selon le temps indiqué sur le paquet. Prélever une louche d’eau de cuisson, puis égoutter.`,
+          durationMinutes: 10,
+        },
+        {
+          description: `Pendant ce temps, tailler ${mentionList([...proteins, ...vegs]) || proteinVeg}.`,
+          durationMinutes: 6,
+        },
+        {
+          description: `Chauffer ${oilText} dans une poêle à feu moyen. ${proteinText ? `Saisir ${proteinText} ${skilletTime}, jusqu’à ce que ${doneness}. ` : ''}Ajouter ${vegText || 'la garniture'}, cuire 4 à 5 min.`,
+          durationMinutes: 10,
+        },
+        {
+          description: `Verser ${starchText || 'les pâtes'} dans la poêle${extraText || aromaText ? `, ajouter ${mentionList([...extras, ...aromas])}` : ''}. Détendre avec un peu d’eau de cuisson, poivrer${salts.includes('pepper') ? ` avec ${mention('pepper')}` : ''}. Mélanger hors du feu et servir tout de suite.`,
+          durationMinutes: 3,
+        },
+      ]);
     case 'omelette':
-      return [
-        { description: `Battre ${mention('egg')} avec ${mention('salt')} et ${mention('pepper')}.`, durationMinutes: 3 },
-        { description: `Faire revenir ${vegText} dans ${oil}.`, durationMinutes: 6 },
-        { description: `Verser les œufs, laisser prendre à feu moyen, puis servir.`, durationMinutes: spec.cook || 10 },
-      ];
+      return finishSteps(keys, [
+        {
+          description: `Casser ${eggText} dans un bol. Ajouter ${saltText || 'une pincée de sel'}, battre à la fourchette jusqu’à ce que le mélange soit homogène et un peu mousseux.`,
+          durationMinutes: 3,
+        },
+        {
+          description: `Laver et tailler ${garnishText || 'la garniture'} en petits morceaux, pour qu’ils cuisent vite et se répartissent dans l’omelette.`,
+          durationMinutes: 6,
+        },
+        {
+          description: `Chauffer ${oilText} dans une poêle antiadhésive à feu moyen. Faire revenir la garniture 4 à 6 min, jusqu’à ce qu’elle soit tendre et ait rendu un peu d’eau.`,
+          durationMinutes: 6,
+        },
+        {
+          description: `Baisser le feu. Verser les œufs, laisser prendre 1 min sans toucher, puis ramener les bords vers le centre avec une spatule en inclinant la poêle. ${aromaText ? `Parsemer ${aromaText}. ` : ''}Cuire encore ${String(Math.max(3, (spec.cook || 8) - 4))} min : le centre doit rester un peu baveux.`,
+          durationMinutes: spec.cook || 8,
+        },
+        {
+          description: `Plier l’omelette en deux, ou la laisser à plat façon frittata. Glisser dans l’assiette et servir immédiatement.`,
+          durationMinutes: 1,
+        },
+      ]);
     case 'breakfast':
-      return [
-        { description: `Réunir ${mention('oats')} avec le liquide et les fruits.`, durationMinutes: 4 },
-        { description: `Laisser épaissir, ou cuire à la poêle si tu veux des pancakes. Servir frais.`, durationMinutes: spec.cook || 5 },
-      ];
+      return pancake
+        ? finishSteps(keys, [
+            {
+              description: `Dans un saladier, écraser ${extraText || 'le fruit'} à la fourchette. Ajouter ${mentionList([...starches, ...proteins]) || 'la pâte'}, mélanger jusqu’à obtenir une pâte épaisse, sans grumeaux.`,
+              durationMinutes: 5,
+            },
+            {
+              description: `Laisser reposer 5 min : les ${starchText || 'flocons'} s’hydratent et la pâte épaissit. ${mentionList([...aromas, ...salts]) ? `Assaisonner avec ${mentionList([...aromas, ...salts])}.` : ''}`,
+              durationMinutes: 5,
+            },
+            {
+              description: `Chauffer une poêle à feu moyen avec ${oilText}. Quand elle est chaude, déposer de petites louches de pâte en les espaçant.`,
+              durationMinutes: 2,
+            },
+            {
+              description: `Cuire 2 à 3 min : des bulles apparaissent à la surface, le dessous est doré. Retourner, cuire encore 2 min. Régler le feu pour ne pas brûler.`,
+              durationMinutes: spec.cook || 8,
+            },
+            {
+              description: `Empiler les pancakes au fur et à mesure, tenir au chaud. Servir dès la dernière fournée.`,
+              durationMinutes: 2,
+            },
+          ])
+        : finishSteps(keys, [
+            {
+              description: `Dans un bol, réunir ${mentionList([...starches, ...proteins]) || 'la base'}${extraText ? ` et ${extraText}` : ''}. Mélanger énergiquement.`,
+              durationMinutes: 4,
+            },
+            {
+              description: `Laisser gonfler 5 à 10 min à température ambiante (ou une nuit au frais, couvert). Les ${starchText || 'flocons'} doivent être tendres, plus de croquant cru.`,
+              durationMinutes: spec.cook || 8,
+            },
+            {
+              description: `${oils.length ? `Pour une version tiède : chauffer ${oilText} dans une casserole, verser le mélange, cuire 3 min en remuant jusqu’à épaissir. ` : ''}Goûter${mentionList([...aromas, ...salts]) ? `, ajuster avec ${mentionList([...aromas, ...salts])}` : ''}.`,
+              durationMinutes: 4,
+            },
+            {
+              description: `Si c’est trop épais, détendre avec une cuillère d’eau. Dresser dans un bol et servir tout de suite, frais ou tiède.`,
+              durationMinutes: 1,
+            },
+          ]);
     case 'parcel':
-      return [
-        { description: `Préchauffer le four. Déposer ${proteinText} et ${vegText} sur une feuille de papier cuisson.`, durationMinutes: 6 },
-        { description: `Arroser de ${oil} et ${mention('lemon')}, refermer les papillotes.`, durationMinutes: 4 },
-        { description: `Enfourner jusqu’à ce que le poisson ou la viande soit juste cuit. Ouvrir à table.`, durationMinutes: spec.cook || 18 },
-      ];
+      return finishSteps(keys, [
+        {
+          description: `Préchauffer le four à ${String(celsius)} °C. Découper 2 grandes feuilles de papier cuisson (ou de papier d’aluminium).`,
+          durationMinutes: 3,
+        },
+        {
+          description: `Laver et tailler ${vegText || 'les légumes'} en lamelles fines, pour qu’ils cuisent en même temps que ${proteinText || 'le poisson'}. Essuyer ${proteinText || proteinVeg}.`,
+          durationMinutes: 8,
+        },
+        {
+          description: `Déposer ${proteinVeg} au centre de chaque feuille. Arroser de ${seasonText}.`,
+          durationMinutes: 4,
+        },
+        {
+          description: `Refermer en papillote hermétique : rabattre, puis plisser les bords pour que la vapeur ne s’échappe pas.`,
+          durationMinutes: 3,
+        },
+        {
+          description: `Enfourner ${String(spec.cook || 18)} min. C’est prêt quand ${doneness}. Ouvrir à table (attention à la vapeur) et servir dans la papillote.`,
+          durationMinutes: spec.cook || 18,
+        },
+      ]);
     case 'oven':
     case 'bake':
-      return [
-        { description: `Préchauffer le four. Tailler ${vegText} et ${proteinText}.`, durationMinutes: 8 },
-        { description: `Mélanger avec ${oil}, ${mention('salt')} et ${mention('pepper')}, répartir sur la plaque.`, durationMinutes: 5 },
-        { description: `Enfourner jusqu’à coloration. Servir dès la sortie.`, durationMinutes: spec.cook || 25 },
-      ];
+      return finishSteps(keys, [
+        {
+          description: `Préchauffer le four à ${String(celsius)} °C, chaleur tournante. Chemiser une plaque de papier cuisson.`,
+          durationMinutes: 5,
+        },
+        {
+          description: `Laver ${vegText || 'les légumes'}. Tailler ${cutText} en morceaux réguliers. Essuyer ${proteinText || 'les pièces'} avec du papier absorbant : trop d’eau empêche de dorer.`,
+          durationMinutes: 10,
+        },
+        {
+          description: `Dans un saladier, mélanger ${marinadeText}. Enrober ${cutText} pour que chaque morceau soit filmé de marinade.`,
+          durationMinutes: 4,
+        },
+        {
+          description: `Répartir en une seule couche sur la plaque, sans tasser${extraText ? `. Glisser ${extraText} tout autour` : ''}.`,
+          durationMinutes: 3,
+        },
+        {
+          description: `Enfourner ${String(spec.cook || 25)} min. Remuer à mi-cuisson. C’est prêt quand ${doneness} et que les légumes sont tendres et colorés. Laisser reposer 5 min hors du four, servir avec le jus de cuisson.`,
+          durationMinutes: spec.cook || 25,
+        },
+      ]);
     case 'bowl':
     case 'rice':
-      return [
-        { description: `Cuire l’accompagnement (céréale ou légumineuse) et le laisser tiédir.`, durationMinutes: 15 },
-        { description: `Préparer ${proteinText} et ${vegText} à part.`, durationMinutes: 10 },
-        { description: `Dresser les bowls, napper de ${oil} et ${mention('lemon')}.`, durationMinutes: 4 },
-      ];
+      return finishSteps(keys, [
+        {
+          description: starchText
+            ? `Rincer ${starchText}. Le cuire dans une eau ${salts.includes('salt') ? `avec ${mention('salt')}` : 'légèrement salée'} selon le paquet, égoutter, tenir au chaud.`
+            : `Préparer la base du bowl.`,
+          durationMinutes: 15,
+        },
+        {
+          description: `Laver et tailler ${vegText || 'les légumes'}. Essuyer ${proteinText || proteinVeg}.`,
+          durationMinutes: 8,
+        },
+        proteinText
+          ? {
+              description: `Chauffer ${oilText} dans une poêle à feu moyen. Cuire ${proteinText} ${skilletTime}, jusqu’à ce que ${doneness}. Réserver, couvrir pour ne pas sécher.`,
+              durationMinutes: 10,
+            }
+          : {
+              description: `Chauffer ${oilText} dans une poêle.`,
+              durationMinutes: 1,
+            },
+        vegText
+          ? {
+              description: `Dans la même poêle, faire sauter ${vegText} 4 à 6 min : ils doivent rester un peu fermes. ${aromaText ? `Déglacer avec ${aromaText}.` : ''}`,
+              durationMinutes: 6,
+            }
+          : null,
+        {
+          description: `Dresser les bowls : ${starchText || 'la base'}, puis ${proteinVeg}${extraText ? `, ${extraText}` : ''}. Napper de ${dressText}. Servir tout de suite, encore tiède.`,
+          durationMinutes: 4,
+        },
+      ]);
     default:
-      return [
-        { description: `Préparer ${proteinText} et ${vegText}.`, durationMinutes: 6 },
-        { description: `Chauffer ${oil} dans la poêle, cuire ${proteinText} à feu moyen.`, durationMinutes: spec.cook || 12 },
-        { description: `Ajouter ${vegText}, assaisonner, servir chaud.`, durationMinutes: 5 },
-      ];
+      return finishSteps(keys, [
+        {
+          description: `Laver et tailler ${vegText || 'les légumes'} en morceaux réguliers. Sécher ${proteinText || cutText}, le détailler si les pièces sont épaisses pour une cuisson homogène.`,
+          durationMinutes: 8,
+        },
+        {
+          description: `Assaisonner ${proteinText || cutText} avec ${mentionList([...aromas, ...salts]) || saltText || 'sel et poivre'}. Laisser poser 5 min le temps que la poêle chauffe.`,
+          durationMinutes: 5,
+        },
+        {
+          description: `Chauffer ${oilText} dans une poêle à feu moyen-vif. Quand l’huile chante, déposer ${proteinText || 'les pièces'} sans les serrer. Cuire ${skilletTime} sans trop les bouger, jusqu’à ce que ${doneness}. Réserver.`,
+          durationMinutes: cook || 12,
+        },
+        vegText
+          ? {
+              description: `Dans la même poêle, faire revenir ${vegText}${starchText ? ` et ${starchText}` : ''} 5 à 7 min, jusqu’à ce qu’ils soient tendres et légèrement colorés.`,
+              durationMinutes: 7,
+            }
+          : starchText
+            ? {
+                description: `Faire réchauffer ${starchText} dans la poêle 3 min.`,
+                durationMinutes: 3,
+              }
+            : null,
+        {
+          description: `Remettre ${proteinText || 'le tout'}${extraText ? `, ajouter ${extraText}` : ''}. Mélanger 2 min à feu doux pour lier les jus. Goûter, ajuster ${saltText || 'l’assaisonnement'}. Servir bien chaud.`,
+          durationMinutes: 3,
+        },
+      ]);
   }
 }
+
 
 function extraTags(spec: RecipeSpec): string[] {
   const tags = new Set(spec.tags);
@@ -485,9 +938,10 @@ export function buildHealthyOfficialSpec(spec: RecipeSpec): OfficialHealthySpec 
     pinch('pepper', PINCH_PEPPER),
   ];
 
-  const protein = spec.egg ? 'egg' : proteinKey(spec);
-  if (protein) lines.push(proteinLine(protein, spec));
-  if (spec.egg && protein !== 'egg') lines.push(proteinLine('egg', spec));
+  for (const key of proteinKeys(spec)) {
+    lines.push(proteinLine(key, spec));
+  }
+  if (spec.egg) lines.push(proteinLine('egg', spec));
 
   const vegs = vegKeys(spec);
   for (const veg of vegs) {
@@ -535,6 +989,12 @@ export function buildHealthyOfficialSpec(spec: RecipeSpec): OfficialHealthySpec 
   }
   if (spec.label.toLowerCase().includes('olive')) {
     lines.push(g('olive', forPeople(PER_PERSON.oliveG)));
+  }
+  if (spec.label.toLowerCase().includes('feta')) {
+    lines.push(g('feta', forPeople(PER_PERSON.fetaG)));
+  }
+  if (/thym|herbes|proven[cç]/.test(spec.label.toLowerCase())) {
+    lines.push(tsp('provence'));
   }
   if (spec.label.toLowerCase().includes('basilic')) {
     lines.push(g('basil', forPeople(PER_PERSON.basilG)));

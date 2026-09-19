@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseStepMentions, insertIngredientToken, scaleMentionQuantity, mentionTooltip } from '../src/recipes/step-mentions.js';
-import { compareRecipesForSlot } from '../src/planner/slot-tags.js';
+import { compareRecipesForSlot, primarySlotForRecipe, recipeFitsSlot } from '../src/planner/slot-tags.js';
 import { weekMacroAverages } from '../src/nutrition/planned-consumed.js';
 import { aggregateUserStats } from '../src/nutrition/stats.js';
 import { buildHealthyOfficialSpecs, HEALTHY_INGREDIENTS, HEALTHY_OFFICIAL_COUNT, OFFICIAL_RECIPE_COUNT, HANDCRAFTED_OFFICIAL_COUNT, IDEAS_RECIPE_IDS, IDEAS_RECIPE_COUNT, isIdeasRecipeId, isPreparedFoodName, pickHealthyIngredient } from '../src/suggestions/official-healthy.js';
@@ -44,6 +44,22 @@ describe('priorité des tags par créneau', () => {
     const breakfast = { name: 'Porridge', tags: ['petit-dejeuner'] };
     const salad = { name: 'Salade', tags: ['salade'] };
     expect(compareRecipesForSlot(breakfast, salad, 'BREAKFAST')).toBeLessThan(0);
+  });
+
+  it('refuse un plat principal au petit-déjeuner et au goûter', () => {
+    expect(recipeFitsSlot(['plat-principal'], 'BREAKFAST')).toBe(false);
+    expect(recipeFitsSlot(['plat-principal'], 'SNACK')).toBe(false);
+    expect(recipeFitsSlot(['petit-dejeuner'], 'BREAKFAST')).toBe(true);
+    expect(recipeFitsSlot(['gouter'], 'SNACK')).toBe(true);
+    expect(recipeFitsSlot(['plat-principal'], 'LUNCH')).toBe(true);
+    expect(recipeFitsSlot(['petit-dejeuner'], 'DINNER')).toBe(false);
+  });
+
+  it('associe l’icône du créneau à partir des tags', () => {
+    expect(primarySlotForRecipe(['petit-dejeuner'], 'LUNCH')).toBe('BREAKFAST');
+    expect(primarySlotForRecipe(['gouter'], 'LUNCH')).toBe('SNACK');
+    expect(primarySlotForRecipe(['plat-principal'], 'DINNER')).toBe('DINNER');
+    expect(primarySlotForRecipe(['plat-principal'], 'LUNCH')).toBe('LUNCH');
   });
 });
 
@@ -125,7 +141,10 @@ describe('catalogue healthy officiel', () => {
     expect(specs.every((s) => s.ingredients.length >= 2)).toBe(true);
     expect(specs.every((s) => s.tagSlugs.includes('healthy'))).toBe(true);
     expect(specs.every((s) => DISH_KINDS.some((kind) => s.tagSlugs.includes(kind)))).toBe(true);
-    expect(specs.every((s) => s.steps.length >= 2)).toBe(true);
+    expect(specs.every((s) => s.steps.length >= 4)).toBe(true);
+    expect(
+      specs.every((s) => s.steps.reduce((n, step) => n + step.description.length, 0) >= 350),
+    ).toBe(true);
     expect(OFFICIAL_RECIPE_COUNT).toBe(222);
     expect(IDEAS_RECIPE_IDS).toHaveLength(200);
     expect(IDEAS_RECIPE_COUNT).toBe(200);
@@ -159,6 +178,48 @@ describe('catalogue healthy officiel', () => {
     const lentilSoup = specs.find((s) => s.id === 'official-h98');
     expect(lentilSoup?.ingredients.find((line) => line.key === 'lentils')?.grams).toBe(280);
     expect(Object.values(HEALTHY_INGREDIENTS).every((ref) => ref.code != null && ref.code > 0)).toBe(true);
+  });
+
+  it('aligne la protéine sur le titre et cite chaque ingrédient dans les étapes', () => {
+    const specs = buildHealthyOfficialSpecs();
+    const roast = specs.find((s) => s.id === 'official-h200');
+    expect(roast?.ingredients.some((line) => line.key === 'chicken')).toBe(true);
+    expect(roast?.ingredients.some((line) => line.key === 'turkey')).toBe(false);
+    expect(roast?.ingredients.some((line) => line.key === 'olive')).toBe(true);
+    expect(roast?.ingredients.some((line) => line.key === 'lemon')).toBe(true);
+    const roastBlob = roast?.steps.map((step) => step.description).join(' ') ?? '';
+    expect(roast?.steps.length ?? 0).toBeGreaterThanOrEqual(5);
+    expect(roastBlob).toMatch(/200\s*°C/);
+    expect(roastBlob).toContain('[[ing:chicken]]');
+    expect(roastBlob).toContain('[[ing:olive]]');
+    expect(roastBlob).toContain('[[ing:lemon]]');
+
+    const grilledFish = specs.find((s) => s.id === 'official-h30');
+    expect(grilledFish?.ingredients.some((line) => line.key === 'pollock')).toBe(true);
+    expect(grilledFish?.ingredients.some((line) => line.key === 'salmon')).toBe(false);
+
+    const troutEgg = specs.find((s) => s.id === 'official-h17');
+    expect(troutEgg?.ingredients.some((line) => line.key === 'trout')).toBe(true);
+    expect(troutEgg?.ingredients.some((line) => line.key === 'egg')).toBe(true);
+
+    for (const spec of specs) {
+      const catalog = HEALTHY_RECIPES.find((recipe) => `official-${recipe.id}` === spec.id);
+      expect(catalog).toBeTruthy();
+      const label = catalog!.label.toLowerCase();
+      const keys = new Set(spec.ingredients.map((line) => line.key));
+      if (label.includes('poulet')) {
+        expect(keys.has('chicken'), spec.id).toBe(true);
+        expect(keys.has('turkey'), spec.id).toBe(false);
+      }
+      if (label.includes('dinde')) {
+        expect(keys.has('turkey'), spec.id).toBe(true);
+        expect(keys.has('chicken'), spec.id).toBe(false);
+      }
+      const blob = spec.steps.map((step) => step.description).join(' ');
+      for (const line of spec.ingredients) {
+        expect(blob, `${spec.id} ne cite pas ${line.key}`).toContain(`[[ing:${line.key}]]`);
+      }
+    }
   });
 
   it('ignore les plats Ciqual tout-prêts au matching par nom', () => {
