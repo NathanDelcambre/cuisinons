@@ -32,6 +32,7 @@ import {
   type GenerateShoppingInput,
 } from '@/components/generate-shopping-modal';
 import { CategoryIcon } from '@/components/category-icon';
+import { RetailerLogo } from '@/components/retailer-logo';
 
 type ShoppingItem = {
   id: string;
@@ -65,6 +66,11 @@ type ShoppingList = {
   economical: boolean;
   items: ShoppingItem[];
 } | null;
+
+const EUR_FORMAT = new Intl.NumberFormat('fr-FR', {
+  style: 'currency',
+  currency: 'EUR',
+});
 
 export default function ShoppingPage() {
   const queryClient = useQueryClient();
@@ -156,6 +162,11 @@ export default function ShoppingPage() {
 
   const items = list.data?.items ?? [];
   const checked = items.filter((item) => item.checked);
+  const pricedItems = items.filter((item) => typeof item.product?.estimatedPrice === 'number');
+  const estimatedTotal = pricedItems.reduce(
+    (total, item) => total + (item.product?.estimatedPrice ?? 0),
+    0,
+  );
 
   // Regroupement par categorie : on fait ses courses par rayon, pas par ordre
   // d'apparition dans les recettes.
@@ -207,10 +218,22 @@ export default function ShoppingPage() {
       ) : null}
 
       {list.data?.retailer ? (
-        <Card className="py-3.5">
-          <p className="text-sm text-ink-700">
-            Produits sélectionnés chez <strong>{RETAILER_LABELS[list.data.retailer]}</strong>
-          </p>
+        <Card className="flex items-center justify-between gap-3 py-3.5">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <RetailerLogo retailer={list.data.retailer} className="size-9 rounded-lg" />
+            <p className="min-w-0 text-sm text-ink-700">
+              Produits sélectionnés chez{' '}
+              <strong className="whitespace-nowrap">{RETAILER_LABELS[list.data.retailer]}</strong>
+            </p>
+          </div>
+          <div className="shrink-0 text-right">
+            <p className="text-[10px] font-medium uppercase tracking-wide text-ink-400">
+              Total estimé
+            </p>
+            <p className="tabular mt-0.5 font-display text-lg font-semibold text-ink-900">
+              {pricedItems.length > 0 ? EUR_FORMAT.format(estimatedTotal) : '—'}
+            </p>
+          </div>
         </Card>
       ) : null}
 

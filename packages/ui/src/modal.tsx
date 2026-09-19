@@ -98,15 +98,22 @@ export function Modal({
             exit={{ opacity: 0, y: 20, scale: 0.98 }}
             transition={transitions.spring}
           >
+            <IconButton
+              icon={X}
+              label="Fermer"
+              size="sm"
+              variant="glass"
+              onClick={onClose}
+              className="absolute right-3 top-3 z-30 bg-white/90 shadow-soft"
+            />
             {chrome === 'default' ? (
-              <div className="flex shrink-0 items-start justify-between gap-4 px-6 pt-6">
+              <div className="flex shrink-0 items-start px-6 pt-6 pr-16">
                 <div className="min-w-0">
                   <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink-900">
                     {title}
                   </h2>
                   {description ? <p className="mt-1 text-sm text-ink-500">{description}</p> : null}
                 </div>
-                <IconButton icon={X} label="Fermer" size="sm" variant="ghost" onClick={onClose} />
               </div>
             ) : null}
             <div

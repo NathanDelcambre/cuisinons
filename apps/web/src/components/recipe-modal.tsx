@@ -3,26 +3,8 @@
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import {
-  CalendarPlus,
-  ChefHat,
-  Clock,
-  Pencil,
-  Star,
-  TriangleAlert,
-  X,
-} from 'lucide-react';
-import {
-  Badge,
-  Button,
-  IconButton,
-  Modal,
-  Select,
-  Skeleton,
-  Stepper,
-  buttonClasses,
-  cn,
-} from '@cuisinons/ui';
+import { CalendarPlus, ChefHat, Clock, Pencil, Star, TriangleAlert } from 'lucide-react';
+import { Badge, Button, Modal, Select, Skeleton, Stepper, buttonClasses, cn } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 import { routes } from '@/lib/routes';
 import { useAuth } from './auth-provider';
@@ -144,9 +126,7 @@ export function RecipeModal({
                 className={buttonClasses({
                   variant: 'glass',
                   size: 'sm',
-                  className: plan
-                    ? 'size-9 shrink-0 p-0 sm:size-11'
-                    : undefined,
+                  className: plan ? 'size-9 shrink-0 p-0 sm:size-11' : undefined,
                 })}
               >
                 <Pencil className="size-3.5 sm:size-4" aria-hidden />
@@ -191,16 +171,7 @@ export function RecipeModal({
           <p className="text-sm text-ink-600">Cette recette est introuvable.</p>
         </div>
       ) : (
-        <RecipeModalBody
-          data={data}
-          servings={servings}
-          onServings={setServings}
-          onClose={() => {
-            setPlanning(false);
-            setServings(null);
-            onClose();
-          }}
-        />
+        <RecipeModalBody data={data} servings={servings} onServings={setServings} />
       )}
     </Modal>
   );
@@ -210,17 +181,18 @@ function RecipeModalBody({
   data,
   servings,
   onServings,
-  onClose,
 }: {
   data: RecipeDetail;
   servings: number | null;
   onServings: (next: number) => void;
-  onClose: () => void;
 }) {
   const queryClient = useQueryClient();
   const rate = useMutation({
     mutationFn: (stars: number) =>
-      apiJson(`/api/bff/recipes/${data.id}/rating`, { method: 'PUT', body: JSON.stringify({ stars }) }),
+      apiJson(`/api/bff/recipes/${data.id}/rating`, {
+        method: 'PUT',
+        body: JSON.stringify({ stars }),
+      }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['recipe', data.id] });
       void queryClient.invalidateQueries({ queryKey: ['recipes'] });
@@ -249,14 +221,6 @@ function RecipeModalBody({
             <ChefHat className="size-10 text-ink-300" aria-hidden />
           </div>
         )}
-        <IconButton
-          icon={X}
-          label="Fermer"
-          size="sm"
-          variant="glass"
-          className="absolute right-3 top-3 bg-white/90 shadow-soft"
-          onClick={onClose}
-        />
       </div>
 
       <div className="space-y-6 px-5 py-5 sm:px-6">
@@ -279,7 +243,9 @@ function RecipeModalBody({
             {data.name}
           </h2>
           {data.description ? (
-            <p className="mt-2 max-w-prose text-sm leading-relaxed text-ink-600">{data.description}</p>
+            <p className="mt-2 max-w-prose text-sm leading-relaxed text-ink-600">
+              {data.description}
+            </p>
           ) : null}
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
             {totalTime > 0 ? (
@@ -306,7 +272,9 @@ function RecipeModalBody({
         <section className="rounded-2xl border border-white/70 bg-white/70 p-4 shadow-soft">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-[11px] font-medium uppercase tracking-wide text-ink-400">Personnes</p>
+              <p className="text-[11px] font-medium uppercase tracking-wide text-ink-400">
+                Personnes
+              </p>
               <p className="mt-0.5 text-xs text-ink-500">
                 Recette prévue pour {baseServings.toLocaleString('fr-FR')}{' '}
                 {baseServings > 1 ? 'personnes' : 'personne'}
@@ -315,12 +283,24 @@ function RecipeModalBody({
             <Stepper value={shown} onChange={onServings} step={1} min={1} suffix="pers." />
           </div>
           <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-white/70 pt-4 sm:grid-cols-4">
-            <Macro kind="kcal" label="Calories" value={data.nutrition.perServing.kcal} unit="kcal" />
-            <Macro kind="protein" label="Protéines" value={data.nutrition.perServing.protein} unit="g" />
+            <Macro
+              kind="kcal"
+              label="Calories"
+              value={data.nutrition.perServing.kcal}
+              unit="kcal"
+            />
+            <Macro
+              kind="protein"
+              label="Protéines"
+              value={data.nutrition.perServing.protein}
+              unit="g"
+            />
             <Macro kind="carbs" label="Glucides" value={data.nutrition.perServing.carbs} unit="g" />
             <Macro kind="fat" label="Lipides" value={data.nutrition.perServing.fat} unit="g" />
           </dl>
-          <p className="mt-3 text-xs text-ink-400">Macros pour 1 personne. Les ingrédients suivent le nombre de personnes.</p>
+          <p className="mt-3 text-xs text-ink-400">
+            Macros pour 1 personne. Les ingrédients suivent le nombre de personnes.
+          </p>
           {!data.nutrition.complete && data.nutrition.incompleteLines > 0 ? (
             <p className="mt-3 flex items-start gap-2 text-xs text-peach-500">
               <TriangleAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden />
@@ -354,9 +334,7 @@ function RecipeModalBody({
           )}
         </section>
 
-        {data.equipment.length > 0 ? (
-          <EquipmentReadList items={data.equipment} />
-        ) : null}
+        {data.equipment.length > 0 ? <EquipmentReadList items={data.equipment} /> : null}
 
         <section>
           <h3 className="mb-3 font-display text-base font-semibold tracking-[-0.01em] text-ink-900">
@@ -419,7 +397,10 @@ function RecipeModalBody({
                   className="rounded-full p-1 transition duration-200 ease-out-soft hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500"
                 >
                   <Star
-                    className={cn('size-6', filled ? 'fill-peach-400 text-peach-400' : 'text-ink-300')}
+                    className={cn(
+                      'size-6',
+                      filled ? 'fill-peach-400 text-peach-400' : 'text-ink-300',
+                    )}
                     aria-hidden
                   />
                 </button>
@@ -573,10 +554,7 @@ function AddToPlan({
       <Button variant="ghost" onClick={onCancel}>
         Annuler
       </Button>
-      <Button
-        variant="glass"
-        onClick={() => add.mutate(true)}
-      >
+      <Button variant="glass" onClick={() => add.mutate(true)}>
         Pour moi seulement
       </Button>
       <Button disabled={!users.data?.length} loading={add.isPending} onClick={() => add.mutate()}>

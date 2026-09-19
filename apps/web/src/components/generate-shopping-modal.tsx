@@ -16,6 +16,7 @@ import {
   Switch,
   cn,
 } from '@cuisinons/ui';
+import { RetailerLogo } from './retailer-logo';
 
 type GeneratePeriod =
   | { mode: 'week'; from: string }
@@ -40,6 +41,7 @@ const MODES: Array<{ value: Mode; label: string }> = [
 const RETAILER_OPTIONS = RETAILERS.map((value) => ({
   value,
   label: RETAILER_LABELS[value],
+  icon: <RetailerLogo retailer={value} className="size-5 rounded" />,
 }));
 
 function rangeLabel(from: Date, to: Date) {
@@ -163,6 +165,7 @@ export function GenerateShoppingModal({
       title="Générer mes courses"
       description="Seulement ce qu’il te manque pour les repas prévus."
       onClose={onClose}
+      className="h-[min(88dvh,42rem)]"
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
@@ -193,18 +196,10 @@ export function GenerateShoppingModal({
             aria-label="Enseigne pour les courses"
             onChange={setRetailer}
           />
-          <p className="text-xs text-ink-500">
-            Les produits et prix observés proviennent d’Open Food Facts et Open Prices.
-          </p>
         </div>
 
         <Inset className="p-3.5">
-          <Switch
-            checked={economical}
-            onChange={setEconomical}
-            label="Formats économiques"
-            description="Autorise un format plus grand, jusqu’à 10× le besoin, quand le prix au kilo ou au litre est meilleur."
-          />
+          <Switch checked={economical} onChange={setEconomical} label="Formats économiques" />
         </Inset>
 
         <Segmented

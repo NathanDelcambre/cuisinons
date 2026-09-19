@@ -199,14 +199,28 @@ function RecipesInner() {
             ) : null}
           </span>
         }
+        actionsBesideTitle
+        actionsClassName="flex items-center justify-end gap-2"
         actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" variant="glass" icon={Sparkles} onClick={openSuggest}>
-              Proposer un plat
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="glass"
+              icon={Sparkles}
+              aria-label="Proposer un plat"
+              className="max-sm:size-11 max-sm:p-0"
+              onClick={openSuggest}
+            >
+              <span className="max-sm:sr-only">Proposer un plat</span>
             </Button>
-            <Link href={routes.recetteNouvelle} className={buttonClasses()}>
+            <Link
+              href={routes.recetteNouvelle}
+              aria-label="Nouvelle recette"
+              title="Nouvelle recette"
+              className={buttonClasses({ className: 'max-sm:size-11 max-sm:p-0' })}
+            >
               <Plus className="size-4" aria-hidden />
-              Nouvelle recette
+              <span className="max-sm:sr-only">Nouvelle recette</span>
             </Link>
           </div>
         }
