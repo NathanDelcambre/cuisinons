@@ -2,19 +2,14 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import {
-  Check,
-  ListChecks,
-  Plus,
-  ShoppingBasket,
-  Sparkles,
-  Trash2,
-} from 'lucide-react';
+import { Check, ListChecks, Plus, ShoppingBasket, Sparkles, Trash2 } from 'lucide-react';
 import {
   UNIT_LABELS,
   UX_CATEGORY_LABELS,
+  RETAILER_LABELS,
   kitchenLabel,
   type QuantityUnit,
+  type Retailer,
   type UxCategory,
 } from '@cuisinons/shared';
 import {
@@ -41,16 +36,33 @@ import { CategoryIcon } from '@/components/category-icon';
 type ShoppingItem = {
   id: string;
   quantity: number;
+  neededQuantity: number;
   unit: QuantityUnit;
   origin: 'PLANNER' | 'MANUAL';
   checked: boolean;
   ingredient: { id: string; nameFr: string; iconUrl: string | null; uxCategory: UxCategory };
+  product: {
+    barcode: string;
+    name: string;
+    brand: string | null;
+    imageUrl: string | null;
+    packageQuantity: number | null;
+    packageCount: number | null;
+    estimatedPrice: number | null;
+    currency: string | null;
+    priceObservedAt: string | null;
+    storeName: string | null;
+    economyNote: string | null;
+    source: 'OPEN_FOOD_FACTS';
+  } | null;
 };
 
 type ShoppingList = {
   id: string;
   fromDate: string | null;
   toDate: string | null;
+  retailer: Retailer | null;
+  economical: boolean;
   items: ShoppingItem[];
 } | null;
 
@@ -183,6 +195,15 @@ export default function ShoppingPage() {
         </Card>
       ) : null}
 
+      {list.data?.retailer ? (
+        <Card className="flex flex-wrap items-center justify-between gap-2 py-3.5">
+          <p className="text-sm text-ink-700">
+            Produits sélectionnés chez <strong>{RETAILER_LABELS[list.data.retailer]}</strong>
+          </p>
+          <Badge tone="sage">Open Food Facts · Open Prices</Badge>
+        </Card>
+      ) : null}
+
       {list.isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }, (_, i) => (
@@ -291,13 +312,16 @@ function ShoppingRow({
   onQuantity: (quantity: number) => void;
   onRemove: () => void;
 }) {
+  const name = item.product?.name ?? kitchenLabel(item.ingredient.nameFr);
+  const image = item.product?.imageUrl ?? item.ingredient.iconUrl;
+  const unit = UNIT_LABELS[item.unit];
   return (
     <Card className={cn('flex flex-wrap items-center gap-3 py-3', item.checked && 'opacity-60')}>
       <button
         type="button"
         role="checkbox"
         aria-checked={item.checked}
-        aria-label={`${item.checked ? 'Décocher' : 'Cocher'} ${kitchenLabel(item.ingredient.nameFr)}`}
+        aria-label={`${item.checked ? 'Décocher' : 'Cocher'} ${name}`}
         onClick={onToggle}
         className={cn(
           'flex size-6 shrink-0 items-center justify-center rounded-full border transition duration-200 ease-out-soft',
@@ -309,35 +333,60 @@ function ShoppingRow({
         {item.checked ? <Check className="size-3.5" aria-hidden /> : null}
       </button>
 
-      <IngredientIcon src={item.ingredient.iconUrl} />
+      <IngredientIcon src={image} />
 
-      <span
-        className={cn(
-          'min-w-0 flex-1 truncate text-sm text-ink-900',
-          item.checked && 'line-through',
+      <span className="min-w-0 flex-1">
+        <span className={cn('block truncate text-sm text-ink-900', item.checked && 'line-through')}>
+          {name}
+        </span>
+        {item.product ? (
+          <>
+            <span className="mt-0.5 block text-xs text-ink-500">
+              {[item.product.brand, item.product.storeName].filter(Boolean).join(' · ')}
+              {item.product.estimatedPrice !== null
+                ? ` · ${item.product.estimatedPrice.toFixed(2).replace('.', ',')} €`
+                : ''}
+            </span>
+            <span className="mt-0.5 block text-xs text-ink-500">
+              Besoin : {String(item.neededQuantity)} {unit} · À acheter : {String(item.quantity)}{' '}
+              {unit}
+              {item.product.packageCount && item.product.packageQuantity
+                ? ` (${String(item.product.packageCount)} × ${String(item.product.packageQuantity)} ${unit})`
+                : ''}
+              {item.product.priceObservedAt
+                ? ` · prix relevé le ${new Intl.DateTimeFormat('fr-FR').format(new Date(item.product.priceObservedAt))}`
+                : ''}
+            </span>
+          </>
+        ) : (
+          <span className="mt-0.5 block text-xs text-tomato-600">
+            Produit introuvable : secours Ciqual
+          </span>
         )}
-      >
-        {kitchenLabel(item.ingredient.nameFr)}
+        {item.product?.economyNote ? (
+          <span className="mt-1 block text-xs text-sage-700">{item.product.economyNote}</span>
+        ) : null}
       </span>
 
       {item.origin === 'MANUAL' ? <Badge tone="peach">Ajouté</Badge> : null}
+      {item.product ? <Badge tone="sage">Produit OFF</Badge> : null}
 
       {/* Corrige la quantite quand le magasin n'a pas le format exact. */}
       <Input
         className="tabular h-11 w-20 px-2 text-right"
         inputMode="decimal"
         defaultValue={String(item.quantity)}
-        aria-label={`Quantité de ${kitchenLabel(item.ingredient.nameFr)}`}
+        aria-label={`Quantité de ${name}`}
         onBlur={(e) => {
           const next = Number(e.target.value.replace(',', '.'));
           if (Number.isFinite(next) && next !== item.quantity) onQuantity(next);
         }}
       />
-      <span className="w-12 shrink-0 text-xs text-ink-500">{UNIT_LABELS[item.unit]}</span>
+      <span className="w-12 shrink-0 text-xs text-ink-500">{unit}</span>
 
       <IconButton
         icon={Trash2}
-        label={`Retirer ${kitchenLabel(item.ingredient.nameFr)}`}
+        label={`Retirer ${name}`}
         size="sm"
         variant="ghost"
         onClick={onRemove}

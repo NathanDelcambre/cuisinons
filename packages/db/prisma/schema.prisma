@@ -86,6 +86,23 @@ enum ShoppingItemOrigin {
   MANUAL
 }
 
+/// Enseignes prises en charge par la résolution Open Prices.
+enum Retailer {
+  LECLERC
+  U
+  CARREFOUR
+  AUCHAN
+  LIDL
+  INTERMARCHE
+}
+
+/// Provenance de la ligne achetable. Ciqual reste le filet de sécurité lorsque
+/// Open Food Facts / Open Prices ne fournit pas de produit exploitable.
+enum ProductDataSource {
+  OPEN_FOOD_FACTS
+  CIQUAL_FALLBACK
+}
+
 enum UxCategory {
   VEGETABLES
   FRUITS
@@ -128,19 +145,19 @@ model User {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
-  sessions                   Session[]
-  recipesCreated             Recipe[]                      @relation("RecipeAuthor")
-  ratings                    RecipeRating[]
-  portions                   MealParticipantPortion[]
-  nutritionGoal              NutritionGoal?
-  dailyOverrides             DailyNutritionGoalOverride[]
-  optimizationPreference     OptimizationPreference?
-  optimizationUndo           OptimizationUndoSnapshot?
-  ingredientFavorites        UserIngredientFavorite[]
-  ingredientRecents          UserIngredientRecent[]
-  createdMealItems           MealItem[]                    @relation("MealItemAuthor")
-  pantryItems                PantryItem[]
-  shoppingLists              ShoppingList[]
+  sessions               Session[]
+  recipesCreated         Recipe[]                     @relation("RecipeAuthor")
+  ratings                RecipeRating[]
+  portions               MealParticipantPortion[]
+  nutritionGoal          NutritionGoal?
+  dailyOverrides         DailyNutritionGoalOverride[]
+  optimizationPreference OptimizationPreference?
+  optimizationUndo       OptimizationUndoSnapshot?
+  ingredientFavorites    UserIngredientFavorite[]
+  ingredientRecents      UserIngredientRecent[]
+  createdMealItems       MealItem[]                   @relation("MealItemAuthor")
+  pantryItems            PantryItem[]
+  shoppingLists          ShoppingList[]
 }
 
 model Session {
@@ -158,8 +175,8 @@ model Session {
 }
 
 model Ingredient {
-  id              String      @id @default(cuid())
-  ciqualCode      Int         @unique
+  id              String     @id @default(cuid())
+  ciqualCode      Int        @unique
   nameFr          String
   nameNormalized  String
   groupName       String
@@ -230,7 +247,9 @@ model Recipe {
   cookTimeMinutes   Int?
   photoUrl          String?
   finalCookedWeight Decimal?     @db.Decimal(12, 4)
-  /** Macros dénormalisées : les listes ne joignent plus les ingrédients Ciqual. */
+  /**
+   * Macros dénormalisées : les listes ne joignent plus les ingrédients Ciqual.
+   */
   nutritionSnapshot Json?
   version           Int          @default(1)
   createdAt         DateTime     @default(now())
@@ -251,18 +270,18 @@ model Recipe {
 }
 
 model RecipeIngredient {
-  id           String       @id @default(cuid())
-  recipeId     String
-  recipe       Recipe       @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  ingredientId String
-  ingredient   Ingredient   @relation(fields: [ingredientId], references: [id])
-  quantity     Decimal      @db.Decimal(12, 4)
-  unit         QuantityUnit
-  grams        Decimal?     @db.Decimal(12, 4)
-  gramsManual  Boolean      @default(false)
+  id              String       @id @default(cuid())
+  recipeId        String
+  recipe          Recipe       @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredientId    String
+  ingredient      Ingredient   @relation(fields: [ingredientId], references: [id])
+  quantity        Decimal      @db.Decimal(12, 4)
+  unit            QuantityUnit
+  grams           Decimal?     @db.Decimal(12, 4)
+  gramsManual     Boolean      @default(false)
   displayQuantity String?
-  sortOrder    Int
-  estimated    Boolean      @default(false)
+  sortOrder       Int
+  estimated       Boolean      @default(false)
 
   @@index([recipeId])
 }
@@ -326,18 +345,18 @@ model RecipeRating {
 }
 
 model MealItem {
-  id          String   @id @default(cuid())
-  date        DateTime @db.Date
+  id          String                   @id @default(cuid())
+  date        DateTime                 @db.Date
   slot        MealSlot
-  kind        MealKind @default(RECIPE)
+  kind        MealKind                 @default(RECIPE)
   recipeId    String?
-  recipe      Recipe?  @relation(fields: [recipeId], references: [id])
-  sortOrder   Int      @default(0)
-  version     Int      @default(1)
+  recipe      Recipe?                  @relation(fields: [recipeId], references: [id])
+  sortOrder   Int                      @default(0)
+  version     Int                      @default(1)
   createdById String
-  createdBy   User     @relation("MealItemAuthor", fields: [createdById], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdBy   User                     @relation("MealItemAuthor", fields: [createdById], references: [id])
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
   portions    MealParticipantPortion[]
 
   @@index([date, slot])
@@ -345,18 +364,18 @@ model MealItem {
 }
 
 model MealParticipantPortion {
-  id         String   @id @default(cuid())
-  mealItemId String
-  mealItem   MealItem @relation(fields: [mealItemId], references: [id], onDelete: Cascade)
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  portions   Decimal  @db.Decimal(8, 3)
+  id              String    @id @default(cuid())
+  mealItemId      String
+  mealItem        MealItem  @relation(fields: [mealItemId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  portions        Decimal   @db.Decimal(8, 3)
   /// Horodate la consommation de cette portion. Sert de garde-fou : le stock
   /// n'est deduit qu'une fois, et le retour en arriere le recredite.
-  consumedAt DateTime?
+  consumedAt      DateTime?
   /// L'utilisateur a refuse la validation automatique d'un jour passe :
   /// on ne re-deduit pas le stock a la prochaine ouverture du planning.
-  skipAutoConsume Boolean @default(false)
+  skipAutoConsume Boolean   @default(false)
 
   @@unique([mealItemId, userId])
   @@index([userId, consumedAt])
@@ -365,16 +384,21 @@ model MealParticipantPortion {
 /// Stock personnel. Volontairement non partage entre les deux comptes : chacun
 /// gere ses propres provisions, comme ses propres courses.
 model PantryItem {
-  id           String       @id @default(cuid())
-  userId       String
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ingredientId String
-  ingredient   Ingredient   @relation(fields: [ingredientId], references: [id])
-  area         StorageArea
-  quantity     Decimal      @db.Decimal(12, 4)
-  unit         QuantityUnit
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id              String            @id @default(cuid())
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ingredientId    String
+  ingredient      Ingredient        @relation(fields: [ingredientId], references: [id])
+  area            StorageArea
+  quantity        Decimal           @db.Decimal(12, 4)
+  unit            QuantityUnit
+  productBarcode  String?
+  productName     String?
+  productBrand    String?
+  productImageUrl String?
+  dataSource      ProductDataSource @default(CIQUAL_FALLBACK)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   /// L'unite fait partie de la cle : 2 pieces et 100 g d'un meme ingredient ne
   /// sont pas cumulables sans inventer une conversion.
@@ -392,63 +416,80 @@ model ShoppingList {
   toDate      DateTime?          @db.Date
   createdAt   DateTime           @default(now())
   completedAt DateTime?
+  retailer    Retailer?
+  economical  Boolean            @default(true)
   items       ShoppingListItem[]
 
   @@index([userId, completedAt])
 }
 
 model ShoppingListItem {
-  id           String             @id @default(cuid())
-  listId       String
-  list         ShoppingList       @relation(fields: [listId], references: [id], onDelete: Cascade)
-  ingredientId String
-  ingredient   Ingredient         @relation(fields: [ingredientId], references: [id])
-  quantity     Decimal            @db.Decimal(12, 4)
-  unit         QuantityUnit
-  origin       ShoppingItemOrigin @default(PLANNER)
-  checked      Boolean            @default(false)
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+  id              String             @id @default(cuid())
+  listId          String
+  list            ShoppingList       @relation(fields: [listId], references: [id], onDelete: Cascade)
+  ingredientId    String
+  ingredient      Ingredient         @relation(fields: [ingredientId], references: [id])
+  quantity        Decimal            @db.Decimal(12, 4)
+  /// Besoin net du planning. `quantity` est la quantité réellement achetée,
+  /// arrondie au nombre de paquets du produit sélectionné.
+  neededQuantity  Decimal?           @db.Decimal(12, 4)
+  unit            QuantityUnit
+  origin          ShoppingItemOrigin @default(PLANNER)
+  dataSource      ProductDataSource  @default(CIQUAL_FALLBACK)
+  productBarcode  String?
+  productName     String?
+  productBrand    String?
+  productImageUrl String?
+  packageQuantity Decimal?           @db.Decimal(12, 4)
+  packageCount    Int?
+  estimatedPrice  Decimal?           @db.Decimal(10, 2)
+  currency        String?
+  priceObservedAt DateTime?
+  storeName       String?
+  economyNote     String?
+  checked         Boolean            @default(false)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
 
   @@unique([listId, ingredientId, unit])
 }
 
 model NutritionGoal {
-  id                 String            @id @default(cuid())
-  userId             String            @unique
-  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  caloriesMode       NutrientGoalMode  @default(NONE)
-  caloriesValue      Decimal?          @db.Decimal(10, 2)
-  caloriesTolerance  Decimal?          @db.Decimal(10, 2)
-  proteinMode        NutrientGoalMode  @default(NONE)
-  proteinValue       Decimal?          @db.Decimal(10, 2)
-  proteinTolerance   Decimal?          @db.Decimal(10, 2)
-  carbsMode          NutrientGoalMode  @default(NONE)
-  carbsValue         Decimal?          @db.Decimal(10, 2)
-  carbsTolerance     Decimal?          @db.Decimal(10, 2)
-  fatMode            NutrientGoalMode  @default(NONE)
-  fatValue           Decimal?          @db.Decimal(10, 2)
-  fatTolerance       Decimal?          @db.Decimal(10, 2)
-  updatedAt          DateTime          @updatedAt
+  id                String           @id @default(cuid())
+  userId            String           @unique
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  caloriesMode      NutrientGoalMode @default(NONE)
+  caloriesValue     Decimal?         @db.Decimal(10, 2)
+  caloriesTolerance Decimal?         @db.Decimal(10, 2)
+  proteinMode       NutrientGoalMode @default(NONE)
+  proteinValue      Decimal?         @db.Decimal(10, 2)
+  proteinTolerance  Decimal?         @db.Decimal(10, 2)
+  carbsMode         NutrientGoalMode @default(NONE)
+  carbsValue        Decimal?         @db.Decimal(10, 2)
+  carbsTolerance    Decimal?         @db.Decimal(10, 2)
+  fatMode           NutrientGoalMode @default(NONE)
+  fatValue          Decimal?         @db.Decimal(10, 2)
+  fatTolerance      Decimal?         @db.Decimal(10, 2)
+  updatedAt         DateTime         @updatedAt
 }
 
 model DailyNutritionGoalOverride {
-  id                 String            @id @default(cuid())
-  userId             String
-  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  date               DateTime          @db.Date
-  caloriesMode       NutrientGoalMode
-  caloriesValue      Decimal?          @db.Decimal(10, 2)
-  caloriesTolerance  Decimal?          @db.Decimal(10, 2)
-  proteinMode        NutrientGoalMode
-  proteinValue       Decimal?          @db.Decimal(10, 2)
-  proteinTolerance   Decimal?          @db.Decimal(10, 2)
-  carbsMode          NutrientGoalMode
-  carbsValue         Decimal?          @db.Decimal(10, 2)
-  carbsTolerance     Decimal?          @db.Decimal(10, 2)
-  fatMode            NutrientGoalMode
-  fatValue           Decimal?          @db.Decimal(10, 2)
-  fatTolerance       Decimal?          @db.Decimal(10, 2)
+  id                String           @id @default(cuid())
+  userId            String
+  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date              DateTime         @db.Date
+  caloriesMode      NutrientGoalMode
+  caloriesValue     Decimal?         @db.Decimal(10, 2)
+  caloriesTolerance Decimal?         @db.Decimal(10, 2)
+  proteinMode       NutrientGoalMode
+  proteinValue      Decimal?         @db.Decimal(10, 2)
+  proteinTolerance  Decimal?         @db.Decimal(10, 2)
+  carbsMode         NutrientGoalMode
+  carbsValue        Decimal?         @db.Decimal(10, 2)
+  carbsTolerance    Decimal?         @db.Decimal(10, 2)
+  fatMode           NutrientGoalMode
+  fatValue          Decimal?         @db.Decimal(10, 2)
+  fatTolerance      Decimal?         @db.Decimal(10, 2)
 
   @@unique([userId, date])
 }
@@ -488,7 +529,7 @@ model UserIngredientRecent {
   ingredientId String
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
-  usedAt       DateTime   @updatedAt @default(now())
+  usedAt       DateTime   @default(now()) @updatedAt
 
   @@id([userId, ingredientId])
   @@index([userId, usedAt])

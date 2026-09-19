@@ -1,6 +1,16 @@
-import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { z } from 'zod';
-import { QUANTITY_UNITS, STORAGE_AREAS } from '@cuisinons/shared';
+import { QUANTITY_UNITS, RETAILERS, STORAGE_AREAS } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthUser } from '../auth/internal-jwt.guard.js';
@@ -10,10 +20,24 @@ import { ProvisionsService } from './provisions.service.js';
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const quantity = z.number().positive().max(100_000);
 
+const productSelection = {
+  retailer: z.enum(RETAILERS),
+  economical: z.boolean().default(true),
+};
+
 const generateSchema = z.discriminatedUnion('mode', [
-  z.object({ mode: z.literal('week'), from: isoDate }),
-  z.object({ mode: z.literal('days'), dates: z.array(isoDate).min(1).max(31) }),
-  z.object({ mode: z.literal('next'), days: z.number().int().min(1).max(31), from: isoDate.optional() }),
+  z.object({ mode: z.literal('week'), from: isoDate, ...productSelection }),
+  z.object({
+    mode: z.literal('days'),
+    dates: z.array(isoDate).min(1).max(31),
+    ...productSelection,
+  }),
+  z.object({
+    mode: z.literal('next'),
+    days: z.number().int().min(1).max(31),
+    from: isoDate.optional(),
+    ...productSelection,
+  }),
 ]);
 
 @Controller()
@@ -74,18 +98,27 @@ export class ProvisionsController {
   generate(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     const parsed = generateSchema.parse(body);
     if (parsed.mode === 'week') {
-      return this.provisions.generate(user.id, { mode: 'week', from: parseIsoDate(parsed.from) });
+      return this.provisions.generate(user.id, {
+        mode: 'week',
+        from: parseIsoDate(parsed.from),
+        retailer: parsed.retailer,
+        economical: parsed.economical,
+      });
     }
     if (parsed.mode === 'days') {
       return this.provisions.generate(user.id, {
         mode: 'days',
         dates: parsed.dates.map(parseIsoDate),
+        retailer: parsed.retailer,
+        economical: parsed.economical,
       });
     }
     return this.provisions.generate(user.id, {
       mode: 'next',
       days: parsed.days,
       from: parsed.from ? parseIsoDate(parsed.from) : todayUtc(),
+      retailer: parsed.retailer,
+      economical: parsed.economical,
     });
   }
 

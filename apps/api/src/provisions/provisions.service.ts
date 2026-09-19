@@ -1,4 +1,10 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { QuantityUnit, StorageArea } from '@cuisinons/db';
 import {
   aggregateQuantities,
@@ -6,11 +12,15 @@ import {
   defaultStorageArea,
   portionRequirement,
   roundForPurchase,
+  selectProductOffer,
+  type ProductSelection,
   subtractStock,
   type QuantityLine,
+  type Retailer,
 } from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { addDays, startOfWeek } from '../planner/dates.js';
+import { OpenFoodFactsService } from './open-food-facts.service.js';
 
 /** Fenetre maximale d'une generation, pour borner la requete et la liste. */
 const MAX_WINDOW_DAYS = 31;
@@ -18,10 +28,11 @@ const MAX_WINDOW_DAYS = 31;
 /** Ligne que le stock n'a pas pu couvrir, nommee pour l'affichage. */
 type MissingLine = QuantityLine & { name: string };
 
-type GenerateInput =
+type GenerateInput = (
   | { mode: 'week'; from: Date }
   | { mode: 'days'; dates: Date[] }
-  | { mode: 'next'; days: number; from: Date };
+  | { mode: 'next'; days: number; from: Date }
+) & { retailer: Retailer; economical: boolean };
 
 /** Ce que l'interface affiche d'un ingredient : rien de plus n'est transfere. */
 const ingredientSelect = {
@@ -30,7 +41,10 @@ const ingredientSelect = {
 
 @Injectable()
 export class ProvisionsService {
-  constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
+  constructor(
+    @Inject(PrismaService) private readonly prisma: PrismaService,
+    @Inject(OpenFoodFactsService) private readonly products: OpenFoodFactsService,
+  ) {}
 
   // ---------------------------------------------------------------- Stock
 
@@ -47,6 +61,16 @@ export class ProvisionsService {
       unit: item.unit,
       updatedAt: item.updatedAt,
       ingredient: item.ingredient,
+      product:
+        item.productBarcode && item.productName
+          ? {
+              barcode: item.productBarcode,
+              name: item.productName,
+              brand: item.productBrand,
+              imageUrl: item.productImageUrl,
+              source: item.dataSource,
+            }
+          : null,
     }));
   }
 
@@ -130,7 +154,10 @@ export class ProvisionsService {
   }
 
   private async assertOwnPantryItem(userId: string, id: string) {
-    const item = await this.prisma.pantryItem.findUnique({ where: { id }, select: { userId: true } });
+    const item = await this.prisma.pantryItem.findUnique({
+      where: { id },
+      select: { userId: true },
+    });
     if (!item) throw new NotFoundException('Ligne de stock introuvable.');
     // Le stock est personnel : on ne touche jamais celui de l'autre compte.
     if (item.userId !== userId) throw new ForbiddenException('Ce stock ne t’appartient pas.');
@@ -155,13 +182,35 @@ export class ProvisionsService {
       fromDate: list.fromDate,
       toDate: list.toDate,
       createdAt: list.createdAt,
+      retailer: list.retailer,
+      economical: list.economical,
       items: list.items.map((item) => ({
         id: item.id,
         quantity: Number(item.quantity),
+        neededQuantity:
+          item.neededQuantity === null ? Number(item.quantity) : Number(item.neededQuantity),
         unit: item.unit,
         origin: item.origin,
         checked: item.checked,
         ingredient: item.ingredient,
+        product:
+          item.productBarcode && item.productName
+            ? {
+                barcode: item.productBarcode,
+                name: item.productName,
+                brand: item.productBrand,
+                imageUrl: item.productImageUrl,
+                packageQuantity:
+                  item.packageQuantity === null ? null : Number(item.packageQuantity),
+                packageCount: item.packageCount,
+                estimatedPrice: item.estimatedPrice === null ? null : Number(item.estimatedPrice),
+                currency: item.currency,
+                priceObservedAt: item.priceObservedAt,
+                storeName: item.storeName,
+                economyNote: item.economyNote,
+                source: item.dataSource,
+              }
+            : null,
       })),
     };
   }
@@ -179,6 +228,7 @@ export class ProvisionsService {
       ...line,
       quantity: roundForPurchase(line.quantity, line.unit),
     }));
+    const selections = await this.productSelections(missing, input.retailer, input.economical);
 
     const from = dates[0]!;
     const to = dates[dates.length - 1]!;
@@ -190,11 +240,24 @@ export class ProvisionsService {
       });
       const list =
         existing ??
-        (await tx.shoppingList.create({ data: { userId, fromDate: from, toDate: to } }));
+        (await tx.shoppingList.create({
+          data: {
+            userId,
+            fromDate: from,
+            toDate: to,
+            retailer: input.retailer,
+            economical: input.economical,
+          },
+        }));
       if (existing) {
         await tx.shoppingList.update({
           where: { id: list.id },
-          data: { fromDate: from, toDate: to },
+          data: {
+            fromDate: from,
+            toDate: to,
+            retailer: input.retailer,
+            economical: input.economical,
+          },
         });
         await tx.shoppingListItem.deleteMany({ where: { listId: list.id, origin: 'PLANNER' } });
       }
@@ -210,9 +273,18 @@ export class ProvisionsService {
       if (fresh.length > 0) {
         await tx.shoppingListItem.createMany({
           data: fresh.map((line) => ({
+            ...(selections.get(`${line.ingredientId}|${line.unit}`)
+              ? this.shoppingProductData(
+                  selections.get(`${line.ingredientId}|${line.unit}`)!,
+                  line.quantity,
+                )
+              : {
+                  quantity: line.quantity,
+                  neededQuantity: line.quantity,
+                  dataSource: 'CIQUAL_FALLBACK' as const,
+                }),
             listId: list.id,
             ingredientId: line.ingredientId,
-            quantity: line.quantity,
             unit: line.unit,
             origin: 'PLANNER' as const,
           })),
@@ -313,6 +385,24 @@ export class ProvisionsService {
             area: defaultStorageArea(item.ingredient.uxCategory),
           },
         });
+        if (item.productBarcode && item.productName) {
+          await tx.pantryItem.update({
+            where: {
+              userId_ingredientId_unit: {
+                userId,
+                ingredientId: item.ingredientId,
+                unit: item.unit,
+              },
+            },
+            data: {
+              productBarcode: item.productBarcode,
+              productName: item.productName,
+              productBrand: item.productBrand,
+              productImageUrl: item.productImageUrl,
+              dataSource: item.dataSource,
+            },
+          });
+        }
       }
       await tx.shoppingListItem.deleteMany({ where: { id: { in: bought.map((i) => i.id) } } });
       const left = await tx.shoppingListItem.count({ where: { listId: list.id } });
@@ -338,7 +428,8 @@ export class ProvisionsService {
       select: { list: { select: { userId: true } } },
     });
     if (!item) throw new NotFoundException('Ligne de courses introuvable.');
-    if (item.list.userId !== userId) throw new ForbiddenException('Cette liste ne t’appartient pas.');
+    if (item.list.userId !== userId)
+      throw new ForbiddenException('Cette liste ne t’appartient pas.');
   }
 
   // --------------------------------------------------------- Consommation
@@ -537,7 +628,9 @@ export class ProvisionsService {
         recipe: {
           select: {
             servings: true,
-            ingredients: { select: { ingredientId: true, quantity: true, unit: true, grams: true } },
+            ingredients: {
+              select: { ingredientId: true, quantity: true, unit: true, grams: true },
+            },
           },
         },
         portions: { where: { userId }, select: { portions: true, consumedAt: true } },
@@ -578,5 +671,53 @@ export class ProvisionsService {
       quantity: Number(item.quantity),
       unit: item.unit,
     }));
+  }
+
+  /** Résout chaque besoin générique vers un produit et un prix observé. */
+  private async productSelections(
+    lines: QuantityLine[],
+    retailer: Retailer,
+    economical: boolean,
+  ): Promise<Map<string, ProductSelection>> {
+    const result = new Map<string, ProductSelection>();
+    const ingredients = await this.prisma.ingredient.findMany({
+      where: { id: { in: lines.map((line) => line.ingredientId) } },
+      select: { id: true, nameFr: true },
+    });
+    const names = new Map(ingredients.map((ingredient) => [ingredient.id, ingredient.nameFr]));
+    // Séquentiel volontairement : une liste peut contenir beaucoup de lignes et
+    // l'API communautaire ne doit pas recevoir une rafale de requêtes.
+    for (const line of lines) {
+      const name = names.get(line.ingredientId);
+      if (!name) continue;
+      const offers = await this.products.findOffers(name, retailer);
+      const selected = selectProductOffer({
+        neededQuantity: line.quantity,
+        neededUnit: line.unit,
+        offers,
+        economical,
+      });
+      if (selected) result.set(`${line.ingredientId}|${line.unit}`, selected);
+    }
+    return result;
+  }
+
+  private shoppingProductData(selection: ProductSelection, neededQuantity: number) {
+    return {
+      quantity: selection.purchaseQuantity,
+      neededQuantity,
+      dataSource: 'OPEN_FOOD_FACTS' as const,
+      productBarcode: selection.barcode,
+      productName: selection.name,
+      productBrand: selection.brand,
+      productImageUrl: selection.imageUrl,
+      packageQuantity: selection.packageQuantity,
+      packageCount: selection.packageCount,
+      estimatedPrice: selection.totalPrice,
+      currency: selection.currency,
+      priceObservedAt: new Date(`${selection.observedAt}T00:00:00.000Z`),
+      storeName: selection.storeName,
+      economyNote: selection.economyNote,
+    };
   }
 }

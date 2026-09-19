@@ -39,7 +39,7 @@ Trois contraintes structurelles, toutes déjà cassées une fois en production :
 2. **Preset framework = « Other »** (dans `vercel.json`, pas dans le dashboard). Le preset `nestjs` compile en plus `src/main.ts` en fonction `index`, or ce fichier appelle `app.listen()` : inexploitable en serverless. `src/main.ts` reste réservé au développement local.
 3. **Tout import relatif du backend porte son extension `.js`.** Vercel ne bundle pas la fonction : il transpile chaque fichier séparément et livre l’arborescence, donc Node applique la résolution ESM stricte, qui n’ajoute aucune extension (`ERR_MODULE_NOT_FOUND`). `apps/api` et `packages/shared` sont en `moduleResolution: NodeNext` pour que le typecheck refuse un import sans extension. `packages/db` reste en CommonJS car le client Prisma généré l’est.
 
-Variables : `DATABASE_URL`, `PASSWORD_PEPPER`, `AUTH_SECRET`, `INTERNAL_API_SECRET`, `WEB_ORIGIN` (URL web https), `APP_ENV=production`.
+Variables : `DATABASE_URL`, `PASSWORD_PEPPER`, `AUTH_SECRET`, `INTERNAL_API_SECRET`, `WEB_ORIGIN` (URL web https), `APP_ENV=production` et `OPEN_FOOD_FACTS_USER_AGENT` au format `Cuisinons/0.1 (adresse-de-contact)`.
 
 ## Google OAuth
 

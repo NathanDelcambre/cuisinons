@@ -4,12 +4,28 @@ import { useState } from 'react';
 import { addDays, format, startOfWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
-import { Button, IconButton, Inset, Modal, Segmented, Stepper, cn } from '@cuisinons/ui';
+import { RETAILERS, RETAILER_LABELS, type Retailer } from '@cuisinons/shared';
+import {
+  Button,
+  IconButton,
+  Inset,
+  Modal,
+  Segmented,
+  Select,
+  Stepper,
+  Switch,
+  cn,
+} from '@cuisinons/ui';
 
-export type GenerateShoppingInput =
+type GeneratePeriod =
   | { mode: 'week'; from: string }
   | { mode: 'days'; dates: string[] }
   | { mode: 'next'; days: number; from: string };
+
+export type GenerateShoppingInput = GeneratePeriod & {
+  retailer: Retailer;
+  economical: boolean;
+};
 
 type Mode = GenerateShoppingInput['mode'];
 
@@ -21,6 +37,11 @@ const MODES: Array<{ value: Mode; label: string }> = [
   { value: 'next', label: 'À venir' },
 ];
 
+const RETAILER_OPTIONS = RETAILERS.map((value) => ({
+  value,
+  label: RETAILER_LABELS[value],
+}));
+
 function rangeLabel(from: Date, to: Date) {
   const sameMonth = from.getMonth() === to.getMonth() && from.getFullYear() === to.getFullYear();
   if (sameMonth) {
@@ -29,13 +50,7 @@ function rangeLabel(from: Date, to: Date) {
   return `${format(from, 'd MMM', { locale: fr })} – ${format(to, 'd MMM', { locale: fr })}`;
 }
 
-function WeekNav({
-  weekStart,
-  onChange,
-}: {
-  weekStart: Date;
-  onChange: (next: Date) => void;
-}) {
+function WeekNav({ weekStart, onChange }: { weekStart: Date; onChange: (next: Date) => void }) {
   const weekEnd = addDays(weekStart, 6);
   return (
     <div className="flex items-center justify-center gap-2">
@@ -87,13 +102,16 @@ function DayStrip({
             onClick={() => onToggle(value)}
             className={cn(
               'flex flex-col items-center rounded-2xl py-2.5 transition duration-200 ease-out-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500 active:scale-[0.97]',
-              on
-                ? 'bg-sage-500 text-white shadow-soft'
-                : 'bg-white/80 text-ink-800 hover:bg-white',
+              on ? 'bg-sage-500 text-white shadow-soft' : 'bg-white/80 text-ink-800 hover:bg-white',
               isToday && !on && 'ring-1 ring-inset ring-sage-400',
             )}
           >
-            <span className={cn('text-[11px] font-medium uppercase', on ? 'text-white/80' : 'text-ink-500')}>
+            <span
+              className={cn(
+                'text-[11px] font-medium uppercase',
+                on ? 'text-white/80' : 'text-ink-500',
+              )}
+            >
               {format(day, 'EEEEEE', { locale: fr })}
             </span>
             <span className="tabular text-[15px] font-semibold leading-5">{format(day, 'd')}</span>
@@ -125,6 +143,8 @@ export function GenerateShoppingModal({
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [days, setDays] = useState<string[]>([]);
   const [nextDays, setNextDays] = useState(3);
+  const [retailer, setRetailer] = useState<Retailer>('LECLERC');
+  const [economical, setEconomical] = useState(true);
 
   const today = new Date();
   const nextUntil = addDays(today, nextDays - 1);
@@ -154,9 +174,9 @@ export function GenerateShoppingModal({
             loading={pending}
             disabled={!canGenerate}
             onClick={() => {
-              if (mode === 'week') onGenerate({ mode, from: iso(weekStart) });
-              else if (mode === 'days') onGenerate({ mode, dates: days });
-              else onGenerate({ mode, days: nextDays, from: iso(today) });
+              if (mode === 'week') onGenerate({ mode, from: iso(weekStart), retailer, economical });
+              else if (mode === 'days') onGenerate({ mode, dates: days, retailer, economical });
+              else onGenerate({ mode, days: nextDays, from: iso(today), retailer, economical });
             }}
           >
             Générer la liste
@@ -165,6 +185,28 @@ export function GenerateShoppingModal({
       }
     >
       <div className="space-y-4">
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-ink-900">Magasin</p>
+          <Select
+            value={retailer}
+            options={RETAILER_OPTIONS}
+            aria-label="Enseigne pour les courses"
+            onChange={setRetailer}
+          />
+          <p className="text-xs text-ink-500">
+            Les produits et prix observés proviennent d’Open Food Facts et Open Prices.
+          </p>
+        </div>
+
+        <Inset className="p-3.5">
+          <Switch
+            checked={economical}
+            onChange={setEconomical}
+            label="Formats économiques"
+            description="Autorise un format plus grand, jusqu’à 10× le besoin, quand le prix au kilo ou au litre est meilleur."
+          />
+        </Inset>
+
         <Segmented
           label="Période"
           value={mode}

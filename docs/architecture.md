@@ -60,7 +60,28 @@ on cumule, puis on retire ce qu’il a déjà en stock. Les repas déjà consomm
 ignorés, sinon on rachèterait ce qui a servi. Trois périodes possibles : la
 semaine, des jours cochés à la main, ou les N prochains jours.
 
-Quatre décisions à connaître :
+### Produits et prix
+
+Les besoins des recettes restent exprimés avec un ingrédient générique afin de
+pouvoir additionner « 200 g de riz » venant de plusieurs recettes. Au moment de
+générer les courses, le backend résout chaque besoin vers un produit réel :
+
+1. les magasins de l'enseigne choisie viennent d'**Open Prices** ;
+2. les produits synchronisés depuis **Open Food Facts** sont recherchés par nom ;
+3. les derniers prix observés dans ces magasins sont récupérés ;
+4. un conditionnement couvrant le besoin est choisi et sa fiche (code-barres,
+   marque, image, prix, magasin, date) est figée sur la ligne de courses ;
+5. après validation, cette identité produit est conservée dans les réserves.
+
+En mode « formats économiques », l'algorithme minimise le prix au kilo ou au
+litre parmi les formats qui ne dépassent pas dix fois le besoin. Sans ce mode,
+il minimise le montant à payer immédiatement. Open Prices étant une base
+communautaire et non l'inventaire temps réel des enseignes, un manque de donnée
+ou une panne déclenche automatiquement la ligne générique **SIQual secours**.
+Les appels externes sont séquentiels et mis en cache 30 minutes afin de respecter
+l'infrastructure communautaire.
+
+Quatre autres décisions à connaître :
 
 1. **L’unité fait partie de la clé** des lignes de stock et de courses. On
    ramène les masses au gramme et les volumes au millilitre (`canonicalQuantity`),
@@ -108,7 +129,7 @@ Trois refus volontaires :
 2. **Une salade de courgette à 20 kcal n’est pas un plat.** En dessous d’environ
    90 kcal par portion (70 au petit-déjeuner), la suggestion est rejetée.
 3. **Si les filtres (végétarien, 15 min, 3 ingrédients) ne passent pas**, on
-   propose au plus une alternative obtenue en relâchant *une* contrainte, clairement
+   propose au plus une alternative obtenue en relâchant _une_ contrainte, clairement
    étiquetée. On n’invente pas un deuxième moteur.
 
 ## Données

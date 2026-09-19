@@ -10,9 +10,8 @@ export type {
   NutrientGoalMode,
   StorageArea,
   ShoppingItemOrigin,
+  Retailer,
+  ProductDataSource,
 } from '../generated/client';
 export { prisma } from './client';
-export {
-  nutritionFromSnapshot,
-  INGREDIENT_MACRO_SELECT,
-} from './recipe-nutrition';
+export { nutritionFromSnapshot, INGREDIENT_MACRO_SELECT } from './recipe-nutrition';

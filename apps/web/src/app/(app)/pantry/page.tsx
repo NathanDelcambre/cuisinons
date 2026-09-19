@@ -33,6 +33,13 @@ type PantryItem = {
   quantity: number;
   unit: QuantityUnit;
   ingredient: { id: string; nameFr: string; iconUrl: string | null; uxCategory: UxCategory };
+  product: {
+    barcode: string;
+    name: string;
+    brand: string | null;
+    imageUrl: string | null;
+    source: 'OPEN_FOOD_FACTS' | 'CIQUAL_FALLBACK';
+  } | null;
 };
 
 export default function PantryPage() {
@@ -169,38 +176,47 @@ function PantryRow({
   onArea: (area: StorageArea) => void;
   onRemove: () => void;
 }) {
+  const name = item.product?.name ?? kitchenLabel(item.ingredient.nameFr);
+  const image = item.product?.imageUrl ?? item.ingredient.iconUrl;
   return (
     <Card className="flex flex-wrap items-center gap-3 py-3">
-      <IngredientIcon src={item.ingredient.iconUrl} />
-      <span className="min-w-0 flex-1 truncate text-sm text-ink-900">{kitchenLabel(item.ingredient.nameFr)}</span>
+      <IngredientIcon src={image} />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm text-ink-900">{name}</span>
+        {item.product?.brand ? (
+          <span className="mt-0.5 block truncate text-xs text-ink-500">
+            {item.product.brand} · Open Food Facts
+          </span>
+        ) : null}
+      </span>
       <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
-      <Select
-        className="h-11 min-h-11 min-w-0 flex-1 sm:w-44 sm:flex-none sm:shrink-0 pl-3 text-[13px]"
-        value={item.area}
-        options={storageAreaOptions()}
-        aria-label={`Rangement de ${kitchenLabel(item.ingredient.nameFr)}`}
-        onChange={onArea}
-      />
+        <Select
+          className="h-11 min-h-11 min-w-0 flex-1 sm:w-44 sm:flex-none sm:shrink-0 pl-3 text-[13px]"
+          value={item.area}
+          options={storageAreaOptions()}
+          aria-label={`Rangement de ${name}`}
+          onChange={onArea}
+        />
 
-      <Input
-        className="tabular h-11 w-20 px-2 text-right"
-        inputMode="decimal"
-        defaultValue={String(item.quantity)}
-        aria-label={`Quantité de ${kitchenLabel(item.ingredient.nameFr)}`}
-        onBlur={(e) => {
-          const next = Number(e.target.value.replace(',', '.'));
-          if (Number.isFinite(next) && next !== item.quantity) onQuantity(next);
-        }}
-      />
-      <span className="w-12 shrink-0 text-xs text-ink-500">{UNIT_LABELS[item.unit]}</span>
+        <Input
+          className="tabular h-11 w-20 px-2 text-right"
+          inputMode="decimal"
+          defaultValue={String(item.quantity)}
+          aria-label={`Quantité de ${name}`}
+          onBlur={(e) => {
+            const next = Number(e.target.value.replace(',', '.'));
+            if (Number.isFinite(next) && next !== item.quantity) onQuantity(next);
+          }}
+        />
+        <span className="w-12 shrink-0 text-xs text-ink-500">{UNIT_LABELS[item.unit]}</span>
 
-      <IconButton
-        icon={Trash2}
-        label={`Retirer ${kitchenLabel(item.ingredient.nameFr)}`}
-        size="sm"
-        variant="ghost"
-        onClick={onRemove}
-      />
+        <IconButton
+          icon={Trash2}
+          label={`Retirer ${name}`}
+          size="sm"
+          variant="ghost"
+          onClick={onRemove}
+        />
       </div>
     </Card>
   );

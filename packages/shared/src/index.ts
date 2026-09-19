@@ -12,6 +12,7 @@ export * from './optimization/engine.js';
 export * from './planner/slots.js';
 export * from './provisions/storage.js';
 export * from './provisions/quantities.js';
+export * from './products/retail.js';
 export * from './ciqual/ux-categories.js';
 export * from './ciqual/category-icons.js';
 export * from './ciqual/kitchen.js';
