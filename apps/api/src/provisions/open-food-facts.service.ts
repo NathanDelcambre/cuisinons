@@ -37,13 +37,21 @@ function relevance(name: string, query: string): number {
   return (exact ? 1_000 : 0) + (startsWithQuery ? 100 : 0) - nameWords.length;
 }
 
+function productQuery(ingredientName: string): string {
+  // SIQual nomme par exemple la feta « fromage de brebis ... (type feta) ».
+  // Dans ce cas, le type culinaire est bien plus discriminant que le libellé
+  // de laboratoire complet pour retrouver les variantes commerciales.
+  const typed = ingredientName.match(/\btype\s+([^,;)]+)/i)?.[1]?.trim();
+  return typed || ingredientName.split(',')[0]?.trim() || ingredientName.trim();
+}
+
 /** Catalogue local : aucun appel HTTP n'est effectue pendant une requete. */
 @Injectable()
 export class OpenFoodFactsService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async findOffers(ingredientName: string, retailer: Retailer): Promise<ProductOffer[]> {
-    const query = ingredientName.split(',')[0]?.trim() ?? ingredientName.trim();
+    const query = productQuery(ingredientName);
     const queryWords = words(query);
     if (queryWords.length === 0) return [];
     const products = await this.prisma.openFoodProduct.findMany({

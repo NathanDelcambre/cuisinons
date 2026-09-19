@@ -56,4 +56,16 @@ describe('OpenFoodFactsService', () => {
     const { service } = serviceWith([]);
     await expect(service.findOffers('riz', 'LIDL')).resolves.toEqual([]);
   });
+
+  it('utilise le type culinaire du libellé SIQual pour retrouver la feta', async () => {
+    const { service, findMany } = serviceWith([]);
+    await service.findOffers('Fromage de brebis au lait pasteurisé (type Feta)', 'CARREFOUR');
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          AND: [{ searchText: { contains: 'feta', mode: 'insensitive' } }],
+        }),
+      }),
+    );
+  });
 });

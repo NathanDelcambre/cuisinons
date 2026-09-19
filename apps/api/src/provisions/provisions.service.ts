@@ -301,11 +301,19 @@ export class ProvisionsService {
   ) {
     const ingredient = await this.prisma.ingredient.findUnique({
       where: { id: input.ingredientId },
-      select: { id: true },
+      select: { id: true, nameFr: true },
     });
     if (!ingredient) throw new NotFoundException('Ingrédient introuvable.');
     const canonical = canonicalQuantity(input.quantity, input.unit);
     const list = await this.ensureList(userId);
+    const selection = list.retailer
+      ? selectProductOffer({
+          neededQuantity: canonical.quantity,
+          neededUnit: canonical.unit,
+          offers: await this.products.findOffers(ingredient.nameFr, list.retailer),
+          economical: list.economical,
+        })
+      : null;
     await this.prisma.shoppingListItem.upsert({
       where: {
         listId_ingredientId_unit: {
@@ -316,12 +324,55 @@ export class ProvisionsService {
       },
       update: { quantity: { increment: canonical.quantity }, origin: 'MANUAL' },
       create: {
+        ...(selection
+          ? this.shoppingProductData(selection, canonical.quantity)
+          : {
+              quantity: canonical.quantity,
+              neededQuantity: canonical.quantity,
+              dataSource: 'CIQUAL_FALLBACK' as const,
+            }),
         listId: list.id,
         ingredientId: input.ingredientId,
-        quantity: canonical.quantity,
         unit: canonical.unit,
         origin: 'MANUAL',
       },
+    });
+    return this.activeList(userId);
+  }
+
+  async shoppingProductOptions(userId: string, id: string) {
+    const { item, selections } = await this.selectableProductsForItem(userId, id);
+    const shortlist = selections
+      .sort(
+        (a, b) =>
+          Number(b.barcode === item.productBarcode) - Number(a.barcode === item.productBarcode),
+      )
+      .slice(0, 12);
+    return shortlist.map((selection) => ({
+      barcode: selection.barcode,
+      name: selection.name,
+      brand: selection.brand,
+      imageUrl: selection.imageUrl,
+      packageQuantity: selection.packageQuantity,
+      packageUnit: selection.packageUnit,
+      packageCount: selection.packageCount,
+      estimatedPrice: selection.totalPrice,
+      currency: selection.currency,
+      priceObservedAt: selection.observedAt,
+      storeName: selection.storeName,
+    }));
+  }
+
+  async selectShoppingProduct(userId: string, id: string, barcode: string) {
+    const { item, selections } = await this.selectableProductsForItem(userId, id);
+    const selection = selections.find((candidate) => candidate.barcode === barcode);
+    if (!selection) {
+      throw new BadRequestException('Ce produit ne correspond pas à cet ingrédient ou ce magasin.');
+    }
+    const neededQuantity = Number(item.neededQuantity ?? item.quantity);
+    await this.prisma.shoppingListItem.update({
+      where: { id },
+      data: this.shoppingProductData(selection, neededQuantity),
     });
     return this.activeList(userId);
   }
@@ -430,6 +481,40 @@ export class ProvisionsService {
     if (!item) throw new NotFoundException('Ligne de courses introuvable.');
     if (item.list.userId !== userId)
       throw new ForbiddenException('Cette liste ne t’appartient pas.');
+  }
+
+  private async selectableProductsForItem(userId: string, id: string) {
+    const item = await this.prisma.shoppingListItem.findUnique({
+      where: { id },
+      select: {
+        quantity: true,
+        neededQuantity: true,
+        productBarcode: true,
+        unit: true,
+        ingredient: { select: { nameFr: true } },
+        list: { select: { userId: true, retailer: true } },
+      },
+    });
+    if (!item) throw new NotFoundException('Ligne de courses introuvable.');
+    if (item.list.userId !== userId) {
+      throw new ForbiddenException('Cette liste ne t’appartient pas.');
+    }
+    if (!item.list.retailer) {
+      throw new BadRequestException('Choisis d’abord un magasin en générant la liste.');
+    }
+    const neededQuantity = Number(item.neededQuantity ?? item.quantity);
+    const offers = await this.products.findOffers(item.ingredient.nameFr, item.list.retailer);
+    const selections = offers
+      .map((offer) =>
+        selectProductOffer({
+          neededQuantity,
+          neededUnit: item.unit,
+          offers: [offer],
+          economical: false,
+        }),
+      )
+      .filter((selection): selection is ProductSelection => selection !== null);
+    return { item, selections };
   }
 
   // --------------------------------------------------------- Consommation

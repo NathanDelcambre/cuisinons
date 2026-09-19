@@ -141,6 +141,17 @@ export class ProvisionsController {
     return this.provisions.updateShoppingItem(user.id, id, parsed);
   }
 
+  @Get('/shopping/items/:id/product-options')
+  productOptions(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.provisions.shoppingProductOptions(user.id, id);
+  }
+
+  @Patch('/shopping/items/:id/product')
+  selectProduct(@CurrentUser() user: AuthUser, @Param('id') id: string, @Body() body: unknown) {
+    const parsed = z.object({ barcode: z.string().min(8).max(14) }).parse(body);
+    return this.provisions.selectShoppingProduct(user.id, id, parsed.barcode);
+  }
+
   @Delete('/shopping/items/:id')
   removeItem(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     return this.provisions.removeShoppingItem(user.id, id);

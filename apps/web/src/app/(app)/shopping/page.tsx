@@ -2,7 +2,15 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Check, ListChecks, Plus, ShoppingBasket, Sparkles, Trash2 } from 'lucide-react';
+import {
+  ArrowLeftRight,
+  Check,
+  ListChecks,
+  Plus,
+  ShoppingBasket,
+  Sparkles,
+  Trash2,
+} from 'lucide-react';
 import {
   UNIT_LABELS,
   UX_CATEGORY_LABELS,
@@ -33,6 +41,7 @@ import {
 } from '@/components/generate-shopping-modal';
 import { CategoryIcon } from '@/components/category-icon';
 import { RetailerLogo } from '@/components/retailer-logo';
+import { ProductSwapModal } from '@/components/product-swap-modal';
 
 type ShoppingItem = {
   id: string;
@@ -76,6 +85,7 @@ export default function ShoppingPage() {
   const queryClient = useQueryClient();
   const [generateOpen, setGenerateOpen] = useState(false);
   const [picker, setPicker] = useState(false);
+  const [swapItem, setSwapItem] = useState<ShoppingItem | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
   const list = useQuery({
@@ -268,6 +278,8 @@ export default function ShoppingPage() {
                   item={item}
                   onToggle={() => patch.mutate({ id: item.id, checked: !item.checked })}
                   onQuantity={(quantity) => patch.mutate({ id: item.id, quantity })}
+                  onSwap={() => setSwapItem(item)}
+                  canSwap={Boolean(list.data?.retailer)}
                   onRemove={() => remove.mutate(item.id)}
                 />
               ))}
@@ -337,6 +349,13 @@ export default function ShoppingPage() {
           },
         }}
       />
+      <ProductSwapModal
+        itemId={swapItem?.id ?? null}
+        ingredientName={swapItem ? kitchenLabel(swapItem.ingredient.nameFr) : ''}
+        currentBarcode={swapItem?.product?.barcode ?? null}
+        retailer={list.data?.retailer ?? null}
+        onClose={() => setSwapItem(null)}
+      />
     </div>
   );
 }
@@ -345,11 +364,15 @@ function ShoppingRow({
   item,
   onToggle,
   onQuantity,
+  onSwap,
+  canSwap,
   onRemove,
 }: {
   item: ShoppingItem;
   onToggle: () => void;
   onQuantity: (quantity: number) => void;
+  onSwap: () => void;
+  canSwap: boolean;
   onRemove: () => void;
 }) {
   const name = item.product?.name ?? kitchenLabel(item.ingredient.nameFr);
@@ -442,13 +465,24 @@ function ShoppingRow({
         <span className="shrink-0 text-xs text-ink-500 sm:w-12">{unit}</span>
       </span>
 
-      <IconButton
-        icon={Trash2}
-        label={`Retirer ${name}`}
-        size="sm"
-        variant="ghost"
-        onClick={onRemove}
-      />
+      <span className="flex shrink-0 items-center gap-0.5">
+        <IconButton
+          icon={ArrowLeftRight}
+          label={`Échanger ${name}`}
+          size="sm"
+          variant="ghost"
+          disabled={!canSwap}
+          onClick={onSwap}
+        />
+
+        <IconButton
+          icon={Trash2}
+          label={`Retirer ${name}`}
+          size="sm"
+          variant="ghost"
+          onClick={onRemove}
+        />
+      </span>
     </Card>
   );
 }
