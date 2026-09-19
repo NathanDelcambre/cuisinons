@@ -172,15 +172,26 @@ export default function ShoppingPage() {
         title="Courses"
         description="Générée depuis ton planning, à partir de ce qu'il te manque vraiment."
         actionsBesideTitle
-        actionsClassName="flex flex-wrap items-center justify-end gap-2 max-sm:w-full max-sm:basis-full"
+        actionsClassName="flex items-center justify-end gap-2"
         actions={
           <>
-            <Button variant="glass" icon={Plus} onClick={() => setPicker(true)}>
-              <span className="sm:hidden">Ajouter</span>
-              <span className="hidden sm:inline">Ajouter un article</span>
+            <Button
+              variant="glass"
+              icon={Plus}
+              aria-label="Ajouter un article"
+              className="max-sm:size-11 max-sm:p-0"
+              onClick={() => setPicker(true)}
+            >
+              <span className="max-sm:sr-only">Ajouter un article</span>
             </Button>
-            <Button variant="accent" icon={Sparkles} onClick={() => setGenerateOpen(true)}>
-              Générer mes courses
+            <Button
+              variant="accent"
+              icon={Sparkles}
+              aria-label="Générer mes courses"
+              className="max-sm:size-11 max-sm:p-0"
+              onClick={() => setGenerateOpen(true)}
+            >
+              <span className="max-sm:sr-only">Générer mes courses</span>
             </Button>
           </>
         }
@@ -196,11 +207,10 @@ export default function ShoppingPage() {
       ) : null}
 
       {list.data?.retailer ? (
-        <Card className="flex flex-wrap items-center justify-between gap-2 py-3.5">
+        <Card className="py-3.5">
           <p className="text-sm text-ink-700">
             Produits sélectionnés chez <strong>{RETAILER_LABELS[list.data.retailer]}</strong>
           </p>
-          <Badge tone="sage">Open Food Facts · Open Prices</Badge>
         </Card>
       ) : null}
 
@@ -241,26 +251,33 @@ export default function ShoppingPage() {
             </section>
           ))}
 
-          <Panel className="sticky bottom-20 flex flex-wrap items-center justify-between gap-3 p-4 lg:bottom-6">
+          <Panel className="sticky bottom-20 flex items-center justify-between gap-2 p-3 sm:gap-3 sm:p-4 lg:bottom-6">
             {/* Une seule chaine : deux noeuds de texte voisins seraient annonces
                 « coché s » par un lecteur d'ecran. */}
-            <p className="tabular text-sm text-ink-600">
-              {`${String(checked.length)} sur ${String(items.length)} coché${checked.length > 1 ? 's' : ''}`}
+            <p className="tabular min-w-0 text-sm text-ink-600">
+              <span className="sm:hidden">{`${String(checked.length)}/${String(items.length)}`}</span>
+              <span className="hidden sm:inline">
+                {`${String(checked.length)} sur ${String(items.length)} coché${checked.length > 1 ? 's' : ''}`}
+              </span>
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <Button
                 variant="ghost"
                 icon={ListChecks}
+                aria-label="Tout cocher"
+                title="Tout cocher"
+                className="max-sm:size-9 max-sm:p-0"
                 loading={checkAll.isPending}
                 disabled={checked.length === items.length}
                 onClick={() =>
                   checkAll.mutate(items.filter((item) => !item.checked).map((item) => item.id))
                 }
               >
-                Tout cocher
+                <span className="max-sm:sr-only">Tout cocher</span>
               </Button>
               <Button
                 icon={Check}
+                size="sm"
                 loading={validate.isPending}
                 disabled={checked.length === 0}
                 onClick={() => validate.mutate()}
@@ -315,8 +332,17 @@ function ShoppingRow({
   const name = item.product?.name ?? kitchenLabel(item.ingredient.nameFr);
   const image = item.product?.imageUrl ?? item.ingredient.iconUrl;
   const unit = UNIT_LABELS[item.unit];
+  const price =
+    item.product?.estimatedPrice !== null && item.product?.estimatedPrice !== undefined
+      ? `${item.product.estimatedPrice.toFixed(2).replace('.', ',')} €`
+      : 'Prix indisponible';
   return (
-    <Card className={cn('flex flex-wrap items-center gap-3 py-3', item.checked && 'opacity-60')}>
+    <Card
+      className={cn(
+        'grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 px-3 py-3 sm:flex sm:gap-3 sm:px-5',
+        item.checked && 'opacity-60',
+      )}
+    >
       <button
         type="button"
         role="checkbox"
@@ -333,19 +359,25 @@ function ShoppingRow({
         {item.checked ? <Check className="size-3.5" aria-hidden /> : null}
       </button>
 
-      <IngredientIcon src={image} />
+      <IngredientIcon src={image} className="hidden sm:flex" />
 
       <span className="min-w-0 flex-1">
-        <span className={cn('block truncate text-sm text-ink-900', item.checked && 'line-through')}>
+        <span
+          className={cn(
+            'block line-clamp-2 text-sm leading-snug text-ink-900 sm:truncate',
+            item.checked && 'line-through',
+          )}
+        >
           {name}
         </span>
+        <span className="tabular mt-1 block text-xs font-medium text-ink-600 sm:hidden">
+          {price}
+        </span>
         {item.product ? (
-          <>
+          <span className="hidden sm:block">
             <span className="mt-0.5 block text-xs text-ink-500">
               {[item.product.brand, item.product.storeName].filter(Boolean).join(' · ')}
-              {item.product.estimatedPrice !== null
-                ? ` · ${item.product.estimatedPrice.toFixed(2).replace('.', ',')} €`
-                : ''}
+              {item.product.estimatedPrice !== null ? ` · ${price}` : ''}
             </span>
             <span className="mt-0.5 block text-xs text-ink-500">
               Besoin : {String(item.neededQuantity)} {unit} · À acheter : {String(item.quantity)}{' '}
@@ -357,32 +389,35 @@ function ShoppingRow({
                 ? ` · prix relevé le ${new Intl.DateTimeFormat('fr-FR').format(new Date(item.product.priceObservedAt))}`
                 : ''}
             </span>
-          </>
-        ) : (
-          <span className="mt-0.5 block text-xs text-tomato-600">
-            Produit introuvable : secours Ciqual
           </span>
-        )}
+        ) : null}
         {item.product?.economyNote ? (
-          <span className="mt-1 block text-xs text-sage-700">{item.product.economyNote}</span>
+          <span className="mt-1 hidden text-xs text-sage-700 sm:block">
+            {item.product.economyNote}
+          </span>
         ) : null}
       </span>
 
-      {item.origin === 'MANUAL' ? <Badge tone="peach">Ajouté</Badge> : null}
-      {item.product ? <Badge tone="sage">Produit OFF</Badge> : null}
+      {item.origin === 'MANUAL' ? (
+        <Badge tone="peach" className="hidden sm:inline-flex">
+          Ajouté
+        </Badge>
+      ) : null}
 
       {/* Corrige la quantite quand le magasin n'a pas le format exact. */}
-      <Input
-        className="tabular h-11 w-20 px-2 text-right"
-        inputMode="decimal"
-        defaultValue={String(item.quantity)}
-        aria-label={`Quantité de ${name}`}
-        onBlur={(e) => {
-          const next = Number(e.target.value.replace(',', '.'));
-          if (Number.isFinite(next) && next !== item.quantity) onQuantity(next);
-        }}
-      />
-      <span className="w-12 shrink-0 text-xs text-ink-500">{unit}</span>
+      <span className="flex shrink-0 items-center gap-1">
+        <Input
+          className="tabular h-10 w-16 px-2 text-right sm:h-11 sm:w-20"
+          inputMode="decimal"
+          defaultValue={String(item.quantity)}
+          aria-label={`Quantité de ${name}`}
+          onBlur={(e) => {
+            const next = Number(e.target.value.replace(',', '.'));
+            if (Number.isFinite(next) && next !== item.quantity) onQuantity(next);
+          }}
+        />
+        <span className="shrink-0 text-xs text-ink-500 sm:w-12">{unit}</span>
+      </span>
 
       <IconButton
         icon={Trash2}

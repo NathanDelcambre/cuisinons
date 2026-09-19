@@ -110,6 +110,7 @@ html {
      et une page longue ne centrent pas le contenu au meme endroit, et toute la
      mise en page (sidebar comprise) saute a chaque navigation. */
   scrollbar-gutter: stable;
+  overscroll-behavior: none;
 }
 
 /*
@@ -161,8 +162,7 @@ body {
   min-height: 100%;
   background:
     radial-gradient(1200px 600px at 10% -10%, rgba(125, 155, 138, 0.12), transparent 50%),
-    radial-gradient(900px 500px at 100% 0%, rgba(232, 178, 152, 0.14), transparent 45%),
-    #f7f5f2;
+    radial-gradient(900px 500px at 100% 0%, rgba(232, 178, 152, 0.14), transparent 45%), #f7f5f2;
   color: var(--color-ink-900);
 }
 
@@ -170,6 +170,9 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  min-height: 100dvh;
+  overflow-x: clip;
+  overscroll-behavior: none;
 }
 
 ::selection {
@@ -247,14 +250,18 @@ textarea {
   background: rgba(255, 255, 255, 0.66);
   backdrop-filter: blur(24px) saturate(1.4);
   border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow:
+    var(--shadow-soft),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 @utility glass-raised {
   background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(28px) saturate(1.5);
   border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  box-shadow:
+    var(--shadow-card),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 @utility glass-auth {

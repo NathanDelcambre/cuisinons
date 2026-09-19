@@ -67,7 +67,7 @@ export function Modal({
   return createPortal(
     <AnimatePresence>
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center sm:p-6">
+        <div className="fixed inset-0 z-50 flex items-end justify-center overscroll-none p-3 sm:items-center sm:p-6">
           <motion.button
             type="button"
             aria-label="Fermer"
@@ -111,7 +111,7 @@ export function Modal({
             ) : null}
             <div
               className={cn(
-                'min-h-0 flex-1 overflow-y-auto',
+                'min-h-0 flex-1 overflow-y-auto overscroll-none',
                 chrome === 'default' && 'px-6 pt-5 pb-6',
                 bodyClassName,
               )}

@@ -229,23 +229,23 @@ function RecipesInner() {
           />
         </div>
         <div className="grid w-full grid-cols-2 gap-3 md:flex md:w-auto md:contents">
-        <Select
-          value={tag}
-          aria-label="Filtrer par catégorie"
-          className="h-11 min-h-11 w-full md:w-[13.5rem] md:max-w-full md:shrink-0"
-          options={[
-            { value: '', label: 'Toutes les catégories' },
-            ...(tags.data ?? []).map((t) => ({ value: t.slug || t.id, label: t.label })),
-          ]}
-          onChange={(next) => update({ tag: next })}
-        />
-        <Select
-          value={sort}
-          aria-label="Trier"
-          className="h-11 min-h-11 w-full md:w-[13.5rem] md:max-w-full md:shrink-0"
-          options={SORTS}
-          onChange={(next) => update({ sort: next })}
-        />
+          <Select
+            value={tag}
+            aria-label="Filtrer par catégorie"
+            className="h-11 min-h-11 w-full md:w-[13.5rem] md:max-w-full md:shrink-0"
+            options={[
+              { value: '', label: 'Toutes les catégories' },
+              ...(tags.data ?? []).map((t) => ({ value: t.slug || t.id, label: t.label })),
+            ]}
+            onChange={(next) => update({ tag: next })}
+          />
+          <Select
+            value={sort}
+            aria-label="Trier"
+            className="h-11 min-h-11 w-full md:w-[13.5rem] md:max-w-full md:shrink-0"
+            options={SORTS}
+            onChange={(next) => update({ sort: next })}
+          />
         </div>
         <Segmented
           label="Vue des recettes"
@@ -299,45 +299,45 @@ function RecipesInner() {
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {list.map((recipe) => (
-            <li key={recipe.id}>
+            <li key={recipe.id} className="min-w-0 overflow-hidden">
               <button
                 type="button"
                 onClick={() => openRecipe(recipe.id)}
-                className="block h-full w-full rounded-2xl text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500"
+                className="block h-full w-full min-w-0 max-w-full rounded-2xl text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500"
               >
-                <CardLink className="flex h-full flex-col overflow-hidden p-0">
+                <CardLink className="flex h-full min-w-0 max-w-full flex-col overflow-hidden p-0">
                   <RecipeCover src={recipe.photoUrl} />
                   <div className="flex flex-1 flex-col p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <h2 className="line-clamp-2 min-h-[2.75em] font-display text-lg font-semibold leading-snug tracking-[-0.02em] text-ink-900">
-                      {recipe.name}
-                    </h2>
-                    <Rating average={recipe.rating.average} count={recipe.rating.count} />
-                  </div>
-                  <p className="mt-1 flex min-w-0 items-center gap-2 truncate text-sm text-ink-500">
-                    {recipe.source === 'CATALOG' ? null : (
-                      <Avatar
-                        name={recipe.author.displayName}
-                        src={recipe.author.email ? avatarUrlForEmail(recipe.author.email) : null}
-                        className="size-5 rounded-full text-[9px]"
-                      />
-                    )}
-                    <span className="truncate">
-                      {recipe.source === 'CATALOG'
-                        ? RECIPE_SOURCE_LABELS.CATALOG
-                        : `Proposé par ${recipe.author.displayName}`}
-                    </span>
-                    <span className="shrink-0 text-ink-400">
-                      · {Number(recipe.servings).toLocaleString('fr-FR')} pers.
-                    </span>
-                  </p>
+                    <div className="flex items-start justify-between gap-3">
+                      <h2 className="line-clamp-2 min-h-[2.75em] font-display text-lg font-semibold leading-snug tracking-[-0.02em] text-ink-900">
+                        {recipe.name}
+                      </h2>
+                      <Rating average={recipe.rating.average} count={recipe.rating.count} />
+                    </div>
+                    <p className="mt-1 flex min-w-0 items-center gap-2 truncate text-sm text-ink-500">
+                      {recipe.source === 'CATALOG' ? null : (
+                        <Avatar
+                          name={recipe.author.displayName}
+                          src={recipe.author.email ? avatarUrlForEmail(recipe.author.email) : null}
+                          className="size-5 rounded-full text-[9px]"
+                        />
+                      )}
+                      <span className="truncate">
+                        {recipe.source === 'CATALOG'
+                          ? RECIPE_SOURCE_LABELS.CATALOG
+                          : `Proposé par ${recipe.author.displayName}`}
+                      </span>
+                      <span className="shrink-0 text-ink-400">
+                        · {Number(recipe.servings).toLocaleString('fr-FR')} pers.
+                      </span>
+                    </p>
 
-                  <RecipeMacros macros={recipe.nutrition.perServing} />
+                    <RecipeMacros macros={recipe.nutrition.perServing} />
 
-                  <OverflowBadges
-                    className="mt-4"
-                    items={recipe.tags.map((t) => ({ key: t.tag.slug, label: t.tag.label }))}
-                  />
+                    <OverflowBadges
+                      className="mt-4"
+                      items={recipe.tags.map((t) => ({ key: t.tag.slug, label: t.tag.label }))}
+                    />
                   </div>
                 </CardLink>
               </button>
@@ -347,7 +347,11 @@ function RecipesInner() {
       )}
 
       <RecipeModal recipeId={selectedId} onClose={closeRecipe} />
-      <SuggestDishModal open={suggestOpen} onClose={closeSuggest} onAccepted={onSuggestionAccepted} />
+      <SuggestDishModal
+        open={suggestOpen}
+        onClose={closeSuggest}
+        onAccepted={onSuggestionAccepted}
+      />
     </div>
   );
 }
