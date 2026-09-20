@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { culinaryName, complementDe, foldText, joinFrench, kitchenLabel } from '../src/suggestions/names.js';
+import { culinaryName, complementDe, foldText, joinFrench, kitchenLabel, withDeArticle, withDefiniteArticle, ingredientInStep } from '../src/suggestions/names.js';
 import { collapseKitchenIngredients } from '../src/ciqual/kitchen.js';
 import { catalogRecipeToArchetype } from '../src/suggestions/from-recipe.js';
 import {
@@ -145,6 +145,28 @@ describe('noms de plat', () => {
     expect(complementDe('oignon')).toBe('d’oignon');
     expect(joinFrench(['courgette', 'poivron'])).toBe('courgette et poivron');
   });
+
+  it('place le, la, les ou l’ devant un ingrédient d’étape', () => {
+    expect(withDefiniteArticle('poulet')).toBe('le poulet');
+    expect(withDefiniteArticle('Courgette')).toBe('la courgette');
+    expect(withDefiniteArticle('oignon')).toBe('l’oignon');
+    expect(withDefiniteArticle("Huile d'olive")).toBe('l’huile d\'olive');
+    expect(withDefiniteArticle('eau')).toBe('l’eau');
+    expect(withDefiniteArticle('Pâtes sèches')).toBe('les pâtes sèches');
+    expect(withDefiniteArticle('petits pois')).toBe('les petits pois');
+    expect(withDefiniteArticle('épinards')).toBe('les épinards');
+    expect(withDefiniteArticle('haricot')).toBe('le haricot');
+    expect(withDefiniteArticle('yaourt')).toBe('le yaourt');
+    expect(withDefiniteArticle('œuf')).toBe('l’œuf');
+    expect(withDefiniteArticle('pomme de terre')).toBe('la pomme de terre');
+    expect(withDeArticle('poulet')).toBe('du poulet');
+    expect(withDeArticle('courgette')).toBe('de la courgette');
+    expect(withDeArticle('huile')).toBe('de l’huile');
+    expect(withDeArticle('pâtes')).toBe('des pâtes');
+    expect(ingredientInStep('Oignon', 'Faire revenir ')).toBe('l’oignon');
+    expect(ingredientInStep('Oignon', 'Ajouter l’')).toBe('oignon');
+    expect(ingredientInStep('Poulet', 'Saisir le ')).toBe('poulet');
+  });
 });
 
 describe('compositeur de plats', () => {
@@ -156,6 +178,11 @@ describe('compositeur de plats', () => {
     expect(poelee?.name.toLowerCase()).toContain('poulet');
     expect(poelee?.name.toLowerCase()).toContain('courgette');
     expect(poelee?.ingredients.every((line) => line.useGrams <= 500)).toBe(true);
+    const steps = poelee?.steps.map((step) => step.description).join(' ') ?? '';
+    expect(steps).toContain('la courgette');
+    expect(steps).toContain('le poulet');
+    expect(steps).toMatch(/l[’']oignon/);
+    expect(steps).toMatch(/l[’']huile/);
   });
 
   it('ne dépasse jamais le stock', () => {

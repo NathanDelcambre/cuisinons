@@ -1,0 +1,4759 @@
+[
+  {
+    "slug": "cheval",
+    "fr": "cheval",
+    "en": "illustrated cheval",
+    "aliases": [
+      "viande de cheval"
+    ]
+  },
+  {
+    "slug": "mouton",
+    "fr": "mouton",
+    "en": "illustrated mouton",
+    "aliases": [
+      "agneau de pré-salé"
+    ]
+  },
+  {
+    "slug": "faisan",
+    "fr": "faisan",
+    "en": "illustrated faisan",
+    "aliases": []
+  },
+  {
+    "slug": "poule",
+    "fr": "poule",
+    "en": "illustrated poule",
+    "aliases": []
+  },
+  {
+    "slug": "chapon",
+    "fr": "chapon",
+    "en": "illustrated chapon",
+    "aliases": []
+  },
+  {
+    "slug": "autruche",
+    "fr": "autruche",
+    "en": "illustrated autruche",
+    "aliases": []
+  },
+  {
+    "slug": "pigeon",
+    "fr": "pigeon",
+    "en": "illustrated pigeon",
+    "aliases": [
+      "pigeonneau"
+    ]
+  },
+  {
+    "slug": "chevreau",
+    "fr": "chevreau",
+    "en": "illustrated chevreau",
+    "aliases": []
+  },
+  {
+    "slug": "volaille",
+    "fr": "volaille",
+    "en": "illustrated volaille",
+    "aliases": [
+      "viande de volaille"
+    ]
+  },
+  {
+    "slug": "lievre",
+    "fr": "lièvre",
+    "en": "illustrated lièvre",
+    "aliases": []
+  },
+  {
+    "slug": "gibier-plumes",
+    "fr": "gibier à plumes",
+    "en": "illustrated gibier à plumes",
+    "aliases": []
+  },
+  {
+    "slug": "gibier-poil",
+    "fr": "gibier à poil",
+    "en": "illustrated gibier à poil",
+    "aliases": []
+  },
+  {
+    "slug": "viande-grisons",
+    "fr": "viande des Grisons",
+    "en": "illustrated viande des Grisons",
+    "aliases": [
+      "grisons"
+    ]
+  },
+  {
+    "slug": "corned-beef",
+    "fr": "corned-beef",
+    "en": "illustrated corned-beef",
+    "aliases": [
+      "corned beef"
+    ]
+  },
+  {
+    "slug": "viande-blanche",
+    "fr": "viande blanche",
+    "en": "illustrated viande blanche",
+    "aliases": []
+  },
+  {
+    "slug": "viande-rouge",
+    "fr": "viande rouge",
+    "en": "illustrated viande rouge",
+    "aliases": []
+  },
+  {
+    "slug": "abat",
+    "fr": "abat",
+    "en": "illustrated abat",
+    "aliases": [
+      "abats"
+    ]
+  },
+  {
+    "slug": "foie",
+    "fr": "foie",
+    "en": "illustrated foie",
+    "aliases": []
+  },
+  {
+    "slug": "gesier",
+    "fr": "gésier",
+    "en": "illustrated gésier",
+    "aliases": []
+  },
+  {
+    "slug": "museau",
+    "fr": "museau de boeuf",
+    "en": "illustrated museau de boeuf",
+    "aliases": [
+      "museau de porc"
+    ]
+  },
+  {
+    "slug": "oreille-de-porc",
+    "fr": "oreille de porc",
+    "en": "illustrated oreille de porc",
+    "aliases": []
+  },
+  {
+    "slug": "pied-de-porc",
+    "fr": "pied de porc",
+    "en": "illustrated pied de porc",
+    "aliases": []
+  },
+  {
+    "slug": "sang",
+    "fr": "sang",
+    "en": "illustrated sang",
+    "aliases": []
+  },
+  {
+    "slug": "cervelle",
+    "fr": "cervelle",
+    "en": "illustrated cervelle",
+    "aliases": []
+  },
+  {
+    "slug": "hache-volaille",
+    "fr": "haché de volaille",
+    "en": "illustrated haché de volaille",
+    "aliases": [
+      "hache de volaille"
+    ]
+  },
+  {
+    "slug": "roti-volaille",
+    "fr": "rôti de volaille",
+    "en": "illustrated rôti de volaille",
+    "aliases": [
+      "roti de volaille"
+    ]
+  },
+  {
+    "slug": "paupiette-volaille",
+    "fr": "paupiette de volaille",
+    "en": "illustrated paupiette de volaille",
+    "aliases": []
+  },
+  {
+    "slug": "brochette-volaille",
+    "fr": "brochette de volaille",
+    "en": "illustrated brochette de volaille",
+    "aliases": []
+  },
+  {
+    "slug": "brochette-mixte",
+    "fr": "brochette mixte de viande",
+    "en": "illustrated brochette mixte de viande",
+    "aliases": [
+      "brochette mixte"
+    ]
+  },
+  {
+    "slug": "brochette-crevettes",
+    "fr": "brochette de crevettes",
+    "en": "illustrated brochette de crevettes",
+    "aliases": []
+  },
+  {
+    "slug": "yakitori",
+    "fr": "yakitori",
+    "en": "illustrated yakitori",
+    "aliases": []
+  },
+  {
+    "slug": "hamburger",
+    "fr": "hamburger",
+    "en": "illustrated hamburger",
+    "aliases": []
+  },
+  {
+    "slug": "cheeseburger",
+    "fr": "cheeseburger",
+    "en": "illustrated cheeseburger",
+    "aliases": []
+  },
+  {
+    "slug": "double-cheeseburger",
+    "fr": "double cheeseburger",
+    "en": "illustrated double cheeseburger",
+    "aliases": []
+  },
+  {
+    "slug": "palette-diable",
+    "fr": "palette à la diable",
+    "en": "illustrated palette à la diable",
+    "aliases": [
+      "palette a la diable"
+    ]
+  },
+  {
+    "slug": "andouillette",
+    "fr": "andouillette",
+    "en": "illustrated andouillette",
+    "aliases": []
+  },
+  {
+    "slug": "andouillette-troyes",
+    "fr": "andouillette de Troyes",
+    "en": "illustrated andouillette de Troyes",
+    "aliases": []
+  },
+  {
+    "slug": "cervelas",
+    "fr": "cervelas",
+    "en": "illustrated cervelas",
+    "aliases": [
+      "cervelas obernois"
+    ]
+  },
+  {
+    "slug": "boudin",
+    "fr": "boudin",
+    "en": "illustrated boudin",
+    "aliases": [
+      "boudin antillais"
+    ]
+  },
+  {
+    "slug": "diot",
+    "fr": "diot",
+    "en": "illustrated diot",
+    "aliases": [
+      "diot cru"
+    ]
+  },
+  {
+    "slug": "rosette",
+    "fr": "rosette",
+    "en": "illustrated rosette",
+    "aliases": [
+      "rosette ou fuseau",
+      "fuseau"
+    ]
+  },
+  {
+    "slug": "galantine",
+    "fr": "galantine",
+    "en": "illustrated galantine",
+    "aliases": []
+  },
+  {
+    "slug": "fromage-de-tete",
+    "fr": "fromage de tête",
+    "en": "illustrated fromage de tête",
+    "aliases": [
+      "fromage de tete"
+    ]
+  },
+  {
+    "slug": "saucisse-francfort",
+    "fr": "saucisse de Francfort",
+    "en": "illustrated saucisse de Francfort",
+    "aliases": []
+  },
+  {
+    "slug": "saucisse-montbeliard",
+    "fr": "saucisse de Montbéliard",
+    "en": "illustrated saucisse de Montbéliard",
+    "aliases": [
+      "saucisse de Montbeliard"
+    ]
+  },
+  {
+    "slug": "saucisse-strasbourg",
+    "fr": "saucisse de Strasbourg",
+    "en": "illustrated saucisse de Strasbourg",
+    "aliases": [
+      "knack de strasbourg"
+    ]
+  },
+  {
+    "slug": "saucisse-cocktail",
+    "fr": "saucisse cocktail",
+    "en": "illustrated saucisse cocktail",
+    "aliases": []
+  },
+  {
+    "slug": "saucisse-alsacienne",
+    "fr": "saucisse alsacienne",
+    "en": "illustrated saucisse alsacienne",
+    "aliases": [
+      "gendarme"
+    ]
+  },
+  {
+    "slug": "saucisse-fumee",
+    "fr": "saucisse fumée",
+    "en": "illustrated saucisse fumée",
+    "aliases": [
+      "saucisse fumee a cuire"
+    ]
+  },
+  {
+    "slug": "saucisse-seche",
+    "fr": "saucisse sèche",
+    "en": "illustrated saucisse sèche",
+    "aliases": [
+      "saucisse seche"
+    ]
+  },
+  {
+    "slug": "saucisse-foie",
+    "fr": "saucisse de foie",
+    "en": "illustrated saucisse de foie",
+    "aliases": []
+  },
+  {
+    "slug": "saucisse-volaille",
+    "fr": "saucisse de volaille",
+    "en": "illustrated saucisse de volaille",
+    "aliases": []
+  },
+  {
+    "slug": "saucisse-vegetale",
+    "fr": "saucisse végétale",
+    "en": "illustrated saucisse végétale",
+    "aliases": [
+      "saucisse vegetale"
+    ]
+  },
+  {
+    "slug": "saucisse-jambon",
+    "fr": "saucisse de jambon",
+    "en": "illustrated saucisse de jambon",
+    "aliases": []
+  },
+  {
+    "slug": "saucisse-biere",
+    "fr": "saucisse de bière",
+    "en": "illustrated saucisse de bière",
+    "aliases": [
+      "saucisse de biere"
+    ]
+  },
+  {
+    "slug": "saucisse-viennoise",
+    "fr": "saucisse viennoise",
+    "en": "illustrated saucisse viennoise",
+    "aliases": []
+  },
+  {
+    "slug": "carrelet",
+    "fr": "carrelet",
+    "en": "illustrated carrelet",
+    "aliases": [
+      "plie",
+      "plie commune"
+    ]
+  },
+  {
+    "slug": "mahi-mahi",
+    "fr": "mahi-mahi",
+    "en": "illustrated mahi-mahi",
+    "aliases": [
+      "mahi mahi"
+    ]
+  },
+  {
+    "slug": "mulet",
+    "fr": "mulet",
+    "en": "illustrated mulet",
+    "aliases": []
+  },
+  {
+    "slug": "rascasse",
+    "fr": "rascasse",
+    "en": "illustrated rascasse",
+    "aliases": [
+      "rascasse de profondeur"
+    ]
+  },
+  {
+    "slug": "julienne-poisson",
+    "fr": "julienne",
+    "en": "illustrated julienne",
+    "aliases": [
+      "lingue"
+    ]
+  },
+  {
+    "slug": "vivaneau",
+    "fr": "vivaneau",
+    "en": "illustrated vivaneau",
+    "aliases": []
+  },
+  {
+    "slug": "roussette",
+    "fr": "roussette",
+    "en": "illustrated roussette",
+    "aliases": [
+      "saumonette",
+      "petite roussette"
+    ]
+  },
+  {
+    "slug": "morue",
+    "fr": "morue",
+    "en": "illustrated morue",
+    "aliases": [
+      "cabillaud salé"
+    ]
+  },
+  {
+    "slug": "bogue",
+    "fr": "bogue",
+    "en": "illustrated bogue",
+    "aliases": []
+  },
+  {
+    "slug": "capelan",
+    "fr": "capelan",
+    "en": "illustrated capelan",
+    "aliases": []
+  },
+  {
+    "slug": "carangue",
+    "fr": "carangue",
+    "en": "illustrated carangue",
+    "aliases": []
+  },
+  {
+    "slug": "cardine",
+    "fr": "cardine",
+    "en": "illustrated cardine",
+    "aliases": [
+      "cardine franche"
+    ]
+  },
+  {
+    "slug": "chinchard",
+    "fr": "chinchard",
+    "en": "illustrated chinchard",
+    "aliases": [
+      "chinchard gras",
+      "chinchard maigre"
+    ]
+  },
+  {
+    "slug": "corb",
+    "fr": "corb",
+    "en": "illustrated corb",
+    "aliases": []
+  },
+  {
+    "slug": "coregone",
+    "fr": "corégone",
+    "en": "illustrated corégone",
+    "aliases": [
+      "lavaret",
+      "coregone"
+    ]
+  },
+  {
+    "slug": "coulirou",
+    "fr": "coulirou",
+    "en": "illustrated coulirou",
+    "aliases": []
+  },
+  {
+    "slug": "dente",
+    "fr": "denté",
+    "en": "illustrated denté",
+    "aliases": [
+      "dente commun"
+    ]
+  },
+  {
+    "slug": "empereur",
+    "fr": "empereur",
+    "en": "illustrated empereur",
+    "aliases": []
+  },
+  {
+    "slug": "esturgeon",
+    "fr": "esturgeon",
+    "en": "illustrated esturgeon",
+    "aliases": []
+  },
+  {
+    "slug": "grenadier",
+    "fr": "grenadier",
+    "en": "illustrated grenadier",
+    "aliases": []
+  },
+  {
+    "slug": "hoki",
+    "fr": "hoki",
+    "en": "illustrated hoki",
+    "aliases": [
+      "hoki de Nouvelle-Zélande"
+    ]
+  },
+  {
+    "slug": "lingue-bleue",
+    "fr": "lingue bleue",
+    "en": "illustrated lingue bleue",
+    "aliases": []
+  },
+  {
+    "slug": "lompe",
+    "fr": "lompe",
+    "en": "illustrated lompe",
+    "aliases": []
+  },
+  {
+    "slug": "loup-atlantique",
+    "fr": "loup de l'Atlantique",
+    "en": "illustrated loup de l'Atlantique",
+    "aliases": [
+      "loup tacheté"
+    ]
+  },
+  {
+    "slug": "merou",
+    "fr": "mérou",
+    "en": "illustrated mérou",
+    "aliases": [
+      "merou"
+    ]
+  },
+  {
+    "slug": "omble-chevalier",
+    "fr": "omble chevalier",
+    "en": "illustrated omble chevalier",
+    "aliases": []
+  },
+  {
+    "slug": "orphie",
+    "fr": "orphie",
+    "en": "illustrated orphie",
+    "aliases": [
+      "orphie commune"
+    ]
+  },
+  {
+    "slug": "requin",
+    "fr": "requin",
+    "en": "illustrated requin",
+    "aliases": []
+  },
+  {
+    "slug": "sabre",
+    "fr": "sabre",
+    "en": "illustrated sabre",
+    "aliases": []
+  },
+  {
+    "slug": "saupe",
+    "fr": "saupe",
+    "en": "illustrated saupe",
+    "aliases": []
+  },
+  {
+    "slug": "tacaud",
+    "fr": "tacaud",
+    "en": "illustrated tacaud",
+    "aliases": []
+  },
+  {
+    "slug": "eperlan",
+    "fr": "éperlan",
+    "en": "illustrated éperlan",
+    "aliases": [
+      "eperlan"
+    ]
+  },
+  {
+    "slug": "breme",
+    "fr": "brème",
+    "en": "illustrated brème",
+    "aliases": [
+      "breme"
+    ]
+  },
+  {
+    "slug": "pangas",
+    "fr": "pangas",
+    "en": "illustrated pangas",
+    "aliases": []
+  },
+  {
+    "slug": "joels",
+    "fr": "joëls",
+    "en": "illustrated joëls",
+    "aliases": [
+      "joels"
+    ]
+  },
+  {
+    "slug": "massissi",
+    "fr": "massissi",
+    "en": "illustrated massissi",
+    "aliases": []
+  },
+  {
+    "slug": "poisson-blanc",
+    "fr": "poisson blanc",
+    "en": "illustrated poisson blanc",
+    "aliases": [
+      "poisson cuit"
+    ]
+  },
+  {
+    "slug": "poisson-pane",
+    "fr": "poisson pané",
+    "en": "illustrated poisson pané",
+    "aliases": [
+      "poisson pane"
+    ]
+  },
+  {
+    "slug": "accra-poisson",
+    "fr": "accra de poisson",
+    "en": "illustrated accra de poisson",
+    "aliases": [
+      "accra"
+    ]
+  },
+  {
+    "slug": "burger-poisson",
+    "fr": "burger au poisson",
+    "en": "illustrated burger au poisson",
+    "aliases": []
+  },
+  {
+    "slug": "brochette-poisson",
+    "fr": "brochette de poisson",
+    "en": "illustrated brochette de poisson",
+    "aliases": []
+  },
+  {
+    "slug": "quenelle-poisson",
+    "fr": "quenelle de poisson",
+    "en": "illustrated quenelle de poisson",
+    "aliases": []
+  },
+  {
+    "slug": "ecrevisse",
+    "fr": "écrevisse",
+    "en": "illustrated écrevisse",
+    "aliases": [
+      "ecrevisse",
+      "ecrevisses"
+    ]
+  },
+  {
+    "slug": "ormeau",
+    "fr": "ormeau",
+    "en": "illustrated ormeau",
+    "aliases": []
+  },
+  {
+    "slug": "fruits-de-mer",
+    "fr": "fruits de mer",
+    "en": "illustrated fruits de mer",
+    "aliases": []
+  },
+  {
+    "slug": "asiago",
+    "fr": "asiago",
+    "en": "illustrated asiago",
+    "aliases": []
+  },
+  {
+    "slug": "chaource",
+    "fr": "chaource",
+    "en": "illustrated chaource",
+    "aliases": []
+  },
+  {
+    "slug": "saint-nectaire",
+    "fr": "saint-nectaire",
+    "en": "illustrated saint-nectaire",
+    "aliases": [
+      "Saint-Nectaire"
+    ]
+  },
+  {
+    "slug": "saint-marcellin",
+    "fr": "saint-marcellin",
+    "en": "illustrated saint-marcellin",
+    "aliases": [
+      "Saint-Marcellin"
+    ]
+  },
+  {
+    "slug": "saint-felicien",
+    "fr": "saint-félicien",
+    "en": "illustrated saint-félicien",
+    "aliases": [
+      "saint-felicien"
+    ]
+  },
+  {
+    "slug": "neufchatel",
+    "fr": "neufchâtel",
+    "en": "illustrated neufchâtel",
+    "aliases": [
+      "neufchatel"
+    ]
+  },
+  {
+    "slug": "morbier",
+    "fr": "morbier",
+    "en": "illustrated morbier",
+    "aliases": []
+  },
+  {
+    "slug": "langres",
+    "fr": "langres",
+    "en": "illustrated langres",
+    "aliases": []
+  },
+  {
+    "slug": "fontina",
+    "fr": "fontina",
+    "en": "illustrated fontina",
+    "aliases": []
+  },
+  {
+    "slug": "grana-padano",
+    "fr": "grana padano",
+    "en": "illustrated grana padano",
+    "aliases": [
+      "Grana Padano"
+    ]
+  },
+  {
+    "slug": "provolone",
+    "fr": "provolone",
+    "en": "illustrated provolone",
+    "aliases": []
+  },
+  {
+    "slug": "fourme-montbrison",
+    "fr": "fourme de Montbrison",
+    "en": "illustrated fourme de Montbrison",
+    "aliases": []
+  },
+  {
+    "slug": "tome-des-bauges",
+    "fr": "tome des Bauges",
+    "en": "illustrated tome des Bauges",
+    "aliases": []
+  },
+  {
+    "slug": "tete-de-moine",
+    "fr": "tête de moine",
+    "en": "illustrated tête de moine",
+    "aliases": [
+      "tete de moine"
+    ]
+  },
+  {
+    "slug": "carre-de-lest",
+    "fr": "carré de l'Est",
+    "en": "illustrated carré de l'Est",
+    "aliases": [
+      "carre de l est"
+    ]
+  },
+  {
+    "slug": "brousse",
+    "fr": "brousse",
+    "en": "illustrated brousse",
+    "aliases": []
+  },
+  {
+    "slug": "brocciu",
+    "fr": "brocciu",
+    "en": "illustrated brocciu",
+    "aliases": [
+      "brucciu"
+    ]
+  },
+  {
+    "slug": "chabichou",
+    "fr": "chabichou",
+    "en": "illustrated chabichou",
+    "aliases": []
+  },
+  {
+    "slug": "picodon",
+    "fr": "picodon",
+    "en": "illustrated picodon",
+    "aliases": []
+  },
+  {
+    "slug": "pelardon",
+    "fr": "pélardon",
+    "en": "illustrated pélardon",
+    "aliases": [
+      "pelardon"
+    ]
+  },
+  {
+    "slug": "selles-sur-cher",
+    "fr": "selles-sur-cher",
+    "en": "illustrated selles-sur-cher",
+    "aliases": []
+  },
+  {
+    "slug": "ossau-iraty",
+    "fr": "ossau-iraty",
+    "en": "illustrated ossau-iraty",
+    "aliases": [
+      "Ossau-Iraty"
+    ]
+  },
+  {
+    "slug": "saint-paulin",
+    "fr": "saint-paulin",
+    "en": "illustrated saint-paulin",
+    "aliases": [
+      "Saint-Paulin"
+    ]
+  },
+  {
+    "slug": "maasdam",
+    "fr": "maasdam",
+    "en": "illustrated maasdam",
+    "aliases": []
+  },
+  {
+    "slug": "bleu-de-gex",
+    "fr": "bleu de Gex",
+    "en": "illustrated bleu de Gex",
+    "aliases": [
+      "bleu de Septmoncel"
+    ]
+  },
+  {
+    "slug": "bleu-causses",
+    "fr": "bleu des Causses",
+    "en": "illustrated bleu des Causses",
+    "aliases": []
+  },
+  {
+    "slug": "chevrot",
+    "fr": "chevrot",
+    "en": "illustrated chevrot",
+    "aliases": []
+  },
+  {
+    "slug": "fromage-brebis",
+    "fr": "fromage de brebis",
+    "en": "illustrated fromage de brebis",
+    "aliases": []
+  },
+  {
+    "slug": "fromage-chevre-buche",
+    "fr": "fromage de chèvre",
+    "en": "illustrated fromage de chèvre",
+    "aliases": [
+      "fromage de chevre",
+      "bûche de chèvre"
+    ]
+  },
+  {
+    "slug": "tartiflette-fromage",
+    "fr": "fromage pour tartiflette",
+    "en": "illustrated fromage pour tartiflette",
+    "aliases": []
+  },
+  {
+    "slug": "fromage-pate-molle",
+    "fr": "fromage à pâte molle",
+    "en": "illustrated fromage à pâte molle",
+    "aliases": [
+      "fromage a pate molle"
+    ]
+  },
+  {
+    "slug": "fromage-pate-pressee",
+    "fr": "fromage à pâte pressée",
+    "en": "illustrated fromage à pâte pressée",
+    "aliases": [
+      "fromage a pate pressee"
+    ]
+  },
+  {
+    "slug": "chayote",
+    "fr": "chayote",
+    "en": "illustrated chayote",
+    "aliases": [
+      "christophine",
+      "chouchou"
+    ]
+  },
+  {
+    "slug": "giraumon",
+    "fr": "giraumon",
+    "en": "illustrated giraumon",
+    "aliases": []
+  },
+  {
+    "slug": "citrouille",
+    "fr": "citrouille",
+    "en": "illustrated citrouille",
+    "aliases": []
+  },
+  {
+    "slug": "crosne",
+    "fr": "crosne",
+    "en": "illustrated crosne",
+    "aliases": []
+  },
+  {
+    "slug": "moringa",
+    "fr": "moringa",
+    "en": "illustrated moringa",
+    "aliases": []
+  },
+  {
+    "slug": "tetragone",
+    "fr": "tétragone",
+    "en": "illustrated tétragone",
+    "aliases": [
+      "tetragone cornue"
+    ]
+  },
+  {
+    "slug": "pissenlit",
+    "fr": "pissenlit",
+    "en": "illustrated pissenlit",
+    "aliases": []
+  },
+  {
+    "slug": "scarole",
+    "fr": "scarole",
+    "en": "illustrated scarole",
+    "aliases": []
+  },
+  {
+    "slug": "batavia",
+    "fr": "batavia",
+    "en": "illustrated batavia",
+    "aliases": []
+  },
+  {
+    "slug": "haricot-plat",
+    "fr": "haricot plat",
+    "en": "illustrated haricot plat",
+    "aliases": []
+  },
+  {
+    "slug": "haricot-lima",
+    "fr": "haricot de Lima",
+    "en": "illustrated haricot de Lima",
+    "aliases": [
+      "pois savon",
+      "pois du Cap"
+    ]
+  },
+  {
+    "slug": "pois-angole",
+    "fr": "pois d'Angole",
+    "en": "illustrated pois d'Angole",
+    "aliases": [
+      "pois d angole"
+    ]
+  },
+  {
+    "slug": "dachine",
+    "fr": "dachine",
+    "en": "illustrated dachine",
+    "aliases": []
+  },
+  {
+    "slug": "ti-nain",
+    "fr": "ti nain",
+    "en": "illustrated ti nain",
+    "aliases": []
+  },
+  {
+    "slug": "kamanioc",
+    "fr": "kamanioc",
+    "en": "illustrated kamanioc",
+    "aliases": []
+  },
+  {
+    "slug": "crudite",
+    "fr": "crudité",
+    "en": "illustrated crudité",
+    "aliases": [
+      "crudite"
+    ]
+  },
+  {
+    "slug": "macedoine",
+    "fr": "macédoine de légumes",
+    "en": "illustrated macédoine de légumes",
+    "aliases": [
+      "macedoine de legumes"
+    ]
+  },
+  {
+    "slug": "julienne-legumes",
+    "fr": "julienne de légumes",
+    "en": "illustrated julienne de légumes",
+    "aliases": [
+      "brunoise de légumes"
+    ]
+  },
+  {
+    "slug": "meloukhia",
+    "fr": "meloukhia",
+    "en": "illustrated meloukhia",
+    "aliases": [
+      "mloukhiya"
+    ]
+  },
+  {
+    "slug": "luzerne",
+    "fr": "luzerne",
+    "en": "illustrated luzerne",
+    "aliases": [
+      "graine germée de luzerne"
+    ]
+  },
+  {
+    "slug": "anone",
+    "fr": "anone",
+    "en": "illustrated anone",
+    "aliases": [
+      "chérimole",
+      "cherimole"
+    ]
+  },
+  {
+    "slug": "feijoa",
+    "fr": "feijoa",
+    "en": "illustrated feijoa",
+    "aliases": []
+  },
+  {
+    "slug": "chadeque",
+    "fr": "chadèque",
+    "en": "illustrated chadèque",
+    "aliases": [
+      "chadeque"
+    ]
+  },
+  {
+    "slug": "nefle",
+    "fr": "nèfle",
+    "en": "illustrated nèfle",
+    "aliases": [
+      "nefle du Japon"
+    ]
+  },
+  {
+    "slug": "ceriser",
+    "fr": "ceriser",
+    "en": "illustrated ceriser",
+    "aliases": []
+  },
+  {
+    "slug": "caimite",
+    "fr": "caïmite",
+    "en": "illustrated caïmite",
+    "aliases": [
+      "pomme étoile"
+    ]
+  },
+  {
+    "slug": "nashi",
+    "fr": "nashi",
+    "en": "illustrated nashi",
+    "aliases": [
+      "poire nashi"
+    ]
+  },
+  {
+    "slug": "salak",
+    "fr": "salak",
+    "en": "illustrated salak",
+    "aliases": [
+      "fruit du serpent"
+    ]
+  },
+  {
+    "slug": "sapote",
+    "fr": "sapote",
+    "en": "illustrated sapote",
+    "aliases": []
+  },
+  {
+    "slug": "longane-alias",
+    "fr": "longan",
+    "en": "illustrated longan",
+    "aliases": []
+  },
+  {
+    "slug": "ugli",
+    "fr": "ugli",
+    "en": "illustrated ugli",
+    "aliases": [
+      "tangelo"
+    ]
+  },
+  {
+    "slug": "mineola",
+    "fr": "minéola",
+    "en": "illustrated minéola",
+    "aliases": [
+      "mineola"
+    ]
+  },
+  {
+    "slug": "combava",
+    "fr": "combava",
+    "en": "illustrated combava",
+    "aliases": [
+      "citron kaffir"
+    ]
+  },
+  {
+    "slug": "main-de-bouddha",
+    "fr": "main de bouddha",
+    "en": "illustrated main de bouddha",
+    "aliases": []
+  },
+  {
+    "slug": "sudachi",
+    "fr": "sudachi",
+    "en": "illustrated sudachi",
+    "aliases": []
+  },
+  {
+    "slug": "kabosu",
+    "fr": "kabosu",
+    "en": "illustrated kabosu",
+    "aliases": []
+  },
+  {
+    "slug": "pomme-gala",
+    "fr": "pomme gala",
+    "en": "illustrated pomme gala",
+    "aliases": []
+  },
+  {
+    "slug": "pomme-pink-lady",
+    "fr": "pomme pink lady",
+    "en": "illustrated pomme pink lady",
+    "aliases": [
+      "pink lady"
+    ]
+  },
+  {
+    "slug": "pomme-canada",
+    "fr": "pomme canada",
+    "en": "illustrated pomme canada",
+    "aliases": []
+  },
+  {
+    "slug": "pomme-chantecler",
+    "fr": "pomme chantecler",
+    "en": "illustrated pomme chantecler",
+    "aliases": []
+  },
+  {
+    "slug": "tomate-grappe",
+    "fr": "tomate grappe",
+    "en": "illustrated tomate grappe",
+    "aliases": []
+  },
+  {
+    "slug": "tomate-marmande",
+    "fr": "tomate marmande",
+    "en": "illustrated tomate marmande",
+    "aliases": []
+  },
+  {
+    "slug": "tomate-noire",
+    "fr": "tomate noire de Crimée",
+    "en": "illustrated tomate noire de Crimée",
+    "aliases": [
+      "tomate noire"
+    ]
+  },
+  {
+    "slug": "tomate-verte",
+    "fr": "tomate verte",
+    "en": "illustrated tomate verte",
+    "aliases": []
+  },
+  {
+    "slug": "tomate-allongee",
+    "fr": "tomate allongée",
+    "en": "illustrated tomate allongée",
+    "aliases": [
+      "tomate allongee"
+    ]
+  },
+  {
+    "slug": "tomate-provencale",
+    "fr": "tomate à la provençale",
+    "en": "illustrated tomate à la provençale",
+    "aliases": []
+  },
+  {
+    "slug": "ble-khorasan",
+    "fr": "blé de Khorasan",
+    "en": "illustrated blé de Khorasan",
+    "aliases": [
+      "kamut",
+      "ble khorasan"
+    ]
+  },
+  {
+    "slug": "ble-dur-complet",
+    "fr": "blé dur complet",
+    "en": "illustrated blé dur complet",
+    "aliases": [
+      "ble dur"
+    ]
+  },
+  {
+    "slug": "seigle-complet",
+    "fr": "seigle complet",
+    "en": "illustrated seigle complet",
+    "aliases": [
+      "seigle"
+    ]
+  },
+  {
+    "slug": "sorgho-complet",
+    "fr": "sorgho complet",
+    "en": "illustrated sorgho complet",
+    "aliases": [
+      "sorgho"
+    ]
+  },
+  {
+    "slug": "mil-complet",
+    "fr": "mil complet",
+    "en": "illustrated mil complet",
+    "aliases": [
+      "mil"
+    ]
+  },
+  {
+    "slug": "frik",
+    "fr": "frik",
+    "en": "illustrated frik",
+    "aliases": []
+  },
+  {
+    "slug": "chanvre-graine",
+    "fr": "chanvre",
+    "en": "illustrated chanvre",
+    "aliases": [
+      "chènevis",
+      "chenevis"
+    ]
+  },
+  {
+    "slug": "pollen",
+    "fr": "pollen",
+    "en": "illustrated pollen",
+    "aliases": []
+  },
+  {
+    "slug": "bouchee-a-la-reine",
+    "fr": "bouchée à la reine",
+    "en": "illustrated bouchée à la reine",
+    "aliases": [
+      "bouchee a la reine"
+    ]
+  },
+  {
+    "slug": "cassoulet",
+    "fr": "cassoulet",
+    "en": "illustrated cassoulet",
+    "aliases": []
+  },
+  {
+    "slug": "moussaka",
+    "fr": "moussaka",
+    "en": "illustrated moussaka",
+    "aliases": []
+  },
+  {
+    "slug": "pot-au-feu",
+    "fr": "pot-au-feu",
+    "en": "illustrated pot-au-feu",
+    "aliases": [
+      "pot au feu"
+    ]
+  },
+  {
+    "slug": "pissaladiere",
+    "fr": "pissaladière",
+    "en": "illustrated pissaladière",
+    "aliases": [
+      "pissaladiere"
+    ]
+  },
+  {
+    "slug": "tielle",
+    "fr": "tielle",
+    "en": "illustrated tielle",
+    "aliases": [
+      "tielle sétoise"
+    ]
+  },
+  {
+    "slug": "pan-bagnat",
+    "fr": "pan bagnat",
+    "en": "illustrated pan bagnat",
+    "aliases": []
+  },
+  {
+    "slug": "croque-madame",
+    "fr": "croque-madame",
+    "en": "illustrated croque-madame",
+    "aliases": []
+  },
+  {
+    "slug": "croque-monsieur",
+    "fr": "croque-monsieur",
+    "en": "illustrated croque-monsieur",
+    "aliases": []
+  },
+  {
+    "slug": "ficelle-picarde",
+    "fr": "ficelle picarde",
+    "en": "illustrated ficelle picarde",
+    "aliases": []
+  },
+  {
+    "slug": "far-breton",
+    "fr": "far breton",
+    "en": "illustrated far breton",
+    "aliases": [
+      "far breton aux pruneaux"
+    ]
+  },
+  {
+    "slug": "gougere",
+    "fr": "gougère",
+    "en": "illustrated gougère",
+    "aliases": [
+      "gougere"
+    ]
+  },
+  {
+    "slug": "calisson",
+    "fr": "calisson",
+    "en": "illustrated calisson",
+    "aliases": [
+      "calisson d'Aix"
+    ]
+  },
+  {
+    "slug": "biscuit-savoie",
+    "fr": "biscuit de Savoie",
+    "en": "illustrated biscuit de Savoie",
+    "aliases": [
+      "biscuit savoie"
+    ]
+  },
+  {
+    "slug": "charlotte-fruits",
+    "fr": "charlotte aux fruits",
+    "en": "illustrated charlotte aux fruits",
+    "aliases": []
+  },
+  {
+    "slug": "fraisier",
+    "fr": "fraisier",
+    "en": "illustrated fraisier",
+    "aliases": [
+      "framboisier"
+    ]
+  },
+  {
+    "slug": "crumble-pommes",
+    "fr": "crumble aux pommes",
+    "en": "illustrated crumble aux pommes",
+    "aliases": [
+      "crumble"
+    ]
+  },
+  {
+    "slug": "gateau-basque",
+    "fr": "gâteau basque",
+    "en": "illustrated gâteau basque",
+    "aliases": [
+      "gateau basque"
+    ]
+  },
+  {
+    "slug": "omelette",
+    "fr": "omelette",
+    "en": "illustrated omelette",
+    "aliases": [
+      "omelette nature"
+    ]
+  },
+  {
+    "slug": "omelette-champignons",
+    "fr": "omelette aux champignons",
+    "en": "illustrated omelette aux champignons",
+    "aliases": []
+  },
+  {
+    "slug": "omelette-lardons",
+    "fr": "omelette aux lardons",
+    "en": "illustrated omelette aux lardons",
+    "aliases": []
+  },
+  {
+    "slug": "omelette-norvegienne",
+    "fr": "omelette norvégienne",
+    "en": "illustrated omelette norvégienne",
+    "aliases": []
+  },
+  {
+    "slug": "gratin-legumes",
+    "fr": "gratin de légumes",
+    "en": "illustrated gratin de légumes",
+    "aliases": [
+      "gratin de legumes"
+    ]
+  },
+  {
+    "slug": "poelee-legumes",
+    "fr": "poêlée de légumes",
+    "en": "illustrated poêlée de légumes",
+    "aliases": [
+      "poelee de legumes"
+    ]
+  },
+  {
+    "slug": "palet-legumes",
+    "fr": "palet de légumes",
+    "en": "illustrated palet de légumes",
+    "aliases": [
+      "galette de légumes"
+    ]
+  },
+  {
+    "slug": "quenelle",
+    "fr": "quenelle",
+    "en": "illustrated quenelle",
+    "aliases": [
+      "quenelle nature"
+    ]
+  },
+  {
+    "slug": "quenelle-volaille",
+    "fr": "quenelle de volaille",
+    "en": "illustrated quenelle de volaille",
+    "aliases": []
+  },
+  {
+    "slug": "beignet-legumes",
+    "fr": "beignet de légumes",
+    "en": "illustrated beignet de légumes",
+    "aliases": []
+  },
+  {
+    "slug": "beignet-viande",
+    "fr": "beignet de viande",
+    "en": "illustrated beignet de viande",
+    "aliases": []
+  },
+  {
+    "slug": "feuille-de-brick",
+    "fr": "feuille de brick",
+    "en": "illustrated feuille de brick",
+    "aliases": [
+      "khatfa"
+    ]
+  },
+  {
+    "slug": "samoussa",
+    "fr": "samoussa",
+    "en": "illustrated samoussa",
+    "aliases": [
+      "samossa",
+      "brick garni"
+    ]
+  },
+  {
+    "slug": "sushi",
+    "fr": "sushi",
+    "en": "illustrated sushi",
+    "aliases": [
+      "maki"
+    ]
+  },
+  {
+    "slug": "gratin-poisson",
+    "fr": "gratin de poisson",
+    "en": "illustrated gratin de poisson",
+    "aliases": [
+      "cassolette de poisson"
+    ]
+  },
+  {
+    "slug": "feuilleté-viande",
+    "fr": "feuilleté à la viande",
+    "en": "illustrated feuilleté à la viande",
+    "aliases": [
+      "friand a la viande"
+    ]
+  },
+  {
+    "slug": "feuilleté-fromage",
+    "fr": "feuilleté au fromage",
+    "en": "illustrated feuilleté au fromage",
+    "aliases": [
+      "friand au fromage"
+    ]
+  },
+  {
+    "slug": "feuilleté-poisson",
+    "fr": "feuilleté au poisson",
+    "en": "illustrated feuilleté au poisson",
+    "aliases": []
+  },
+  {
+    "slug": "champignons-grecque",
+    "fr": "champignons à la grecque",
+    "en": "illustrated champignons à la grecque",
+    "aliases": []
+  },
+  {
+    "slug": "riste-aubergine",
+    "fr": "riste d'aubergines",
+    "en": "illustrated riste d'aubergines",
+    "aliases": []
+  },
+  {
+    "slug": "sauce-bechamel",
+    "fr": "sauce béchamel",
+    "en": "illustrated sauce béchamel",
+    "aliases": [
+      "bechamel"
+    ]
+  },
+  {
+    "slug": "sauce-caesar",
+    "fr": "sauce Caesar",
+    "en": "illustrated sauce Caesar",
+    "aliases": [
+      "sauce cesar"
+    ]
+  },
+  {
+    "slug": "sauce-algerienne",
+    "fr": "sauce algérienne",
+    "en": "illustrated sauce algérienne",
+    "aliases": [
+      "sauce algerienne"
+    ]
+  },
+  {
+    "slug": "sauce-americaine",
+    "fr": "sauce américaine",
+    "en": "illustrated sauce américaine",
+    "aliases": [
+      "sauce americaine"
+    ]
+  },
+  {
+    "slug": "sauce-andalouse",
+    "fr": "sauce andalouse",
+    "en": "illustrated sauce andalouse",
+    "aliases": []
+  },
+  {
+    "slug": "sauce-armoricaine",
+    "fr": "sauce armoricaine",
+    "en": "illustrated sauce armoricaine",
+    "aliases": []
+  },
+  {
+    "slug": "sauce-basquaise",
+    "fr": "sauce basquaise",
+    "en": "illustrated sauce basquaise",
+    "aliases": [
+      "sauce aux poivrons"
+    ]
+  },
+  {
+    "slug": "sauce-bourguignonne",
+    "fr": "sauce bourguignonne",
+    "en": "illustrated sauce bourguignonne",
+    "aliases": []
+  },
+  {
+    "slug": "sauce-burger",
+    "fr": "sauce burger",
+    "en": "illustrated sauce burger",
+    "aliases": []
+  },
+  {
+    "slug": "sauce-chasseur",
+    "fr": "sauce chasseur",
+    "en": "illustrated sauce chasseur",
+    "aliases": []
+  },
+  {
+    "slug": "sauce-cocktail",
+    "fr": "sauce cocktail",
+    "en": "illustrated sauce cocktail",
+    "aliases": []
+  },
+  {
+    "slug": "sauce-grand-veneur",
+    "fr": "sauce grand veneur",
+    "en": "illustrated sauce grand veneur",
+    "aliases": []
+  },
+  {
+    "slug": "sauce-tikka",
+    "fr": "sauce tikka masala",
+    "en": "illustrated sauce tikka masala",
+    "aliases": [
+      "tandoori",
+      "tikka masala"
+    ]
+  },
+  {
+    "slug": "sauce-kebab",
+    "fr": "sauce kebab",
+    "en": "illustrated sauce kebab",
+    "aliases": []
+  },
+  {
+    "slug": "sauce-madere",
+    "fr": "sauce madère",
+    "en": "illustrated sauce madère",
+    "aliases": [
+      "sauce madere"
+    ]
+  },
+  {
+    "slug": "sauce-rouille",
+    "fr": "sauce rouille",
+    "en": "illustrated sauce rouille",
+    "aliases": []
+  },
+  {
+    "slug": "sauce-samourai",
+    "fr": "sauce samouraï",
+    "en": "illustrated sauce samouraï",
+    "aliases": [
+      "sauce samourai"
+    ]
+  },
+  {
+    "slug": "sauce-champignons",
+    "fr": "sauce aux champignons",
+    "en": "illustrated sauce aux champignons",
+    "aliases": []
+  },
+  {
+    "slug": "boisson-energetisante",
+    "fr": "boisson énergisante",
+    "en": "illustrated boisson énergisante",
+    "aliases": [
+      "boisson energisante"
+    ]
+  },
+  {
+    "slug": "boisson-sport",
+    "fr": "boisson pour le sport",
+    "en": "illustrated boisson pour le sport",
+    "aliases": [
+      "boisson de l effort"
+    ]
+  },
+  {
+    "slug": "aloe-vera",
+    "fr": "aloe vera",
+    "en": "illustrated aloe vera",
+    "aliases": [
+      "boisson à l'aloe vera"
+    ]
+  },
+  {
+    "slug": "seve-bouleau",
+    "fr": "sève de bouleau",
+    "en": "illustrated sève de bouleau",
+    "aliases": [
+      "seve de bouleau"
+    ]
+  },
+  {
+    "slug": "punch",
+    "fr": "punch",
+    "en": "illustrated punch",
+    "aliases": [
+      "cocktail type punch"
+    ]
+  },
+  {
+    "slug": "sangria",
+    "fr": "sangria",
+    "en": "illustrated sangria",
+    "aliases": []
+  },
+  {
+    "slug": "marsala",
+    "fr": "marsala",
+    "en": "illustrated marsala",
+    "aliases": []
+  },
+  {
+    "slug": "liqueur",
+    "fr": "liqueur",
+    "en": "illustrated liqueur",
+    "aliases": []
+  },
+  {
+    "slug": "alcool-pur",
+    "fr": "alcool pur",
+    "en": "illustrated alcool pur",
+    "aliases": []
+  },
+  {
+    "slug": "aperitif-anise",
+    "fr": "apéritif anisé",
+    "en": "illustrated apéritif anisé",
+    "aliases": [
+      "aperitif anise"
+    ]
+  },
+  {
+    "slug": "panache",
+    "fr": "panaché",
+    "en": "illustrated panaché",
+    "aliases": [
+      "panache"
+    ]
+  },
+  {
+    "slug": "petillant-fruits",
+    "fr": "pétillant de fruits",
+    "en": "illustrated pétillant de fruits",
+    "aliases": [
+      "petillant de fruits"
+    ]
+  },
+  {
+    "slug": "milkshake",
+    "fr": "milkshake",
+    "en": "illustrated milkshake",
+    "aliases": []
+  },
+  {
+    "slug": "nectar-multifruit",
+    "fr": "nectar multifruit",
+    "en": "illustrated nectar multifruit",
+    "aliases": [
+      "nectar"
+    ]
+  },
+  {
+    "slug": "jus-fruits",
+    "fr": "jus de fruits",
+    "en": "illustrated jus de fruits",
+    "aliases": [
+      "jus de fruit"
+    ]
+  },
+  {
+    "slug": "jus-legumes",
+    "fr": "jus de légumes",
+    "en": "illustrated jus de légumes",
+    "aliases": [
+      "jus de legumes"
+    ]
+  },
+  {
+    "slug": "jus-multifruit",
+    "fr": "jus multifruit",
+    "en": "illustrated jus multifruit",
+    "aliases": []
+  },
+  {
+    "slug": "jus-lime",
+    "fr": "jus de lime",
+    "en": "illustrated jus de lime",
+    "aliases": []
+  },
+  {
+    "slug": "jus-corossol",
+    "fr": "jus de corossol",
+    "en": "illustrated jus de corossol",
+    "aliases": []
+  },
+  {
+    "slug": "jus-moubin",
+    "fr": "jus de moubin",
+    "en": "illustrated jus de moubin",
+    "aliases": []
+  },
+  {
+    "slug": "boisson-gazeuse",
+    "fr": "boisson gazeuse",
+    "en": "illustrated boisson gazeuse",
+    "aliases": [
+      "soda"
+    ]
+  },
+  {
+    "slug": "boisson-plate-fruits",
+    "fr": "boisson plate aux fruits",
+    "en": "illustrated boisson plate aux fruits",
+    "aliases": []
+  },
+  {
+    "slug": "chewing-gum",
+    "fr": "chewing-gum",
+    "en": "illustrated chewing-gum",
+    "aliases": [
+      "chewing gum"
+    ]
+  },
+  {
+    "slug": "sucette",
+    "fr": "sucette",
+    "en": "illustrated sucette",
+    "aliases": [
+      "bonbon dur et sucette"
+    ]
+  },
+  {
+    "slug": "bonbon-dur",
+    "fr": "bonbon dur",
+    "en": "illustrated bonbon dur",
+    "aliases": []
+  },
+  {
+    "slug": "bonbon-gelifie",
+    "fr": "bonbon gélifié",
+    "en": "illustrated bonbon gélifié",
+    "aliases": [
+      "bonbon gelifie"
+    ]
+  },
+  {
+    "slug": "bonbon-tendre",
+    "fr": "bonbon tendre",
+    "en": "illustrated bonbon tendre",
+    "aliases": []
+  },
+  {
+    "slug": "marshmallow",
+    "fr": "marshmallow",
+    "en": "illustrated marshmallow",
+    "aliases": [
+      "guimauve"
+    ]
+  },
+  {
+    "slug": "praline",
+    "fr": "praline",
+    "en": "illustrated praline",
+    "aliases": []
+  },
+  {
+    "slug": "fruit-confit",
+    "fr": "fruit confit",
+    "en": "illustrated fruit confit",
+    "aliases": []
+  },
+  {
+    "slug": "fructose",
+    "fr": "fructose",
+    "en": "illustrated fructose",
+    "aliases": []
+  },
+  {
+    "slug": "melasse",
+    "fr": "mélasse",
+    "en": "illustrated mélasse",
+    "aliases": [
+      "melasse de canne"
+    ]
+  },
+  {
+    "slug": "pastille",
+    "fr": "pastille",
+    "en": "illustrated pastille",
+    "aliases": [
+      "pastille rafraîchissante"
+    ]
+  },
+  {
+    "slug": "huile-argan",
+    "fr": "huile d'argan",
+    "en": "illustrated huile d'argan",
+    "aliases": [
+      "huile d argane"
+    ]
+  },
+  {
+    "slug": "huile-chanvre",
+    "fr": "huile de chanvre",
+    "en": "illustrated huile de chanvre",
+    "aliases": []
+  },
+  {
+    "slug": "huile-coton",
+    "fr": "huile de coton",
+    "en": "illustrated huile de coton",
+    "aliases": []
+  },
+  {
+    "slug": "huile-mais",
+    "fr": "huile de maïs",
+    "en": "illustrated huile de maïs",
+    "aliases": [
+      "huile de mais"
+    ]
+  },
+  {
+    "slug": "huile-pavot",
+    "fr": "huile de pavot",
+    "en": "illustrated huile de pavot",
+    "aliases": []
+  },
+  {
+    "slug": "huile-soja",
+    "fr": "huile de soja",
+    "en": "illustrated huile de soja",
+    "aliases": []
+  },
+  {
+    "slug": "huile-son-riz",
+    "fr": "huile de son de riz",
+    "en": "illustrated huile de son de riz",
+    "aliases": []
+  },
+  {
+    "slug": "huile-palmiste",
+    "fr": "huile de palmiste",
+    "en": "illustrated huile de palmiste",
+    "aliases": []
+  },
+  {
+    "slug": "huile-friture",
+    "fr": "huile pour friture",
+    "en": "illustrated huile pour friture",
+    "aliases": []
+  },
+  {
+    "slug": "matiere-grasse-tartinable",
+    "fr": "matière grasse tartinable",
+    "en": "illustrated matière grasse tartinable",
+    "aliases": [
+      "matiere grasse tartinable"
+    ]
+  },
+  {
+    "slug": "dulse",
+    "fr": "dulse",
+    "en": "illustrated dulse",
+    "aliases": []
+  },
+  {
+    "slug": "kombu",
+    "fr": "kombu",
+    "en": "illustrated kombu",
+    "aliases": [
+      "kombu japonais"
+    ]
+  },
+  {
+    "slug": "kombu-breton",
+    "fr": "kombu breton",
+    "en": "illustrated kombu breton",
+    "aliases": []
+  },
+  {
+    "slug": "kombu-royal",
+    "fr": "kombu royal",
+    "en": "illustrated kombu royal",
+    "aliases": []
+  },
+  {
+    "slug": "fucus",
+    "fr": "fucus",
+    "en": "illustrated fucus",
+    "aliases": [
+      "fucus vésiculeux"
+    ]
+  },
+  {
+    "slug": "haricot-de-mer",
+    "fr": "haricot de mer",
+    "en": "illustrated haricot de mer",
+    "aliases": [
+      "himanthalia"
+    ]
+  },
+  {
+    "slug": "lithothamne",
+    "fr": "lithothamne",
+    "en": "illustrated lithothamne",
+    "aliases": [
+      "maërl"
+    ]
+  },
+  {
+    "slug": "chondrus",
+    "fr": "chondrus",
+    "en": "illustrated chondrus",
+    "aliases": [
+      "pioca",
+      "lichen de mer"
+    ]
+  },
+  {
+    "slug": "gracilaire",
+    "fr": "gracilaire",
+    "en": "illustrated gracilaire",
+    "aliases": [
+      "ogonori"
+    ]
+  },
+  {
+    "slug": "ascophylle",
+    "fr": "ascophylle",
+    "en": "illustrated ascophylle",
+    "aliases": [
+      "goémon noir"
+    ]
+  },
+  {
+    "slug": "chlorelle",
+    "fr": "chlorelle",
+    "en": "illustrated chlorelle",
+    "aliases": [
+      "chlorella"
+    ]
+  },
+  {
+    "slug": "pain-campagne",
+    "fr": "pain de campagne",
+    "en": "illustrated pain de campagne",
+    "aliases": []
+  },
+  {
+    "slug": "pain-son",
+    "fr": "pain au son",
+    "en": "illustrated pain au son",
+    "aliases": []
+  },
+  {
+    "slug": "pain-azyme",
+    "fr": "pain azyme",
+    "en": "illustrated pain azyme",
+    "aliases": []
+  },
+  {
+    "slug": "pain-perdu",
+    "fr": "pain perdu",
+    "en": "illustrated pain perdu",
+    "aliases": []
+  },
+  {
+    "slug": "pain-sans-gluten",
+    "fr": "pain sans gluten",
+    "en": "illustrated pain sans gluten",
+    "aliases": []
+  },
+  {
+    "slug": "bretzel",
+    "fr": "bretzel",
+    "en": "illustrated bretzel",
+    "aliases": [
+      "pretzel"
+    ]
+  },
+  {
+    "slug": "panini-pain",
+    "fr": "pain panini",
+    "en": "illustrated pain panini",
+    "aliases": [
+      "panini"
+    ]
+  },
+  {
+    "slug": "tartine-craquante",
+    "fr": "tartine craquante",
+    "en": "illustrated tartine craquante",
+    "aliases": [
+      "tartine croustillante"
+    ]
+  },
+  {
+    "slug": "pain-blanc",
+    "fr": "pain blanc",
+    "en": "illustrated pain blanc",
+    "aliases": []
+  },
+  {
+    "slug": "pain-grille",
+    "fr": "pain grillé",
+    "en": "illustrated pain grillé",
+    "aliases": [
+      "pain grille"
+    ]
+  },
+  {
+    "slug": "petit-pain-suedois",
+    "fr": "petit pain grillé suédois",
+    "en": "illustrated petit pain grillé suédois",
+    "aliases": []
+  },
+  {
+    "slug": "gateau-moelleux",
+    "fr": "gâteau moelleux",
+    "en": "illustrated gâteau moelleux",
+    "aliases": [
+      "gateau moelleux"
+    ]
+  },
+  {
+    "slug": "biscuit-sec",
+    "fr": "biscuit sec",
+    "en": "illustrated biscuit sec",
+    "aliases": [
+      "biscuit"
+    ]
+  },
+  {
+    "slug": "gaufrette",
+    "fr": "gaufrette",
+    "en": "illustrated gaufrette",
+    "aliases": []
+  },
+  {
+    "slug": "tuile",
+    "fr": "tuile",
+    "en": "illustrated tuile",
+    "aliases": [
+      "biscuit sec fin"
+    ]
+  },
+  {
+    "slug": "canistrelli",
+    "fr": "canistrelli",
+    "en": "illustrated canistrelli",
+    "aliases": []
+  },
+  {
+    "slug": "barre-chocolatee",
+    "fr": "barre chocolatée",
+    "en": "illustrated barre chocolatée",
+    "aliases": [
+      "barre chocolatee"
+    ]
+  },
+  {
+    "slug": "barre-patissiere",
+    "fr": "barre pâtissière",
+    "en": "illustrated barre pâtissière",
+    "aliases": [
+      "barre patissiere"
+    ]
+  },
+  {
+    "slug": "quatre-epices",
+    "fr": "quatre épices",
+    "en": "illustrated quatre épices",
+    "aliases": [
+      "quatre epices"
+    ]
+  },
+  {
+    "slug": "carvi",
+    "fr": "carvi",
+    "en": "illustrated carvi",
+    "aliases": []
+  },
+  {
+    "slug": "criste-marine",
+    "fr": "criste marine",
+    "en": "illustrated criste marine",
+    "aliases": []
+  },
+  {
+    "slug": "carre-chocolat",
+    "fr": "chocolat en tablette",
+    "en": "illustrated chocolat en tablette",
+    "aliases": []
+  },
+  {
+    "slug": "eau-de-vie",
+    "fr": "eau de vie",
+    "en": "illustrated eau de vie",
+    "aliases": []
+  },
+  {
+    "slug": "eau-coco",
+    "fr": "eau de coco",
+    "en": "illustrated eau de coco",
+    "aliases": []
+  },
+  {
+    "slug": "specialite-proteinee",
+    "fr": "spécialité laitière riche en protéines",
+    "en": "illustrated spécialité laitière riche en protéines",
+    "aliases": []
+  },
+  {
+    "slug": "substitut-repas",
+    "fr": "substitut de repas",
+    "en": "illustrated substitut de repas",
+    "aliases": []
+  },
+  {
+    "slug": "fines-tranches-vegetales",
+    "fr": "fines tranches végétales",
+    "en": "illustrated fines tranches végétales",
+    "aliases": []
+  },
+  {
+    "slug": "sandwich",
+    "fr": "sandwich",
+    "en": "illustrated sandwich",
+    "aliases": []
+  },
+  {
+    "slug": "toasts",
+    "fr": "toasts",
+    "en": "illustrated toasts",
+    "aliases": [
+      "canapés salés"
+    ]
+  },
+  {
+    "slug": "viennoiserie",
+    "fr": "viennoiserie",
+    "en": "illustrated viennoiserie",
+    "aliases": []
+  },
+  {
+    "slug": "patisserie",
+    "fr": "pâtisserie",
+    "en": "illustrated pâtisserie",
+    "aliases": [
+      "patisserie"
+    ]
+  },
+  {
+    "slug": "dessert-fruits",
+    "fr": "dessert de fruits",
+    "en": "illustrated dessert de fruits",
+    "aliases": []
+  },
+  {
+    "slug": "legume-sec",
+    "fr": "légume sec",
+    "en": "illustrated légume sec",
+    "aliases": [
+      "legume sec"
+    ]
+  },
+  {
+    "slug": "legumes-potage",
+    "fr": "légumes pour potages",
+    "en": "illustrated légumes pour potages",
+    "aliases": []
+  },
+  {
+    "slug": "petit-pois-carottes",
+    "fr": "petits pois et carottes",
+    "en": "illustrated petits pois et carottes",
+    "aliases": []
+  },
+  {
+    "slug": "potatoes",
+    "fr": "potatoes",
+    "en": "illustrated potatoes",
+    "aliases": [
+      "wedges"
+    ]
+  },
+  {
+    "slug": "fond-volaille",
+    "fr": "fond de volaille",
+    "en": "illustrated fond de volaille",
+    "aliases": []
+  },
+  {
+    "slug": "sauce-moyenne",
+    "fr": "sauce",
+    "en": "illustrated sauce",
+    "aliases": []
+  },
+  {
+    "slug": "charcuterie-moyenne",
+    "fr": "charcuterie",
+    "en": "illustrated charcuterie",
+    "aliases": []
+  },
+  {
+    "slug": "herbes-fraiches",
+    "fr": "herbes aromatiques fraîches",
+    "en": "illustrated herbes aromatiques fraîches",
+    "aliases": []
+  },
+  {
+    "slug": "fruit-seche",
+    "fr": "fruit séché",
+    "en": "illustrated fruit séché",
+    "aliases": []
+  },
+  {
+    "slug": "gateau-mousse",
+    "fr": "gâteau mousse de fruits",
+    "en": "illustrated gâteau mousse de fruits",
+    "aliases": []
+  },
+  {
+    "slug": "liegeois-fruits",
+    "fr": "liégeois aux fruits",
+    "en": "illustrated liégeois aux fruits",
+    "aliases": []
+  },
+  {
+    "slug": "preparation-fruits",
+    "fr": "préparation aux fruits",
+    "en": "illustrated préparation aux fruits",
+    "aliases": []
+  },
+  {
+    "slug": "gelifiant",
+    "fr": "gélifiant",
+    "en": "illustrated gélifiant",
+    "aliases": [
+      "gelifiant"
+    ]
+  },
+  {
+    "slug": "vermicelles-multicolores",
+    "fr": "vermicelles multicolores",
+    "en": "illustrated vermicelles multicolores",
+    "aliases": []
+  },
+  {
+    "slug": "galette-cereales",
+    "fr": "galette de céréales",
+    "en": "illustrated galette de céréales",
+    "aliases": []
+  },
+  {
+    "slug": "blinis",
+    "fr": "blinis",
+    "en": "illustrated blinis",
+    "aliases": []
+  },
+  {
+    "slug": "fougasse",
+    "fr": "fougasse",
+    "en": "illustrated fougasse",
+    "aliases": []
+  },
+  {
+    "slug": "ressource-aloe",
+    "fr": "boisson à base de plantes",
+    "en": "illustrated boisson à base de plantes",
+    "aliases": []
+  },
+  {
+    "slug": "boisson-bebe-fruits",
+    "fr": "boisson aux fruits pour bébé",
+    "en": "illustrated boisson aux fruits pour bébé",
+    "aliases": []
+  },
+  {
+    "slug": "biscuit-bebe",
+    "fr": "biscuit pour bébé",
+    "en": "illustrated biscuit pour bébé",
+    "aliases": []
+  },
+  {
+    "slug": "poudre-cacao-bebe",
+    "fr": "poudre cacaotée pour bébé",
+    "en": "illustrated poudre cacaotée pour bébé",
+    "aliases": []
+  },
+  {
+    "slug": "petit-pot-legumes",
+    "fr": "petit pot légumes",
+    "en": "illustrated petit pot légumes",
+    "aliases": []
+  },
+  {
+    "slug": "bao-vapeur",
+    "fr": "bouchée à la vapeur",
+    "en": "illustrated bouchée à la vapeur",
+    "aliases": [
+      "dim sum vapeur"
+    ]
+  },
+  {
+    "slug": "chinchard-maigre",
+    "fr": "chinchard maigre",
+    "en": "illustrated chinchard maigre",
+    "aliases": []
+  },
+  {
+    "slug": "corossol",
+    "fr": "corossol",
+    "en": "illustrated corossol",
+    "aliases": []
+  },
+  {
+    "slug": "moubin",
+    "fr": "moubin",
+    "en": "illustrated moubin",
+    "aliases": []
+  },
+  {
+    "slug": "nashi-pomme",
+    "fr": "pomme nashi",
+    "en": "illustrated pomme nashi",
+    "aliases": []
+  },
+  {
+    "slug": "salicorne-fraiche",
+    "fr": "criste marine fraîche",
+    "en": "illustrated criste marine fraîche",
+    "aliases": []
+  },
+  {
+    "slug": "diots",
+    "fr": "diots",
+    "en": "illustrated diots",
+    "aliases": []
+  },
+  {
+    "slug": "fuseau-saucisson",
+    "fr": "fuseau",
+    "en": "illustrated fuseau",
+    "aliases": []
+  },
+  {
+    "slug": "knack-volaille",
+    "fr": "knack de volaille",
+    "en": "illustrated knack de volaille",
+    "aliases": []
+  },
+  {
+    "slug": "saucisse-morteau-alias",
+    "fr": "saucisse de Morteau fumée",
+    "en": "illustrated saucisse de Morteau fumée",
+    "aliases": []
+  },
+  {
+    "slug": "andouille-cambrai",
+    "fr": "andouille de Cambrai",
+    "en": "illustrated andouille de Cambrai",
+    "aliases": []
+  },
+  {
+    "slug": "boudin-creole",
+    "fr": "boudin créole",
+    "en": "illustrated boudin créole",
+    "aliases": []
+  },
+  {
+    "slug": "merguez-volaille",
+    "fr": "merguez de volaille",
+    "en": "illustrated merguez de volaille",
+    "aliases": []
+  },
+  {
+    "slug": "chipolata-volaille",
+    "fr": "chipolata de volaille",
+    "en": "illustrated chipolata de volaille",
+    "aliases": []
+  },
+  {
+    "slug": "steak-cheval",
+    "fr": "steak de cheval",
+    "en": "illustrated steak de cheval",
+    "aliases": []
+  },
+  {
+    "slug": "roti-cheval",
+    "fr": "rôti de cheval",
+    "en": "illustrated rôti de cheval",
+    "aliases": []
+  },
+  {
+    "slug": "filet-cheval",
+    "fr": "filet de cheval",
+    "en": "illustrated filet de cheval",
+    "aliases": []
+  },
+  {
+    "slug": "escalope-dinde",
+    "fr": "escalope de dinde",
+    "en": "illustrated escalope de dinde",
+    "aliases": []
+  },
+  {
+    "slug": "escalope-poulet",
+    "fr": "escalope de poulet",
+    "en": "illustrated escalope de poulet",
+    "aliases": []
+  },
+  {
+    "slug": "blanc-volaille",
+    "fr": "blanc de volaille",
+    "en": "illustrated blanc de volaille",
+    "aliases": []
+  },
+  {
+    "slug": "cuisse-dinde",
+    "fr": "cuisse de dinde",
+    "en": "illustrated cuisse de dinde",
+    "aliases": []
+  },
+  {
+    "slug": "aile-dinde",
+    "fr": "aile de dinde",
+    "en": "illustrated aile de dinde",
+    "aliases": []
+  },
+  {
+    "slug": "magret-oie",
+    "fr": "magret d'oie",
+    "en": "illustrated magret d'oie",
+    "aliases": []
+  },
+  {
+    "slug": "confit-oie",
+    "fr": "confit d'oie",
+    "en": "illustrated confit d'oie",
+    "aliases": []
+  },
+  {
+    "slug": "terrine-campagne",
+    "fr": "terrine de campagne",
+    "en": "illustrated terrine de campagne",
+    "aliases": []
+  },
+  {
+    "slug": "pate-foie",
+    "fr": "pâté de foie",
+    "en": "illustrated pâté de foie",
+    "aliases": [
+      "pate de foie"
+    ]
+  },
+  {
+    "slug": "pate-campagne-alias",
+    "fr": "pâté de campagne",
+    "en": "illustrated pâté de campagne",
+    "aliases": []
+  },
+  {
+    "slug": "rillettes-oie",
+    "fr": "rillettes d'oie",
+    "en": "illustrated rillettes d'oie",
+    "aliases": []
+  },
+  {
+    "slug": "rillettes-canard",
+    "fr": "rillettes de canard",
+    "en": "illustrated rillettes de canard",
+    "aliases": []
+  },
+  {
+    "slug": "jambon-parme",
+    "fr": "jambon de Parme",
+    "en": "illustrated jambon de Parme",
+    "aliases": [
+      "jambon sec de Parme"
+    ]
+  },
+  {
+    "slug": "jambon-serrano",
+    "fr": "jambon serrano",
+    "en": "illustrated jambon serrano",
+    "aliases": [
+      "jambon sec Serrano"
+    ]
+  },
+  {
+    "slug": "jambon-volaille",
+    "fr": "jambon de volaille",
+    "en": "illustrated jambon de volaille",
+    "aliases": [
+      "blanc de volaille"
+    ]
+  },
+  {
+    "slug": "coppa-alias",
+    "fr": "coppa italienne",
+    "en": "illustrated coppa italienne",
+    "aliases": []
+  },
+  {
+    "slug": "bresaola-alias",
+    "fr": "bresaola di manzo",
+    "en": "illustrated bresaola di manzo",
+    "aliases": []
+  },
+  {
+    "slug": "guanciale-alias",
+    "fr": "guanciale italien",
+    "en": "illustrated guanciale italien",
+    "aliases": []
+  },
+  {
+    "slug": "lard-fume",
+    "fr": "lard fumé",
+    "en": "illustrated lard fumé",
+    "aliases": []
+  },
+  {
+    "slug": "poitrine-fraise",
+    "fr": "poitrine fraîche",
+    "en": "illustrated poitrine fraîche",
+    "aliases": []
+  },
+  {
+    "slug": "travers-agneau",
+    "fr": "travers d'agneau",
+    "en": "illustrated travers d'agneau",
+    "aliases": []
+  },
+  {
+    "slug": "selle-agneau",
+    "fr": "selle d'agneau",
+    "en": "illustrated selle d'agneau",
+    "aliases": []
+  },
+  {
+    "slug": "carre-agneau",
+    "fr": "carré d'agneau",
+    "en": "illustrated carré d'agneau",
+    "aliases": []
+  },
+  {
+    "slug": "gigot-souris",
+    "fr": "souris d'agneau braisée",
+    "en": "illustrated souris d'agneau braisée",
+    "aliases": []
+  },
+  {
+    "slug": "jarret-boeuf",
+    "fr": "jarret de bœuf",
+    "en": "illustrated jarret de bœuf",
+    "aliases": []
+  },
+  {
+    "slug": "paleron-braise",
+    "fr": "paleron braisé",
+    "en": "illustrated paleron braisé",
+    "aliases": []
+  },
+  {
+    "slug": "onglet-grille",
+    "fr": "onglet grillé",
+    "en": "illustrated onglet grillé",
+    "aliases": []
+  },
+  {
+    "slug": "hampe-grillee",
+    "fr": "hampe grillée",
+    "en": "illustrated hampe grillée",
+    "aliases": []
+  },
+  {
+    "slug": "rumsteck-grille",
+    "fr": "rumsteck grillé",
+    "en": "illustrated rumsteck grillé",
+    "aliases": []
+  },
+  {
+    "slug": "faux-filet-grille",
+    "fr": "faux-filet grillé",
+    "en": "illustrated faux-filet grillé",
+    "aliases": []
+  },
+  {
+    "slug": "entrecote-grillee",
+    "fr": "entrecôte grillée",
+    "en": "illustrated entrecôte grillée",
+    "aliases": []
+  },
+  {
+    "slug": "bavette-grillee",
+    "fr": "bavette grillée",
+    "en": "illustrated bavette grillée",
+    "aliases": []
+  },
+  {
+    "slug": "tournedos",
+    "fr": "tournedos",
+    "en": "illustrated tournedos",
+    "aliases": []
+  },
+  {
+    "slug": "chateaubriand",
+    "fr": "châteaubriand",
+    "en": "illustrated châteaubriand",
+    "aliases": [
+      "chateaubriand"
+    ]
+  },
+  {
+    "slug": "steak-tartare",
+    "fr": "steak tartare",
+    "en": "illustrated steak tartare",
+    "aliases": []
+  },
+  {
+    "slug": "carpaccio-boeuf",
+    "fr": "carpaccio de bœuf",
+    "en": "illustrated carpaccio de bœuf",
+    "aliases": []
+  },
+  {
+    "slug": "osso-buco",
+    "fr": "osso buco",
+    "en": "illustrated osso buco",
+    "aliases": []
+  },
+  {
+    "slug": "blanquette-veau",
+    "fr": "blanquette de veau",
+    "en": "illustrated blanquette de veau",
+    "aliases": []
+  },
+  {
+    "slug": "saute-veau",
+    "fr": "sauté de veau",
+    "en": "illustrated sauté de veau",
+    "aliases": []
+  },
+  {
+    "slug": "escalope-milanaise-alias",
+    "fr": "escalope à la milanaise",
+    "en": "illustrated escalope à la milanaise",
+    "aliases": []
+  },
+  {
+    "slug": "cordon-bleu-alias",
+    "fr": "cordon-bleu de volaille",
+    "en": "illustrated cordon-bleu de volaille",
+    "aliases": []
+  },
+  {
+    "slug": "nuggets-dinde",
+    "fr": "nuggets de dinde",
+    "en": "illustrated nuggets de dinde",
+    "aliases": []
+  },
+  {
+    "slug": "fish-sticks",
+    "fr": "bâtonnets de poisson",
+    "en": "illustrated bâtonnets de poisson",
+    "aliases": [
+      "fish sticks"
+    ]
+  },
+  {
+    "slug": "calamar-pane",
+    "fr": "calamar pané",
+    "en": "illustrated calamar pané",
+    "aliases": []
+  },
+  {
+    "slug": "beignet-crevette",
+    "fr": "beignet de crevettes",
+    "en": "illustrated beignet de crevettes",
+    "aliases": []
+  },
+  {
+    "slug": "gambas-grillees",
+    "fr": "gambas grillées",
+    "en": "illustrated gambas grillées",
+    "aliases": []
+  },
+  {
+    "slug": "langoustine-mayo",
+    "fr": "langoustine mayonnaise",
+    "en": "illustrated langoustine mayonnaise",
+    "aliases": []
+  },
+  {
+    "slug": "homard-grille",
+    "fr": "homard grillé",
+    "en": "illustrated homard grillé",
+    "aliases": []
+  },
+  {
+    "slug": "crabe-mayo",
+    "fr": "crabe mayonnaise",
+    "en": "illustrated crabe mayonnaise",
+    "aliases": []
+  },
+  {
+    "slug": "tourteau-mayo",
+    "fr": "tourteau mayonnaise",
+    "en": "illustrated tourteau mayonnaise",
+    "aliases": []
+  },
+  {
+    "slug": "moules-marinieres",
+    "fr": "moules marinières",
+    "en": "illustrated moules marinières",
+    "aliases": []
+  },
+  {
+    "slug": "moules-farcies",
+    "fr": "moules farcies",
+    "en": "illustrated moules farcies",
+    "aliases": []
+  },
+  {
+    "slug": "huitres-nature",
+    "fr": "huîtres nature",
+    "en": "illustrated huîtres nature",
+    "aliases": []
+  },
+  {
+    "slug": "bulots-mayo",
+    "fr": "bulots mayonnaise",
+    "en": "illustrated bulots mayonnaise",
+    "aliases": []
+  },
+  {
+    "slug": "bigorneaux",
+    "fr": "bigorneaux",
+    "en": "illustrated bigorneaux",
+    "aliases": []
+  },
+  {
+    "slug": "oursin-vif",
+    "fr": "oursin vif",
+    "en": "illustrated oursin vif",
+    "aliases": []
+  },
+  {
+    "slug": "caviar-oscietre",
+    "fr": "caviar osciètre",
+    "en": "illustrated caviar osciètre",
+    "aliases": []
+  },
+  {
+    "slug": "tarama-maison",
+    "fr": "tarama maison",
+    "en": "illustrated tarama maison",
+    "aliases": []
+  },
+  {
+    "slug": "brandade-morue",
+    "fr": "brandade de morue",
+    "en": "illustrated brandade de morue",
+    "aliases": []
+  },
+  {
+    "slug": "accras-morue",
+    "fr": "accras de morue",
+    "en": "illustrated accras de morue",
+    "aliases": []
+  },
+  {
+    "slug": "soupe-poisson",
+    "fr": "soupe de poissons",
+    "en": "illustrated soupe de poissons",
+    "aliases": []
+  },
+  {
+    "slug": "bisque",
+    "fr": "bisque",
+    "en": "illustrated bisque",
+    "aliases": [
+      "bisque de homard"
+    ]
+  },
+  {
+    "slug": "bouillabaisse",
+    "fr": "bouillabaisse",
+    "en": "illustrated bouillabaisse",
+    "aliases": []
+  },
+  {
+    "slug": "aioli-poisson",
+    "fr": "bourride",
+    "en": "illustrated bourride",
+    "aliases": [
+      "aïoli de poisson"
+    ]
+  },
+  {
+    "slug": "brandade-parmentier",
+    "fr": "parmentier de poisson",
+    "en": "illustrated parmentier de poisson",
+    "aliases": []
+  },
+  {
+    "slug": "gratin-fruits-mer",
+    "fr": "gratin de fruits de mer",
+    "en": "illustrated gratin de fruits de mer",
+    "aliases": []
+  },
+  {
+    "slug": "paella-fruits-mer",
+    "fr": "paella aux fruits de mer",
+    "en": "illustrated paella aux fruits de mer",
+    "aliases": []
+  },
+  {
+    "slug": "risotto-fruits-mer",
+    "fr": "risotto aux fruits de mer",
+    "en": "illustrated risotto aux fruits de mer",
+    "aliases": []
+  },
+  {
+    "slug": "spaghetti-fruits-mer",
+    "fr": "spaghetti aux fruits de mer",
+    "en": "illustrated spaghetti aux fruits de mer",
+    "aliases": []
+  },
+  {
+    "slug": "pates-saumon",
+    "fr": "pâtes au saumon",
+    "en": "illustrated pâtes au saumon",
+    "aliases": []
+  },
+  {
+    "slug": "pates-carbonara",
+    "fr": "pâtes carbonara",
+    "en": "illustrated pâtes carbonara",
+    "aliases": []
+  },
+  {
+    "slug": "pates-bolognaise",
+    "fr": "pâtes bolognaise",
+    "en": "illustrated pâtes bolognaise",
+    "aliases": []
+  },
+  {
+    "slug": "pates-pesto",
+    "fr": "pâtes au pesto",
+    "en": "illustrated pâtes au pesto",
+    "aliases": []
+  },
+  {
+    "slug": "lasagnes-legumes",
+    "fr": "lasagnes aux légumes",
+    "en": "illustrated lasagnes aux légumes",
+    "aliases": []
+  },
+  {
+    "slug": "cannelloni",
+    "fr": "cannelloni",
+    "en": "illustrated cannelloni",
+    "aliases": []
+  },
+  {
+    "slug": "ravioli-ricotta",
+    "fr": "ravioli ricotta",
+    "en": "illustrated ravioli ricotta",
+    "aliases": [
+      "ravioli épinards"
+    ]
+  },
+  {
+    "slug": "gnocchi-sauce",
+    "fr": "gnocchi sauce",
+    "en": "illustrated gnocchi sauce",
+    "aliases": []
+  },
+  {
+    "slug": "polenta-grillee",
+    "fr": "polenta grillée",
+    "en": "illustrated polenta grillée",
+    "aliases": []
+  },
+  {
+    "slug": "risotto-champignons",
+    "fr": "risotto aux champignons",
+    "en": "illustrated risotto aux champignons",
+    "aliases": []
+  },
+  {
+    "slug": "risotto-asperges",
+    "fr": "risotto aux asperges",
+    "en": "illustrated risotto aux asperges",
+    "aliases": []
+  },
+  {
+    "slug": "couscous-royal",
+    "fr": "couscous royal",
+    "en": "illustrated couscous royal",
+    "aliases": []
+  },
+  {
+    "slug": "couscous-legumes",
+    "fr": "couscous aux légumes",
+    "en": "illustrated couscous aux légumes",
+    "aliases": []
+  },
+  {
+    "slug": "tajine-agneau",
+    "fr": "tajine d'agneau",
+    "en": "illustrated tajine d'agneau",
+    "aliases": []
+  },
+  {
+    "slug": "tajine-kefta",
+    "fr": "tajine kefta",
+    "en": "illustrated tajine kefta",
+    "aliases": []
+  },
+  {
+    "slug": "tajine-legumes",
+    "fr": "tajine aux légumes",
+    "en": "illustrated tajine aux légumes",
+    "aliases": []
+  },
+  {
+    "slug": "chili-con-carne",
+    "fr": "chili con carne",
+    "en": "illustrated chili con carne",
+    "aliases": []
+  },
+  {
+    "slug": "hachis-parmentier-alias",
+    "fr": "hachis",
+    "en": "illustrated hachis",
+    "aliases": []
+  },
+  {
+    "slug": "shepherds-pie",
+    "fr": "shepherd's pie",
+    "en": "illustrated shepherd's pie",
+    "aliases": []
+  },
+  {
+    "slug": "moussaka-agneau",
+    "fr": "moussaka d'agneau",
+    "en": "illustrated moussaka d'agneau",
+    "aliases": []
+  },
+  {
+    "slug": "gratin-dauphinois-alias",
+    "fr": "dauphinois",
+    "en": "illustrated dauphinois",
+    "aliases": []
+  },
+  {
+    "slug": "tartiflette",
+    "fr": "tartiflette",
+    "en": "illustrated tartiflette",
+    "aliases": []
+  },
+  {
+    "slug": "raclette-plat",
+    "fr": "plat de raclette",
+    "en": "illustrated plat de raclette",
+    "aliases": []
+  },
+  {
+    "slug": "fondue-savoyarde",
+    "fr": "fondue savoyarde",
+    "en": "illustrated fondue savoyarde",
+    "aliases": []
+  },
+  {
+    "slug": "fondue-bourguignonne",
+    "fr": "fondue bourguignonne",
+    "en": "illustrated fondue bourguignonne",
+    "aliases": []
+  },
+  {
+    "slug": "pierrade",
+    "fr": "pierrade",
+    "en": "illustrated pierrade",
+    "aliases": []
+  },
+  {
+    "slug": "aligot-plat",
+    "fr": "aligot plat",
+    "en": "illustrated aligot plat",
+    "aliases": []
+  },
+  {
+    "slug": "truffade",
+    "fr": "truffade",
+    "en": "illustrated truffade",
+    "aliases": []
+  },
+  {
+    "slug": "potee",
+    "fr": "potée",
+    "en": "illustrated potée",
+    "aliases": [
+      "potee auvergnate"
+    ]
+  },
+  {
+    "slug": "choucroute-garnie",
+    "fr": "choucroute garnie",
+    "en": "illustrated choucroute garnie",
+    "aliases": []
+  },
+  {
+    "slug": "cassoulet-toulouse",
+    "fr": "cassoulet de Toulouse",
+    "en": "illustrated cassoulet de Toulouse",
+    "aliases": []
+  },
+  {
+    "slug": "cassoulet-castelnaudary",
+    "fr": "cassoulet de Castelnaudary",
+    "en": "illustrated cassoulet de Castelnaudary",
+    "aliases": []
+  },
+  {
+    "slug": "baeckeoffe",
+    "fr": "baeckeoffe",
+    "en": "illustrated baeckeoffe",
+    "aliases": []
+  },
+  {
+    "slug": "flammekueche",
+    "fr": "flammekueche",
+    "en": "illustrated flammekueche",
+    "aliases": [
+      "tarte flambée"
+    ]
+  },
+  {
+    "slug": "quiche-lorraine",
+    "fr": "quiche lorraine",
+    "en": "illustrated quiche lorraine",
+    "aliases": []
+  },
+  {
+    "slug": "quiche-legumes",
+    "fr": "quiche aux légumes",
+    "en": "illustrated quiche aux légumes",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-oignon",
+    "fr": "tarte à l'oignon",
+    "en": "illustrated tarte à l'oignon",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-poireaux",
+    "fr": "tarte aux poireaux",
+    "en": "illustrated tarte aux poireaux",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-tomates",
+    "fr": "tarte à la tomate",
+    "en": "illustrated tarte à la tomate",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-chevre-miel",
+    "fr": "tarte chèvre miel",
+    "en": "illustrated tarte chèvre miel",
+    "aliases": []
+  },
+  {
+    "slug": "clafoutis-sale",
+    "fr": "clafoutis salé",
+    "en": "illustrated clafoutis salé",
+    "aliases": []
+  },
+  {
+    "slug": "cake-sale",
+    "fr": "cake salé",
+    "en": "illustrated cake salé",
+    "aliases": []
+  },
+  {
+    "slug": "muffin-sale",
+    "fr": "muffin salé",
+    "en": "illustrated muffin salé",
+    "aliases": []
+  },
+  {
+    "slug": "scone",
+    "fr": "scone",
+    "en": "illustrated scone",
+    "aliases": []
+  },
+  {
+    "slug": "bagel-saumon",
+    "fr": "bagel saumon",
+    "en": "illustrated bagel saumon",
+    "aliases": []
+  },
+  {
+    "slug": "wrap-poulet",
+    "fr": "wrap poulet",
+    "en": "illustrated wrap poulet",
+    "aliases": []
+  },
+  {
+    "slug": "wrap-legumes",
+    "fr": "wrap légumes",
+    "en": "illustrated wrap légumes",
+    "aliases": []
+  },
+  {
+    "slug": "burrito",
+    "fr": "burrito",
+    "en": "illustrated burrito",
+    "aliases": []
+  },
+  {
+    "slug": "fajitas",
+    "fr": "fajitas",
+    "en": "illustrated fajitas",
+    "aliases": []
+  },
+  {
+    "slug": "tacos",
+    "fr": "tacos",
+    "en": "illustrated tacos",
+    "aliases": []
+  },
+  {
+    "slug": "enchiladas",
+    "fr": "enchiladas",
+    "en": "illustrated enchiladas",
+    "aliases": []
+  },
+  {
+    "slug": "quesadilla",
+    "fr": "quesadilla",
+    "en": "illustrated quesadilla",
+    "aliases": []
+  },
+  {
+    "slug": "nachos",
+    "fr": "nachos",
+    "en": "illustrated nachos",
+    "aliases": []
+  },
+  {
+    "slug": "guacamole-bol",
+    "fr": "bol de guacamole",
+    "en": "illustrated bol de guacamole",
+    "aliases": []
+  },
+  {
+    "slug": "houmous-bol",
+    "fr": "bol de houmous",
+    "en": "illustrated bol de houmous",
+    "aliases": []
+  },
+  {
+    "slug": "tzatziki-bol",
+    "fr": "bol de tzatziki",
+    "en": "illustrated bol de tzatziki",
+    "aliases": []
+  },
+  {
+    "slug": "caviar-aubergine-bol",
+    "fr": "caviar d'aubergine",
+    "en": "illustrated caviar d'aubergine",
+    "aliases": []
+  },
+  {
+    "slug": "tapenade-bol",
+    "fr": "bol de tapenade",
+    "en": "illustrated bol de tapenade",
+    "aliases": []
+  },
+  {
+    "slug": "anchoiade-bol",
+    "fr": "bol d'anchoïade",
+    "en": "illustrated bol d'anchoïade",
+    "aliases": []
+  },
+  {
+    "slug": "rillettes-bol",
+    "fr": "bol de rillettes",
+    "en": "illustrated bol de rillettes",
+    "aliases": []
+  },
+  {
+    "slug": "terrine-poisson",
+    "fr": "terrine de poisson",
+    "en": "illustrated terrine de poisson",
+    "aliases": []
+  },
+  {
+    "slug": "terrine-legumes",
+    "fr": "terrine de légumes",
+    "en": "illustrated terrine de légumes",
+    "aliases": []
+  },
+  {
+    "slug": "aspic",
+    "fr": "aspic",
+    "en": "illustrated aspic",
+    "aliases": []
+  },
+  {
+    "slug": "oeufs-mimosa",
+    "fr": "oeufs mimosa",
+    "en": "illustrated oeufs mimosa",
+    "aliases": []
+  },
+  {
+    "slug": "oeufs-meurette",
+    "fr": "oeufs en meurette",
+    "en": "illustrated oeufs en meurette",
+    "aliases": []
+  },
+  {
+    "slug": "oeufs-benedicte",
+    "fr": "oeufs bénédictine",
+    "en": "illustrated oeufs bénédictine",
+    "aliases": []
+  },
+  {
+    "slug": "oeufs-cocotte",
+    "fr": "oeufs cocotte",
+    "en": "illustrated oeufs cocotte",
+    "aliases": []
+  },
+  {
+    "slug": "omelette-fromage",
+    "fr": "omelette au fromage",
+    "en": "illustrated omelette au fromage",
+    "aliases": []
+  },
+  {
+    "slug": "omelette-fines-herbes",
+    "fr": "omelette aux fines herbes",
+    "en": "illustrated omelette aux fines herbes",
+    "aliases": []
+  },
+  {
+    "slug": "frittata",
+    "fr": "frittata",
+    "en": "illustrated frittata",
+    "aliases": []
+  },
+  {
+    "slug": "shakshuka",
+    "fr": "shakshuka",
+    "en": "illustrated shakshuka",
+    "aliases": []
+  },
+  {
+    "slug": "piperade-oeufs",
+    "fr": "piperade aux oeufs",
+    "en": "illustrated piperade aux oeufs",
+    "aliases": []
+  },
+  {
+    "slug": "eggs-benedict",
+    "fr": "eggs benedict",
+    "en": "illustrated eggs benedict",
+    "aliases": []
+  },
+  {
+    "slug": "pancake-sale",
+    "fr": "pancake salé",
+    "en": "illustrated pancake salé",
+    "aliases": []
+  },
+  {
+    "slug": "gaufre-salee",
+    "fr": "gaufre salée",
+    "en": "illustrated gaufre salée",
+    "aliases": []
+  },
+  {
+    "slug": "crepe-complete",
+    "fr": "crêpe complète",
+    "en": "illustrated crêpe complète",
+    "aliases": []
+  },
+  {
+    "slug": "crepe-jambon-fromage",
+    "fr": "crêpe jambon fromage",
+    "en": "illustrated crêpe jambon fromage",
+    "aliases": []
+  },
+  {
+    "slug": "galette-complete",
+    "fr": "galette complète",
+    "en": "illustrated galette complète",
+    "aliases": []
+  },
+  {
+    "slug": "galette-saumon",
+    "fr": "galette saumon",
+    "en": "illustrated galette saumon",
+    "aliases": []
+  },
+  {
+    "slug": "blini-saumon",
+    "fr": "blini saumon",
+    "en": "illustrated blini saumon",
+    "aliases": []
+  },
+  {
+    "slug": "toast-avocat",
+    "fr": "toast avocat",
+    "en": "illustrated toast avocat",
+    "aliases": []
+  },
+  {
+    "slug": "tartine-chevre",
+    "fr": "tartine chèvre",
+    "en": "illustrated tartine chèvre",
+    "aliases": []
+  },
+  {
+    "slug": "bruschetta",
+    "fr": "bruschetta",
+    "en": "illustrated bruschetta",
+    "aliases": []
+  },
+  {
+    "slug": "crostini",
+    "fr": "crostini",
+    "en": "illustrated crostini",
+    "aliases": []
+  },
+  {
+    "slug": "pain-perdu-sale",
+    "fr": "pain perdu salé",
+    "en": "illustrated pain perdu salé",
+    "aliases": []
+  },
+  {
+    "slug": "croque-hawaïen",
+    "fr": "croque hawaïen",
+    "en": "illustrated croque hawaïen",
+    "aliases": []
+  },
+  {
+    "slug": "welsh",
+    "fr": "welsh",
+    "en": "illustrated welsh",
+    "aliases": []
+  },
+  {
+    "slug": "hot-dog-pain",
+    "fr": "hot-dog",
+    "en": "illustrated hot-dog",
+    "aliases": []
+  },
+  {
+    "slug": "hot-dog-chutney",
+    "fr": "hot-dog chutney",
+    "en": "illustrated hot-dog chutney",
+    "aliases": []
+  },
+  {
+    "slug": "pretzel-saucisse",
+    "fr": "pretzel saucisse",
+    "en": "illustrated pretzel saucisse",
+    "aliases": []
+  },
+  {
+    "slug": "kebab",
+    "fr": "kebab",
+    "en": "illustrated kebab",
+    "aliases": [
+      "dürüm"
+    ]
+  },
+  {
+    "slug": "doner",
+    "fr": "döner",
+    "en": "illustrated döner",
+    "aliases": [
+      "doner kebab"
+    ]
+  },
+  {
+    "slug": "gyros",
+    "fr": "gyros",
+    "en": "illustrated gyros",
+    "aliases": []
+  },
+  {
+    "slug": "falafel-pain",
+    "fr": "falafel pain pita",
+    "en": "illustrated falafel pain pita",
+    "aliases": []
+  },
+  {
+    "slug": "shawarma",
+    "fr": "shawarma",
+    "en": "illustrated shawarma",
+    "aliases": []
+  },
+  {
+    "slug": "banh-mi",
+    "fr": "banh mi",
+    "en": "illustrated banh mi",
+    "aliases": []
+  },
+  {
+    "slug": "ciabatta-jambon",
+    "fr": "ciabatta jambon",
+    "en": "illustrated ciabatta jambon",
+    "aliases": []
+  },
+  {
+    "slug": "focaccia-tomate",
+    "fr": "focaccia tomate",
+    "en": "illustrated focaccia tomate",
+    "aliases": []
+  },
+  {
+    "slug": "pain-surprise",
+    "fr": "pain surprise",
+    "en": "illustrated pain surprise",
+    "aliases": []
+  },
+  {
+    "slug": "miche",
+    "fr": "miche",
+    "en": "illustrated miche",
+    "aliases": []
+  },
+  {
+    "slug": "boule-campagne",
+    "fr": "boule de campagne",
+    "en": "illustrated boule de campagne",
+    "aliases": []
+  },
+  {
+    "slug": "batard",
+    "fr": "bâtard",
+    "en": "illustrated bâtard",
+    "aliases": []
+  },
+  {
+    "slug": "ficelle",
+    "fr": "ficelle",
+    "en": "illustrated ficelle",
+    "aliases": []
+  },
+  {
+    "slug": "pain-viennois",
+    "fr": "pain viennois",
+    "en": "illustrated pain viennois",
+    "aliases": []
+  },
+  {
+    "slug": "pain-de-mie-complet",
+    "fr": "pain de mie complet",
+    "en": "illustrated pain de mie complet",
+    "aliases": []
+  },
+  {
+    "slug": "pain-nordique",
+    "fr": "pain nordique",
+    "en": "illustrated pain nordique",
+    "aliases": []
+  },
+  {
+    "slug": "pain-aux-noix",
+    "fr": "pain aux noix",
+    "en": "illustrated pain aux noix",
+    "aliases": []
+  },
+  {
+    "slug": "pain-aux-figues",
+    "fr": "pain aux figues",
+    "en": "illustrated pain aux figues",
+    "aliases": []
+  },
+  {
+    "slug": "pain-au-mais",
+    "fr": "pain au maïs",
+    "en": "illustrated pain au maïs",
+    "aliases": []
+  },
+  {
+    "slug": "cornbread",
+    "fr": "cornbread",
+    "en": "illustrated cornbread",
+    "aliases": []
+  },
+  {
+    "slug": "soda-bread",
+    "fr": "soda bread",
+    "en": "illustrated soda bread",
+    "aliases": []
+  },
+  {
+    "slug": "baguette-tradition",
+    "fr": "baguette tradition",
+    "en": "illustrated baguette tradition",
+    "aliases": []
+  },
+  {
+    "slug": "baguette-graines",
+    "fr": "baguette aux graines",
+    "en": "illustrated baguette aux graines",
+    "aliases": []
+  },
+  {
+    "slug": "croissant-amandes",
+    "fr": "croissant aux amandes",
+    "en": "illustrated croissant aux amandes",
+    "aliases": []
+  },
+  {
+    "slug": "pain-chocolat-amandes",
+    "fr": "pain au chocolat aux amandes",
+    "en": "illustrated pain au chocolat aux amandes",
+    "aliases": []
+  },
+  {
+    "slug": "chausson",
+    "fr": "chausson",
+    "en": "illustrated chausson",
+    "aliases": []
+  },
+  {
+    "slug": "chouquette-sucre",
+    "fr": "chouquette sucrée",
+    "en": "illustrated chouquette sucrée",
+    "aliases": []
+  },
+  {
+    "slug": "eclair-cafe",
+    "fr": "éclair café",
+    "en": "illustrated éclair café",
+    "aliases": []
+  },
+  {
+    "slug": "eclair-chocolat",
+    "fr": "éclair chocolat",
+    "en": "illustrated éclair chocolat",
+    "aliases": []
+  },
+  {
+    "slug": "religieuse",
+    "fr": "religieuse",
+    "en": "illustrated religieuse",
+    "aliases": []
+  },
+  {
+    "slug": "millefeuille-vanille",
+    "fr": "millefeuille vanille",
+    "en": "illustrated millefeuille vanille",
+    "aliases": []
+  },
+  {
+    "slug": "paris-brest-alias",
+    "fr": "paris-brest noisette",
+    "en": "illustrated paris-brest noisette",
+    "aliases": []
+  },
+  {
+    "slug": "saint-honore-alias",
+    "fr": "saint-honoré caramel",
+    "en": "illustrated saint-honoré caramel",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-citron",
+    "fr": "tarte au citron",
+    "en": "illustrated tarte au citron",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-fraises",
+    "fr": "tarte aux fraises",
+    "en": "illustrated tarte aux fraises",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-pommes",
+    "fr": "tarte aux pommes",
+    "en": "illustrated tarte aux pommes",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-poires",
+    "fr": "tarte aux poires",
+    "en": "illustrated tarte aux poires",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-abricots",
+    "fr": "tarte aux abricots",
+    "en": "illustrated tarte aux abricots",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-mirabelles",
+    "fr": "tarte aux mirabelles",
+    "en": "illustrated tarte aux mirabelles",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-prunes",
+    "fr": "tarte aux prunes",
+    "en": "illustrated tarte aux prunes",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-rhubarbe",
+    "fr": "tarte à la rhubarbe",
+    "en": "illustrated tarte à la rhubarbe",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-noix",
+    "fr": "tarte aux noix",
+    "en": "illustrated tarte aux noix",
+    "aliases": []
+  },
+  {
+    "slug": "tarte-chocolat-pecan",
+    "fr": "tarte chocolat pécan",
+    "en": "illustrated tarte chocolat pécan",
+    "aliases": []
+  },
+  {
+    "slug": "flan-patissier",
+    "fr": "flan pâtissier",
+    "en": "illustrated flan pâtissier",
+    "aliases": []
+  },
+  {
+    "slug": "flan-coco",
+    "fr": "flan coco",
+    "en": "illustrated flan coco",
+    "aliases": []
+  },
+  {
+    "slug": "riz-au-lait-alias",
+    "fr": "riz au lait vanille",
+    "en": "illustrated riz au lait vanille",
+    "aliases": []
+  },
+  {
+    "slug": "ile-flottante-alias",
+    "fr": "île flottante caramel",
+    "en": "illustrated île flottante caramel",
+    "aliases": []
+  },
+  {
+    "slug": "creme-brulee-alias",
+    "fr": "crème brûlée vanille",
+    "en": "illustrated crème brûlée vanille",
+    "aliases": []
+  },
+  {
+    "slug": "panna-cotta-fruits",
+    "fr": "panna cotta fruits",
+    "en": "illustrated panna cotta fruits",
+    "aliases": []
+  },
+  {
+    "slug": "tiramisu-speculoos",
+    "fr": "tiramisu speculoos",
+    "en": "illustrated tiramisu speculoos",
+    "aliases": []
+  },
+  {
+    "slug": "mousse-citron",
+    "fr": "mousse au citron",
+    "en": "illustrated mousse au citron",
+    "aliases": []
+  },
+  {
+    "slug": "mousse-framboise",
+    "fr": "mousse à la framboise",
+    "en": "illustrated mousse à la framboise",
+    "aliases": []
+  },
+  {
+    "slug": "brownie-noix",
+    "fr": "brownie aux noix",
+    "en": "illustrated brownie aux noix",
+    "aliases": []
+  },
+  {
+    "slug": "cookie-pepites",
+    "fr": "cookie pépites",
+    "en": "illustrated cookie pépites",
+    "aliases": []
+  },
+  {
+    "slug": "muffin-myrtille",
+    "fr": "muffin myrtille",
+    "en": "illustrated muffin myrtille",
+    "aliases": []
+  },
+  {
+    "slug": "muffin-chocolat",
+    "fr": "muffin chocolat",
+    "en": "illustrated muffin chocolat",
+    "aliases": []
+  },
+  {
+    "slug": "madeleine-citron",
+    "fr": "madeleine citron",
+    "en": "illustrated madeleine citron",
+    "aliases": []
+  },
+  {
+    "slug": "financier-amande",
+    "fr": "financier amande",
+    "en": "illustrated financier amande",
+    "aliases": []
+  },
+  {
+    "slug": "canneles-bordeaux",
+    "fr": "cannelés de Bordeaux",
+    "en": "illustrated cannelés de Bordeaux",
+    "aliases": []
+  },
+  {
+    "slug": "kouign-amann-alias",
+    "fr": "kouign-amann beurre",
+    "en": "illustrated kouign-amann beurre",
+    "aliases": []
+  },
+  {
+    "slug": "quatre-quarts",
+    "fr": "quatre-quarts",
+    "en": "illustrated quatre-quarts",
+    "aliases": []
+  },
+  {
+    "slug": "gateau-yaourt",
+    "fr": "gâteau au yaourt",
+    "en": "illustrated gâteau au yaourt",
+    "aliases": []
+  },
+  {
+    "slug": "cake-citron",
+    "fr": "cake au citron",
+    "en": "illustrated cake au citron",
+    "aliases": []
+  },
+  {
+    "slug": "cake-chocolat",
+    "fr": "cake au chocolat",
+    "en": "illustrated cake au chocolat",
+    "aliases": []
+  },
+  {
+    "slug": "cake-fruits-confits",
+    "fr": "cake aux fruits confits",
+    "en": "illustrated cake aux fruits confits",
+    "aliases": []
+  },
+  {
+    "slug": "pain-epices-alias",
+    "fr": "pain d'épices miel",
+    "en": "illustrated pain d'épices miel",
+    "aliases": []
+  },
+  {
+    "slug": "speculoos-alias",
+    "fr": "spéculoos",
+    "en": "illustrated spéculoos",
+    "aliases": []
+  },
+  {
+    "slug": "sables-beurre",
+    "fr": "sablés au beurre",
+    "en": "illustrated sablés au beurre",
+    "aliases": []
+  },
+  {
+    "slug": "palet-breton",
+    "fr": "palet breton",
+    "en": "illustrated palet breton",
+    "aliases": []
+  },
+  {
+    "slug": "galette-bretonne",
+    "fr": "galette bretonne",
+    "en": "illustrated galette bretonne",
+    "aliases": []
+  },
+  {
+    "slug": "macaron-pistache",
+    "fr": "macaron pistache",
+    "en": "illustrated macaron pistache",
+    "aliases": []
+  },
+  {
+    "slug": "macaron-chocolat",
+    "fr": "macaron chocolat",
+    "en": "illustrated macaron chocolat",
+    "aliases": []
+  },
+  {
+    "slug": "macaron-framboise",
+    "fr": "macaron framboise",
+    "en": "illustrated macaron framboise",
+    "aliases": []
+  },
+  {
+    "slug": "nougat-noir",
+    "fr": "nougat noir",
+    "en": "illustrated nougat noir",
+    "aliases": []
+  },
+  {
+    "slug": "nougat-blanc",
+    "fr": "nougat blanc",
+    "en": "illustrated nougat blanc",
+    "aliases": []
+  },
+  {
+    "slug": "touron",
+    "fr": "touron",
+    "en": "illustrated touron",
+    "aliases": []
+  },
+  {
+    "slug": "calisson-alias",
+    "fr": "calissons d'Aix",
+    "en": "illustrated calissons d'Aix",
+    "aliases": []
+  },
+  {
+    "slug": "berlingot",
+    "fr": "berlingot",
+    "en": "illustrated berlingot",
+    "aliases": []
+  },
+  {
+    "slug": "caramel-mou",
+    "fr": "caramel mou",
+    "en": "illustrated caramel mou",
+    "aliases": []
+  },
+  {
+    "slug": "reglisse",
+    "fr": "réglisse",
+    "en": "illustrated réglisse",
+    "aliases": [
+      "reglisse"
+    ]
+  },
+  {
+    "slug": "pate-d-amande-fruits",
+    "fr": "fruits déguisés",
+    "en": "illustrated fruits déguisés",
+    "aliases": []
+  },
+  {
+    "slug": "marron-glace",
+    "fr": "marron glacé",
+    "en": "illustrated marron glacé",
+    "aliases": []
+  },
+  {
+    "slug": "chtaouk",
+    "fr": "chtaouk",
+    "en": "illustrated chtaouk",
+    "aliases": []
+  },
+  {
+    "slug": "taboule",
+    "fr": "taboulé",
+    "en": "illustrated taboulé",
+    "aliases": [
+      "taboule"
+    ]
+  },
+  {
+    "slug": "fattoush",
+    "fr": "fattoush",
+    "en": "illustrated fattoush",
+    "aliases": []
+  },
+  {
+    "slug": "salade-nicoise",
+    "fr": "salade niçoise",
+    "en": "illustrated salade niçoise",
+    "aliases": []
+  },
+  {
+    "slug": "salade-cesar",
+    "fr": "salade césar",
+    "en": "illustrated salade césar",
+    "aliases": []
+  },
+  {
+    "slug": "salade-grecque",
+    "fr": "salade grecque",
+    "en": "illustrated salade grecque",
+    "aliases": []
+  },
+  {
+    "slug": "salade-chevre-chaud",
+    "fr": "salade chèvre chaud",
+    "en": "illustrated salade chèvre chaud",
+    "aliases": []
+  },
+  {
+    "slug": "salade-lentilles",
+    "fr": "salade de lentilles",
+    "en": "illustrated salade de lentilles",
+    "aliases": []
+  },
+  {
+    "slug": "salade-quinoa",
+    "fr": "salade de quinoa",
+    "en": "illustrated salade de quinoa",
+    "aliases": []
+  },
+  {
+    "slug": "salade-pate",
+    "fr": "salade de pâtes",
+    "en": "illustrated salade de pâtes",
+    "aliases": []
+  },
+  {
+    "slug": "salade-riz-thon",
+    "fr": "salade de riz au thon",
+    "en": "illustrated salade de riz au thon",
+    "aliases": []
+  },
+  {
+    "slug": "coleslaw",
+    "fr": "coleslaw",
+    "en": "illustrated coleslaw",
+    "aliases": [
+      "salade de chou"
+    ]
+  },
+  {
+    "slug": "poulet-caesar",
+    "fr": "salade césar poulet",
+    "en": "illustrated salade césar poulet",
+    "aliases": []
+  },
+  {
+    "slug": "poke-bowl",
+    "fr": "poke bowl",
+    "en": "illustrated poke bowl",
+    "aliases": []
+  },
+  {
+    "slug": "buddha-bowl",
+    "fr": "buddha bowl",
+    "en": "illustrated buddha bowl",
+    "aliases": []
+  },
+  {
+    "slug": "acai-bowl",
+    "fr": "açaí bowl",
+    "en": "illustrated açaí bowl",
+    "aliases": []
+  },
+  {
+    "slug": "smoothie-bowl",
+    "fr": "smoothie bowl",
+    "en": "illustrated smoothie bowl",
+    "aliases": []
+  },
+  {
+    "slug": "granola-bol",
+    "fr": "bol de granola",
+    "en": "illustrated bol de granola",
+    "aliases": []
+  },
+  {
+    "slug": "porridge-fruits",
+    "fr": "porridge aux fruits",
+    "en": "illustrated porridge aux fruits",
+    "aliases": []
+  },
+  {
+    "slug": "overnight-oats",
+    "fr": "overnight oats",
+    "en": "illustrated overnight oats",
+    "aliases": []
+  },
+  {
+    "slug": "chia-pudding",
+    "fr": "pudding de chia",
+    "en": "illustrated pudding de chia",
+    "aliases": []
+  },
+  {
+    "slug": "yaourt-granola",
+    "fr": "yaourt granola",
+    "en": "illustrated yaourt granola",
+    "aliases": []
+  },
+  {
+    "slug": "fromage-blanc-miel",
+    "fr": "fromage blanc miel",
+    "en": "illustrated fromage blanc miel",
+    "aliases": []
+  },
+  {
+    "slug": "skyr-fruits",
+    "fr": "skyr aux fruits",
+    "en": "illustrated skyr aux fruits",
+    "aliases": []
+  },
+  {
+    "slug": "cottage-herbes",
+    "fr": "cottage cheese herbes",
+    "en": "illustrated cottage cheese herbes",
+    "aliases": []
+  },
+  {
+    "slug": "labneh-huile",
+    "fr": "labneh huile d'olive",
+    "en": "illustrated labneh huile d'olive",
+    "aliases": []
+  },
+  {
+    "slug": "kefir-fruits",
+    "fr": "kéfir fruits",
+    "en": "illustrated kéfir fruits",
+    "aliases": []
+  },
+  {
+    "slug": "lait-or-curcuma",
+    "fr": "lait d'or",
+    "en": "illustrated lait d'or",
+    "aliases": [
+      "golden milk"
+    ]
+  },
+  {
+    "slug": "chai",
+    "fr": "chai",
+    "en": "illustrated chai",
+    "aliases": []
+  },
+  {
+    "slug": "matcha",
+    "fr": "matcha",
+    "en": "illustrated matcha",
+    "aliases": []
+  },
+  {
+    "slug": "the-earl-grey",
+    "fr": "earl grey",
+    "en": "illustrated earl grey",
+    "aliases": []
+  },
+  {
+    "slug": "the-jasmin",
+    "fr": "thé jasmin",
+    "en": "illustrated thé jasmin",
+    "aliases": []
+  },
+  {
+    "slug": "infusion-tilleul",
+    "fr": "tilleul",
+    "en": "illustrated tilleul",
+    "aliases": []
+  },
+  {
+    "slug": "infusion-camomille",
+    "fr": "camomille",
+    "en": "illustrated camomille",
+    "aliases": []
+  },
+  {
+    "slug": "infusion-menthe",
+    "fr": "menthe à l'eau",
+    "en": "illustrated menthe à l'eau",
+    "aliases": []
+  },
+  {
+    "slug": "citronnade",
+    "fr": "citronnade",
+    "en": "illustrated citronnade",
+    "aliases": []
+  },
+  {
+    "slug": "orangeade",
+    "fr": "orangeade",
+    "en": "illustrated orangeade",
+    "aliases": []
+  },
+  {
+    "slug": "granite-citron",
+    "fr": "granité citron",
+    "en": "illustrated granité citron",
+    "aliases": []
+  },
+  {
+    "slug": "sorbet-cassis",
+    "fr": "sorbet cassis",
+    "en": "illustrated sorbet cassis",
+    "aliases": []
+  },
+  {
+    "slug": "glace-vanille",
+    "fr": "glace vanille",
+    "en": "illustrated glace vanille",
+    "aliases": []
+  },
+  {
+    "slug": "glace-chocolat",
+    "fr": "glace chocolat",
+    "en": "illustrated glace chocolat",
+    "aliases": []
+  },
+  {
+    "slug": "glace-fraise",
+    "fr": "glace fraise",
+    "en": "illustrated glace fraise",
+    "aliases": []
+  },
+  {
+    "slug": "glace-pistache",
+    "fr": "glace pistache",
+    "en": "illustrated glace pistache",
+    "aliases": []
+  },
+  {
+    "slug": "glace-cafe",
+    "fr": "glace café",
+    "en": "illustrated glace café",
+    "aliases": []
+  },
+  {
+    "slug": "coupe-liegeoise",
+    "fr": "coupe liégeoise",
+    "en": "illustrated coupe liégeoise",
+    "aliases": []
+  },
+  {
+    "slug": "banana-split",
+    "fr": "banana split",
+    "en": "illustrated banana split",
+    "aliases": []
+  },
+  {
+    "slug": "milkshake-chocolat",
+    "fr": "milkshake chocolat",
+    "en": "illustrated milkshake chocolat",
+    "aliases": []
+  },
+  {
+    "slug": "milkshake-fraise",
+    "fr": "milkshake fraise",
+    "en": "illustrated milkshake fraise",
+    "aliases": []
+  },
+  {
+    "slug": "smoothie-vert",
+    "fr": "smoothie vert",
+    "en": "illustrated smoothie vert",
+    "aliases": []
+  },
+  {
+    "slug": "smoothie-fruits-rouges",
+    "fr": "smoothie fruits rouges",
+    "en": "illustrated smoothie fruits rouges",
+    "aliases": []
+  },
+  {
+    "slug": "jus-detox",
+    "fr": "jus détox",
+    "en": "illustrated jus détox",
+    "aliases": []
+  },
+  {
+    "slug": "kombucha-gingembre",
+    "fr": "kombucha gingembre",
+    "en": "illustrated kombucha gingembre",
+    "aliases": []
+  },
+  {
+    "slug": "kefir-eau",
+    "fr": "kéfir d'eau",
+    "en": "illustrated kéfir d'eau",
+    "aliases": []
+  },
+  {
+    "slug": "eau-aromatisee",
+    "fr": "eau aromatisée",
+    "en": "illustrated eau aromatisée",
+    "aliases": []
+  },
+  {
+    "slug": "perrier",
+    "fr": "perrier",
+    "en": "illustrated perrier",
+    "aliases": []
+  },
+  {
+    "slug": "badoit",
+    "fr": "badoit",
+    "en": "illustrated badoit",
+    "aliases": []
+  },
+  {
+    "slug": "san-pellegrino",
+    "fr": "san pellegrino",
+    "en": "illustrated san pellegrino",
+    "aliases": []
+  },
+  {
+    "slug": "evian",
+    "fr": "evian",
+    "en": "illustrated evian",
+    "aliases": []
+  },
+  {
+    "slug": "vittel",
+    "fr": "vittel",
+    "en": "illustrated vittel",
+    "aliases": []
+  },
+  {
+    "slug": "volvic",
+    "fr": "volvic",
+    "en": "illustrated volvic",
+    "aliases": []
+  },
+  {
+    "slug": "contrex",
+    "fr": "contrex",
+    "en": "illustrated contrex",
+    "aliases": []
+  },
+  {
+    "slug": "hepar",
+    "fr": "hépar",
+    "en": "illustrated hépar",
+    "aliases": []
+  },
+  {
+    "slug": "salvetat",
+    "fr": "salvetat",
+    "en": "illustrated salvetat",
+    "aliases": []
+  },
+  {
+    "slug": "quebec",
+    "fr": "eau quézac",
+    "en": "illustrated eau quézac",
+    "aliases": [
+      "quezac"
+    ]
+  },
+  {
+    "slug": "cidre-brut",
+    "fr": "cidre brut",
+    "en": "illustrated cidre brut",
+    "aliases": []
+  },
+  {
+    "slug": "cidre-doux",
+    "fr": "cidre doux",
+    "en": "illustrated cidre doux",
+    "aliases": []
+  },
+  {
+    "slug": "poire-cidre",
+    "fr": "poiré",
+    "en": "illustrated poiré",
+    "aliases": []
+  },
+  {
+    "slug": "hydromel",
+    "fr": "hydromel",
+    "en": "illustrated hydromel",
+    "aliases": []
+  },
+  {
+    "slug": "sake",
+    "fr": "saké",
+    "en": "illustrated saké",
+    "aliases": []
+  },
+  {
+    "slug": "soju",
+    "fr": "soju",
+    "en": "illustrated soju",
+    "aliases": []
+  },
+  {
+    "slug": "mezcal",
+    "fr": "mezcal",
+    "en": "illustrated mezcal",
+    "aliases": []
+  },
+  {
+    "slug": "rhum-blanc",
+    "fr": "rhum blanc",
+    "en": "illustrated rhum blanc",
+    "aliases": []
+  },
+  {
+    "slug": "rhum-ambre",
+    "fr": "rhum ambré",
+    "en": "illustrated rhum ambré",
+    "aliases": []
+  },
+  {
+    "slug": "cognac",
+    "fr": "cognac",
+    "en": "illustrated cognac",
+    "aliases": []
+  },
+  {
+    "slug": "armagnac-verre",
+    "fr": "armagnac",
+    "en": "illustrated armagnac",
+    "aliases": []
+  },
+  {
+    "slug": "calvados-verre",
+    "fr": "calvados",
+    "en": "illustrated calvados",
+    "aliases": []
+  },
+  {
+    "slug": "chartreuse",
+    "fr": "chartreuse",
+    "en": "illustrated chartreuse",
+    "aliases": []
+  },
+  {
+    "slug": "genepi",
+    "fr": "génépi",
+    "en": "illustrated génépi",
+    "aliases": []
+  },
+  {
+    "slug": "get-27",
+    "fr": "get 27",
+    "en": "illustrated get 27",
+    "aliases": []
+  },
+  {
+    "slug": "menthe-pastille",
+    "fr": "menthe-pastille",
+    "en": "illustrated menthe-pastille",
+    "aliases": []
+  },
+  {
+    "slug": "suze",
+    "fr": "suze",
+    "en": "illustrated suze",
+    "aliases": []
+  },
+  {
+    "slug": "campari",
+    "fr": "campari",
+    "en": "illustrated campari",
+    "aliases": []
+  },
+  {
+    "slug": "aperol",
+    "fr": "aperol",
+    "en": "illustrated aperol",
+    "aliases": []
+  },
+  {
+    "slug": "spritz",
+    "fr": "spritz",
+    "en": "illustrated spritz",
+    "aliases": []
+  },
+  {
+    "slug": "negroni",
+    "fr": "negroni",
+    "en": "illustrated negroni",
+    "aliases": []
+  },
+  {
+    "slug": "mojito",
+    "fr": "mojito",
+    "en": "illustrated mojito",
+    "aliases": []
+  },
+  {
+    "slug": "caipirinha",
+    "fr": "caipirinha",
+    "en": "illustrated caipirinha",
+    "aliases": []
+  },
+  {
+    "slug": "margarita",
+    "fr": "margarita",
+    "en": "illustrated margarita",
+    "aliases": []
+  },
+  {
+    "slug": "bloody-mary",
+    "fr": "bloody mary",
+    "en": "illustrated bloody mary",
+    "aliases": []
+  },
+  {
+    "slug": "pina-colada",
+    "fr": "piña colada",
+    "en": "illustrated piña colada",
+    "aliases": []
+  },
+  {
+    "slug": "cosmopolitan",
+    "fr": "cosmopolitan",
+    "en": "illustrated cosmopolitan",
+    "aliases": []
+  },
+  {
+    "slug": "kir",
+    "fr": "kir",
+    "en": "illustrated kir",
+    "aliases": []
+  },
+  {
+    "slug": "kir-royal",
+    "fr": "kir royal",
+    "en": "illustrated kir royal",
+    "aliases": []
+  },
+  {
+    "slug": "champagne-rose",
+    "fr": "champagne rosé",
+    "en": "illustrated champagne rosé",
+    "aliases": []
+  },
+  {
+    "slug": "cremant",
+    "fr": "crémant",
+    "en": "illustrated crémant",
+    "aliases": []
+  },
+  {
+    "slug": "prosecco",
+    "fr": "prosecco",
+    "en": "illustrated prosecco",
+    "aliases": []
+  },
+  {
+    "slug": "cava",
+    "fr": "cava",
+    "en": "illustrated cava",
+    "aliases": []
+  },
+  {
+    "slug": "porto-tawny",
+    "fr": "porto tawny",
+    "en": "illustrated porto tawny",
+    "aliases": []
+  },
+  {
+    "slug": "porto-ruby",
+    "fr": "porto ruby",
+    "en": "illustrated porto ruby",
+    "aliases": []
+  },
+  {
+    "slug": "xeres",
+    "fr": "xérès",
+    "en": "illustrated xérès",
+    "aliases": [
+      "sherry"
+    ]
+  },
+  {
+    "slug": "madere-verre",
+    "fr": "madère",
+    "en": "illustrated madère",
+    "aliases": []
+  },
+  {
+    "slug": "pineau",
+    "fr": "pineau des charentes",
+    "en": "illustrated pineau des charentes",
+    "aliases": []
+  },
+  {
+    "slug": "floc",
+    "fr": "floc de gascogne",
+    "en": "illustrated floc de gascogne",
+    "aliases": []
+  },
+  {
+    "slug": "pommeau",
+    "fr": "pommeau",
+    "en": "illustrated pommeau",
+    "aliases": []
+  },
+  {
+    "slug": "ratafia",
+    "fr": "ratafia",
+    "en": "illustrated ratafia",
+    "aliases": []
+  },
+  {
+    "slug": "vin-jaune",
+    "fr": "vin jaune",
+    "en": "illustrated vin jaune",
+    "aliases": []
+  },
+  {
+    "slug": "vin-de-paille",
+    "fr": "vin de paille",
+    "en": "illustrated vin de paille",
+    "aliases": []
+  },
+  {
+    "slug": "sauternes",
+    "fr": "sauternes",
+    "en": "illustrated sauternes",
+    "aliases": []
+  },
+  {
+    "slug": "gewurztraminer",
+    "fr": "gewurztraminer",
+    "en": "illustrated gewurztraminer",
+    "aliases": []
+  },
+  {
+    "slug": "riesling",
+    "fr": "riesling",
+    "en": "illustrated riesling",
+    "aliases": []
+  },
+  {
+    "slug": "chardonnay",
+    "fr": "chardonnay",
+    "en": "illustrated chardonnay",
+    "aliases": []
+  },
+  {
+    "slug": "sauvignon",
+    "fr": "sauvignon",
+    "en": "illustrated sauvignon",
+    "aliases": []
+  },
+  {
+    "slug": "pinot-noir",
+    "fr": "pinot noir",
+    "en": "illustrated pinot noir",
+    "aliases": []
+  },
+  {
+    "slug": "merlot",
+    "fr": "merlot",
+    "en": "illustrated merlot",
+    "aliases": []
+  },
+  {
+    "slug": "cabernet",
+    "fr": "cabernet",
+    "en": "illustrated cabernet",
+    "aliases": []
+  },
+  {
+    "slug": "syrah",
+    "fr": "syrah",
+    "en": "illustrated syrah",
+    "aliases": []
+  },
+  {
+    "slug": "cotes-du-rhone",
+    "fr": "côtes du rhône",
+    "en": "illustrated côtes du rhône",
+    "aliases": []
+  },
+  {
+    "slug": "bordeaux-rouge",
+    "fr": "bordeaux rouge",
+    "en": "illustrated bordeaux rouge",
+    "aliases": []
+  },
+  {
+    "slug": "bourgogne-blanc",
+    "fr": "bourgogne blanc",
+    "en": "illustrated bourgogne blanc",
+    "aliases": []
+  },
+  {
+    "slug": "beaujolais",
+    "fr": "beaujolais",
+    "en": "illustrated beaujolais",
+    "aliases": []
+  },
+  {
+    "slug": "champagne-brut",
+    "fr": "champagne brut",
+    "en": "illustrated champagne brut",
+    "aliases": []
+  }
+]

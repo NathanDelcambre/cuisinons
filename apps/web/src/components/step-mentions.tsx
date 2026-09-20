@@ -1,7 +1,7 @@
 'use client';
 
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { insertIngredientToken, parseStepMentions } from '@cuisinons/shared';
+import { ingredientInStep, insertIngredientToken, parseStepMentions } from '@cuisinons/shared';
 import { cn } from '@cuisinons/ui';
 
 export type StepIngredientOption = {
@@ -18,6 +18,18 @@ function tokenFor(id: string) {
 
 function nameOf(id: string, ingredients: StepIngredientOption[]) {
   return ingredients.find((item) => item.id === id)?.name ?? 'Ingrédient';
+}
+
+function labeledParts(value: string, ingredients: StepIngredientOption[]) {
+  let preceding = '';
+  return parseStepMentions(value).map((part) => {
+    if (part.type === 'text') {
+      preceding += part.value;
+      return part;
+    }
+    const name = ingredientInStep(nameOf(part.id, ingredients), preceding);
+    return { type: 'ingredient' as const, id: part.id, name };
+  });
 }
 
 function createChip(id: string, name: string) {
@@ -181,13 +193,13 @@ function setCaretOffset(root: HTMLElement, target: number) {
 
 function paintEditor(root: HTMLElement, value: string, ingredients: StepIngredientOption[]) {
   root.replaceChildren();
-  const parts = parseStepMentions(value);
+  const parts = labeledParts(value, ingredients);
   if (parts.length === 0) return;
   for (const part of parts) {
     if (part.type === 'text') {
       root.append(part.value);
     } else {
-      root.append(createChip(part.id, nameOf(part.id, ingredients)));
+      root.append(createChip(part.id, part.name));
     }
   }
 }
@@ -220,11 +232,16 @@ export function StepDescriptionField({
     const el = editorRef.current;
     if (!el) return;
     if (serializeEditor(el) === value) {
-      for (const chip of Array.from(el.querySelectorAll<HTMLElement>('[data-ingredient-id]'))) {
-        const id = chip.dataset.ingredientId;
-        if (!id) continue;
-        const nextName = nameOf(id, ingredients);
-        if (chip.textContent !== nextName) chip.textContent = nextName;
+      let preceding = '';
+      for (const node of Array.from(el.childNodes)) {
+        if (node.nodeType === Node.TEXT_NODE) {
+          preceding += node.textContent ?? '';
+          continue;
+        }
+        if (!(node instanceof HTMLElement) || !node.dataset.ingredientId) continue;
+        const nextName = ingredientInStep(nameOf(node.dataset.ingredientId, ingredients), preceding);
+        if (node.textContent !== nextName) node.textContent = nextName;
+        preceding += nextName;
       }
       el.dataset.empty = value.length === 0 ? 'true' : 'false';
       return;
@@ -385,7 +402,7 @@ export function StepMentionPreview({
   const byId = new Map(ingredients.map((item) => [item.id, item]));
   return (
     <p className="text-sm leading-relaxed text-ink-800">
-      {parseStepMentions(description).map((part, index) => {
+      {labeledParts(description, ingredients).map((part, index) => {
         if (part.type === 'text') return <span key={index}>{part.value}</span>;
         const item = byId.get(part.id);
         if (!item) return <span key={index}>Ingrédient</span>;
@@ -398,7 +415,7 @@ export function StepMentionPreview({
             title={tip}
             className="mx-0.5 inline rounded-md bg-sage-100 px-1.5 py-0.5 text-sage-700 underline-offset-2 hover:bg-sage-200"
           >
-            {item.name}
+            {part.name}
           </button>
         );
       })}

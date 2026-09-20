@@ -1,14 +1,15 @@
 import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import extra from "./ingredient-icon-extra.json" with { type: "json" };
 
 const items = [];
 const seen = new Set();
 
-function add(slug, fr, en) {
+function add(slug, fr, en, aliases) {
   if (seen.has(slug)) throw new Error(`duplicate slug: ${slug}`);
   seen.add(slug);
-  items.push({ slug, fr, en });
+  items.push(aliases?.length ? { slug, fr, en, aliases } : { slug, fr, en });
 }
 
 // —— Fruits ——
@@ -1019,6 +1020,11 @@ add("huile-de-pistache", "huile de pistache", "a bottle of pistachio oil");
 add("beurre-de-cacao", "beurre de cacao", "a block of cocoa butter");
 add("cacao-beurre", "copeaux de beurre de cacao", "cocoa butter shavings");
 
+for (const item of extra) {
+  if (seen.has(item.slug)) continue;
+  add(item.slug, item.fr, item.en, item.aliases);
+}
+
 // fix accidental leading spaces in slugs
 for (const item of items) {
   item.slug = item.slug.trim();
@@ -1036,7 +1042,7 @@ for (const item of items) {
 const out = join(dirname(fileURLToPath(import.meta.url)), "ingredient-icon-catalog.json");
 writeFileSync(out, JSON.stringify(unique, null, 2) + "\n");
 console.log(`wrote ${unique.length} items to ${out}`);
-if (unique.length < 800) {
-  console.error(`NEED ${800 - unique.length} more items`);
+if (unique.length < 1400) {
+  console.error(`NEED ${1400 - unique.length} more items`);
   process.exit(1);
 }

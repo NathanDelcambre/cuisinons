@@ -1,0 +1,731 @@
+# slug,family,fr,aliases (semicolon-separated)
+cheval,meat,cheval,viande de cheval
+mouton,meat,mouton,agneau de pré-salé
+faisan,bird,faisan,
+poule,bird,poule,
+chapon,bird,chapon,
+autruche,bird,autruche,
+pigeon,bird,pigeon,pigeonneau
+chevreau,meat,chevreau,
+volaille,bird,volaille,viande de volaille
+lievre,meat,lièvre,
+gibier-plumes,bird,gibier à plumes,
+gibier-poil,meat,gibier à poil,
+viande-grisons,steak,viande des Grisons,grisons
+corned-beef,can,corned-beef,corned beef
+viande-blanche,meat,viande blanche,
+viande-rouge,steak,viande rouge,
+abat,meat,abat,abats
+foie,meat,foie,
+gesier,meat,gésier,
+museau,meat,museau de boeuf,museau de porc
+oreille-de-porc,meat,oreille de porc,
+pied-de-porc,meat,pied de porc,
+sang,bowl,sang,
+cervelle,meat,cervelle,
+hache-volaille,meat,haché de volaille,hache de volaille
+roti-volaille,bird,rôti de volaille,roti de volaille
+paupiette-volaille,meat,paupiette de volaille,
+brochette-volaille,meat,brochette de volaille,
+brochette-mixte,meat,brochette mixte de viande,brochette mixte
+brochette-crevettes,shrimp,brochette de crevettes,
+yakitori,meat,yakitori,
+hamburger,bun,hamburger,
+cheeseburger,bun,cheeseburger,
+double-cheeseburger,bun,double cheeseburger,
+palette-diable,meat,palette à la diable,palette a la diable
+andouillette,sausage,andouillette,
+andouillette-troyes,sausage,andouillette de Troyes,
+cervelas,sausage,cervelas,cervelas obernois
+boudin,sausage,boudin,boudin antillais
+diot,sausage,diot,diot cru
+rosette,sausage,rosette,rosette ou fuseau;fuseau
+galantine,slice,galantine,
+fromage-de-tete,slice,fromage de tête,fromage de tete
+saucisse-francfort,sausage,saucisse de Francfort,
+saucisse-montbeliard,sausage,saucisse de Montbéliard,saucisse de Montbeliard
+saucisse-strasbourg,sausage,saucisse de Strasbourg,knack de strasbourg
+saucisse-cocktail,sausage,saucisse cocktail,
+saucisse-alsacienne,sausage,saucisse alsacienne,gendarme
+saucisse-fumee,sausage,saucisse fumée,saucisse fumee a cuire
+saucisse-seche,sausage,saucisse sèche,saucisse seche
+saucisse-foie,sausage,saucisse de foie,
+saucisse-volaille,sausage,saucisse de volaille,
+saucisse-vegetale,sausage,saucisse végétale,saucisse vegetale
+saucisse-jambon,sausage,saucisse de jambon,
+saucisse-biere,sausage,saucisse de bière,saucisse de biere
+saucisse-viennoise,sausage,saucisse viennoise,
+carrelet,fish,carrelet,plie;plie commune
+mahi-mahi,fish,mahi-mahi,mahi mahi
+mulet,fish,mulet,
+rascasse,fish,rascasse,rascasse de profondeur
+julienne-poisson,fish,julienne,lingue
+vivaneau,fish,vivaneau,
+roussette,fish,roussette,saumonette;petite roussette
+morue,fish,morue,cabillaud salé
+bogue,fish,bogue,
+capelan,fish,capelan,
+carangue,fish,carangue,
+cardine,fish,cardine,cardine franche
+chinchard,fish,chinchard,chinchard gras;chinchard maigre
+corb,fish,corb,
+coregone,fish,corégone,lavaret;coregone
+coulirou,fish,coulirou,
+dente,fish,denté,dente commun
+empereur,fish,empereur,
+esturgeon,fish,esturgeon,
+grenadier,fish,grenadier,
+hoki,fish,hoki,hoki de Nouvelle-Zélande
+lingue-bleue,fish,lingue bleue,
+lompe,fish,lompe,
+loup-atlantique,fish,loup de l'Atlantique,loup tacheté
+merou,fish,mérou,merou
+omble-chevalier,fish,omble chevalier,
+orphie,fish,orphie,orphie commune
+requin,fish,requin,
+sabre,fish,sabre,
+saupe,fish,saupe,
+tacaud,fish,tacaud,
+eperlan,fish,éperlan,eperlan
+breme,fish,brème,breme
+pangas,fish,pangas,
+joels,fish,joëls,joels
+massissi,fish,massissi,
+poisson-blanc,fish,poisson blanc,poisson cuit
+poisson-pane,fish,poisson pané,poisson pane
+accra-poisson,bowl,accra de poisson,accra
+burger-poisson,bun,burger au poisson,
+brochette-poisson,fish,brochette de poisson,
+quenelle-poisson,oval,quenelle de poisson,
+ecrevisse,shrimp,écrevisse,ecrevisse;ecrevisses
+ormeau,shell,ormeau,
+fruits-de-mer,shell,fruits de mer,
+asiago,wedge,asiago,
+chaource,wheel,chaource,
+saint-nectaire,wheel,saint-nectaire,Saint-Nectaire
+saint-marcellin,wheel,saint-marcellin,Saint-Marcellin
+saint-felicien,wheel,saint-félicien,saint-felicien
+neufchatel,heart,neufchâtel,neufchatel
+morbier,wedge,morbier,
+langres,wheel,langres,
+fontina,wedge,fontina,
+grana-padano,wedge,grana padano,Grana Padano
+provolone,wedge,provolone,
+fourme-montbrison,wheel,fourme de Montbrison,
+tome-des-bauges,wheel,tome des Bauges,
+tete-de-moine,wheel,tête de moine,tete de moine
+carre-de-lest,cube,carré de l'Est,carre de l est
+brousse,bowl,brousse,
+brocciu,bowl,brocciu,brucciu
+chabichou,oval,chabichou,
+picodon,oval,picodon,
+pelardon,oval,pélardon,pelardon
+selles-sur-cher,pyramid,selles-sur-cher,
+ossau-iraty,wedge,ossau-iraty,Ossau-Iraty
+saint-paulin,wheel,saint-paulin,Saint-Paulin
+maasdam,wedge,maasdam,
+bleu-de-gex,wedge,bleu de Gex,bleu de Septmoncel
+bleu-causses,wedge,bleu des Causses,
+chevrot,oval,chevrot,
+fromage-brebis,wedge,fromage de brebis,
+fromage-chevre-buche,oval,fromage de chèvre,fromage de chevre;bûche de chèvre
+tartiflette-fromage,wedge,fromage pour tartiflette,
+fromage-pate-molle,wedge,fromage à pâte molle,fromage a pate molle
+fromage-pate-pressee,wedge,fromage à pâte pressée,fromage a pate pressee
+chayote,oval,chayote,christophine;chouchou
+giraumon,squash,giraumon,
+citrouille,squash,citrouille,
+crosne,root,crosne,
+moringa,leaf,moringa,
+tetragone,leaf,tétragone,tetragone cornue
+pissenlit,leaf,pissenlit,
+scarole,leaf,scarole,
+batavia,leaf,batavia,
+haricot-plat,pod,haricot plat,
+haricot-lima,pod,haricot de Lima,pois savon;pois du Cap
+pois-angole,pod,pois d'Angole,pois d angole
+dachine,root,dachine,
+ti-nain,oval,ti nain,
+kamanioc,root,kamanioc,
+crudite,leaf,crudité,crudite
+macedoine,bowl,macédoine de légumes,macedoine de legumes
+julienne-legumes,bowl,julienne de légumes,brunoise de légumes
+meloukhia,leaf,meloukhia,mloukhiya
+luzerne,sprout,luzerne,graine germée de luzerne
+anone,round,anone,chérimole;cherimole
+feijoa,oval,feijoa,
+chadeque,citrus,chadèque,chadeque
+nefle,round,nèfle,nefle du Japon
+ceriser,round,ceriser,
+caimite,round,caïmite,pomme étoile
+nashi,round,nashi,poire nashi
+salak,oval,salak,fruit du serpent
+sapote,round,sapote,
+longane-alias,round,longan,
+ugli,citrus,ugli,tangelo
+mineola,citrus,minéola,mineola
+combava,citrus,combava,citron kaffir
+main-de-bouddha,citrus,main de bouddha,
+sudachi,citrus,sudachi,
+kabosu,citrus,kabosu,
+pomme-gala,round,pomme gala,
+pomme-pink-lady,round,pomme pink lady,pink lady
+pomme-canada,round,pomme canada,
+pomme-chantecler,round,pomme chantecler,
+tomate-grappe,round,tomate grappe,
+tomate-marmande,round,tomate marmande,
+tomate-noire,round,tomate noire de Crimée,tomate noire
+tomate-verte,round,tomate verte,
+tomate-allongee,oval,tomate allongée,tomate allongee
+tomate-provencale,round,tomate à la provençale,
+ble-khorasan,grain,blé de Khorasan,kamut;ble khorasan
+ble-dur-complet,grain,blé dur complet,ble dur
+seigle-complet,grain,seigle complet,seigle
+sorgho-complet,grain,sorgho complet,sorgho
+mil-complet,grain,mil complet,mil
+frik,grain,frik,
+chanvre-graine,grain,chanvre,chènevis;chenevis
+pollen,powder,pollen,
+bouchee-a-la-reine,bowl,bouchée à la reine,bouchee a la reine
+cassoulet,bowl,cassoulet,
+moussaka,slice,moussaka,
+pot-au-feu,bowl,pot-au-feu,pot au feu
+pissaladiere,slice,pissaladière,pissaladiere
+tielle,round,tielle,tielle sétoise
+pan-bagnat,bun,pan bagnat,
+croque-madame,slice,croque-madame,
+croque-monsieur,slice,croque-monsieur,
+ficelle-picarde,slice,ficelle picarde,
+far-breton,slice,far breton,far breton aux pruneaux
+gougere,round,gougère,gougere
+calisson,diamond,calisson,calisson d'Aix
+biscuit-savoie,slice,biscuit de Savoie,biscuit savoie
+charlotte-fruits,slice,charlotte aux fruits,
+fraisier,slice,fraisier,framboisier
+crumble-pommes,bowl,crumble aux pommes,crumble
+gateau-basque,slice,gâteau basque,gateau basque
+omelette,oval,omelette,omelette nature
+omelette-champignons,oval,omelette aux champignons,
+omelette-lardons,oval,omelette aux lardons,
+omelette-norvegienne,slice,omelette norvégienne,
+gratin-legumes,bowl,gratin de légumes,gratin de legumes
+poelee-legumes,bowl,poêlée de légumes,poelee de legumes
+palet-legumes,round,palet de légumes,galette de légumes
+quenelle,oval,quenelle,quenelle nature
+quenelle-volaille,oval,quenelle de volaille,
+beignet-legumes,round,beignet de légumes,
+beignet-viande,round,beignet de viande,
+feuille-de-brick,sheet,feuille de brick,khatfa
+samoussa,triangle,samoussa,samossa;brick garni
+sushi,oval,sushi,maki
+gratin-poisson,bowl,gratin de poisson,cassolette de poisson
+feuilleté-viande,slice,feuilleté à la viande,friand a la viande
+feuilleté-fromage,slice,feuilleté au fromage,friand au fromage
+feuilleté-poisson,slice,feuilleté au poisson,
+champignons-grecque,bowl,champignons à la grecque,
+riste-aubergine,bowl,riste d'aubergines,
+sauce-bechamel,jar,sauce béchamel,bechamel
+sauce-caesar,jar,sauce Caesar,sauce cesar
+sauce-algerienne,jar,sauce algérienne,sauce algerienne
+sauce-americaine,jar,sauce américaine,sauce americaine
+sauce-andalouse,jar,sauce andalouse,
+sauce-armoricaine,jar,sauce armoricaine,
+sauce-basquaise,jar,sauce basquaise,sauce aux poivrons
+sauce-bourguignonne,jar,sauce bourguignonne,
+sauce-burger,jar,sauce burger,
+sauce-chasseur,jar,sauce chasseur,
+sauce-cocktail,jar,sauce cocktail,
+sauce-grand-veneur,jar,sauce grand veneur,
+sauce-tikka,jar,sauce tikka masala,tandoori;tikka masala
+sauce-kebab,jar,sauce kebab,
+sauce-madere,jar,sauce madère,sauce madere
+sauce-rouille,jar,sauce rouille,
+sauce-samourai,jar,sauce samouraï,sauce samourai
+sauce-champignons,jar,sauce aux champignons,
+boisson-energetisante,can,boisson énergisante,boisson energisante
+boisson-sport,bottle,boisson pour le sport,boisson de l effort
+aloe-vera,bottle,aloe vera,boisson à l'aloe vera
+seve-bouleau,bottle,sève de bouleau,seve de bouleau
+punch,glass,punch,cocktail type punch
+sangria,glass,sangria,
+marsala,glass,marsala,
+liqueur,glass,liqueur,
+alcool-pur,bottle,alcool pur,
+aperitif-anise,glass,apéritif anisé,aperitif anise
+panache,glass,panaché,panache
+petillant-fruits,glass,pétillant de fruits,petillant de fruits
+milkshake,glass,milkshake,
+nectar-multifruit,glass,nectar multifruit,nectar
+jus-fruits,glass,jus de fruits,jus de fruit
+jus-legumes,glass,jus de légumes,jus de legumes
+jus-multifruit,glass,jus multifruit,
+jus-lime,glass,jus de lime,
+jus-corossol,glass,jus de corossol,
+jus-moubin,glass,jus de moubin,
+boisson-gazeuse,can,boisson gazeuse,soda
+boisson-plate-fruits,bottle,boisson plate aux fruits,
+chewing-gum,candy,chewing-gum,chewing gum
+sucette,candy,sucette,bonbon dur et sucette
+bonbon-dur,candy,bonbon dur,
+bonbon-gelifie,candy,bonbon gélifié,bonbon gelifie
+bonbon-tendre,candy,bonbon tendre,
+marshmallow,candy,marshmallow,guimauve
+praline,candy,praline,
+fruit-confit,candy,fruit confit,
+fructose,powder,fructose,
+melasse,jar,mélasse,melasse de canne
+pastille,candy,pastille,pastille rafraîchissante
+huile-argan,bottle,huile d'argan,huile d argane
+huile-chanvre,bottle,huile de chanvre,
+huile-coton,bottle,huile de coton,
+huile-mais,bottle,huile de maïs,huile de mais
+huile-pavot,bottle,huile de pavot,
+huile-soja,bottle,huile de soja,
+huile-son-riz,bottle,huile de son de riz,
+huile-palmiste,bottle,huile de palmiste,
+huile-friture,bottle,huile pour friture,
+matiere-grasse-tartinable,cube,matière grasse tartinable,matiere grasse tartinable
+dulse,leaf,dulse,
+kombu,sheet,kombu,kombu japonais
+kombu-breton,sheet,kombu breton,
+kombu-royal,sheet,kombu royal,
+fucus,leaf,fucus,fucus vésiculeux
+haricot-de-mer,leaf,haricot de mer,himanthalia
+lithothamne,powder,lithothamne,maërl
+chondrus,leaf,chondrus,pioca;lichen de mer
+gracilaire,leaf,gracilaire,ogonori
+ascophylle,leaf,ascophylle,goémon noir
+chlorelle,powder,chlorelle,chlorella
+pain-campagne,loaf,pain de campagne,
+pain-son,loaf,pain au son,
+pain-azyme,sheet,pain azyme,
+pain-perdu,slice,pain perdu,
+pain-sans-gluten,loaf,pain sans gluten,
+bretzel,pretzel,bretzel,pretzel
+panini-pain,loaf,pain panini,panini
+tartine-craquante,slice,tartine craquante,tartine croustillante
+pain-blanc,loaf,pain blanc,
+pain-grille,slice,pain grillé,pain grille
+petit-pain-suedois,slice,petit pain grillé suédois,
+gateau-moelleux,slice,gâteau moelleux,gateau moelleux
+biscuit-sec,round,biscuit sec,biscuit
+gaufrette,sheet,gaufrette,
+tuile,sheet,tuile,biscuit sec fin
+canistrelli,round,canistrelli,
+barre-chocolatee,bar,barre chocolatée,barre chocolatee
+barre-patissiere,bar,barre pâtissière,barre patissiere
+quatre-epices,powder,quatre épices,quatre epices
+carvi,grain,carvi,
+criste-marine,leaf,criste marine,
+carre-chocolat,bar,chocolat en tablette,
+eau-de-vie,glass,eau de vie,
+eau-coco,coconut,eau de coco,
+specialite-proteinee,cup,spécialité laitière riche en protéines,
+substitut-repas,bar,substitut de repas,
+fines-tranches-vegetales,slice,fines tranches végétales,
+sandwich,bun,sandwich,
+toasts,slice,toasts,canapés salés
+viennoiserie,bun,viennoiserie,
+patisserie,slice,pâtisserie,patisserie
+dessert-fruits,bowl,dessert de fruits,
+legume-sec,grain,légume sec,legume sec
+legumes-potage,bowl,légumes pour potages,
+petit-pois-carottes,bowl,petits pois et carottes,
+potatoes,root,potatoes,wedges
+fond-volaille,jar,fond de volaille,
+sauce-moyenne,jar,sauce,
+charcuterie-moyenne,sausage,charcuterie,
+herbes-fraiches,sprig,herbes aromatiques fraîches,
+fruit-seche,round,fruit séché,
+gateau-mousse,slice,gâteau mousse de fruits,
+liegeois-fruits,glass,liégeois aux fruits,
+preparation-fruits,jar,préparation aux fruits,
+gelifiant,powder,gélifiant,gelifiant
+vermicelles-multicolores,pasta,vermicelles multicolores,
+galette-cereales,round,galette de céréales,
+blinis,round,blinis,
+fougasse,loaf,fougasse,
+ressource-aloe,bottle,boisson à base de plantes,
+boisson-bebe-fruits,bottle,boisson aux fruits pour bébé,
+biscuit-bebe,round,biscuit pour bébé,
+poudre-cacao-bebe,powder,poudre cacaotée pour bébé,
+petit-pot-legumes,jar,petit pot légumes,
+bao-vapeur,bun,bouchée à la vapeur,dim sum vapeur
+chinchard-maigre,fish,chinchard maigre,
+corossol,round,corossol,
+moubin,round,moubin,
+nashi-pomme,round,pomme nashi,
+salicorne-fraiche,sprig,criste marine fraîche,
+diots,sausage,diots,
+fuseau-saucisson,sausage,fuseau,
+knack-volaille,sausage,knack de volaille,
+saucisse-morteau-alias,sausage,saucisse de Morteau fumée,
+andouille-cambrai,sausage,andouille de Cambrai,
+boudin-creole,sausage,boudin créole,
+merguez-volaille,sausage,merguez de volaille,
+chipolata-volaille,sausage,chipolata de volaille,
+steak-cheval,steak,steak de cheval,
+roti-cheval,meat,rôti de cheval,
+filet-cheval,steak,filet de cheval,
+escalope-dinde,meat,escalope de dinde,
+escalope-poulet,meat,escalope de poulet,
+blanc-volaille,meat,blanc de volaille,
+cuisse-dinde,bird,cuisse de dinde,
+aile-dinde,bird,aile de dinde,
+magret-oie,bird,magret d'oie,
+confit-oie,bird,confit d'oie,
+terrine-campagne,slice,terrine de campagne,
+pate-foie,slice,pâté de foie,pate de foie
+pate-campagne-alias,slice,pâté de campagne,
+rillettes-oie,jar,rillettes d'oie,
+rillettes-canard,jar,rillettes de canard,
+jambon-parme,slice,jambon de Parme,jambon sec de Parme
+jambon-serrano,slice,jambon serrano,jambon sec Serrano
+jambon-volaille,slice,jambon de volaille,blanc de volaille
+coppa-alias,slice,coppa italienne,
+bresaola-alias,slice,bresaola di manzo,
+guanciale-alias,slice,guanciale italien,
+lard-fume,slice,lard fumé,
+poitrine-fraise,slice,poitrine fraîche,
+travers-agneau,meat,travers d'agneau,
+selle-agneau,meat,selle d'agneau,
+carre-agneau,meat,carré d'agneau,
+gigot-souris,meat,souris d'agneau braisée,
+jarret-boeuf,meat,jarret de bœuf,
+paleron-braise,meat,paleron braisé,
+onglet-grille,steak,onglet grillé,
+hampe-grillee,steak,hampe grillée,
+rumsteck-grille,steak,rumsteck grillé,
+faux-filet-grille,steak,faux-filet grillé,
+entrecote-grillee,steak,entrecôte grillée,
+bavette-grillee,steak,bavette grillée,
+tournedos,steak,tournedos,
+chateaubriand,steak,châteaubriand,chateaubriand
+steak-tartare,bowl,steak tartare,
+carpaccio-boeuf,slice,carpaccio de bœuf,
+osso-buco,meat,osso buco,
+blanquette-veau,bowl,blanquette de veau,
+saute-veau,bowl,sauté de veau,
+escalope-milanaise-alias,meat,escalope à la milanaise,
+cordon-bleu-alias,meat,cordon-bleu de volaille,
+nuggets-dinde,meat,nuggets de dinde,
+fish-sticks,fish,bâtonnets de poisson,fish sticks
+calamar-pane,fish,calamar pané,
+beignet-crevette,shrimp,beignet de crevettes,
+gambas-grillees,shrimp,gambas grillées,
+langoustine-mayo,shrimp,langoustine mayonnaise,
+homard-grille,shell,homard grillé,
+crabe-mayo,shell,crabe mayonnaise,
+tourteau-mayo,shell,tourteau mayonnaise,
+moules-marinieres,shell,moules marinières,
+moules-farcies,shell,moules farcies,
+huitres-nature,shell,huîtres nature,
+bulots-mayo,shell,bulots mayonnaise,
+bigorneaux,shell,bigorneaux,
+oursin-vif,shell,oursin vif,
+caviar-oscietre,jar,caviar osciètre,
+tarama-maison,bowl,tarama maison,
+brandade-morue,bowl,brandade de morue,
+accras-morue,round,accras de morue,
+soupe-poisson,bowl,soupe de poissons,
+bisque,bowl,bisque,bisque de homard
+bouillabaisse,bowl,bouillabaisse,
+aioli-poisson,bowl,bourride,aïoli de poisson
+brandade-parmentier,bowl,parmentier de poisson,
+gratin-fruits-mer,bowl,gratin de fruits de mer,
+paella-fruits-mer,bowl,paella aux fruits de mer,
+risotto-fruits-mer,bowl,risotto aux fruits de mer,
+spaghetti-fruits-mer,pasta,spaghetti aux fruits de mer,
+pates-saumon,pasta,pâtes au saumon,
+pates-carbonara,pasta,pâtes carbonara,
+pates-bolognaise,pasta,pâtes bolognaise,
+pates-pesto,pasta,pâtes au pesto,
+lasagnes-legumes,slice,lasagnes aux légumes,
+cannelloni,pasta,cannelloni,
+ravioli-ricotta,pasta,ravioli ricotta,ravioli épinards
+gnocchi-sauce,bowl,gnocchi sauce,
+polenta-grillee,slice,polenta grillée,
+risotto-champignons,bowl,risotto aux champignons,
+risotto-asperges,bowl,risotto aux asperges,
+couscous-royal,bowl,couscous royal,
+couscous-legumes,bowl,couscous aux légumes,
+tajine-agneau,bowl,tajine d'agneau,
+tajine-kefta,bowl,tajine kefta,
+tajine-legumes,bowl,tajine aux légumes,
+chili-con-carne,bowl,chili con carne,
+hachis-parmentier-alias,bowl,hachis,
+shepherds-pie,bowl,shepherd's pie,
+moussaka-agneau,slice,moussaka d'agneau,
+gratin-dauphinois-alias,bowl,dauphinois,
+tartiflette,bowl,tartiflette,
+raclette-plat,bowl,plat de raclette,
+fondue-savoyarde,bowl,fondue savoyarde,
+fondue-bourguignonne,bowl,fondue bourguignonne,
+pierrade,bowl,pierrade,
+aligot-plat,bowl,aligot plat,
+truffade,bowl,truffade,
+potee,bowl,potée,potee auvergnate
+choucroute-garnie,bowl,choucroute garnie,
+cassoulet-toulouse,bowl,cassoulet de Toulouse,
+cassoulet-castelnaudary,bowl,cassoulet de Castelnaudary,
+baeckeoffe,bowl,baeckeoffe,
+flammekueche,slice,flammekueche,tarte flambée
+quiche-lorraine,slice,quiche lorraine,
+quiche-legumes,slice,quiche aux légumes,
+tarte-oignon,slice,tarte à l'oignon,
+tarte-poireaux,slice,tarte aux poireaux,
+tarte-tomates,slice,tarte à la tomate,
+tarte-chevre-miel,slice,tarte chèvre miel,
+clafoutis-sale,slice,clafoutis salé,
+cake-sale,slice,cake salé,
+muffin-sale,round,muffin salé,
+scone,round,scone,
+bagel-saumon,bun,bagel saumon,
+wrap-poulet,roll,wrap poulet,
+wrap-legumes,roll,wrap légumes,
+burrito,roll,burrito,
+fajitas,roll,fajitas,
+tacos,roll,tacos,
+enchiladas,roll,enchiladas,
+quesadilla,round,quesadilla,
+nachos,triangle,nachos,
+guacamole-bol,bowl,bol de guacamole,
+houmous-bol,bowl,bol de houmous,
+tzatziki-bol,bowl,bol de tzatziki,
+caviar-aubergine-bol,bowl,caviar d'aubergine,
+tapenade-bol,bowl,bol de tapenade,
+anchoiade-bol,bowl,bol d'anchoïade,
+rillettes-bol,bowl,bol de rillettes,
+terrine-poisson,slice,terrine de poisson,
+terrine-legumes,slice,terrine de légumes,
+aspic,slice,aspic,
+oeufs-mimosa,oval,oeufs mimosa,
+oeufs-meurette,oval,oeufs en meurette,
+oeufs-benedicte,oval,oeufs bénédictine,
+oeufs-cocotte,cup,oeufs cocotte,
+omelette-fromage,oval,omelette au fromage,
+omelette-fines-herbes,oval,omelette aux fines herbes,
+frittata,round,frittata,
+shakshuka,bowl,shakshuka,
+piperade-oeufs,bowl,piperade aux oeufs,
+eggs-benedict,oval,eggs benedict,
+pancake-sale,round,pancake salé,
+gaufre-salee,sheet,gaufre salée,
+crepe-complete,round,crêpe complète,
+crepe-jambon-fromage,round,crêpe jambon fromage,
+galette-complete,round,galette complète,
+galette-saumon,round,galette saumon,
+blini-saumon,round,blini saumon,
+toast-avocat,slice,toast avocat,
+tartine-chevre,slice,tartine chèvre,
+bruschetta,slice,bruschetta,
+crostini,slice,crostini,
+pain-perdu-sale,slice,pain perdu salé,
+croque-hawaïen,slice,croque hawaïen,
+welsh,slice,welsh,
+hot-dog-pain,bun,hot-dog,
+hot-dog-chutney,bun,hot-dog chutney,
+pretzel-saucisse,pretzel,pretzel saucisse,
+kebab,roll,kebab,dürüm
+doner,roll,döner,doner kebab
+gyros,roll,gyros,
+falafel-pain,bun,falafel pain pita,
+shawarma,roll,shawarma,
+banh-mi,bun,banh mi,
+ciabatta-jambon,loaf,ciabatta jambon,
+focaccia-tomate,loaf,focaccia tomate,
+pain-surprise,loaf,pain surprise,
+miche,loaf,miche,
+boule-campagne,loaf,boule de campagne,
+batard,loaf,bâtard,
+ficelle,loaf,ficelle,
+pain-viennois,loaf,pain viennois,
+pain-de-mie-complet,loaf,pain de mie complet,
+pain-nordique,loaf,pain nordique,
+pain-aux-noix,loaf,pain aux noix,
+pain-aux-figues,loaf,pain aux figues,
+pain-au-mais,loaf,pain au maïs,
+cornbread,loaf,cornbread,
+soda-bread,loaf,soda bread,
+baguette-tradition,loaf,baguette tradition,
+baguette-graines,loaf,baguette aux graines,
+croissant-amandes,bun,croissant aux amandes,
+pain-chocolat-amandes,bun,pain au chocolat aux amandes,
+chausson,bun,chausson,
+chouquette-sucre,round,chouquette sucrée,
+eclair-cafe,bar,éclair café,
+eclair-chocolat,bar,éclair chocolat,
+religieuse,round,religieuse,
+millefeuille-vanille,slice,millefeuille vanille,
+paris-brest-alias,round,paris-brest noisette,
+saint-honore-alias,round,saint-honoré caramel,
+tarte-citron,slice,tarte au citron,
+tarte-fraises,slice,tarte aux fraises,
+tarte-pommes,slice,tarte aux pommes,
+tarte-poires,slice,tarte aux poires,
+tarte-abricots,slice,tarte aux abricots,
+tarte-mirabelles,slice,tarte aux mirabelles,
+tarte-prunes,slice,tarte aux prunes,
+tarte-rhubarbe,slice,tarte à la rhubarbe,
+tarte-noix,slice,tarte aux noix,
+tarte-chocolat-pecan,slice,tarte chocolat pécan,
+flan-patissier,slice,flan pâtissier,
+flan-coco,slice,flan coco,
+riz-au-lait-alias,bowl,riz au lait vanille,
+ile-flottante-alias,bowl,île flottante caramel,
+creme-brulee-alias,cup,crème brûlée vanille,
+panna-cotta-fruits,cup,panna cotta fruits,
+tiramisu-speculoos,cup,tiramisu speculoos,
+mousse-citron,cup,mousse au citron,
+mousse-framboise,cup,mousse à la framboise,
+brownie-noix,slice,brownie aux noix,
+cookie-pepites,round,cookie pépites,
+muffin-myrtille,round,muffin myrtille,
+muffin-chocolat,round,muffin chocolat,
+madeleine-citron,oval,madeleine citron,
+financier-amande,diamond,financier amande,
+canneles-bordeaux,round,cannelés de Bordeaux,
+kouign-amann-alias,round,kouign-amann beurre,
+quatre-quarts,slice,quatre-quarts,
+gateau-yaourt,slice,gâteau au yaourt,
+cake-citron,slice,cake au citron,
+cake-chocolat,slice,cake au chocolat,
+cake-fruits-confits,slice,cake aux fruits confits,
+pain-epices-alias,slice,pain d'épices miel,
+speculoos-alias,round,spéculoos,
+sables-beurre,round,sablés au beurre,
+palet-breton,round,palet breton,
+galette-bretonne,round,galette bretonne,
+macaron-pistache,round,macaron pistache,
+macaron-chocolat,round,macaron chocolat,
+macaron-framboise,round,macaron framboise,
+nougat-noir,bar,nougat noir,
+nougat-blanc,bar,nougat blanc,
+touron,bar,touron,
+calisson-alias,diamond,calissons d'Aix,
+berlingot,candy,berlingot,
+caramel-mou,candy,caramel mou,
+reglisse,candy,réglisse,reglisse
+pate-d-amande-fruits,round,fruits déguisés,
+marron-glace,round,marron glacé,
+chtaouk,bowl,chtaouk,
+taboule,bowl,taboulé,taboule
+fattoush,bowl,fattoush,
+salade-nicoise,bowl,salade niçoise,
+salade-cesar,bowl,salade césar,
+salade-grecque,bowl,salade grecque,
+salade-chevre-chaud,bowl,salade chèvre chaud,
+salade-lentilles,bowl,salade de lentilles,
+salade-quinoa,bowl,salade de quinoa,
+salade-pate,bowl,salade de pâtes,
+salade-riz-thon,bowl,salade de riz au thon,
+coleslaw,bowl,coleslaw,salade de chou
+poulet-caesar,bowl,salade césar poulet,
+poke-bowl,bowl,poke bowl,
+buddha-bowl,bowl,buddha bowl,
+acai-bowl,bowl,açaí bowl,
+smoothie-bowl,bowl,smoothie bowl,
+granola-bol,bowl,bol de granola,
+porridge-fruits,bowl,porridge aux fruits,
+overnight-oats,jar,overnight oats,
+chia-pudding,jar,pudding de chia,
+yaourt-granola,cup,yaourt granola,
+fromage-blanc-miel,cup,fromage blanc miel,
+skyr-fruits,cup,skyr aux fruits,
+cottage-herbes,bowl,cottage cheese herbes,
+labneh-huile,bowl,labneh huile d'olive
+kefir-fruits,glass,kéfir fruits,
+lait-or-curcuma,glass,lait d'or,golden milk
+chai,glass,chai,
+matcha,powder,matcha,
+the-earl-grey,cup,earl grey,
+the-jasmin,cup,thé jasmin,
+infusion-tilleul,cup,tilleul,
+infusion-camomille,cup,camomille,
+infusion-menthe,cup,menthe à l'eau,
+citronnade,glass,citronnade,
+orangeade,glass,orangeade,
+granite-citron,cup,granité citron,
+sorbet-cassis,cup,sorbet cassis,
+glace-vanille,cup,glace vanille,
+glace-chocolat,cup,glace chocolat,
+glace-fraise,cup,glace fraise,
+glace-pistache,cup,glace pistache,
+glace-cafe,cup,glace café,
+coupe-liegeoise,glass,coupe liégeoise,
+banana-split,bowl,banana split,
+milkshake-chocolat,glass,milkshake chocolat,
+milkshake-fraise,glass,milkshake fraise,
+smoothie-vert,glass,smoothie vert,
+smoothie-fruits-rouges,glass,smoothie fruits rouges,
+jus-detox,glass,jus détox,
+kombucha-gingembre,bottle,kombucha gingembre,
+kefir-eau,bottle,kéfir d'eau,
+eau-aromatisee,bottle,eau aromatisée,
+perrier,bottle,perrier,
+badoit,bottle,badoit,
+san-pellegrino,bottle,san pellegrino,
+evian,bottle,evian,
+vittel,bottle,vittel,
+volvic,bottle,volvic,
+contrex,bottle,contrex,
+hepar,bottle,hépar,
+salvetat,bottle,salvetat,
+quebec,bottle,eau quézac,quezac
+cidre-brut,glass,cidre brut,
+cidre-doux,glass,cidre doux,
+poire-cidre,glass,poiré,
+hydromel,glass,hydromel,
+sake,glass,saké,
+soju,glass,soju,
+mezcal,glass,mezcal,
+rhum-blanc,glass,rhum blanc,
+rhum-ambre,glass,rhum ambré,
+cognac,glass,cognac,
+armagnac-verre,glass,armagnac,
+calvados-verre,glass,calvados,
+chartreuse,glass,chartreuse,
+genepi,glass,génépi,
+get-27,glass,get 27,
+menthe-pastille,glass,menthe-pastille,
+suze,glass,suze,
+campari,glass,campari,
+aperol,glass,aperol,
+spritz,glass,spritz,
+negroni,glass,negroni,
+mojito,glass,mojito,
+caipirinha,glass,caipirinha,
+margarita,glass,margarita,
+bloody-mary,glass,bloody mary,
+pina-colada,glass,piña colada,
+cosmopolitan,glass,cosmopolitan,
+kir,glass,kir,
+kir-royal,glass,kir royal,
+champagne-rose,glass,champagne rosé,
+cremant,glass,crémant,
+prosecco,glass,prosecco,
+cava,glass,cava,
+porto-tawny,glass,porto tawny,
+porto-ruby,glass,porto ruby,
+xeres,glass,xérès,sherry
+madere-verre,glass,madère,
+pineau,glass,pineau des charentes,
+floc,glass,floc de gascogne,
+pommeau,glass,pommeau,
+ratafia,glass,ratafia,
+vin-jaune,glass,vin jaune,
+vin-de-paille,glass,vin de paille,
+sauternes,glass,sauternes,
+gewurztraminer,glass,gewurztraminer,
+riesling,glass,riesling,
+chardonnay,glass,chardonnay,
+sauvignon,glass,sauvignon,
+pinot-noir,glass,pinot noir,
+merlot,glass,merlot,
+cabernet,glass,cabernet,
+syrah,glass,syrah,
+cotes-du-rhone,glass,côtes du rhône,
+bordeaux-rouge,glass,bordeaux rouge,
+bourgogne-blanc,glass,bourgogne blanc,
+beaujolais,glass,beaujolais,
+champagne-brut,glass,champagne brut,

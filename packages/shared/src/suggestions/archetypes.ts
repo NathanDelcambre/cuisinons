@@ -1,5 +1,12 @@
 import type { UxCategory } from '../ciqual/ux-categories.js';
-import { capitalize, complementDe, culinaryName, joinFrench } from './names.js';
+import {
+  capitalize,
+  complementDe,
+  culinaryName,
+  joinFrench,
+  withDeArticle,
+  withDefiniteArticle,
+} from './names.js';
 import type { CulinaryRole, Diet } from './roles.js';
 import { DISH_KINDS, DISH_KIND_LABELS, type DishKind } from './kinds.js';
 
@@ -57,6 +64,14 @@ function named(items: readonly PickedIngredient[]): string {
   return joinFrench(names(items));
 }
 
+function namedThe(items: readonly PickedIngredient[]): string {
+  return joinFrench(names(items).map(withDefiniteArticle));
+}
+
+function namedDe(items: readonly PickedIngredient[]): string {
+  return joinFrench(names(items).map(withDeArticle));
+}
+
 function firstName(items: readonly PickedIngredient[], fallback: string): string {
   return names(items)[0] ?? fallback;
 }
@@ -83,10 +98,10 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     description: (picked) =>
       `Poêlée rapide avec ${named(picked.filter((item) => item.role === 'protein' || item.role === 'vegetable'))}, uniquement ce que tu as en réserve.`,
     steps: (picked) => {
-      const veg = named(ofRole(picked, 'vegetable'));
-      const protein = named(ofRole(picked, 'protein'));
-      const fat = named(ofRole(picked, 'fat'));
-      const aromatic = named(ofRole(picked, 'aromatic'));
+      const veg = namedThe(ofRole(picked, 'vegetable'));
+      const protein = namedThe(ofRole(picked, 'protein'));
+      const fat = namedThe(ofRole(picked, 'fat'));
+      const aromatic = namedThe(ofRole(picked, 'aromatic'));
       return [
         { description: `Laver et couper ${veg}.`, durationMinutes: 8 },
         {
@@ -129,10 +144,10 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     },
     description: () => 'Salade composée, sans cuisson, à partir des légumes en stock.',
     steps: (picked) => {
-      const veg = named(ofRole(picked, 'vegetable'));
-      const protein = named(ofRole(picked, 'protein'));
-      const fat = named(ofRole(picked, 'fat'));
-      const condiment = named(ofRole(picked, 'condiment'));
+      const veg = namedThe(ofRole(picked, 'vegetable'));
+      const protein = namedThe(ofRole(picked, 'protein'));
+      const fat = namedThe(ofRole(picked, 'fat'));
+      const condiment = namedThe(ofRole(picked, 'condiment'));
       const dressing = joinFrench([fat, condiment].filter(Boolean));
       return [
         { description: `Laver et couper ${veg}.`, durationMinutes: 10 },
@@ -165,10 +180,10 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     title: (picked) => capitalize(`soupe ${complementDe(named(ofRole(picked, 'vegetable')))}`),
     description: (picked) => `Soupe de ${named(ofRole(picked, 'vegetable'))}, mixée ou servie en morceaux.`,
     steps: (picked) => {
-      const veg = named(ofRole(picked, 'vegetable'));
-      const aromatic = named(ofRole(picked, 'aromatic'));
-      const starch = named(ofRole(picked, 'starch'));
-      const fat = named(ofRole(picked, 'fat'));
+      const veg = namedThe(ofRole(picked, 'vegetable'));
+      const aromatic = namedThe(ofRole(picked, 'aromatic'));
+      const starch = namedThe(ofRole(picked, 'starch'));
+      const fat = namedThe(ofRole(picked, 'fat'));
       return [
         { description: `Éplucher et couper ${veg}${aromatic ? ` et ${aromatic}` : ''}.`, durationMinutes: 8 },
         {
@@ -205,9 +220,9 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     },
     description: () => 'Omelette rapide, éventuellement garnie avec un légume du frigo.',
     steps: (picked) => {
-      const veg = named(ofRole(picked, 'vegetable'));
-      const dairy = named(ofRole(picked, 'dairy'));
-      const fat = named(ofRole(picked, 'fat'));
+      const veg = namedThe(ofRole(picked, 'vegetable'));
+      const dairy = namedThe(ofRole(picked, 'dairy'));
+      const fat = namedThe(ofRole(picked, 'fat'));
       return [
         {
           description: dairy ? `Battre les œufs avec ${dairy}.` : 'Battre les œufs.',
@@ -247,9 +262,9 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
       ),
     description: () => 'Assiette complète : féculent, protéine et légumes.',
     steps: (picked) => {
-      const starch = named(ofRole(picked, 'starch'));
-      const protein = named(ofRole(picked, 'protein'));
-      const veg = named(ofRole(picked, 'vegetable'));
+      const starch = namedThe(ofRole(picked, 'starch'));
+      const protein = namedThe(ofRole(picked, 'protein'));
+      const veg = namedThe(ofRole(picked, 'vegetable'));
       return [
         { description: `Cuire ${starch}.`, durationMinutes: 12 },
         { description: `Cuire ${protein} à part.`, durationMinutes: 10 },
@@ -274,10 +289,10 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     title: (picked) => capitalize(`gratin ${complementDe(named(ofRole(picked, 'vegetable')))}`),
     description: () => 'Gratin au four, lié avec un produit laitier du frigo.',
     steps: (picked) => {
-      const veg = named(ofRole(picked, 'vegetable'));
-      const dairy = named(ofRole(picked, 'dairy'));
-      const protein = named(ofRole(picked, 'protein'));
-      const starch = named(ofRole(picked, 'starch'));
+      const veg = namedThe(ofRole(picked, 'vegetable'));
+      const dairy = namedDe(ofRole(picked, 'dairy'));
+      const protein = namedThe(ofRole(picked, 'protein'));
+      const starch = namedThe(ofRole(picked, 'starch'));
       return [
         { description: `Préchauffer le four à 180 °C. Couper ${veg}.`, durationMinutes: 10 },
         {
@@ -286,7 +301,7 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
             : `Répartir ${veg} dans un plat.`,
           durationMinutes: 3,
         },
-        { description: `Napper de ${dairy} et enfourner.`, durationMinutes: 25 },
+        { description: `Napper ${dairy} et enfourner.`, durationMinutes: 25 },
       ];
     },
   },
@@ -317,9 +332,9 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     },
     description: () => 'Pâtes assaisonnées avec ce que le frigo permet.',
     steps: (picked) => {
-      const pasta = named(ofRole(picked, 'starch'));
-      const extra = named([...ofRole(picked, 'protein'), ...ofRole(picked, 'vegetable')]);
-      const fat = named(ofRole(picked, 'fat'));
+      const pasta = namedThe(ofRole(picked, 'starch'));
+      const extra = namedThe([...ofRole(picked, 'protein'), ...ofRole(picked, 'vegetable')]);
+      const fat = namedThe(ofRole(picked, 'fat'));
       return [
         { description: `Cuire ${pasta} dans l’eau bouillante salée.`, durationMinutes: 10 },
         ...(extra
@@ -360,10 +375,10 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
     },
     description: () => 'Riz sauté avec des légumes, éventuellement une protéine.',
     steps: (picked) => {
-      const rice = named(ofRole(picked, 'starch'));
-      const veg = named(ofRole(picked, 'vegetable'));
-      const protein = named(ofRole(picked, 'protein'));
-      const aromatic = named(ofRole(picked, 'aromatic'));
+      const rice = namedThe(ofRole(picked, 'starch'));
+      const veg = namedThe(ofRole(picked, 'vegetable'));
+      const protein = namedThe(ofRole(picked, 'protein'));
+      const aromatic = namedThe(ofRole(picked, 'aromatic'));
       return [
         { description: `Cuire ${rice} si besoin.`, durationMinutes: 12 },
         {
@@ -401,7 +416,7 @@ const GENERIC_ARCHETYPES: readonly Archetype[] = [
       capitalize(`bol ${joinFrench(names([...ofRole(picked, 'dairy'), ...ofRole(picked, 'starch'), ...ofRole(picked, 'fruit')]))}`),
     description: () => 'Petit-déjeuner assemblé, sans cuisson.',
     steps: (picked) => {
-      const parts = named(picked);
+      const parts = namedThe(picked);
       return [{ description: `Assembler ${parts} dans un bol.`, durationMinutes: 3 }];
     },
   },

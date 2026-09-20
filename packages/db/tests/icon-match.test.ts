@@ -17,4 +17,14 @@ describe('ingredient icon matching', () => {
     expect(matchDedicatedIcon('Croquette panée de poulet')).not.toBe('roquette');
     expect(matchDedicatedIcon("Brochette d'agneau")).not.toBe('brochet');
   });
+
+  it('ignore le mode de cuisson après la virgule', () => {
+    expect(matchDedicatedIcon('Petits pois, cuits à l\'eau')).toBe('petit-pois');
+    expect(matchDedicatedIcon('Morue, salée, trempée, bouillie/cuite à l\'eau')).toBe('morue');
+  });
+
+  it('préfère l\'aliment spécifique à un mot générique', () => {
+    expect(matchDedicatedIcon('Chabichou (fromage de chèvre)')).toBe('chabichou');
+    expect(matchDedicatedIcon('Crevettes, cuites')).toBe('crevette');
+  });
 });

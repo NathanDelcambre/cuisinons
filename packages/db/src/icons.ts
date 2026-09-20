@@ -38,42 +38,57 @@ const CATEGORY_ICONS: Record<string, IconAsset> = {
   OTHER: { slug: 'cat-autres', source: 'cuisinons', attribution: 'Illustration originale Cuisinons' },
 };
 
+const CHUNK = 80;
+
 function iconUrl(slug: string): string {
   return `/ingredients/${slug}.png`;
 }
 
 export async function applyDedicatedIcons(): Promise<void> {
   const ingredients = await prisma.ingredient.findMany({
-    select: { id: true, nameNormalized: true, nameFr: true, uxCategory: true, uxSubCategory: true },
+    select: {
+      id: true,
+      nameNormalized: true,
+      nameFr: true,
+      uxCategory: true,
+      iconSlug: true,
+      iconUrl: true,
+      dedicatedIcon: true,
+    },
   });
 
+  const ops = [];
   for (const ingredient of ingredients) {
-    const dedicated = matchDedicatedIcon(ingredient.nameNormalized, ingredient.nameFr);
+    const dedicated = matchDedicatedIcon(ingredient.nameFr, ingredient.nameNormalized);
     const categoryIcon = CATEGORY_ICONS[ingredient.uxCategory] ?? CATEGORY_ICONS.OTHER;
     if (!categoryIcon) continue;
-    if (dedicated) {
-      await prisma.ingredient.update({
-        where: { id: ingredient.id },
-        data: {
+    const next = dedicated
+      ? {
           iconSlug: dedicated,
           iconUrl: iconUrl(dedicated),
-          iconSource: 'cuisinons',
+          iconSource: 'cuisinons' as const,
           iconAttribution: 'Illustration originale Cuisinons',
           dedicatedIcon: true,
-        },
-      });
-    } else {
-      await prisma.ingredient.update({
-        where: { id: ingredient.id },
-        data: {
+        }
+      : {
           iconSlug: categoryIcon.slug,
           iconUrl: categoryIconUrl(ingredient.uxCategory),
           iconSource: categoryIcon.source,
           iconAttribution: categoryIcon.attribution,
           dedicatedIcon: false,
-        },
-      });
+        };
+    if (
+      ingredient.iconSlug === next.iconSlug &&
+      ingredient.iconUrl === next.iconUrl &&
+      ingredient.dedicatedIcon === next.dedicatedIcon
+    ) {
+      continue;
     }
+    ops.push(prisma.ingredient.update({ where: { id: ingredient.id }, data: next }));
+  }
+
+  for (let index = 0; index < ops.length; index += CHUNK) {
+    await prisma.$transaction(ops.slice(index, index + CHUNK));
   }
 }
 

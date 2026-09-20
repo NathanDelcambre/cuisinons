@@ -1,4 +1,4 @@
-import { culinaryName, joinFrench } from './names.js';
+import { culinaryName, joinFrench, withDeArticle, withDefiniteArticle } from './names.js';
 import { primaryRole, type CulinaryRole, type Diet } from './roles.js';
 import type { UxCategory } from '../ciqual/ux-categories.js';
 import { DISH_KINDS, type DishKind } from './kinds.js';
@@ -39,6 +39,14 @@ function ofRole(picked: readonly PickedIngredient[], role: CulinaryRole): Picked
 
 function named(items: readonly PickedIngredient[]): string {
   return joinFrench(items.map((item) => culinaryName(item.nameFr)));
+}
+
+function namedThe(items: readonly PickedIngredient[]): string {
+  return joinFrench(items.map((item) => withDefiniteArticle(culinaryName(item.nameFr))));
+}
+
+function namedDe(items: readonly PickedIngredient[]): string {
+  return joinFrench(items.map((item) => withDeArticle(culinaryName(item.nameFr))));
 }
 
 export function dietsFromTags(tags: readonly string[]): Diet[] {
@@ -92,13 +100,14 @@ function stepsForKind(
   cook: number,
   picked: readonly PickedIngredient[],
 ): Array<{ description: string; durationMinutes: number | null }> {
-  const veg = named(ofRole(picked, 'vegetable'));
-  const protein = named(ofRole(picked, 'protein'));
-  const starch = named(ofRole(picked, 'starch'));
-  const fat = named(ofRole(picked, 'fat'));
-  const dairy = named(ofRole(picked, 'dairy'));
-  const fruit = named(ofRole(picked, 'fruit'));
+  const veg = namedThe(ofRole(picked, 'vegetable'));
+  const protein = namedThe(ofRole(picked, 'protein'));
+  const starch = namedThe(ofRole(picked, 'starch'));
+  const fat = namedThe(ofRole(picked, 'fat'));
+  const dairy = namedThe(ofRole(picked, 'dairy'));
+  const fruit = namedThe(ofRole(picked, 'fruit'));
   const extra = joinFrench([protein, veg, starch].filter(Boolean));
+  const dairyDe = namedDe(ofRole(picked, 'dairy'));
   switch (kind) {
     case 'wok':
       return [
@@ -133,7 +142,7 @@ function stepsForKind(
     case 'gratin':
       return [
         { description: `Préchauffer le four à 180 °C. Ranger ${veg || extra} dans un plat.`, durationMinutes: 10 },
-        { description: dairy ? `Napper de ${dairy} et enfourner.` : 'Enfourner.', durationMinutes: cook },
+        { description: dairyDe ? `Napper ${dairyDe} et enfourner.` : 'Enfourner.', durationMinutes: cook },
       ];
     case 'omelette':
       return [
