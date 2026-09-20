@@ -283,7 +283,7 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
                 className="min-w-0 rounded-xl border border-white/70 bg-white/70 p-2.5 sm:grid sm:grid-cols-[1fr_5.5rem_8rem_auto] sm:items-center sm:gap-2"
               >
                 <div className="flex min-w-0 items-center gap-2.5">
-                  <IngredientIcon src={line.iconUrl} />
+                  <IngredientIcon src={line.iconUrl} name={line.name} />
                   <span className="min-w-0 flex-1 truncate text-sm text-ink-900">{line.name}</span>
                   <IconButton
                     icon={Trash2}

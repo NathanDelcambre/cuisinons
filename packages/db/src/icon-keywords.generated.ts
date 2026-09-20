@@ -1398,6 +1398,7 @@ export const DEDICATED_KEYWORDS: Array<[string, string]> = [
   ["munster", "munster"],
   ["muscade", "muscade"],
   ["nigelle", "nigelle"],
+  ["nuggets", "nugget"],
   ["oseille", "oseille"],
   ["paleron", "paleron"],
   ["pancake", "pancake"],

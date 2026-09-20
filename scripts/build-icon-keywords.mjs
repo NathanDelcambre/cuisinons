@@ -28,6 +28,7 @@ const extra = [
   ["colin", "cabillaud"],
   ["lard", "lardon"],
   ["bacon", "bacon"],
+  ["nuggets", "nugget"],
   ["steak", "steak"],
   ["courge", "potiron"],
   ["pâtes", "pates"],

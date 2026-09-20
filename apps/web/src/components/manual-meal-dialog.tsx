@@ -99,7 +99,11 @@ export function ManualMealDialog({
               key={`${line.ingredient.id}-${index}`}
               className="flex items-center gap-2 rounded-xl bg-white/70 px-3 py-2"
             >
-              <IngredientIcon src={line.ingredient.iconUrl} className="size-8 shrink-0" />
+              <IngredientIcon
+                src={line.ingredient.iconUrl}
+                name={line.ingredient.nameFr}
+                className="size-8 shrink-0"
+              />
               <span className="min-w-0 flex-1 truncate text-sm text-ink-800">
                 {line.ingredient.nameFr}
               </span>

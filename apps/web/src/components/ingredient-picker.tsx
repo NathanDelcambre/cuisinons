@@ -281,7 +281,7 @@ export function IngredientPicker({
                       index === active ? 'bg-ink-900 font-medium text-white' : 'text-ink-700 hover:bg-white/80',
                     )}
                   >
-                    <IngredientIcon src={item.iconUrl} />
+                    <IngredientIcon src={item.iconUrl} name={item.nameFr} />
                     <span className="min-w-0 truncate">{kitchenLabel(item.nameFr)}</span>
                   </button>
                 </li>

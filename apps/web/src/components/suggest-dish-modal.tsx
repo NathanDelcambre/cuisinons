@@ -484,7 +484,7 @@ function DishDetail({ dish, error }: { dish: SuggestedDish; error: string | null
         <ul className="space-y-1.5">
           {dish.ingredients.map((line) => (
             <li key={line.ingredientId} className="flex items-center gap-3 text-sm text-ink-800">
-              <IngredientIcon src={line.iconUrl} />
+              <IngredientIcon src={line.iconUrl} name={line.nameFr} />
               <span className="min-w-0 flex-1 truncate">{kitchenLabel(line.nameFr)}</span>
               <span className="tabular shrink-0 text-ink-500">
                 {line.displayQuantity} {UNIT_LABELS[line.unit]}

@@ -1,6 +1,7 @@
 import { categoryIconUrl } from '@cuisinons/shared';
 import { prisma } from './client';
 import { DEDICATED_KEYWORDS } from './icon-keywords.generated';
+import { matchDedicatedIcon } from './icon-match';
 
 type IconAsset = {
   slug: string;
@@ -47,14 +48,7 @@ export async function applyDedicatedIcons(): Promise<void> {
   });
 
   for (const ingredient of ingredients) {
-    const haystack = `${ingredient.nameNormalized} ${ingredient.nameFr.toLowerCase()}`;
-    let dedicated: string | null = null;
-    for (const [keyword, slug] of DEDICATED_KEYWORDS) {
-      if (haystack.includes(keyword)) {
-        dedicated = slug;
-        break;
-      }
-    }
+    const dedicated = matchDedicatedIcon(ingredient.nameNormalized, ingredient.nameFr);
     const categoryIcon = CATEGORY_ICONS[ingredient.uxCategory] ?? CATEGORY_ICONS.OTHER;
     if (!categoryIcon) continue;
     if (dedicated) {

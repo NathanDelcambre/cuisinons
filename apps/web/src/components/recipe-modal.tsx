@@ -320,7 +320,11 @@ function RecipeModalBody({
             <ul className="divide-y divide-white/80 overflow-hidden rounded-2xl border border-white/70 bg-white/60">
               {data.ingredients.map((line, index) => (
                 <li key={index} className="flex items-center gap-3 px-3 py-2.5">
-                  <IngredientIcon src={line.ingredient.iconUrl} size={32} />
+                  <IngredientIcon
+                    src={line.ingredient.iconUrl}
+                    name={line.ingredient.nameFr}
+                    size={32}
+                  />
                   <span className="min-w-0 flex-1 text-sm text-ink-900">
                     <span className="tabular font-medium">
                       {formatQuantity(Number(line.quantity) * factor)} {unitLabel(line.unit)}

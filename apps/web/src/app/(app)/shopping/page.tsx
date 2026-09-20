@@ -548,7 +548,7 @@ function ShoppingRow({
         {item.checked ? <Check className="size-3.5" aria-hidden /> : null}
       </button>
 
-      <IngredientIcon src={item.ingredient.iconUrl} />
+      <IngredientIcon src={item.ingredient.iconUrl} name={item.ingredient.nameFr} />
 
       <span className="min-w-0 flex-1">
         <span
