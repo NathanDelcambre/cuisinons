@@ -4,6 +4,7 @@ import {
   resolveGrams,
   type QuantityUnit as SharedUnit,
   compareRecipesForSlot,
+  recipeDietSlugsForQuery,
   type RecipeNutrition,
 } from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -278,13 +279,21 @@ export class RecipesService {
     }
     if (input.q) {
       const needle = { contains: input.q, mode: 'insensitive' as const };
-      where.OR = [
+      const dietSlugs = recipeDietSlugsForQuery(input.q);
+      const or: Prisma.RecipeWhereInput[] = [
         { name: needle },
         { description: needle },
         { tags: { some: { tag: { label: needle } } } },
+        { tags: { some: { tag: { slug: needle } } } },
       ];
+      if (dietSlugs.length > 0) {
+        or.push({ tags: { some: { tag: { slug: { in: dietSlugs } } } } });
+      }
+      where.OR = or;
     }
-    if (input.tag) {
+    if (input.tag === 'vegetarien') {
+      where.tags = { some: { tag: { slug: { in: ['vegetarien', 'vegan'] } } } };
+    } else if (input.tag) {
       where.tags = { some: { tag: { OR: [{ slug: input.tag }, { id: input.tag }] } } };
     }
     if (input.equipment) {

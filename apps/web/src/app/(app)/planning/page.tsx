@@ -123,7 +123,10 @@ function weekRangeLabel(start: Date) {
 export default function PlanningPage() {
   const { user } = useAuth();
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date(), { weekStartsOn: 1 }));
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(() => {
+    const start = startOfWeek(new Date(), { weekStartsOn: 1 });
+    return Math.min(6, Math.max(0, differenceInCalendarDays(new Date(), start)));
+  });
   const [dialog, setDialog] = useState<{
     date: string;
     slot: MealSlot;
@@ -136,6 +139,7 @@ export default function PlanningPage() {
   const [detail, setDetail] = useState<MealItem | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const from = iso(weekStart);
   const todayIso = new Date().toISOString().slice(0, 10);
   const days = useMemo(
@@ -197,6 +201,21 @@ export default function PlanningPage() {
   });
 
   const selectedDate = days[selectedIndex] ?? days[0]!;
+
+  useLayoutEffect(() => {
+    if (mealsQuery.isLoading) return;
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const card = scroller.querySelector<HTMLElement>(`[data-day-index="${String(selectedIndex)}"]`);
+    if (!card) return;
+    const scrollerRect = scroller.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const left =
+      scroller.scrollLeft +
+      (cardRect.left - scrollerRect.left) -
+      (scroller.clientWidth - cardRect.width) / 2;
+    scroller.scrollTo({ left: Math.max(0, left) });
+  }, [selectedIndex, mealsQuery.isLoading, weekStart]);
   const rawMeals = mealsQuery.data ?? [];
   const meals = user?.id ? mealsForEater(rawMeals, user.id) : rawMeals;
 
@@ -395,11 +414,14 @@ export default function PlanningPage() {
           </div>
         </div>
       ) : (
-        <div className="-mx-4 overflow-x-auto overscroll-x-contain scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
+        <div
+          ref={scrollerRef}
+          className="-mx-4 overflow-x-auto overscroll-x-contain scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8"
+        >
           <div className="flex w-max items-stretch gap-3">
             {days.map((day, index) => (
-              <DayCard
-                key={iso(day)}
+              <div key={iso(day)} data-day-index={index} className="shrink-0">
+                <DayCard
                 date={day}
                 meals={meals}
                 userId={user?.id}
@@ -430,6 +452,7 @@ export default function PlanningPage() {
                 onRemove={(id, scope) => remove.mutate({ id, scope })}
                 todayIso={todayIso}
               />
+              </div>
             ))}
           </div>
         </div>

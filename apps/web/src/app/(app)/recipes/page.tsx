@@ -249,7 +249,9 @@ function RecipesInner() {
             aria-label="Filtrer par catégorie"
             className="h-11 min-h-11 w-full md:w-[13.5rem] md:max-w-full md:shrink-0"
             options={[
-              { value: '', label: 'Toutes les catégories' },
+              { value: '', label: 'Tous les repas' },
+              { value: 'vegetarien', label: 'Végétarien' },
+              { value: 'vegan', label: 'Vegan' },
               ...DISH_KINDS.map((slug) => ({ value: slug, label: DISH_KIND_LABELS[slug] })),
             ]}
             onChange={(next) => update({ tag: next })}
