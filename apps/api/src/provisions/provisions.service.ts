@@ -8,6 +8,7 @@ import {
 import type { QuantityUnit, StorageArea } from '@cuisinons/db';
 import {
   aggregateQuantities,
+  bulkPieceSuggestion,
   canonicalQuantity,
   defaultStorageArea,
   portionRequirement,
@@ -40,6 +41,33 @@ const ingredientSelect = {
   select: { id: true, nameFr: true, iconUrl: true, uxCategory: true },
 } as const;
 
+const pantryProductSelect = {
+  select: {
+    barcode: true,
+    name: true,
+    brand: true,
+    imageUrl: true,
+    packageQuantity: true,
+    packageUnit: true,
+    nutriScore: true,
+    isActive: true,
+  },
+} as const;
+
+const shoppingIngredientSelect = {
+  select: {
+    id: true,
+    nameFr: true,
+    iconUrl: true,
+    uxCategory: true,
+    conversions: {
+      where: { unit: 'PIECE' as const },
+      select: { gramsPerUnit: true },
+      take: 1,
+    },
+  },
+} as const;
+
 @Injectable()
 export class ProvisionsService {
   constructor(
@@ -51,9 +79,9 @@ export class ProvisionsService {
 
   async listPantry(userId: string) {
     const items = await this.prisma.pantryItem.findMany({
-      where: { userId },
-      include: { ingredient: ingredientSelect },
-      orderBy: [{ area: 'asc' }, { ingredient: { nameFr: 'asc' } }],
+      where: { userId, quantity: { gt: 0 } },
+      include: { ingredient: ingredientSelect, product: pantryProductSelect },
+      orderBy: [{ area: 'asc' }, { product: { name: 'asc' } }],
     });
     return items.map((item) => ({
       id: item.id,
@@ -62,16 +90,19 @@ export class ProvisionsService {
       unit: item.unit,
       updatedAt: item.updatedAt,
       ingredient: item.ingredient,
-      product:
-        item.productBarcode && item.productName
-          ? {
-              barcode: item.productBarcode,
-              name: item.productName,
-              brand: item.productBrand,
-              imageUrl: item.productImageUrl,
-              source: item.dataSource,
-            }
-          : null,
+      product: {
+        ...item.product,
+        packageQuantity:
+          item.product.packageQuantity === null ? null : Number(item.product.packageQuantity),
+      },
+    }));
+  }
+
+  async searchPantryProducts(query: string) {
+    const products = await this.products.searchProducts(query.trim());
+    return products.map((product) => ({
+      ...product,
+      packageQuantity: product.packageQuantity === null ? null : Number(product.packageQuantity),
     }));
   }
 
@@ -100,32 +131,35 @@ export class ProvisionsService {
     return { counts, toBuy };
   }
 
-  /** Ajoute au stock : une deuxieme entree du meme ingredient s'y cumule. */
+  /** Ajoute au stock : un second exemplaire du même produit s'y cumule. */
   async addPantryItem(
     userId: string,
-    input: { ingredientId: string; quantity: number; unit: QuantityUnit; area?: StorageArea },
+    input: { productBarcode: string; quantity: number; area?: StorageArea },
   ) {
-    const ingredient = await this.prisma.ingredient.findUnique({
-      where: { id: input.ingredientId },
-      select: { id: true, uxCategory: true },
-    });
-    if (!ingredient) throw new NotFoundException('Ingrédient introuvable.');
-    const canonical = canonicalQuantity(input.quantity, input.unit);
+    const product = await this.products.productByBarcode(input.productBarcode);
+    if (!product) throw new NotFoundException('Produit OpenFoodFacts introuvable.');
+    if (product.packageUnit !== 'G' && product.packageUnit !== 'ML') {
+      throw new BadRequestException('Le format de ce produit ne permet pas de suivre le stock.');
+    }
+    const ingredient = await this.products.resolveIngredientForProduct(product.name);
+    if (!ingredient) {
+      throw new BadRequestException('Aucun ingrédient SIQUAL compatible avec ce produit.');
+    }
     const area = input.area ?? defaultStorageArea(ingredient.uxCategory);
     return this.prisma.pantryItem.upsert({
       where: {
-        userId_ingredientId_unit: {
+        userId_productBarcode: {
           userId,
-          ingredientId: input.ingredientId,
-          unit: canonical.unit,
+          productBarcode: product.barcode,
         },
       },
-      update: { quantity: { increment: canonical.quantity }, ...(input.area ? { area } : {}) },
+      update: { quantity: { increment: input.quantity }, ...(input.area ? { area } : {}) },
       create: {
         userId,
-        ingredientId: input.ingredientId,
-        unit: canonical.unit,
-        quantity: canonical.quantity,
+        ingredientId: ingredient.id,
+        productBarcode: product.barcode,
+        unit: product.packageUnit,
+        quantity: input.quantity,
         area,
       },
     });
@@ -172,7 +206,7 @@ export class ProvisionsService {
       orderBy: { createdAt: 'desc' },
       include: {
         items: {
-          include: { ingredient: ingredientSelect },
+          include: { ingredient: shoppingIngredientSelect },
           orderBy: [{ ingredient: { uxCategory: 'asc' } }, { ingredient: { nameFr: 'asc' } }],
         },
       },
@@ -185,34 +219,45 @@ export class ProvisionsService {
       createdAt: list.createdAt,
       retailer: list.retailer,
       economical: list.economical,
-      items: list.items.map((item) => ({
-        id: item.id,
-        quantity: Number(item.quantity),
-        neededQuantity:
-          item.neededQuantity === null ? Number(item.quantity) : Number(item.neededQuantity),
-        unit: item.unit,
-        origin: item.origin,
-        checked: item.checked,
-        ingredient: item.ingredient,
-        product:
-          item.productBarcode && item.productName
-            ? {
-                barcode: item.productBarcode,
-                name: item.productName,
-                brand: item.productBrand,
-                imageUrl: item.productImageUrl,
-                packageQuantity:
-                  item.packageQuantity === null ? null : Number(item.packageQuantity),
-                packageCount: item.packageCount,
-                estimatedPrice: item.estimatedPrice === null ? null : Number(item.estimatedPrice),
-                currency: item.currency,
-                priceObservedAt: item.priceObservedAt,
-                storeName: item.storeName,
-                economyNote: item.economyNote,
-                source: item.dataSource,
-              }
-            : null,
-      })),
+      items: list.items.map((item) => {
+        const { conversions, ...ingredient } = item.ingredient;
+        return {
+          id: item.id,
+          quantity: Number(item.quantity),
+          neededQuantity:
+            item.neededQuantity === null ? Number(item.quantity) : Number(item.neededQuantity),
+          unit: item.unit,
+          origin: item.origin,
+          checked: item.checked,
+          ingredient,
+          bulkSuggestion: item.productBarcode
+            ? null
+            : bulkPieceSuggestion({
+                quantity: Number(item.neededQuantity ?? item.quantity),
+                unit: item.unit,
+                category: item.ingredient.uxCategory,
+                gramsPerPiece: conversions[0] ? Number(conversions[0].gramsPerUnit) : null,
+              }),
+          product:
+            item.productBarcode && item.productName
+              ? {
+                  barcode: item.productBarcode,
+                  name: item.productName,
+                  brand: item.productBrand,
+                  imageUrl: item.productImageUrl,
+                  packageQuantity:
+                    item.packageQuantity === null ? null : Number(item.packageQuantity),
+                  packageCount: item.packageCount,
+                  estimatedPrice: item.estimatedPrice === null ? null : Number(item.estimatedPrice),
+                  currency: item.currency,
+                  priceObservedAt: item.priceObservedAt,
+                  storeName: item.storeName,
+                  economyNote: item.economyNote,
+                  source: item.dataSource,
+                }
+              : null,
+        };
+      }),
     };
   }
 
@@ -490,19 +535,11 @@ export class ProvisionsService {
     return this.activeList(userId);
   }
 
-  async updateShoppingItem(
-    userId: string,
-    id: string,
-    input: { quantity?: number; checked?: boolean },
-  ) {
+  async updateShoppingItem(userId: string, id: string, input: { checked: boolean }) {
     await this.assertOwnShoppingItem(userId, id);
-    if (input.quantity !== undefined && input.quantity <= 0) {
-      await this.prisma.shoppingListItem.delete({ where: { id } });
-      return this.activeList(userId);
-    }
     await this.prisma.shoppingListItem.update({
       where: { id },
-      data: { quantity: input.quantity, checked: input.checked },
+      data: { checked: input.checked },
     });
     return this.activeList(userId);
   }
@@ -529,44 +566,32 @@ export class ProvisionsService {
     if (bought.length === 0) {
       throw new BadRequestException('Coche d’abord ce que tu as acheté.');
     }
+    const withoutProduct = bought.filter((item) => !item.productBarcode);
+    if (withoutProduct.length > 0) {
+      throw new BadRequestException(
+        'Choisis un produit OpenFoodFacts pour chaque article avant de l’ajouter aux réserves.',
+      );
+    }
 
     await this.prisma.$transaction(async (tx) => {
       for (const item of bought) {
         await tx.pantryItem.upsert({
           where: {
-            userId_ingredientId_unit: {
+            userId_productBarcode: {
               userId,
-              ingredientId: item.ingredientId,
-              unit: item.unit,
+              productBarcode: item.productBarcode!,
             },
           },
           update: { quantity: { increment: item.quantity } },
           create: {
             userId,
             ingredientId: item.ingredientId,
+            productBarcode: item.productBarcode!,
             unit: item.unit,
             quantity: item.quantity,
             area: defaultStorageArea(item.ingredient.uxCategory),
           },
         });
-        if (item.productBarcode && item.productName) {
-          await tx.pantryItem.update({
-            where: {
-              userId_ingredientId_unit: {
-                userId,
-                ingredientId: item.ingredientId,
-                unit: item.unit,
-              },
-            },
-            data: {
-              productBarcode: item.productBarcode,
-              productName: item.productName,
-              productBrand: item.productBrand,
-              productImageUrl: item.productImageUrl,
-              dataSource: item.dataSource,
-            },
-          });
-        }
       }
       await tx.shoppingListItem.deleteMany({ where: { id: { in: bought.map((i) => i.id) } } });
       const left = await tx.shoppingListItem.count({ where: { listId: list.id } });
@@ -705,40 +730,66 @@ export class ProvisionsService {
 
     const missing: QuantityLine[] = [];
     await this.prisma.$transaction(async (tx) => {
-      for (const line of lines) {
-        const key = {
-          userId_ingredientId_unit: { userId, ingredientId: line.ingredientId, unit: line.unit },
-        };
-        const current = await tx.pantryItem.findUnique({ where: key });
-        if (!consumed) {
-          // Annulation : on recredite, meme si la ligne avait disparu du stock.
-          const ingredient = await tx.ingredient.findUnique({
-            where: { id: line.ingredientId },
-            select: { uxCategory: true },
-          });
+      if (!consumed) {
+        const debits = await tx.pantryConsumption.findMany({ where: { portionId } });
+        for (const debit of debits) {
           await tx.pantryItem.upsert({
-            where: key,
-            update: { quantity: { increment: line.quantity } },
+            where: {
+              userId_productBarcode: { userId, productBarcode: debit.productBarcode },
+            },
+            update: { quantity: { increment: debit.quantity } },
             create: {
+              userId,
+              ingredientId: debit.ingredientId,
+              productBarcode: debit.productBarcode,
+              unit: debit.unit,
+              quantity: debit.quantity,
+              area: debit.area,
+            },
+          });
+        }
+        await tx.pantryConsumption.deleteMany({ where: { portionId } });
+      } else {
+        for (const line of lines) {
+          const stocks = await tx.pantryItem.findMany({
+            where: {
               userId,
               ingredientId: line.ingredientId,
               unit: line.unit,
-              quantity: line.quantity,
-              area: defaultStorageArea(ingredient?.uxCategory ?? 'OTHER'),
+              quantity: { gt: 0 },
             },
+            orderBy: [{ updatedAt: 'asc' }, { createdAt: 'asc' }],
           });
-          continue;
+          const have = stocks.reduce((total, stock) => total + Number(stock.quantity), 0);
+          if (have < line.quantity) {
+            missing.push({ ...line, quantity: Math.round((line.quantity - have) * 10) / 10 });
+          }
+          let remaining = line.quantity;
+          for (const stock of stocks) {
+            if (remaining <= 0) break;
+            const debit = Math.min(remaining, Number(stock.quantity));
+            if (debit <= 0) continue;
+            await tx.pantryItem.update({
+              where: { id: stock.id },
+              data: { quantity: { decrement: debit } },
+            });
+            await tx.pantryConsumption.upsert({
+              where: {
+                portionId_productBarcode: { portionId, productBarcode: stock.productBarcode },
+              },
+              update: { quantity: { increment: debit } },
+              create: {
+                portionId,
+                productBarcode: stock.productBarcode,
+                ingredientId: stock.ingredientId,
+                area: stock.area,
+                quantity: debit,
+                unit: stock.unit,
+              },
+            });
+            remaining -= debit;
+          }
         }
-        const have = current ? Number(current.quantity) : 0;
-        if (have < line.quantity) {
-          missing.push({ ...line, quantity: Math.round((line.quantity - have) * 10) / 10 });
-        }
-        if (!current) continue;
-        const left = have - line.quantity;
-        // Le stock ne descend pas sous zero : un manque se signale, il ne se
-        // transforme pas en dette.
-        if (left <= 0) await tx.pantryItem.delete({ where: { id: current.id } });
-        else await tx.pantryItem.update({ where: { id: current.id }, data: { quantity: left } });
       }
       await tx.mealParticipantPortion.update({
         where: { id: portionId },

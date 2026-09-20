@@ -1,9 +1,29 @@
 import { describe, expect, it } from 'vitest';
-import { parseStepMentions, insertIngredientToken, scaleMentionQuantity, mentionTooltip } from '../src/recipes/step-mentions.js';
-import { compareRecipesForSlot, primarySlotForRecipe, recipeFitsSlot } from '../src/planner/slot-tags.js';
+import {
+  parseStepMentions,
+  insertIngredientToken,
+  scaleMentionQuantity,
+  mentionTooltip,
+} from '../src/recipes/step-mentions.js';
+import {
+  compareRecipesForSlot,
+  primarySlotForRecipe,
+  recipeFitsSlot,
+} from '../src/planner/slot-tags.js';
 import { weekMacroAverages } from '../src/nutrition/planned-consumed.js';
 import { aggregateUserStats } from '../src/nutrition/stats.js';
-import { buildHealthyOfficialSpecs, HEALTHY_INGREDIENTS, HEALTHY_OFFICIAL_COUNT, OFFICIAL_RECIPE_COUNT, HANDCRAFTED_OFFICIAL_COUNT, IDEAS_RECIPE_IDS, IDEAS_RECIPE_COUNT, isIdeasRecipeId, isPreparedFoodName, pickHealthyIngredient } from '../src/suggestions/official-healthy.js';
+import {
+  buildHealthyOfficialSpecs,
+  HEALTHY_INGREDIENTS,
+  HEALTHY_OFFICIAL_COUNT,
+  OFFICIAL_RECIPE_COUNT,
+  HANDCRAFTED_OFFICIAL_COUNT,
+  IDEAS_RECIPE_IDS,
+  IDEAS_RECIPE_COUNT,
+  isIdeasRecipeId,
+  isPreparedFoodName,
+  pickHealthyIngredient,
+} from '../src/suggestions/official-healthy.js';
 import { HEALTHY_RECIPES } from '../src/suggestions/catalog.js';
 import { DISH_KINDS } from '../src/suggestions/kinds.js';
 import { categoryIconUrl } from '../src/ciqual/category-icons.js';
@@ -141,6 +161,12 @@ describe('catalogue healthy officiel', () => {
     expect(specs.every((s) => s.ingredients.length >= 2)).toBe(true);
     expect(specs.every((s) => s.tagSlugs.includes('healthy'))).toBe(true);
     expect(specs.every((s) => DISH_KINDS.some((kind) => s.tagSlugs.includes(kind)))).toBe(true);
+    for (const kind of DISH_KINDS) {
+      expect(
+        specs.filter((spec) => spec.tagSlugs.includes(kind)).length,
+        `La catégorie ${kind} doit contenir au moins 5 recettes`,
+      ).toBeGreaterThanOrEqual(5);
+    }
     expect(specs.every((s) => s.steps.length >= 4)).toBe(true);
     expect(
       specs.every((s) => s.steps.reduce((n, step) => n + step.description.length, 0) >= 350),
@@ -172,12 +198,14 @@ describe('catalogue healthy officiel', () => {
       expect(perPerson).toBeGreaterThanOrEqual(100);
       expect(perPerson).toBeLessThanOrEqual(150);
     }
-    expect(specs.some((s) => s.tagSlugs.includes('petit-dejeuner') && s.tagSlugs.includes('gouter'))).toBe(
-      true,
-    );
+    expect(
+      specs.some((s) => s.tagSlugs.includes('petit-dejeuner') && s.tagSlugs.includes('gouter')),
+    ).toBe(true);
     const lentilSoup = specs.find((s) => s.id === 'official-h98');
     expect(lentilSoup?.ingredients.find((line) => line.key === 'lentils')?.grams).toBe(280);
-    expect(Object.values(HEALTHY_INGREDIENTS).every((ref) => ref.code != null && ref.code > 0)).toBe(true);
+    expect(
+      Object.values(HEALTHY_INGREDIENTS).every((ref) => ref.code != null && ref.code > 0),
+    ).toBe(true);
   });
 
   it('aligne la protéine sur le titre et cite chaque ingrédient dans les étapes', () => {

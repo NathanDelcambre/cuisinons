@@ -48,6 +48,30 @@ export function roundForPurchase(quantity: number, unit: QuantityUnit): number {
   return tidy(quantity, unit);
 }
 
+/** Donne un ordre de grandeur en pièces pour les fruits et légumes vendus en vrac. */
+export function bulkPieceSuggestion(input: {
+  quantity: number;
+  unit: QuantityUnit;
+  category: string;
+  gramsPerPiece: number | null;
+}): { quantity: number; unit: 'PIECE'; label: string } | null {
+  if (
+    input.unit !== 'G' ||
+    !['FRUITS', 'VEGETABLES'].includes(input.category) ||
+    input.quantity <= 0 ||
+    input.gramsPerPiece === null ||
+    input.gramsPerPiece <= 0
+  ) {
+    return null;
+  }
+  const quantity = Math.max(1, Math.ceil(input.quantity / input.gramsPerPiece));
+  return {
+    quantity,
+    unit: 'PIECE',
+    label: `Vrac : environ ${String(quantity)} unité${quantity > 1 ? 's' : ''}`,
+  };
+}
+
 /**
  * Cumule des lignes par ingredient et par unite de reference. Deux unites
  * inconvertibles d'un meme ingredient (100 g et 2 pieces) restent deux lignes :
@@ -63,7 +87,10 @@ export function aggregateQuantities(lines: readonly QuantityLine[]): QuantityLin
     if (current) current.quantity += canonical.quantity;
     else totals.set(key, { ingredientId: line.ingredientId, ...canonical });
   }
-  return [...totals.values()].map((line) => ({ ...line, quantity: tidy(line.quantity, line.unit) }));
+  return [...totals.values()].map((line) => ({
+    ...line,
+    quantity: tidy(line.quantity, line.unit),
+  }));
 }
 
 /**

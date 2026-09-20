@@ -228,7 +228,7 @@ function chunks<T>(rows: T[], size: number) {
   return result;
 }
 
-const UPSERT_PRODUCTS = `INSERT INTO "OpenFoodProduct" ("barcode","name","normalizedName","searchText","brand","imageUrl","packageQuantity","packageUnit","categories","nutriScore","novaGroup","popularity","isStaple","sourceUpdatedAt","importBatchId","updatedAt") SELECT x."barcode",x."name",x."normalizedName",x."searchText",x."brand",x."imageUrl",x."packageQuantity",x."packageUnit",x."categories",x."nutriScore",x."novaGroup",x."popularity",x."isStaple",x."sourceUpdatedAt",x."importBatchId",NOW() FROM jsonb_to_recordset($1::jsonb) AS x("barcode" text,"name" text,"normalizedName" text,"searchText" text,"brand" text,"imageUrl" text,"packageQuantity" numeric,"packageUnit" text,"categories" text[],"nutriScore" text,"novaGroup" int,"popularity" int,"isStaple" boolean,"sourceUpdatedAt" timestamp,"importBatchId" text) ON CONFLICT ("barcode") DO UPDATE SET "name"=EXCLUDED."name","normalizedName"=EXCLUDED."normalizedName","searchText"=EXCLUDED."searchText","brand"=EXCLUDED."brand","imageUrl"=EXCLUDED."imageUrl","packageQuantity"=EXCLUDED."packageQuantity","packageUnit"=EXCLUDED."packageUnit","categories"=EXCLUDED."categories","nutriScore"=EXCLUDED."nutriScore","novaGroup"=EXCLUDED."novaGroup","popularity"=EXCLUDED."popularity","isStaple"=EXCLUDED."isStaple","sourceUpdatedAt"=EXCLUDED."sourceUpdatedAt","importBatchId"=EXCLUDED."importBatchId","updatedAt"=NOW()`;
+const UPSERT_PRODUCTS = `INSERT INTO "OpenFoodProduct" ("barcode","name","normalizedName","searchText","brand","imageUrl","packageQuantity","packageUnit","categories","nutriScore","novaGroup","popularity","isStaple","isActive","sourceUpdatedAt","importBatchId","updatedAt") SELECT x."barcode",x."name",x."normalizedName",x."searchText",x."brand",x."imageUrl",x."packageQuantity",x."packageUnit",x."categories",x."nutriScore",x."novaGroup",x."popularity",x."isStaple",true,x."sourceUpdatedAt",x."importBatchId",NOW() FROM jsonb_to_recordset($1::jsonb) AS x("barcode" text,"name" text,"normalizedName" text,"searchText" text,"brand" text,"imageUrl" text,"packageQuantity" numeric,"packageUnit" text,"categories" text[],"nutriScore" text,"novaGroup" int,"popularity" int,"isStaple" boolean,"sourceUpdatedAt" timestamp,"importBatchId" text) ON CONFLICT ("barcode") DO UPDATE SET "name"=EXCLUDED."name","normalizedName"=EXCLUDED."normalizedName","searchText"=EXCLUDED."searchText","brand"=EXCLUDED."brand","imageUrl"=EXCLUDED."imageUrl","packageQuantity"=EXCLUDED."packageQuantity","packageUnit"=EXCLUDED."packageUnit","categories"=EXCLUDED."categories","nutriScore"=EXCLUDED."nutriScore","novaGroup"=EXCLUDED."novaGroup","popularity"=EXCLUDED."popularity","isStaple"=EXCLUDED."isStaple","isActive"=true,"sourceUpdatedAt"=EXCLUDED."sourceUpdatedAt","importBatchId"=EXCLUDED."importBatchId","updatedAt"=NOW()`;
 const UPSERT_PRICES = `INSERT INTO "OpenFoodPrice" ("id","productBarcode","retailer","locationId","storeName","price","currency","observedAt","importBatchId","updatedAt") SELECT x."id",x."productBarcode",x."retailer"::"Retailer",x."locationId",x."storeName",x."price",x."currency",x."observedAt",x."importBatchId",NOW() FROM jsonb_to_recordset($1::jsonb) AS x("id" text,"productBarcode" text,"retailer" text,"locationId" int,"storeName" text,"price" numeric,"currency" text,"observedAt" date,"importBatchId" text) ON CONFLICT ("productBarcode","retailer") DO UPDATE SET "locationId"=EXCLUDED."locationId","storeName"=EXCLUDED."storeName","price"=EXCLUDED."price","currency"=EXCLUDED."currency","observedAt"=EXCLUDED."observedAt","importBatchId"=EXCLUDED."importBatchId","updatedAt"=NOW()`;
 
 async function selectProducts() {
@@ -329,7 +329,20 @@ async function main() {
       batchId,
       new Set(products.map((product) => product.barcode)),
     );
-    await prisma.openFoodProduct.deleteMany({ where: { importBatchId: { not: batchId } } });
+    // Un produit qui disparaît du dump ne doit plus être proposé. S'il est
+    // encore présent dans une réserve, on conserve toutefois sa fiche afin de
+    // pouvoir afficher et consommer proprement le stock réel restant.
+    await prisma.openFoodProduct.updateMany({
+      where: { importBatchId: { not: batchId } },
+      data: { isActive: false },
+    });
+    await prisma.openFoodProduct.deleteMany({
+      where: {
+        isActive: false,
+        pantryItems: { none: {} },
+        pantryConsumptions: { none: {} },
+      },
+    });
     await prisma.openFoodImport.update({
       where: { id: batchId },
       data: {

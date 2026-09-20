@@ -30,12 +30,14 @@ export function ProductSwapModal({
   itemId,
   ingredientName,
   currentBarcode,
+  ingredientIconUrl,
   retailer,
   onClose,
 }: {
   itemId: string | null;
   ingredientName: string;
   currentBarcode: string | null;
+  ingredientIconUrl: string | null;
   retailer: Retailer | null;
   onClose: () => void;
 }) {
@@ -114,7 +116,7 @@ export function ProductSwapModal({
                       : 'border-white/80 bg-white/65 hover:bg-white/90',
                   )}
                 >
-                  <IngredientIcon src={option.imageUrl} size={32} />
+                  <IngredientIcon src={option.imageUrl ?? ingredientIconUrl} size={32} />
                   <span className="min-w-0">
                     <span className="block line-clamp-2 text-sm font-medium text-ink-900">
                       {option.name}

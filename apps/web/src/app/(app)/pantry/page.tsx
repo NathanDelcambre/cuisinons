@@ -7,7 +7,6 @@ import {
   STORAGE_AREAS,
   STORAGE_AREA_LABELS,
   UNIT_LABELS,
-  kitchenLabel,
   type QuantityUnit,
   type StorageArea,
   type UxCategory,
@@ -23,9 +22,9 @@ import {
   Skeleton,
 } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
-import { IngredientPicker } from '@/components/ingredient-picker';
 import { IngredientIcon } from '@/components/ingredient-icon';
 import { StorageAreaIcon, storageAreaOptions } from '@/components/storage-area-icon';
+import { PantryProductPicker } from '@/components/pantry-product-picker';
 
 type PantryItem = {
   id: string;
@@ -38,8 +37,11 @@ type PantryItem = {
     name: string;
     brand: string | null;
     imageUrl: string | null;
-    source: 'OPEN_FOOD_FACTS' | 'CIQUAL_FALLBACK';
-  } | null;
+    packageQuantity: number | null;
+    packageUnit: string | null;
+    nutriScore: string | null;
+    isActive: boolean;
+  };
 };
 
 export default function PantryPage() {
@@ -57,12 +59,8 @@ export default function PantryPage() {
   };
 
   const add = useMutation({
-    mutationFn: (input: {
-      ingredientId: string;
-      quantity: number;
-      unit: QuantityUnit;
-      area?: StorageArea;
-    }) => apiJson('/api/bff/pantry/items', { method: 'POST', body: JSON.stringify(input) }),
+    mutationFn: (input: { productBarcode: string; quantity: number; area?: StorageArea }) =>
+      apiJson('/api/bff/pantry/items', { method: 'POST', body: JSON.stringify(input) }),
     onSuccess: () => {
       setPicker(false);
       void refresh();
@@ -111,7 +109,7 @@ export default function PantryPage() {
           description="Ajoute ce que tu as déjà, ou valide une liste de courses pour remplir le stock."
           action={
             <Button icon={Plus} onClick={() => setPicker(true)}>
-              Ajouter un ingrédient
+              Ajouter un produit
             </Button>
           }
         />
@@ -145,21 +143,15 @@ export default function PantryPage() {
         </div>
       )}
 
-      <IngredientPicker
+      <PantryProductPicker
         open={picker}
+        pending={add.isPending}
+        error={add.error instanceof Error ? add.error.message : null}
         onClose={() => {
           add.reset();
           setPicker(false);
         }}
-        quantity={{
-          withArea: true,
-          pending: add.isPending,
-          error: add.error instanceof Error ? add.error.message : null,
-          onBack: () => add.reset(),
-          onConfirm: (ingredient, { quantity, unit, area }) => {
-            add.mutate({ ingredientId: ingredient.id, quantity, unit, area });
-          },
-        }}
+        onConfirm={(input) => add.mutate(input)}
       />
     </div>
   );
@@ -176,16 +168,16 @@ function PantryRow({
   onArea: (area: StorageArea) => void;
   onRemove: () => void;
 }) {
-  const name = item.product?.name ?? kitchenLabel(item.ingredient.nameFr);
-  const image = item.product?.imageUrl ?? item.ingredient.iconUrl;
+  const name = item.product.name;
+  const image = item.product.imageUrl ?? item.ingredient.iconUrl;
   return (
     <Card className="flex flex-wrap items-center gap-3 py-3">
       <IngredientIcon src={image} />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm text-ink-900">{name}</span>
-        {item.product?.brand ? (
+        {item.product.brand ? (
           <span className="mt-0.5 block truncate text-xs text-ink-500">
-            {item.product.brand} · Open Food Facts
+            {item.product.brand} · OpenFoodFacts
           </span>
         ) : null}
       </span>

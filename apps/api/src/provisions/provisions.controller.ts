@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { z } from 'zod';
@@ -52,6 +53,11 @@ export class ProvisionsController {
     return this.provisions.listPantry(user.id);
   }
 
+  @Get('/pantry/products')
+  products(@Query('q') query = '') {
+    return this.provisions.searchPantryProducts(query);
+  }
+
   @Get('/provisions/summary')
   summary(@CurrentUser() user: AuthUser) {
     return this.provisions.summary(user.id);
@@ -61,9 +67,8 @@ export class ProvisionsController {
   addPantry(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     const parsed = z
       .object({
-        ingredientId: z.string().min(1),
+        productBarcode: z.string().min(8).max(14),
         quantity,
-        unit: z.enum(QUANTITY_UNITS),
         area: z.enum(STORAGE_AREAS).optional(),
       })
       .parse(body);
@@ -145,8 +150,7 @@ export class ProvisionsController {
   updateItem(@CurrentUser() user: AuthUser, @Param('id') id: string, @Body() body: unknown) {
     const parsed = z
       .object({
-        quantity: z.number().nonnegative().max(100_000).optional(),
-        checked: z.boolean().optional(),
+        checked: z.boolean(),
       })
       .parse(body);
     return this.provisions.updateShoppingItem(user.id, id, parsed);

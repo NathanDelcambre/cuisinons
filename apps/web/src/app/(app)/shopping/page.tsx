@@ -28,7 +28,6 @@ import {
   Card,
   EmptyState,
   IconButton,
-  Input,
   Modal,
   PageHeader,
   Panel,
@@ -54,6 +53,7 @@ type ShoppingItem = {
   unit: QuantityUnit;
   origin: 'PLANNER' | 'MANUAL';
   checked: boolean;
+  bulkSuggestion: { quantity: number; unit: 'PIECE'; label: string } | null;
   ingredient: { id: string; nameFr: string; iconUrl: string | null; uxCategory: UxCategory };
   product: {
     barcode: string;
@@ -123,7 +123,9 @@ export default function ShoppingPage() {
     ],
     queryFn: () => apiJson<RetailerEstimate[]>('/api/bff/shopping/retailer-estimates'),
     enabled: retailerOpen && Boolean(list.data),
-    staleTime: 5 * 60_000,
+    staleTime: Number.POSITIVE_INFINITY,
+    gcTime: Number.POSITIVE_INFINITY,
+    refetchOnWindowFocus: false,
   });
 
   const refresh = () => {
@@ -162,10 +164,10 @@ export default function ShoppingPage() {
   });
 
   const patch = useMutation({
-    mutationFn: (input: { id: string; quantity?: number; checked?: boolean }) =>
+    mutationFn: (input: { id: string; checked: boolean }) =>
       apiJson<ShoppingList>(`/api/bff/shopping/items/${input.id}`, {
         method: 'PATCH',
-        body: JSON.stringify({ quantity: input.quantity, checked: input.checked }),
+        body: JSON.stringify({ checked: input.checked }),
       }),
     onSuccess: (data) => queryClient.setQueryData(['shopping'], data),
   });
@@ -210,7 +212,7 @@ export default function ShoppingPage() {
     mutationFn: () => apiJson<{ added: number }>('/api/bff/shopping/validate', { method: 'POST' }),
     onSuccess: (data) => {
       refresh();
-      setNotice(`${String(data.added)} ingrédient(s) ajouté(s) à tes réserves.`);
+      setNotice(`${String(data.added)} produit(s) ajouté(s) à tes réserves.`);
     },
     onError: (error: Error) => setNotice(error.message),
   });
@@ -336,7 +338,6 @@ export default function ShoppingPage() {
                   key={item.id}
                   item={item}
                   onToggle={() => patch.mutate({ id: item.id, checked: !item.checked })}
-                  onQuantity={(quantity) => patch.mutate({ id: item.id, quantity })}
                   onSwap={() => setSwapItem(item)}
                   canSwap={Boolean(list.data?.retailer)}
                   onRemove={() => remove.mutate(item.id)}
@@ -497,6 +498,7 @@ export default function ShoppingPage() {
         itemId={swapItem?.id ?? null}
         ingredientName={swapItem ? kitchenLabel(swapItem.ingredient.nameFr) : ''}
         currentBarcode={swapItem?.product?.barcode ?? null}
+        ingredientIconUrl={swapItem?.ingredient.iconUrl ?? null}
         retailer={list.data?.retailer ?? null}
         onClose={() => setSwapItem(null)}
       />
@@ -507,14 +509,12 @@ export default function ShoppingPage() {
 function ShoppingRow({
   item,
   onToggle,
-  onQuantity,
   onSwap,
   canSwap,
   onRemove,
 }: {
   item: ShoppingItem;
   onToggle: () => void;
-  onQuantity: (quantity: number) => void;
   onSwap: () => void;
   canSwap: boolean;
   onRemove: () => void;
@@ -528,7 +528,7 @@ function ShoppingRow({
   return (
     <Card
       className={cn(
-        'grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)_auto_auto] items-center gap-2 px-3 py-3 sm:flex sm:gap-3 sm:px-5',
+        'grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-2 px-3 py-3 sm:flex sm:gap-3 sm:px-5',
         item.checked && 'opacity-60',
       )}
     >
@@ -565,6 +565,15 @@ function ShoppingRow({
         <span className="tabular mt-1 block text-xs font-medium text-ink-600 sm:hidden">
           {price}
         </span>
+        {item.product?.packageCount ? (
+          <span className="mt-0.5 block text-xs text-ink-500 sm:hidden">
+            {String(item.product.packageCount)} × {String(item.product.packageQuantity)} {unit}
+          </span>
+        ) : item.bulkSuggestion ? (
+          <span className="mt-0.5 block text-xs text-ink-500 sm:hidden">
+            {item.bulkSuggestion.label}
+          </span>
+        ) : null}
         {item.product ? (
           <span className="hidden sm:block">
             <span className="mt-0.5 block text-xs text-ink-500">
@@ -588,6 +597,11 @@ function ShoppingRow({
             {item.product.economyNote}
           </span>
         ) : null}
+        {!item.product && item.bulkSuggestion ? (
+          <span className="mt-1 hidden text-xs text-ink-500 sm:block">
+            {item.bulkSuggestion.label}
+          </span>
+        ) : null}
       </span>
 
       {item.origin === 'MANUAL' ? (
@@ -595,21 +609,6 @@ function ShoppingRow({
           Ajouté
         </Badge>
       ) : null}
-
-      {/* Corrige la quantite quand le magasin n'a pas le format exact. */}
-      <span className="flex shrink-0 items-center gap-1">
-        <Input
-          className="tabular h-10 w-16 px-2 text-right sm:h-11 sm:w-20"
-          inputMode="decimal"
-          defaultValue={String(item.quantity)}
-          aria-label={`Quantité de ${name}`}
-          onBlur={(e) => {
-            const next = Number(e.target.value.replace(',', '.'));
-            if (Number.isFinite(next) && next !== item.quantity) onQuantity(next);
-          }}
-        />
-        <span className="shrink-0 text-xs text-ink-500 sm:w-12">{unit}</span>
-      </span>
 
       <span className="flex shrink-0 items-center gap-0.5">
         <IconButton

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   aggregateQuantities,
+  bulkPieceSuggestion,
   canonicalQuantity,
   portionRequirement,
   roundForPurchase,
@@ -79,6 +80,25 @@ describe('quantite a acheter', () => {
   });
 });
 
+describe('équivalent vrac', () => {
+  it('traduit 200 g de poivron en deux pièces estimées', () => {
+    expect(
+      bulkPieceSuggestion({
+        quantity: 200,
+        unit: 'G',
+        category: 'VEGETABLES',
+        gramsPerPiece: 150,
+      }),
+    ).toEqual({ quantity: 2, unit: 'PIECE', label: 'Vrac : environ 2 unités' });
+  });
+
+  it('ne propose pas de pièces pour les céréales', () => {
+    expect(
+      bulkPieceSuggestion({ quantity: 200, unit: 'G', category: 'CEREALS', gramsPerPiece: 150 }),
+    ).toBeNull();
+  });
+});
+
 describe('besoin d’un convive', () => {
   it('proratise sur le nombre de portions', () => {
     const need = portionRequirement(
@@ -99,7 +119,9 @@ describe('besoin d’un convive', () => {
   });
 
   it('ignore une portion nulle', () => {
-    expect(portionRequirement({ ingredientId: 'x', quantity: 1, unit: 'G', grams: 1 }, 2, 0)).toBeNull();
+    expect(
+      portionRequirement({ ingredientId: 'x', quantity: 1, unit: 'G', grams: 1 }, 2, 0),
+    ).toBeNull();
   });
 });
 

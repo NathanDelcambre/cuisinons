@@ -56,6 +56,7 @@ export class OpenFoodFactsService {
     if (queryWords.length === 0) return [];
     const products = await this.prisma.openFoodProduct.findMany({
       where: {
+        isActive: true,
         AND: queryWords.map((word) => ({ searchText: { contains: word, mode: 'insensitive' } })),
         packageQuantity: { gt: 0 },
         packageUnit: { in: ['G', 'ML'] },
@@ -112,6 +113,7 @@ export class OpenFoodFactsService {
     if (queryWords.length === 0) return result;
     const products = await this.prisma.openFoodProduct.findMany({
       where: {
+        isActive: true,
         AND: queryWords.map((word) => ({ searchText: { contains: word, mode: 'insensitive' } })),
         packageQuantity: { gt: 0 },
         packageUnit: { in: ['G', 'ML'] },
@@ -148,5 +150,68 @@ export class OpenFoodFactsService {
         }));
     }
     return result;
+  }
+
+  async searchProducts(query: string) {
+    const queryWords = words(query).slice(0, 6);
+    if (queryWords.length === 0) return [];
+    return this.prisma.openFoodProduct.findMany({
+      where: {
+        isActive: true,
+        AND: queryWords.map((word) => ({ searchText: { contains: word, mode: 'insensitive' } })),
+        packageQuantity: { gt: 0 },
+        packageUnit: { in: ['G', 'ML'] },
+      },
+      select: {
+        barcode: true,
+        name: true,
+        brand: true,
+        imageUrl: true,
+        packageQuantity: true,
+        packageUnit: true,
+        nutriScore: true,
+      },
+      orderBy: [{ isStaple: 'desc' }, { popularity: 'desc' }],
+      take: 30,
+    });
+  }
+
+  async productByBarcode(barcode: string) {
+    return this.prisma.openFoodProduct.findFirst({
+      where: {
+        barcode,
+        isActive: true,
+        packageQuantity: { gt: 0 },
+        packageUnit: { in: ['G', 'ML'] },
+      },
+    });
+  }
+
+  /** Trouve le lien SIQUAL nécessaire à la consommation, sans en faire l'identité du stock. */
+  async resolveIngredientForProduct(productName: string) {
+    const query = productQuery(productName);
+    const queryWords = words(query)
+      .filter((word) => word.length > 2)
+      .slice(0, 5);
+    if (queryWords.length === 0) return null;
+    const ingredients = await this.prisma.ingredient.findMany({
+      where: {
+        OR: queryWords.map((word) => ({ nameNormalized: { contains: word, mode: 'insensitive' } })),
+      },
+      select: { id: true, nameFr: true, nameNormalized: true, uxCategory: true },
+      take: 150,
+    });
+    return (
+      ingredients
+        .map((ingredient) => {
+          const ingredientWords = new Set(words(ingredient.nameNormalized));
+          const overlap = queryWords.filter((word) => ingredientWords.has(word)).length;
+          const starts = ingredient.nameNormalized.startsWith(queryWords[0] ?? '') ? 2 : 0;
+          return { ingredient, score: overlap * 10 + starts };
+        })
+        .sort(
+          (a, b) => b.score - a.score || a.ingredient.nameFr.length - b.ingredient.nameFr.length,
+        )[0]?.ingredient ?? null
+    );
   }
 }

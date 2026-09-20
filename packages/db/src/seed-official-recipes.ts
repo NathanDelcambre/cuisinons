@@ -124,6 +124,46 @@ const CODE = {
   skyr: 19663,
 } as const;
 
+const PRODUCE_PIECE_GRAMS: Array<[number, number]> = [
+  [CODE.banana, PIECE_BANANA],
+  [CODE.avocado, PIECE_AVOCADO],
+  [CODE.cucumber, PIECE_CUCUMBER],
+  [CODE.tomatoRibbed, PIECE_TOMATO],
+  [CODE.bellPepper, PIECE_PEPPER],
+  [CODE.onion, PIECE_ONION],
+  [CODE.redOnion, PIECE_RED_ONION],
+  [CODE.eggplant, PIECE_EGGPLANT],
+  [CODE.zucchini, PIECE_ZUCCHINI],
+  [CODE.apple, PIECE_APPLE],
+];
+
+async function ensureProducePieceConversions() {
+  const ingredients = await prisma.ingredient.findMany({
+    where: { ciqualCode: { in: PRODUCE_PIECE_GRAMS.map(([code]) => code) } },
+    select: { id: true, ciqualCode: true },
+  });
+  const gramsByCode = new Map(PRODUCE_PIECE_GRAMS);
+  await Promise.all(
+    ingredients.map((ingredient) =>
+      prisma.ingredientConversion.upsert({
+        where: { ingredientId_unit: { ingredientId: ingredient.id, unit: 'PIECE' } },
+        update: {
+          gramsPerUnit: gramsByCode.get(ingredient.ciqualCode)!,
+          source: 'Recettes healthy sourcées du catalogue',
+          confidence: 'estimated',
+        },
+        create: {
+          ingredientId: ingredient.id,
+          unit: 'PIECE',
+          gramsPerUnit: gramsByCode.get(ingredient.ciqualCode)!,
+          source: 'Recettes healthy sourcées du catalogue',
+          confidence: 'estimated',
+        },
+      }),
+    ),
+  );
+}
+
 function pinch(code: number): Line {
   return {
     code,
@@ -882,6 +922,7 @@ async function upsertOfficialRecipe(
 
 export async function seedOfficialRecipes(authorId: string) {
   await ensureWhey();
+  await ensureProducePieceConversions();
 
   const olive = await prisma.ingredient.findUnique({ where: { ciqualCode: CODE.oliveOil } });
   if (!olive) {

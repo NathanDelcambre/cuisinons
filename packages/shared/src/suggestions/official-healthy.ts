@@ -923,7 +923,17 @@ function extraTags(spec: RecipeSpec): string[] {
   if (spec.kind === 'soupe' || spec.method === 'soup') tags.add('soupe');
   if (spec.diets.includes('vegan')) tags.add('vegan');
   else if (spec.diets.includes('vegetarian')) tags.add('vegetarien');
-  if (proteinKey(spec) === 'chicken' || proteinKey(spec) === 'turkey' || proteinKey(spec) === 'pork') {
+  const protein = proteinKey(spec);
+  if (protein === 'chicken' || protein === 'turkey' || protein === 'pork') {
+    tags.add('viande');
+    tags.add('proteine');
+  }
+  if (['salmon', 'cod', 'tuna', 'whiteFish'].includes(protein ?? '')) {
+    tags.add('poisson');
+    tags.add('proteine');
+  }
+  if (protein === 'shrimp' || protein === 'mussels') {
+    tags.add('fruits-de-mer');
     tags.add('proteine');
   }
   return [...tags];

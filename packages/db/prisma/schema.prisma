@@ -383,18 +383,19 @@ model MealItemIngredient {
 }
 
 model MealParticipantPortion {
-  id              String    @id @default(cuid())
-  mealItemId      String
-  mealItem        MealItem  @relation(fields: [mealItemId], references: [id], onDelete: Cascade)
-  userId          String
-  user            User      @relation(fields: [userId], references: [id])
-  portions        Decimal   @db.Decimal(8, 3)
+  id                 String              @id @default(cuid())
+  mealItemId         String
+  mealItem           MealItem            @relation(fields: [mealItemId], references: [id], onDelete: Cascade)
+  userId             String
+  user               User                @relation(fields: [userId], references: [id])
+  portions           Decimal             @db.Decimal(8, 3)
   /// Horodate la consommation de cette portion. Sert de garde-fou : le stock
   /// n'est deduit qu'une fois, et le retour en arriere le recredite.
-  consumedAt      DateTime?
+  consumedAt         DateTime?
   /// L'utilisateur a refuse la validation automatique d'un jour passe :
   /// on ne re-deduit pas le stock a la prochaine ouverture du planning.
-  skipAutoConsume Boolean   @default(false)
+  skipAutoConsume    Boolean             @default(false)
+  pantryConsumptions PantryConsumption[]
 
   @@unique([mealItemId, userId])
   @@index([userId, consumedAt])
@@ -403,26 +404,42 @@ model MealParticipantPortion {
 /// Stock personnel. Volontairement non partage entre les deux comptes : chacun
 /// gere ses propres provisions, comme ses propres courses.
 model PantryItem {
-  id              String            @id @default(cuid())
-  userId          String
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ingredientId    String
-  ingredient      Ingredient        @relation(fields: [ingredientId], references: [id])
-  area            StorageArea
-  quantity        Decimal           @db.Decimal(12, 4)
-  unit            QuantityUnit
-  productBarcode  String?
-  productName     String?
-  productBrand    String?
-  productImageUrl String?
-  dataSource      ProductDataSource @default(CIQUAL_FALLBACK)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
+  id             String          @id @default(cuid())
+  userId         String
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Passerelle vers SIQUAL, utilisée uniquement pour déduire les recettes.
+  ingredientId   String
+  ingredient     Ingredient      @relation(fields: [ingredientId], references: [id])
+  productBarcode String
+  product        OpenFoodProduct @relation(fields: [productBarcode], references: [barcode], onDelete: Restrict)
+  area           StorageArea
+  /// Quantité réellement restante, dans l'unité métrique du produit.
+  quantity       Decimal         @db.Decimal(12, 4)
+  unit           QuantityUnit
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
-  /// L'unite fait partie de la cle : 2 pieces et 100 g d'un meme ingredient ne
-  /// sont pas cumulables sans inventer une conversion.
-  @@unique([userId, ingredientId, unit])
+  @@unique([userId, productBarcode])
+  @@index([userId, ingredientId, unit])
   @@index([userId, area])
+}
+
+/// Journal exact des produits débités par un repas. Il permet d'annuler une
+/// consommation sans recréditer un autre produit du même ingrédient SIQUAL.
+model PantryConsumption {
+  id             String                 @id @default(cuid())
+  portionId      String
+  portion        MealParticipantPortion @relation(fields: [portionId], references: [id], onDelete: Cascade)
+  productBarcode String
+  product        OpenFoodProduct        @relation(fields: [productBarcode], references: [barcode], onDelete: Restrict)
+  ingredientId   String
+  area           StorageArea
+  quantity       Decimal                @db.Decimal(12, 4)
+  unit           QuantityUnit
+  createdAt      DateTime               @default(now())
+
+  @@unique([portionId, productBarcode])
+  @@index([portionId])
 }
 
 /// Une liste de courses en cours par utilisateur. `completedAt` la cloture au
@@ -476,24 +493,27 @@ model ShoppingListItem {
 /// Projection locale et volontairement bornee du dump Open Food Facts. Le
 /// serveur applicatif ne contacte jamais Open Food Facts pendant une requete.
 model OpenFoodProduct {
-  barcode         String          @id
-  name            String
-  normalizedName  String
-  searchText      String
-  brand           String?
-  imageUrl        String?
-  packageQuantity Decimal?        @db.Decimal(12, 4)
-  packageUnit     String?
-  categories      String[]        @default([])
-  nutriScore      String?
-  novaGroup       Int?
-  popularity      Int             @default(0)
-  isStaple        Boolean         @default(false)
-  sourceUpdatedAt DateTime?
-  importBatchId   String
-  importedAt      DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  prices          OpenFoodPrice[]
+  barcode            String              @id
+  name               String
+  normalizedName     String
+  searchText         String
+  brand              String?
+  imageUrl           String?
+  packageQuantity    Decimal?            @db.Decimal(12, 4)
+  packageUnit        String?
+  categories         String[]            @default([])
+  nutriScore         String?
+  novaGroup          Int?
+  popularity         Int                 @default(0)
+  isStaple           Boolean             @default(false)
+  isActive           Boolean             @default(true)
+  sourceUpdatedAt    DateTime?
+  importBatchId      String
+  importedAt         DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  prices             OpenFoodPrice[]
+  pantryItems        PantryItem[]
+  pantryConsumptions PantryConsumption[]
 
   @@index([normalizedName])
   @@index([isStaple, popularity(sort: Desc)])

@@ -24,7 +24,13 @@ import { SuggestDishModal } from '@/components/suggest-dish-modal';
 import { RecipeCover } from '@/components/recipe-cover';
 import { Avatar } from '@/components/avatar';
 import { MacroIcon } from '@/components/macro-icon';
-import { avatarUrlForEmail, RECIPE_SOURCE_LABELS, type RecipeListView } from '@cuisinons/shared';
+import {
+  avatarUrlForEmail,
+  DISH_KIND_LABELS,
+  DISH_KINDS,
+  RECIPE_SOURCE_LABELS,
+  type RecipeListView,
+} from '@cuisinons/shared';
 
 type Macros = { kcal: number; protein: number; carbs: number; fat: number };
 
@@ -109,11 +115,6 @@ function RecipesInner() {
         `/api/bff/recipes?q=${encodeURIComponent(q)}&tag=${encodeURIComponent(tag)}&sort=${sort}&view=${view}`,
       ),
     staleTime: 120_000,
-  });
-  const tags = useQuery({
-    queryKey: ['tags'],
-    queryFn: () => apiJson<Array<{ id: string; slug: string; label: string }>>('/api/bff/tags'),
-    staleTime: 300_000,
   });
 
   function update(next: Partial<Filters>) {
@@ -249,7 +250,7 @@ function RecipesInner() {
             className="h-11 min-h-11 w-full md:w-[13.5rem] md:max-w-full md:shrink-0"
             options={[
               { value: '', label: 'Toutes les catégories' },
-              ...(tags.data ?? []).map((t) => ({ value: t.slug || t.id, label: t.label })),
+              ...DISH_KINDS.map((slug) => ({ value: slug, label: DISH_KIND_LABELS[slug] })),
             ]}
             onChange={(next) => update({ tag: next })}
           />

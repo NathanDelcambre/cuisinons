@@ -19,6 +19,21 @@ export function slotTagRank(tags: readonly string[], slot: MealSlot): number {
   return index === -1 ? wanted.length : index;
 }
 
+export function recipeFitsSlot(tags: readonly string[], slot: MealSlot): boolean {
+  const normalized = new Set(tags.map(normalizeTag));
+  return SLOT_PREFERRED_TAGS[slot].some((tag) => normalized.has(normalizeTag(tag)));
+}
+
+export function primarySlotForRecipe(tags: readonly string[], fallback: MealSlot): MealSlot {
+  const normalized = new Set(tags.map(normalizeTag));
+  if (normalized.has('petit-dejeuner')) return 'BREAKFAST';
+  if (normalized.has('gouter') || normalized.has('dessert')) return 'SNACK';
+  if (normalized.has('plat-principal') || normalized.has('salade') || normalized.has('soupe')) {
+    return fallback === 'DINNER' ? 'DINNER' : 'LUNCH';
+  }
+  return fallback;
+}
+
 export function compareRecipesForSlot(
   a: { tags: readonly string[]; name?: string },
   b: { tags: readonly string[]; name?: string },
