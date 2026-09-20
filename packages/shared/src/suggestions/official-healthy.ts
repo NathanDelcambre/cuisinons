@@ -48,6 +48,7 @@ const PER_PERSON = {
   walnutG: 20,
   cerealG: 90,
   oatsG: 50,
+  couscousG: 60,
   potatoG: 200,
   yogurtG: 80,
   fetaG: 40,
@@ -245,6 +246,7 @@ const PROTEIN_FROM_NAME: Array<{ needles: readonly string[]; key: string }> = [
 ];
 
 const FISH_PROTEIN_KEYS = ['salmon', 'cod', 'hake', 'pollock', 'trout', 'tuna', 'sardine', 'mackerel'] as const;
+const SEAFOOD_PROTEIN_KEYS = [...FISH_PROTEIN_KEYS, 'shrimp', 'mussels'] as const;
 
 function proteinFromText(text: string): string | null {
   const folded = normalizeSearchText(text);
@@ -264,8 +266,23 @@ function addProteinsFromLabel(label: string, keys: string[]): void {
       keys.push(row.key);
     }
   }
-  const hasFish = keys.some((key) => (FISH_PROTEIN_KEYS as readonly string[]).includes(key));
+  const hasFish = keys.some((key) => (SEAFOOD_PROTEIN_KEYS as readonly string[]).includes(key));
   if (!hasFish && folded.includes('poisson')) keys.push('pollock');
+}
+
+function isSeafoodPlate(label: string): boolean {
+  const folded = normalizeSearchText(label);
+  return folded.includes('de la mer') || folded.includes('fruits de mer');
+}
+
+function isSeafoodToken(token: string): boolean {
+  const key = proteinFromText(token);
+  return Boolean(
+    (key && (SEAFOOD_PROTEIN_KEYS as readonly string[]).includes(key)) ||
+      token.includes('daurade') ||
+      token.includes('dorade') ||
+      token.includes('poisson'),
+  );
 }
 
 function isWhiteBag(tokens: string[]): boolean {
@@ -273,16 +290,7 @@ function isWhiteBag(tokens: string[]): boolean {
 }
 
 function isFishBag(tokens: string[]): boolean {
-  if (tokens.length < 2) return false;
-  return tokens.every((token) => {
-    const key = proteinFromText(token);
-    return Boolean(
-      (key && (FISH_PROTEIN_KEYS as readonly string[]).includes(key)) ||
-        token.includes('daurade') ||
-        token.includes('dorade') ||
-        token.includes('poisson'),
-    );
-  });
+  return tokens.length >= 2 && tokens.every(isSeafoodToken);
 }
 
 function isLegumeBag(tokens: string[]): boolean {
@@ -309,6 +317,7 @@ function proteinKeys(spec: RecipeSpec): string[] {
     }
   }
   if (keys.length > 0) return keys;
+  if (isSeafoodPlate(spec.label)) return ['pollock', 'shrimp', 'mussels'];
 
   const tokens = tokensOf(spec.protein);
   if (isWhiteBag(tokens)) keys.push('chicken');
@@ -413,29 +422,39 @@ function vegGramsPerPerson(key: string): number {
   }
 }
 
-function proteinLine(key: string, spec: RecipeSpec): OfficialLine {
+function proteinGramsPerPerson(key: string): number {
+  switch (key) {
+    case 'lentils':
+    case 'chickpeas':
+    case 'whiteBeans':
+      return PER_PERSON.legumesG;
+    case 'tofu':
+      return PER_PERSON.tofuG;
+    case 'shrimp':
+      return PER_PERSON.shrimpG;
+    case 'walnut':
+      return PER_PERSON.walnutG;
+    default:
+      return PER_PERSON.meatFishG;
+  }
+}
+
+function proteinLine(key: string, spec: RecipeSpec, share = 1): OfficialLine {
   switch (key) {
     case 'egg': {
       const eggsEach = spec.method === 'omelette' || spec.egg ? 2 : 1;
       return piece('egg', eggsEach * OFFICIAL_HEALTHY_SERVINGS, 60);
     }
-    case 'lentils':
-    case 'chickpeas':
-    case 'whiteBeans':
-      return g(key, forPeople(PER_PERSON.legumesG));
-    case 'tofu':
-      return g(key, forPeople(PER_PERSON.tofuG));
-    case 'shrimp':
-      return g(key, forPeople(PER_PERSON.shrimpG));
     case 'walnut':
       return g(key, forPeople(PER_PERSON.walnutG));
     default:
-      return g(key, forPeople(PER_PERSON.meatFishG));
+      return g(key, forPeople(Math.max(40, Math.round(proteinGramsPerPerson(key) * share))));
   }
 }
 
 function starchLine(key: string): OfficialLine {
   if (key === 'oats') return g(key, forPeople(PER_PERSON.oatsG));
+  if (key === 'couscous') return g(key, forPeople(PER_PERSON.couscousG));
   if (key === 'potato' || key === 'sweetPotato') {
     return piece(key, OFFICIAL_HEALTHY_SERVINGS, PER_PERSON.potatoG);
   }
@@ -948,8 +967,12 @@ export function buildHealthyOfficialSpec(spec: RecipeSpec): OfficialHealthySpec 
     pinch('pepper', PINCH_PEPPER),
   ];
 
-  for (const key of proteinKeys(spec)) {
-    lines.push(proteinLine(key, spec));
+  const proteins = proteinKeys(spec);
+  const seafood = proteins.filter((key) => (SEAFOOD_PROTEIN_KEYS as readonly string[]).includes(key));
+  const seafoodShare = seafood.length > 1 ? 1 / seafood.length : 1;
+  for (const key of proteins) {
+    const share = seafood.includes(key) ? seafoodShare : 1;
+    lines.push(proteinLine(key, spec, share));
   }
   if (spec.egg) lines.push(proteinLine('egg', spec));
 

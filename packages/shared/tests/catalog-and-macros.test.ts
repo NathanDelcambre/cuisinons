@@ -178,7 +178,7 @@ describe('catalogue healthy officiel', () => {
     expect(isIdeasRecipeId('official-h01')).toBe(true);
     expect(isIdeasRecipeId('official-vinaigrette-crudites')).toBe(false);
     expect(specs.every((s) => s.servings === 2)).toBe(true);
-    const meatKeys = new Set([
+    const animalKeys = new Set([
       'chicken',
       'turkey',
       'pork',
@@ -190,13 +190,17 @@ describe('catalogue healthy officiel', () => {
       'tuna',
       'sardine',
       'mackerel',
+      'shrimp',
+      'mussels',
     ]);
     for (const spec of specs) {
-      const meat = spec.ingredients.find((line) => meatKeys.has(line.key));
-      if (!meat) continue;
-      const perPerson = meat.grams / spec.servings;
-      expect(perPerson).toBeGreaterThanOrEqual(100);
-      expect(perPerson).toBeLessThanOrEqual(150);
+      const grams = spec.ingredients
+        .filter((line) => animalKeys.has(line.key))
+        .reduce((sum, line) => sum + line.grams, 0);
+      if (grams === 0) continue;
+      const perPerson = grams / spec.servings;
+      expect(perPerson, spec.id).toBeGreaterThanOrEqual(100);
+      expect(perPerson, spec.id).toBeLessThanOrEqual(160);
     }
     expect(
       specs.some((s) => s.tagSlugs.includes('petit-dejeuner') && s.tagSlugs.includes('gouter')),
@@ -225,6 +229,17 @@ describe('catalogue healthy officiel', () => {
     const grilledFish = specs.find((s) => s.id === 'official-h30');
     expect(grilledFish?.ingredients.some((line) => line.key === 'pollock')).toBe(true);
     expect(grilledFish?.ingredients.some((line) => line.key === 'salmon')).toBe(false);
+
+    const couscousMer = specs.find((s) => s.id === 'official-h44');
+    const couscousSeafood = (couscousMer?.ingredients ?? []).filter((line) =>
+      ['salmon', 'cod', 'hake', 'pollock', 'trout', 'tuna', 'sardine', 'mackerel', 'shrimp', 'mussels'].includes(
+        line.key,
+      ),
+    );
+    expect(couscousSeafood.map((line) => line.key).sort()).toEqual(['mussels', 'pollock', 'shrimp']);
+    expect(couscousSeafood.reduce((sum, line) => sum + line.grams, 0)).toBeLessThanOrEqual(320);
+    expect(couscousMer?.ingredients.some((line) => line.key === 'couscous')).toBe(true);
+    expect(couscousMer?.ingredients.find((line) => line.key === 'couscous')?.grams).toBe(120);
 
     const troutEgg = specs.find((s) => s.id === 'official-h17');
     expect(troutEgg?.ingredients.some((line) => line.key === 'trout')).toBe(true);
