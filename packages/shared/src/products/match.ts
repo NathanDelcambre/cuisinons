@@ -2,6 +2,7 @@ import { kitchenLabel } from '../suggestions/names.js';
 import { normalizeSearchText } from '../search/normalize.js';
 
 const FORM_QUERY_WORDS = new Set(['sec', 'sirop', 'grille', 'fume', 'au', 'aux', 'a']);
+const OPTIONAL_QUERY_WORDS = new Set(['noir', 'blanc', 'vert', 'moulu', 'grains', 'grain']);
 
 /** Plat, dessert ou conserve : seulement si la requête le demande. */
 const PREPARED_FORMS = new Set([
@@ -115,6 +116,8 @@ const QUALIFIERS = new Set([
   'long',
   'moelleuse',
   'moelleux',
+  'moulin',
+  'moulu',
   'nature',
   'noir',
   'origine',
@@ -173,7 +176,6 @@ const PROCESSED_CATEGORY_NEEDLES = [
   'biscuit',
   'cake',
   'candy',
-  'cereal',
   'clafoutis',
   'compote',
   'confection',
@@ -239,7 +241,9 @@ export function productSearchQuery(ingredientName: string): string {
 
 /** Mots à chercher en base : l'aliment, pas l'état (sec, sirop). */
 export function productCatalogTokens(query: string): string[] {
-  return tokens(query).filter((word) => !FORM_QUERY_WORDS.has(lemma(word)) && !HEAD_STOP.has(word));
+  const words = tokens(query).filter((word) => !FORM_QUERY_WORDS.has(lemma(word)) && !HEAD_STOP.has(word));
+  const required = words.filter((word) => !OPTIONAL_QUERY_WORDS.has(lemma(word)));
+  return required.length > 0 ? required : words;
 }
 
 function firstContentWord(nameWords: readonly string[]): string | undefined {

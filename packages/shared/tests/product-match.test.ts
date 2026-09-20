@@ -44,11 +44,31 @@ describe('productRelevance', () => {
     expect(productRelevance('Dessert au riz', 'riz')).toBe(-1);
     expect(productRelevance('Riz basmati', 'riz')).toBeGreaterThan(-1);
   });
+
+  it('accepte un poivre moulu pour du poivre noir', () => {
+    expect(productRelevance('Poivre moulu', 'Poivre noir')).toBeGreaterThan(-1);
+    expect(productRelevance('Moulin poivre noir', 'Poivre noir')).not.toBe(-1);
+    expect(productRelevance('Chips sel de mer et poivre noir', 'Poivre noir')).toBe(-1);
+  });
+
+  it('accepte les flocons d’avoine, même classés céréales petit-déj', () => {
+    expect(
+      productRelevance("Flocons d'avoine", "Flocons d'avoine", {
+        categories: ['en:breakfast-cereals', 'en:rolled-oats', 'en:cereal-flakes'],
+      }),
+    ).toBeGreaterThan(-1);
+    expect(
+      productRelevance('Muesli Raisin Figue Abricot', 'abricot', {
+        categories: ['en:mueslis', 'en:breakfast-cereals'],
+      }),
+    ).toBe(-1);
+  });
 });
 
 describe('productCatalogTokens', () => {
   it('cherche l’aliment sans l’état', () => {
     expect(productCatalogTokens('Abricot sec')).toEqual(['abricot']);
     expect(productCatalogTokens('Feta')).toEqual(['feta']);
+    expect(productCatalogTokens('Poivre noir')).toEqual(['poivre']);
   });
 });

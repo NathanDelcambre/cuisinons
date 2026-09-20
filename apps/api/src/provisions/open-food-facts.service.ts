@@ -43,7 +43,7 @@ export class OpenFoodFactsService {
       },
       include: { prices: { where: { retailer, currency: 'EUR' }, take: 1 } },
       orderBy: [{ isStaple: 'desc' }, { popularity: 'desc' }],
-      take: 150,
+      take: 250,
     });
     return products
       .map((product) => ({
@@ -103,7 +103,7 @@ export class OpenFoodFactsService {
       },
       include: { prices: { where: { currency: 'EUR', price: { gt: 0 } } } },
       orderBy: [{ isStaple: 'desc' }, { popularity: 'desc' }],
-      take: 150,
+      take: 250,
     });
     for (const retailer of RETAILERS) {
       result[retailer] = products
@@ -184,7 +184,7 @@ export class OpenFoodFactsService {
         OR: queryWords.map((word) => ({ nameNormalized: { contains: word, mode: 'insensitive' } })),
       },
       select: { id: true, nameFr: true, nameNormalized: true, uxCategory: true },
-      take: 150,
+      take: 250,
     });
     return (
       ingredients

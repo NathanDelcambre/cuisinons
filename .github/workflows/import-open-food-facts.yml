@@ -19,9 +19,9 @@ jobs:
     timeout-minutes: 360
     env:
       DATABASE_URL: ${{ secrets.OFF_IMPORT_DATABASE_URL }}
-      OFF_MAX_PRODUCTS: "100000"
-      OFF_STAPLE_QUOTA: "20000"
-      NODE_OPTIONS: "--max-old-space-size=4096"
+      OFF_MAX_PRODUCTS: "150000"
+      OFF_STAPLE_QUOTA: "30000"
+      NODE_OPTIONS: "--max-old-space-size=8192"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

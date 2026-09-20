@@ -16,7 +16,7 @@ const PRICES_SOURCE =
   process.env.OPEN_PRICES_SOURCE ?? 'https://prices.openfoodfacts.org/data/prices.jsonl.gz';
 const MAX_PRODUCTS = Number(process.env.OFF_MAX_PRODUCTS ?? 50_000);
 const STAPLE_QUOTA = Math.min(MAX_PRODUCTS, Number(process.env.OFF_STAPLE_QUOTA ?? 10_000));
-const MAX_ALLOWED_PRODUCTS = 100_000;
+const MAX_ALLOWED_PRODUCTS = 150_000;
 const MIN_PRODUCT_COMPLETENESS = 0.95;
 const MIN_PRICE_RETENTION = 0.25;
 const USER_AGENT =
@@ -58,6 +58,14 @@ const STAPLE_TAGS = new Set([
   'en:sugars',
   'en:salts',
   'en:frozen-vegetables',
+  'en:spices',
+  'en:peppers',
+  'en:black-peppers',
+  'en:herbs',
+  'en:aromatic-herbs',
+  'en:dried-fruits',
+  'en:rolled-oats',
+  'en:oat-flakes',
 ]);
 const STAPLE_WORDS = new Set([
   'riz',
@@ -77,6 +85,12 @@ const STAPLE_WORDS = new Set([
   'sel',
   'tomates',
   'thon',
+  'poivre',
+  'paprika',
+  'cumin',
+  'curcuma',
+  'cannelle',
+  'avoine',
 ]);
 const RETAILER_TERMS: Array<[Retailer, string[]]> = [
   ['LECLERC', ['e leclerc', 'leclerc']],
@@ -231,19 +245,37 @@ function chunks<T>(rows: T[], size: number) {
 const UPSERT_PRODUCTS = `INSERT INTO "OpenFoodProduct" ("barcode","name","normalizedName","searchText","brand","imageUrl","packageQuantity","packageUnit","categories","nutriScore","novaGroup","popularity","isStaple","isActive","sourceUpdatedAt","importBatchId","updatedAt") SELECT x."barcode",x."name",x."normalizedName",x."searchText",x."brand",x."imageUrl",x."packageQuantity",x."packageUnit",x."categories",x."nutriScore",x."novaGroup",x."popularity",x."isStaple",true,x."sourceUpdatedAt",x."importBatchId",NOW() FROM jsonb_to_recordset($1::jsonb) AS x("barcode" text,"name" text,"normalizedName" text,"searchText" text,"brand" text,"imageUrl" text,"packageQuantity" numeric,"packageUnit" text,"categories" text[],"nutriScore" text,"novaGroup" int,"popularity" int,"isStaple" boolean,"sourceUpdatedAt" timestamp,"importBatchId" text) ON CONFLICT ("barcode") DO UPDATE SET "name"=EXCLUDED."name","normalizedName"=EXCLUDED."normalizedName","searchText"=EXCLUDED."searchText","brand"=EXCLUDED."brand","imageUrl"=EXCLUDED."imageUrl","packageQuantity"=EXCLUDED."packageQuantity","packageUnit"=EXCLUDED."packageUnit","categories"=EXCLUDED."categories","nutriScore"=EXCLUDED."nutriScore","novaGroup"=EXCLUDED."novaGroup","popularity"=EXCLUDED."popularity","isStaple"=EXCLUDED."isStaple","isActive"=true,"sourceUpdatedAt"=EXCLUDED."sourceUpdatedAt","importBatchId"=EXCLUDED."importBatchId","updatedAt"=NOW()`;
 const UPSERT_PRICES = `INSERT INTO "OpenFoodPrice" ("id","productBarcode","retailer","locationId","storeName","price","currency","observedAt","importBatchId","updatedAt") SELECT x."id",x."productBarcode",x."retailer"::"Retailer",x."locationId",x."storeName",x."price",x."currency",x."observedAt",x."importBatchId",NOW() FROM jsonb_to_recordset($1::jsonb) AS x("id" text,"productBarcode" text,"retailer" text,"locationId" int,"storeName" text,"price" numeric,"currency" text,"observedAt" date,"importBatchId" text) ON CONFLICT ("productBarcode","retailer") DO UPDATE SET "locationId"=EXCLUDED."locationId","storeName"=EXCLUDED."storeName","price"=EXCLUDED."price","currency"=EXCLUDED."currency","observedAt"=EXCLUDED."observedAt","importBatchId"=EXCLUDED."importBatchId","updatedAt"=NOW()`;
 
-async function selectProducts() {
-  const staples = new TopRows(STAPLE_QUOTA),
-    others = new TopRows(MAX_PRODUCTS - STAPLE_QUOTA);
+async function selectProducts(pricedBarcodes: Set<string>) {
+  const priced = new TopRows(MAX_PRODUCTS);
+  const staples = new TopRows(STAPLE_QUOTA);
+  const others = new TopRows(MAX_PRODUCTS);
   for await (const item of jsonLines(PRODUCTS_SOURCE)) {
     const row = productFromJson(item);
-    if (row) (row.isStaple ? staples : others).add(row);
+    if (!row) continue;
+    if (pricedBarcodes.has(row.barcode)) {
+      priced.add(row);
+      continue;
+    }
+    (row.isStaple ? staples : others).add(row);
   }
-  return [...staples.values(), ...others.values()];
+  const keptPriced = priced.values();
+  const seen = new Set(keptPriced.map((row) => row.barcode));
+  const room = Math.max(0, MAX_PRODUCTS - keptPriced.length);
+  const extraStaples = staples
+    .values()
+    .filter((row) => !seen.has(row.barcode))
+    .slice(0, room);
+  for (const row of extraStaples) seen.add(row.barcode);
+  const extraOthers = others
+    .values()
+    .filter((row) => !seen.has(row.barcode))
+    .slice(0, room - extraStaples.length);
+  return [...keptPriced, ...extraStaples, ...extraOthers];
 }
 function retailerFor(location: Json): Retailer | null {
   if (
     asString(location.osm_address_country_code)?.toUpperCase() !== 'FR' ||
-    !['supermarket', 'convenience'].includes(asString(location.osm_tag_value) ?? '')
+    !['supermarket', 'convenience', 'discount'].includes(asString(location.osm_tag_value) ?? '')
   )
     return null;
   const label = normalize(
@@ -253,34 +285,54 @@ function retailerFor(location: Json): Retailer | null {
     RETAILER_TERMS.find(([, terms]) => terms.some((term) => label.includes(term)))?.[0] ?? null
   );
 }
-async function importPrices(batchId: string, barcodes: Set<string>) {
+type PriceRow = {
+  id: string;
+  productBarcode: string;
+  retailer: Retailer;
+  locationId: number;
+  storeName: string | null;
+  price: number;
+  currency: string;
+  observedAt: string;
+  importBatchId: string;
+};
+
+async function loadRetailerLocations() {
   const locations = new Map<number, { retailer: Retailer; name: string | null }>();
   for await (const item of jsonLines(LOCATIONS_SOURCE)) {
-    const id = asNumber(item.id),
-      retailer = retailerFor(item);
+    const id = asNumber(item.id);
+    const retailer = retailerFor(item);
     if (id !== null && retailer)
       locations.set(id, { retailer, name: asString(item.osm_name) ?? asString(item.osm_brand) });
   }
-  const latest = new Map<string, Json>();
+  return locations;
+}
+
+/** Tous les derniers prix France des six enseignes, même si le produit n’est pas encore au catalogue. */
+async function collectLatestPrices(
+  batchId: string,
+  locations: Map<number, { retailer: Retailer; name: string | null }>,
+) {
+  const latest = new Map<string, PriceRow>();
   for await (const item of jsonLines(PRICES_SOURCE)) {
-    const barcode = asString(item.product_code),
-      locationId = asNumber(item.location_id),
-      location = locationId === null ? null : locations.get(locationId),
-      observedAt = asString(item.date),
-      price = asNumber(item.price);
+    const barcode = asString(item.product_code);
+    const locationId = asNumber(item.location_id);
+    const location = locationId === null ? null : locations.get(locationId);
+    const observedAt = asString(item.date);
+    const price = asNumber(item.price);
     if (
       !barcode ||
-      !barcodes.has(barcode) ||
       !location ||
+      locationId === null ||
       !observedAt ||
       !price ||
       price <= 0 ||
       item.currency !== 'EUR'
     )
       continue;
-    const key = `${barcode}|${location.retailer}`,
-      previous = latest.get(key);
-    if (previous && String(previous.observedAt) >= observedAt) continue;
+    const key = `${barcode}|${location.retailer}`;
+    const previous = latest.get(key);
+    if (previous && previous.observedAt >= observedAt) continue;
     latest.set(key, {
       id: randomUUID(),
       productBarcode: barcode,
@@ -293,7 +345,15 @@ async function importPrices(batchId: string, barcodes: Set<string>) {
       importBatchId: batchId,
     });
   }
-  const rows = [...latest.values()];
+  return latest;
+}
+
+async function writePrices(
+  batchId: string,
+  latest: Map<string, PriceRow>,
+  barcodes: Set<string>,
+) {
+  const rows = [...latest.values()].filter((row) => barcodes.has(row.productBarcode));
   const previousPriceCount = await prisma.openFoodPrice.count();
   if (previousPriceCount > 0 && rows.length < previousPriceCount * MIN_PRICE_RETENTION) {
     throw new Error(
@@ -314,7 +374,10 @@ async function main() {
   const batchId = randomUUID();
   await prisma.openFoodImport.create({ data: { id: batchId } });
   try {
-    const products = await selectProducts();
+    const locations = await loadRetailerLocations();
+    const latestPrices = await collectLatestPrices(batchId, locations);
+    const pricedBarcodes = new Set([...latestPrices.values()].map((row) => row.productBarcode));
+    const products = await selectProducts(pricedBarcodes);
     const minimumExpectedProducts = Math.floor(MAX_PRODUCTS * MIN_PRODUCT_COMPLETENESS);
     if (products.length < minimumExpectedProducts) {
       throw new Error(
@@ -325,8 +388,9 @@ async function main() {
       const rows = batch.map(({ score: _score, ...row }) => ({ ...row, importBatchId: batchId }));
       await prisma.$executeRawUnsafe(UPSERT_PRODUCTS, JSON.stringify(rows));
     }
-    const priceCount = await importPrices(
+    const priceCount = await writePrices(
       batchId,
+      latestPrices,
       new Set(products.map((product) => product.barcode)),
     );
     // Un produit qui disparaît du dump ne doit plus être proposé. S'il est
