@@ -1,10 +1,22 @@
-import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { MealSlot, Prisma } from '@cuisinons/db';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { MealSlot, Prisma, type QuantityUnit } from '@cuisinons/db';
 import { addDays, startOfWeek } from './dates.js';
 import { nutritionFromSnapshot } from '@cuisinons/db';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { publicRecipePhotoUrl } from '../recipes/recipe-photo.js';
-import { computeRecipeNutrition, mealsForEater, type MacroNutrients, type MealKind } from '@cuisinons/shared';
+import {
+  canonicalQuantity,
+  computeRecipeNutrition,
+  mealsForEater,
+  type MacroNutrients,
+  type MealKind,
+} from '@cuisinons/shared';
 
 @Injectable()
 export class PlannerService {
@@ -34,6 +46,23 @@ export class PlannerService {
           },
         },
         portions: { include: { user: { select: { id: true, displayName: true } } } },
+        manualIngredients: {
+          include: {
+            ingredient: {
+              select: {
+                id: true,
+                nameFr: true,
+                iconUrl: true,
+                energyKcal: true,
+                proteinG: true,
+                carbG: true,
+                fatG: true,
+                fiberG: true,
+              },
+            },
+          },
+          orderBy: { sortOrder: 'asc' },
+        },
         createdBy: { select: { displayName: true } },
       },
       orderBy: [{ date: 'asc' }, { slot: 'asc' }, { sortOrder: 'asc' }],
@@ -52,13 +81,40 @@ export class PlannerService {
           ).map((row) => [row.id, row.photoUrl]),
     );
     return items.map((item) => {
+      const manualIngredients = item.manualIngredients.map((line) => ({
+        id: line.id,
+        ingredientId: line.ingredientId,
+        quantity: Number(line.quantity),
+        unit: line.unit,
+        grams: line.grams === null ? null : Number(line.grams),
+        ingredient: {
+          id: line.ingredient.id,
+          nameFr: line.ingredient.nameFr,
+          iconUrl: line.ingredient.iconUrl,
+        },
+      }));
       if (!item.recipe) {
-        return { ...item, recipe: null, nutrition: computeRecipeNutrition([], 1) };
+        const nutrition = computeRecipeNutrition(
+          item.manualIngredients.map((line) => ({
+            grams: line.grams === null ? null : Number(line.grams),
+            energyKcalPer100g:
+              line.ingredient.energyKcal === null ? null : Number(line.ingredient.energyKcal),
+            proteinPer100g:
+              line.ingredient.proteinG === null ? null : Number(line.ingredient.proteinG),
+            carbsPer100g: line.ingredient.carbG === null ? null : Number(line.ingredient.carbG),
+            fatPer100g: line.ingredient.fatG === null ? null : Number(line.ingredient.fatG),
+            fiberPer100g: line.ingredient.fiberG === null ? null : Number(line.ingredient.fiberG),
+          })),
+          1,
+        );
+        return { ...item, manualIngredients, recipe: null, nutrition };
       }
       const nutrition =
-        nutritionFromSnapshot(item.recipe.nutritionSnapshot) ?? computeRecipeNutrition([], Number(item.recipe.servings));
+        nutritionFromSnapshot(item.recipe.nutritionSnapshot) ??
+        computeRecipeNutrition([], Number(item.recipe.servings));
       return {
         ...item,
+        manualIngredients,
         recipe: {
           id: item.recipe.id,
           name: item.recipe.name,
@@ -67,7 +123,11 @@ export class PlannerService {
           cookTimeMinutes: item.recipe.cookTimeMinutes,
           updatedAt: item.recipe.updatedAt,
           ingredientCount: item.recipe._count.ingredients,
-          photoUrl: publicRecipePhotoUrl(item.recipe.id, withPhoto.get(item.recipe.id) ?? null, item.recipe.updatedAt),
+          photoUrl: publicRecipePhotoUrl(
+            item.recipe.id,
+            withPhoto.get(item.recipe.id) ?? null,
+            item.recipe.updatedAt,
+          ),
         },
         nutrition,
       };
@@ -81,6 +141,7 @@ export class PlannerService {
     recipeId?: string;
     createdById: string;
     portions: Array<{ userId: string; portions: number }>;
+    ingredients?: Array<{ ingredientId: string; quantity: number; unit: QuantityUnit }>;
   }) {
     return this.prisma.$transaction(async (tx) => {
       if (input.kind === 'RECIPE') {
@@ -90,6 +151,21 @@ export class PlannerService {
       } else if (input.recipeId) {
         throw new BadRequestException('Pas de recette pour ce type de repas.');
       }
+      const manualIngredients =
+        input.kind === 'IMPOSED'
+          ? (input.ingredients ?? []).map((line, sortOrder) => {
+              const canonical = canonicalQuantity(line.quantity, line.unit);
+              return {
+                ingredientId: line.ingredientId,
+                quantity: canonical.quantity,
+                unit: canonical.unit,
+                grams: canonical.unit === 'G' ? canonical.quantity : null,
+                sortOrder,
+              };
+            })
+          : [];
+      if (input.kind === 'IMPOSED' && manualIngredients.length === 0)
+        throw new BadRequestException('Ajoute au moins un ingrédient.');
       const eaters = input.portions.filter((p) => p.portions > 0).map((p) => p.userId);
       await this.releaseSlot(tx, input.date, input.slot, eaters);
       const count = await tx.mealItem.count({
@@ -109,6 +185,8 @@ export class PlannerService {
               portions: p.portions,
             })),
           },
+          manualIngredients:
+            manualIngredients.length > 0 ? { create: manualIngredients } : undefined,
         },
         include: { portions: true, recipe: true },
       });
@@ -155,6 +233,9 @@ export class PlannerService {
         await tx.mealItem.delete({ where: { id } });
         return { id, deleted: true };
       }
+      if (nextKind !== 'IMPOSED') {
+        await tx.mealItemIngredient.deleteMany({ where: { mealItemId: id } });
+      }
       const targetDate = input.date ?? existing.date;
       const targetSlot = input.slot ?? existing.slot;
       const eaters = remaining.filter((p) => Number(p.portions) > 0).map((p) => p.userId);
@@ -195,11 +276,7 @@ export class PlannerService {
     return { ok: true, scoped: 'me' };
   }
 
-  async replaceForUser(
-    id: string,
-    userId: string,
-    input: { recipeId: string; portions: number },
-  ) {
+  async replaceForUser(id: string, userId: string, input: { recipeId: string; portions: number }) {
     const item = await this.prisma.mealItem.findUnique({
       where: { id },
       include: { portions: true },
@@ -263,7 +340,9 @@ export class PlannerService {
           data: { portions: 0 },
         });
       }
-      const remaining = await tx.mealParticipantPortion.findMany({ where: { mealItemId: item.id } });
+      const remaining = await tx.mealParticipantPortion.findMany({
+        where: { mealItemId: item.id },
+      });
       if (remaining.every((p) => Number(p.portions) <= 0)) {
         await tx.mealItem.delete({ where: { id: item.id } });
       } else {

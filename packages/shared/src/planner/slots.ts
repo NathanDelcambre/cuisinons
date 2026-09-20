@@ -16,7 +16,7 @@ export const MEAL_KIND_LABELS: Record<MealKind, string> = {
   RECIPE: 'Recette',
   SKIPPED: 'Repas sauté',
   RESTAURANT: 'Restaurant',
-  IMPOSED: 'Repas imposé',
+  IMPOSED: 'Ajouter manuellement',
 };
 
 function dayKey(date: string | Date) {

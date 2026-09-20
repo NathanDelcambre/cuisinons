@@ -215,6 +215,59 @@ export class ProvisionsService {
     };
   }
 
+  /** Change de magasin et re-selectionne chaque produit de la liste active. */
+  async changeRetailer(userId: string, retailer: Retailer) {
+    const list = await this.prisma.shoppingList.findFirst({
+      where: { userId, completedAt: null },
+      orderBy: { createdAt: 'desc' },
+      include: { items: { include: { ingredient: { select: { nameFr: true } } } } },
+    });
+    if (!list) throw new NotFoundException('Aucune liste de courses en cours.');
+    const selections = await Promise.all(
+      list.items.map(async (item) => {
+        const needed = Number(item.neededQuantity ?? item.quantity);
+        const offers = await this.products.findOffers(item.ingredient.nameFr, retailer);
+        return {
+          item,
+          selection: selectProductOffer({
+            neededQuantity: needed,
+            neededUnit: item.unit,
+            offers,
+            economical: list.economical,
+          }),
+        };
+      }),
+    );
+    await this.prisma.$transaction(async (tx) => {
+      await tx.shoppingList.update({ where: { id: list.id }, data: { retailer } });
+      for (const { item, selection } of selections) {
+        const needed = Number(item.neededQuantity ?? item.quantity);
+        await tx.shoppingListItem.update({
+          where: { id: item.id },
+          data: selection
+            ? this.shoppingProductData(selection, needed)
+            : {
+                quantity: needed,
+                neededQuantity: needed,
+                dataSource: 'CIQUAL_FALLBACK',
+                productBarcode: null,
+                productName: null,
+                productBrand: null,
+                productImageUrl: null,
+                packageQuantity: null,
+                packageCount: null,
+                estimatedPrice: null,
+                currency: null,
+                priceObservedAt: null,
+                storeName: null,
+                economyNote: null,
+              },
+        });
+      }
+    });
+    return this.activeList(userId);
+  }
+
   /**
    * Recalcule les lignes issues du planning pour la periode demandee. Les lignes
    * ajoutees a la main sont conservees : elles ne viennent pas du planning, donc
@@ -538,6 +591,9 @@ export class ProvisionsService {
                 },
               },
             },
+            manualIngredients: {
+              select: { ingredientId: true, quantity: true, unit: true, grams: true },
+            },
           },
         },
       },
@@ -559,10 +615,10 @@ export class ProvisionsService {
       return { consumed: already, missing: await this.withNames([]) };
     }
 
-    // Restaurant, repas sauté, repas imposé : pas de stock à déduire, mais on
-    // mémorise le refus de validation automatique pour ne pas rerayer le créneau.
+    // Restaurant et repas sauté : pas de stock à déduire.
     const recipe = portion.mealItem.recipe;
-    if (!recipe) {
+    const manualIngredients = portion.mealItem.manualIngredients;
+    if (!recipe && manualIngredients.length === 0) {
       await this.prisma.mealParticipantPortion.update({
         where: { id: portionId },
         data: { skipAutoConsume: !consumed, consumedAt: null },
@@ -571,7 +627,7 @@ export class ProvisionsService {
     }
 
     const lines = aggregateQuantities(
-      recipe.ingredients
+      (recipe?.ingredients ?? manualIngredients)
         .map((line) =>
           portionRequirement(
             {
@@ -580,7 +636,7 @@ export class ProvisionsService {
               unit: line.unit,
               grams: line.grams === null ? null : Number(line.grams),
             },
-            Number(recipe.servings),
+            Number(recipe?.servings ?? 1),
             Number(portion.portions),
           ),
         )
@@ -648,7 +704,10 @@ export class ProvisionsService {
         userId,
         consumedAt: null,
         skipAutoConsume: false,
-        mealItem: { date: { lt: today }, recipeId: { not: null } },
+        mealItem: {
+          date: { lt: today },
+          OR: [{ recipeId: { not: null } }, { manualIngredients: { some: {} } }],
+        },
       },
       select: { id: true },
     });
@@ -718,6 +777,9 @@ export class ProvisionsService {
             },
           },
         },
+        manualIngredients: {
+          select: { ingredientId: true, quantity: true, unit: true, grams: true },
+        },
         portions: { where: { userId }, select: { portions: true, consumedAt: true } },
       },
     });
@@ -728,8 +790,9 @@ export class ProvisionsService {
       // Un repas deja consomme a deja puise dans le stock : le racheter serait
       // compter deux fois.
       if (portion.consumedAt !== null) continue;
-      if (!item.recipe) continue;
-      for (const line of item.recipe.ingredients) {
+      const source = item.recipe?.ingredients ?? item.manualIngredients;
+      if (source.length === 0) continue;
+      for (const line of source) {
         const need = portionRequirement(
           {
             ingredientId: line.ingredientId,
@@ -737,7 +800,7 @@ export class ProvisionsService {
             unit: line.unit,
             grams: line.grams === null ? null : Number(line.grams),
           },
-          Number(item.recipe.servings),
+          Number(item.recipe?.servings ?? 1),
           Number(portion.portions),
         );
         if (need) lines.push(need);

@@ -33,8 +33,12 @@ export class NutritionService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async stats(periodRaw: string | undefined, dateRaw: string | undefined) {
-    const period = STATS_PERIODS.includes(periodRaw as StatsPeriod) ? (periodRaw as StatsPeriod) : 'week';
-    const date = dateRaw ? parseIsoDate(dateRaw) : parseIsoDate(new Date().toISOString().slice(0, 10));
+    const period = STATS_PERIODS.includes(periodRaw as StatsPeriod)
+      ? (periodRaw as StatsPeriod)
+      : 'week';
+    const date = dateRaw
+      ? parseIsoDate(dateRaw)
+      : parseIsoDate(new Date().toISOString().slice(0, 10));
     const { from, to } = bounds(period, date);
     const todayIso = new Date().toISOString().slice(0, 10);
     const days = periodDayCount(period, from, to);
@@ -50,6 +54,14 @@ export class NutritionService {
         slot: true,
         recipeId: true,
         recipe: { select: { name: true, servings: true, nutritionSnapshot: true } },
+        manualIngredients: {
+          select: {
+            grams: true,
+            ingredient: {
+              select: { energyKcal: true, proteinG: true, carbG: true, fatG: true, fiberG: true },
+            },
+          },
+        },
         portions: {
           select: { userId: true, portions: true, consumedAt: true, skipAutoConsume: true },
         },
@@ -58,14 +70,27 @@ export class NutritionService {
 
     const meals = items.map((item) => {
       const nutrition = item.recipe
-        ? nutritionFromSnapshot(item.recipe.nutritionSnapshot) ??
-          computeRecipeNutrition([], Number(item.recipe.servings))
-        : { perServing: { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 } };
+        ? (nutritionFromSnapshot(item.recipe.nutritionSnapshot) ??
+          computeRecipeNutrition([], Number(item.recipe.servings)))
+        : computeRecipeNutrition(
+            item.manualIngredients.map((line) => ({
+              grams: line.grams === null ? null : Number(line.grams),
+              energyKcalPer100g:
+                line.ingredient.energyKcal === null ? null : Number(line.ingredient.energyKcal),
+              proteinPer100g:
+                line.ingredient.proteinG === null ? null : Number(line.ingredient.proteinG),
+              carbsPer100g: line.ingredient.carbG === null ? null : Number(line.ingredient.carbG),
+              fatPer100g: line.ingredient.fatG === null ? null : Number(line.ingredient.fatG),
+              fiberPer100g: line.ingredient.fiberG === null ? null : Number(line.ingredient.fiberG),
+            })),
+            1,
+          );
       return {
         date: item.date.toISOString(),
         slot: item.slot as MealSlot,
         recipeId: item.recipeId,
-        recipeName: item.recipe?.name ?? null,
+        recipeName:
+          item.recipe?.name ?? (item.manualIngredients.length > 0 ? 'Ajouter manuellement' : null),
         perServing: nutrition.perServing,
         portions: item.portions.map((p) => ({
           userId: p.userId,

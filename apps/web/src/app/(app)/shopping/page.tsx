@@ -5,6 +5,7 @@ import { useState } from 'react';
 import {
   ArrowLeftRight,
   Check,
+  ChevronDown,
   ListChecks,
   Plus,
   ShoppingBasket,
@@ -15,6 +16,7 @@ import {
   UNIT_LABELS,
   UX_CATEGORY_LABELS,
   RETAILER_LABELS,
+  RETAILERS,
   kitchenLabel,
   type QuantityUnit,
   type Retailer,
@@ -27,6 +29,7 @@ import {
   EmptyState,
   IconButton,
   Input,
+  Modal,
   PageHeader,
   Panel,
   Skeleton,
@@ -86,6 +89,7 @@ export default function ShoppingPage() {
   const [generateOpen, setGenerateOpen] = useState(false);
   const [picker, setPicker] = useState(false);
   const [swapItem, setSwapItem] = useState<ShoppingItem | null>(null);
+  const [retailerOpen, setRetailerOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   const list = useQuery({
@@ -113,6 +117,18 @@ export default function ShoppingPage() {
           ? null
           : 'Rien à acheter : tes réserves couvrent déjà les repas prévus.',
       );
+    },
+  });
+
+  const changeRetailer = useMutation({
+    mutationFn: (retailer: Retailer) =>
+      apiJson<ShoppingList>('/api/bff/shopping/retailer', {
+        method: 'PATCH',
+        body: JSON.stringify({ retailer }),
+      }),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['shopping'], data);
+      setRetailerOpen(false);
     },
   });
 
@@ -229,13 +245,21 @@ export default function ShoppingPage() {
 
       {list.data?.retailer ? (
         <Card className="flex items-center justify-between gap-3 py-3.5">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <RetailerLogo retailer={list.data.retailer} className="size-9 rounded-lg" />
-            <p className="min-w-0 text-sm text-ink-700">
-              Produits sélectionnés chez{' '}
-              <strong className="whitespace-nowrap">{RETAILER_LABELS[list.data.retailer]}</strong>
-            </p>
-          </div>
+          <button
+            type="button"
+            onClick={() => setRetailerOpen(true)}
+            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl text-left hover:bg-white/50"
+            aria-label="Changer de distributeur"
+          >
+            <div className="flex min-w-0 items-center gap-2.5">
+              <RetailerLogo retailer={list.data.retailer} className="size-9 rounded-lg" />
+              <p className="min-w-0 text-sm text-ink-700">
+                Produits sélectionnés chez{' '}
+                <strong className="whitespace-nowrap">{RETAILER_LABELS[list.data.retailer]}</strong>
+              </p>
+            </div>
+            <ChevronDown className="size-4 shrink-0 text-ink-400" aria-hidden />
+          </button>
           <div className="shrink-0 text-right">
             <p className="text-[10px] font-medium uppercase tracking-wide text-ink-400">
               Total estimé
@@ -334,6 +358,39 @@ export default function ShoppingPage() {
         }}
         onGenerate={(input) => generate.mutate(input)}
       />
+      <Modal
+        open={retailerOpen}
+        title="Choisir un distributeur"
+        description="Les produits et prix seront recalculés pour ce magasin."
+        onClose={() => {
+          changeRetailer.reset();
+          setRetailerOpen(false);
+        }}
+        bodyClassName="overflow-y-auto"
+      >
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {RETAILERS.map((retailer) => (
+            <button
+              key={retailer}
+              type="button"
+              disabled={changeRetailer.isPending}
+              onClick={() => changeRetailer.mutate(retailer)}
+              className={cn(
+                'flex min-h-16 items-center gap-2 rounded-2xl border px-3 text-left text-sm transition',
+                retailer === list.data?.retailer
+                  ? 'border-sage-400 bg-sage-50 text-ink-900'
+                  : 'border-ink-100 bg-white/70 text-ink-700 hover:border-sage-300',
+              )}
+            >
+              <RetailerLogo retailer={retailer} className="size-8 rounded-lg" />
+              <span className="min-w-0 truncate">{RETAILER_LABELS[retailer]}</span>
+            </button>
+          ))}
+        </div>
+        {changeRetailer.error instanceof Error ? (
+          <p className="mt-3 text-sm text-tomato-500">{changeRetailer.error.message}</p>
+        ) : null}
+      </Modal>
       <IngredientPicker
         open={picker}
         onClose={() => {

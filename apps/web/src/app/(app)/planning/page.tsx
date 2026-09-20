@@ -3,9 +3,30 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { addDays, differenceInCalendarDays, format, isToday, startOfWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
 import { createPortal } from 'react-dom';
-import { Carrot, Check, ChevronLeft, ChevronRight, Clock, CookingPot, RefreshCw, Sparkles, Trash2, UtensilsCrossed, type LucideIcon } from 'lucide-react';
+import {
+  Carrot,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  CookingPot,
+  RefreshCw,
+  Sparkles,
+  Trash2,
+  UtensilsCrossed,
+  type LucideIcon,
+} from 'lucide-react';
 import {
   Badge,
   Button,
@@ -28,8 +49,10 @@ import {
   weekMacroAverages,
   type MealKind,
   type MealSlot,
+  type QuantityUnit,
 } from '@cuisinons/shared';
 import { AddMealDialog } from '@/components/add-meal-dialog';
+import { ManualMealDialog } from '@/components/manual-meal-dialog';
 import { PlannedMealModal } from '@/components/planned-meal-modal';
 import { SlotAddMenu, SLOT_CHROME, type SpecialMealKind } from '@/components/slot-add-menu';
 import { OptimizePanel } from '@/components/optimize-panel';
@@ -56,7 +79,16 @@ type MealItem = {
     skipAutoConsume?: boolean;
     user: { displayName: string };
   }>;
-  nutrition: { perServing: { kcal: number; protein: number; carbs: number; fat: number }; complete: boolean };
+  nutrition: {
+    perServing: { kcal: number; protein: number; carbs: number; fat: number };
+    complete: boolean;
+  };
+  manualIngredients?: Array<{
+    id: string;
+    quantity: number;
+    unit: QuantityUnit;
+    ingredient: { id: string; nameFr: string; iconUrl: string | null };
+  }>;
 };
 
 type Goal = {
@@ -66,7 +98,12 @@ type Goal = {
   fatValue: string | null;
 };
 
-type MacroTargets = { kcal: number | null; protein: number | null; carbs: number | null; fat: number | null };
+type MacroTargets = {
+  kcal: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+};
 type Macros = { kcal: number; protein: number; carbs: number; fat: number };
 
 function iso(date: Date) {
@@ -75,7 +112,8 @@ function iso(date: Date) {
 
 function weekRangeLabel(start: Date) {
   const end = addDays(start, 6);
-  const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+  const sameMonth =
+    start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
   if (sameMonth) {
     return `${format(start, 'd', { locale: fr })} – ${format(end, 'd MMMM', { locale: fr })}`;
   }
@@ -94,12 +132,16 @@ export default function PlanningPage() {
     replaceScope?: 'me' | 'all';
   } | null>(null);
   const [optimizeOpen, setOptimizeOpen] = useState(false);
+  const [manualDialog, setManualDialog] = useState<{ date: string; slot: MealSlot } | null>(null);
   const [detail, setDetail] = useState<MealItem | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const from = iso(weekStart);
   const todayIso = new Date().toISOString().slice(0, 10);
-  const days = useMemo(() => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)), [weekStart]);
+  const days = useMemo(
+    () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
+    [weekStart],
+  );
 
   const mealsQuery = useQuery({
     queryKey: ['planner', from],
@@ -141,10 +183,10 @@ export default function PlanningPage() {
   // le stock et la liste de courses, qui en decoulent.
   const consume = useMutation({
     mutationFn: (input: { portionId: string; consumed: boolean }) =>
-      apiJson<{ consumed: boolean }>(
-        '/api/bff/provisions/consumption',
-        { method: 'POST', body: JSON.stringify(input) },
-      ),
+      apiJson<{ consumed: boolean }>('/api/bff/provisions/consumption', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['planner'] });
       void queryClient.invalidateQueries({ queryKey: ['pantry'] });
@@ -204,6 +246,8 @@ export default function PlanningPage() {
           </span>
         }
         title="Planning"
+        actionsBesideTitle
+        actionsClassName="flex items-center justify-end gap-2"
         description={
           <div className="flex flex-wrap items-center gap-2 text-ink-900">
             <IconButton
@@ -262,21 +306,83 @@ export default function PlanningPage() {
       <Panel className="p-5 sm:p-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-medium text-ink-900">Moyennes de la semaine</p>
-          {goals ? null : (
-            <Badge tone="peach">Aucun objectif défini</Badge>
-          )}
+          {goals ? null : <Badge tone="peach">Aucun objectif défini</Badge>}
         </div>
         <div className="grid grid-cols-4 gap-2 md:hidden">
-          <MacroRing label="kcal" planned={weekAverages.planned.kcal} consumed={weekAverages.consumed.kcal} target={num(goals?.caloriesValue)} unit="" tone="peach" icon={<MacroIcon kind="kcal" />} />
-          <MacroRing label="Protéines" planned={weekAverages.planned.protein} consumed={weekAverages.consumed.protein} target={num(goals?.proteinValue)} unit="g" tone="sage" icon={<MacroIcon kind="protein" />} />
-          <MacroRing label="Glucides" planned={weekAverages.planned.carbs} consumed={weekAverages.consumed.carbs} target={num(goals?.carbsValue)} unit="g" tone="gold" icon={<MacroIcon kind="carbs" />} />
-          <MacroRing label="Lipides" planned={weekAverages.planned.fat} consumed={weekAverages.consumed.fat} target={num(goals?.fatValue)} unit="g" tone="tomato" icon={<MacroIcon kind="fat" />} />
+          <MacroRing
+            label="kcal"
+            planned={weekAverages.planned.kcal}
+            consumed={weekAverages.consumed.kcal}
+            target={num(goals?.caloriesValue)}
+            unit=""
+            tone="peach"
+            icon={<MacroIcon kind="kcal" />}
+          />
+          <MacroRing
+            label="Protéines"
+            planned={weekAverages.planned.protein}
+            consumed={weekAverages.consumed.protein}
+            target={num(goals?.proteinValue)}
+            unit="g"
+            tone="sage"
+            icon={<MacroIcon kind="protein" />}
+          />
+          <MacroRing
+            label="Glucides"
+            planned={weekAverages.planned.carbs}
+            consumed={weekAverages.consumed.carbs}
+            target={num(goals?.carbsValue)}
+            unit="g"
+            tone="gold"
+            icon={<MacroIcon kind="carbs" />}
+          />
+          <MacroRing
+            label="Lipides"
+            planned={weekAverages.planned.fat}
+            consumed={weekAverages.consumed.fat}
+            target={num(goals?.fatValue)}
+            unit="g"
+            tone="tomato"
+            icon={<MacroIcon kind="fat" />}
+          />
         </div>
         <div className="hidden md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-4">
-          <Meter label="kcal" value={weekAverages.planned.kcal} consumed={weekAverages.consumed.kcal} target={num(goals?.caloriesValue)} unit="" tone="peach" icon={<MacroIcon kind="kcal" />} />
-          <Meter label="Protéines" value={weekAverages.planned.protein} consumed={weekAverages.consumed.protein} target={num(goals?.proteinValue)} unit="g" tone="sage" icon={<MacroIcon kind="protein" />} />
-          <Meter label="Glucides" value={weekAverages.planned.carbs} consumed={weekAverages.consumed.carbs} target={num(goals?.carbsValue)} unit="g" tone="gold" icon={<MacroIcon kind="carbs" />} />
-          <Meter label="Lipides" value={weekAverages.planned.fat} consumed={weekAverages.consumed.fat} target={num(goals?.fatValue)} unit="g" tone="tomato" icon={<MacroIcon kind="fat" />} />
+          <Meter
+            label="kcal"
+            value={weekAverages.planned.kcal}
+            consumed={weekAverages.consumed.kcal}
+            target={num(goals?.caloriesValue)}
+            unit=""
+            tone="peach"
+            icon={<MacroIcon kind="kcal" />}
+          />
+          <Meter
+            label="Protéines"
+            value={weekAverages.planned.protein}
+            consumed={weekAverages.consumed.protein}
+            target={num(goals?.proteinValue)}
+            unit="g"
+            tone="sage"
+            icon={<MacroIcon kind="protein" />}
+          />
+          <Meter
+            label="Glucides"
+            value={weekAverages.planned.carbs}
+            consumed={weekAverages.consumed.carbs}
+            target={num(goals?.carbsValue)}
+            unit="g"
+            tone="gold"
+            icon={<MacroIcon kind="carbs" />}
+          />
+          <Meter
+            label="Lipides"
+            value={weekAverages.planned.fat}
+            consumed={weekAverages.consumed.fat}
+            target={num(goals?.fatValue)}
+            unit="g"
+            tone="tomato"
+            icon={<MacroIcon kind="fat" />}
+          />
         </div>
       </Panel>
 
@@ -307,7 +413,10 @@ export default function PlanningPage() {
                 selected={index === selectedIndex}
                 onSelect={() => setSelectedIndex(index)}
                 onAddRecipe={(slot) => setDialog({ date: iso(day), slot })}
-                onAddKind={(slot, kind) => addKind.mutate({ date: iso(day), slot, kind })}
+                onAddKind={(slot, kind) => {
+                  if (kind === 'IMPOSED') setManualDialog({ date: iso(day), slot });
+                  else addKind.mutate({ date: iso(day), slot, kind });
+                }}
                 onOpenItem={setDetail}
                 onChangeRecipe={(item, scope) =>
                   setDialog({
@@ -336,9 +445,24 @@ export default function PlanningPage() {
         onClose={() => setDialog(null)}
         onAdded={() => queryClient.invalidateQueries({ queryKey: ['planner'] })}
       />
+      <ManualMealDialog
+        open={manualDialog !== null}
+        date={manualDialog?.date ?? iso(selectedDate)}
+        slot={manualDialog?.slot ?? 'DINNER'}
+        onClose={() => setManualDialog(null)}
+        onAdded={() => queryClient.invalidateQueries({ queryKey: ['planner'] })}
+      />
       <PlannedMealModal
         item={detail}
-        validated={detail ? isValidated(detail, detail.portions.find((p) => p.userId === user?.id), todayIso) : false}
+        validated={
+          detail
+            ? isValidated(
+                detail,
+                detail.portions.find((p) => p.userId === user?.id),
+                todayIso,
+              )
+            : false
+        }
         loading={consume.isPending}
         onClose={() => setDetail(null)}
         onCancelValidation={() => {
@@ -442,7 +566,9 @@ function DayCard({
           >
             {format(date, 'EEEE d MMMM', { locale: fr })}
           </span>
-          {today ? <span className="text-[11px] font-medium text-sage-500">Aujourd’hui</span> : null}
+          {today ? (
+            <span className="text-[11px] font-medium text-sage-500">Aujourd’hui</span>
+          ) : null}
         </span>
         <MacroCounts macros={macros} />
       </button>
@@ -498,7 +624,12 @@ function SlotSection({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {items.length === 0 ? (
-        <SlotAddMenu slot={slot} variant="empty" onChooseRecipe={onAddRecipe} onChooseKind={onAddKind} />
+        <SlotAddMenu
+          slot={slot}
+          variant="empty"
+          onChooseRecipe={onAddRecipe}
+          onChooseKind={onAddKind}
+        />
       ) : (
         <ul
           className={cn(
@@ -527,9 +658,7 @@ function SlotSection({
                   <button
                     type="button"
                     onClick={() => onOpenItem(item)}
-                    aria-label={
-                      validated ? `${label}, ${title}, validé` : `${label}, ${title}`
-                    }
+                    aria-label={validated ? `${label}, ${title}, validé` : `${label}, ${title}`}
                     className="flex min-w-0 items-center gap-2.5 rounded-lg pr-24 text-left"
                   >
                     <span
@@ -539,10 +668,16 @@ function SlotSection({
                         validated ? 'bg-sage-200 text-sage-800' : chrome.iconClass,
                       )}
                     >
-                      {validated ? <Check className="size-3.5" strokeWidth={2.75} /> : <SlotIcon className="size-3" />}
+                      {validated ? (
+                        <Check className="size-3.5" strokeWidth={2.75} />
+                      ) : (
+                        <SlotIcon className="size-3" />
+                      )}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <p className="line-clamp-2 text-sm font-medium leading-snug text-ink-900">{title}</p>
+                      <p className="line-clamp-2 text-sm font-medium leading-snug text-ink-900">
+                        {title}
+                      </p>
                       {recipe ? <RecipeMeta recipe={recipe} /> : null}
                     </span>
                   </button>
@@ -618,18 +753,34 @@ function MealItemActions({
   return (
     <>
       <ActionMenu icon={RefreshCw} label={`Changer ${title}`} hoverClass="hover:text-sage-600">
-        <button type="button" className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm" onClick={() => onChange('all')}>
+        <button
+          type="button"
+          className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm"
+          onClick={() => onChange('all')}
+        >
           Échanger pour tout le monde
         </button>
-        <button type="button" className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm" onClick={() => onChange('me')}>
+        <button
+          type="button"
+          className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm"
+          onClick={() => onChange('me')}
+        >
           Échanger pour moi seulement
         </button>
       </ActionMenu>
       <ActionMenu icon={Trash2} label={`Retirer ${title}`} hoverClass="hover:text-tomato-500">
-        <button type="button" className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm text-tomato-500" onClick={() => onRemove('all')}>
+        <button
+          type="button"
+          className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm text-tomato-500"
+          onClick={() => onRemove('all')}
+        >
           Supprimer pour tout le monde
         </button>
-        <button type="button" className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm text-tomato-500" onClick={() => onRemove('me')}>
+        <button
+          type="button"
+          className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm text-tomato-500"
+          onClick={() => onRemove('me')}
+        >
           Supprimer pour moi seulement
         </button>
       </ActionMenu>
@@ -651,9 +802,12 @@ function ActionMenu({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState<{ top?: number; bottom?: number; left: number; width: number } | null>(
-    null,
-  );
+  const [pos, setPos] = useState<{
+    top?: number;
+    bottom?: number;
+    left: number;
+    width: number;
+  } | null>(null);
 
   const updatePosition = useCallback(() => {
     const trigger = triggerRef.current;
@@ -755,11 +909,7 @@ function ActionMenu({
   );
 }
 
-function RecipeMeta({
-  recipe,
-}: {
-  recipe: NonNullable<MealItem['recipe']>;
-}) {
+function RecipeMeta({ recipe }: { recipe: NonNullable<MealItem['recipe']> }) {
   const ingredientCount = recipe.ingredientCount ?? 0;
   const prep = recipe.prepTimeMinutes;
   const cook = recipe.cookTimeMinutes;
@@ -815,10 +965,22 @@ function MacroCounts({
     const target = targets?.[item.key] ?? null;
     const percent = target && target > 0 ? Math.round((macros[item.key] / target) * 100) : null;
     return (
-      <span key={item.key} className={cn('flex min-w-0 items-center gap-1 whitespace-nowrap font-bold', item.className)}>
+      <span
+        key={item.key}
+        className={cn(
+          'flex min-w-0 items-center gap-1 whitespace-nowrap font-bold',
+          item.className,
+        )}
+      >
         <MacroIcon kind={item.key} className="size-3 shrink-0" />
         <span className="tabular">
-          {showPercent ? (percent === null ? '—' : `${String(percent)} %`) : (
+          {showPercent ? (
+            percent === null ? (
+              '—'
+            ) : (
+              `${String(percent)} %`
+            )
+          ) : (
             <>
               {Math.round(macros[item.key])}
               {item.suffix === 'kcal' ? ' kcal' : ` ${item.suffix}`}
@@ -842,9 +1004,7 @@ function MacroCounts({
         className={classes}
         aria-pressed={asPercent}
         aria-label={
-          asPercent
-            ? 'Afficher les quantités'
-            : 'Afficher le pourcentage de l’objectif du jour'
+          asPercent ? 'Afficher les quantités' : 'Afficher le pourcentage de l’objectif du jour'
         }
         onClick={() => setAsPercent((current) => !current)}
       >

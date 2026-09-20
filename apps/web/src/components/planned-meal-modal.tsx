@@ -7,6 +7,7 @@ import {
   MEAL_SLOT_LABELS,
   type MealKind,
   type MealSlot,
+  UNIT_LABELS,
 } from '@cuisinons/shared';
 import { RecipeModal } from './recipe-modal';
 
@@ -29,6 +30,12 @@ export function PlannedMealModal({
     slot: MealSlot;
     kind: MealKind;
     recipe: { id: string } | null;
+    manualIngredients?: Array<{
+      id: string;
+      quantity: number;
+      unit: keyof typeof UNIT_LABELS;
+      ingredient: { nameFr: string };
+    }>;
   } | null;
   validated: boolean;
   loading?: boolean;
@@ -114,10 +121,25 @@ export function PlannedMealModal({
           {kind === 'SKIPPED'
             ? 'Ce créneau est marqué comme sauté.'
             : kind === 'IMPOSED'
-              ? 'Ce repas est imposé, sans recette à cuisiner.'
+              ? 'Ajout manuel'
               : 'Repas pris à l’extérieur.'}
         </p>
       </div>
+      {kind === 'IMPOSED' && item.manualIngredients?.length ? (
+        <ul className="mt-5 space-y-2 border-t border-white/70 pt-4">
+          {item.manualIngredients.map((line) => (
+            <li
+              key={line.id}
+              className="flex items-center justify-between gap-3 text-sm text-ink-700"
+            >
+              <span className="truncate">{line.ingredient.nameFr}</span>
+              <span className="shrink-0 tabular text-ink-500">
+                {line.quantity} {UNIT_LABELS[line.unit]}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </Modal>
   );
 }

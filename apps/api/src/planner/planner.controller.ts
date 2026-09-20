@@ -1,6 +1,17 @@
-import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { z } from 'zod';
-import { MEAL_KINDS, MEAL_SLOTS } from '@cuisinons/shared';
+import { MEAL_KINDS, MEAL_SLOTS, QUANTITY_UNITS } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthUser } from '../auth/internal-jwt.guard.js';
@@ -9,6 +20,11 @@ import { maxFutureDate, parseIsoDate } from './dates.js';
 import { ForbiddenException } from '@nestjs/common';
 
 const portionLine = z.object({ userId: z.string(), portions: z.number().min(0).max(6) });
+const manualIngredientLine = z.object({
+  ingredientId: z.string().min(1),
+  quantity: z.number().positive().max(100_000),
+  unit: z.enum(QUANTITY_UNITS),
+});
 
 function assertSomePortions(portions: Array<{ portions: number }>, ctx: z.RefinementCtx) {
   if (!portions.some((line) => line.portions > 0)) {
@@ -40,6 +56,7 @@ export class PlannerController {
         kind: z.enum(MEAL_KINDS).optional(),
         recipeId: z.string().min(1).optional(),
         portions: z.array(portionLine),
+        ingredients: z.array(manualIngredientLine).max(30).optional(),
       })
       .superRefine((val, ctx) => {
         const kind = val.kind ?? 'RECIPE';
@@ -57,6 +74,20 @@ export class PlannerController {
             path: ['recipeId'],
           });
         }
+        if (kind === 'IMPOSED' && !val.ingredients?.length) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Ajoute au moins un ingrédient.',
+            path: ['ingredients'],
+          });
+        }
+        if (kind !== 'IMPOSED' && val.ingredients?.length) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Les ingrédients manuels sont réservés à l’ajout manuel.',
+            path: ['ingredients'],
+          });
+        }
         assertSomePortions(val.portions, ctx);
       })
       .parse(body);
@@ -71,6 +102,7 @@ export class PlannerController {
       recipeId: parsed.recipeId,
       createdById: user.id,
       portions: parsed.portions,
+      ingredients: parsed.ingredients,
     });
   }
 
@@ -78,7 +110,10 @@ export class PlannerController {
   update(@Param('id') id: string, @Body() body: unknown) {
     const parsed = z
       .object({
-        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+        date: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/)
+          .optional(),
         slot: z.enum(MEAL_SLOTS).optional(),
         recipeId: z.string().min(1).optional(),
         kind: z.enum(MEAL_KINDS).optional(),
@@ -100,11 +135,7 @@ export class PlannerController {
   }
 
   @Delete('/planner/items/:id')
-  remove(
-    @CurrentUser() user: AuthUser,
-    @Param('id') id: string,
-    @Query('scope') scope?: string,
-  ) {
+  remove(@CurrentUser() user: AuthUser, @Param('id') id: string, @Query('scope') scope?: string) {
     if (scope === 'me') return this.planner.removeForUser(id, user.id);
     return this.planner.remove(id);
   }

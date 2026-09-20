@@ -1,15 +1,46 @@
 'use client';
 
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import { Ban, CalendarCheck, ChefHat, Cookie, Moon, Plus, Sun, Sunrise, Utensils, type LucideIcon } from 'lucide-react';
+import {
+  Ban,
+  ChefHat,
+  Cookie,
+  ListPlus,
+  Moon,
+  Plus,
+  Sun,
+  Sunrise,
+  Utensils,
+  type LucideIcon,
+} from 'lucide-react';
 import { Button, IconButton, cn, transitions } from '@cuisinons/ui';
-import { MEAL_KIND_LABELS, MEAL_SLOT_LABELS, type MealKind, type MealSlot } from '@cuisinons/shared';
+import {
+  MEAL_KIND_LABELS,
+  MEAL_SLOT_LABELS,
+  type MealKind,
+  type MealSlot,
+} from '@cuisinons/shared';
 
 export const SLOT_CHROME: Record<
   MealSlot,
-  { icon: LucideIcon; border: string; tint: string; iconClass: string; labelClass: string; rail: string }
+  {
+    icon: LucideIcon;
+    border: string;
+    tint: string;
+    iconClass: string;
+    labelClass: string;
+    rail: string;
+  }
 > = {
   BREAKFAST: {
     icon: Sunrise,
@@ -49,7 +80,7 @@ export type SpecialMealKind = Exclude<MealKind, 'RECIPE'>;
 
 const SPECIALS: Array<{ kind: SpecialMealKind; icon: LucideIcon }> = [
   { kind: 'RESTAURANT', icon: Utensils },
-  { kind: 'IMPOSED', icon: CalendarCheck },
+  { kind: 'IMPOSED', icon: ListPlus },
   { kind: 'SKIPPED', icon: Ban },
 ];
 
@@ -240,7 +271,10 @@ export function SlotAddMenu({
           <span className={cn('min-w-0 flex-1 text-[11px] font-medium', chrome.labelClass)}>
             {slotLabel}
           </span>
-          <Plus className="size-3.5 shrink-0 text-ink-300 transition-colors group-hover:text-sage-600" aria-hidden />
+          <Plus
+            className="size-3.5 shrink-0 text-ink-300 transition-colors group-hover:text-sage-600"
+            aria-hidden
+          />
         </button>
       ) : (
         <IconButton
@@ -316,9 +350,7 @@ export function SlotAddMenu({
                           onClick={() => chooseKind(option.kind)}
                           className={cn(
                             'flex min-h-10 w-full items-center gap-2.5 rounded-xl px-3 text-left text-sm transition-colors duration-150 ease-out-soft',
-                            highlighted === itemIndex
-                              ? 'bg-white/80 text-ink-900'
-                              : 'text-ink-600',
+                            highlighted === itemIndex ? 'bg-white/80 text-ink-900' : 'text-ink-600',
                           )}
                         >
                           <Icon className="size-4 shrink-0 text-ink-400" aria-hidden />

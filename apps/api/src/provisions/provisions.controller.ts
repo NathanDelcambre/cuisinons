@@ -94,6 +94,12 @@ export class ProvisionsController {
     return this.provisions.activeList(user.id);
   }
 
+  @Patch('/shopping/retailer')
+  retailer(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    const parsed = z.object({ retailer: z.enum(RETAILERS) }).parse(body);
+    return this.provisions.changeRetailer(user.id, parsed.retailer);
+  }
+
   @Post('/shopping/generate')
   generate(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     const parsed = generateSchema.parse(body);

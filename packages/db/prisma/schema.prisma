@@ -209,12 +209,13 @@ model Ingredient {
   iconAttribution String?
   dedicatedIcon   Boolean  @default(false)
 
-  conversions       IngredientConversion[]
-  recipeIngredients RecipeIngredient[]
-  favorites         UserIngredientFavorite[]
-  recents           UserIngredientRecent[]
-  pantryItems       PantryItem[]
-  shoppingItems     ShoppingListItem[]
+  conversions         IngredientConversion[]
+  recipeIngredients   RecipeIngredient[]
+  mealItemIngredients MealItemIngredient[]
+  favorites           UserIngredientFavorite[]
+  recents             UserIngredientRecent[]
+  pantryItems         PantryItem[]
+  shoppingItems       ShoppingListItem[]
 
   @@index([nameNormalized])
   @@index([uxCategory])
@@ -345,22 +346,40 @@ model RecipeRating {
 }
 
 model MealItem {
-  id          String                   @id @default(cuid())
-  date        DateTime                 @db.Date
-  slot        MealSlot
-  kind        MealKind                 @default(RECIPE)
-  recipeId    String?
-  recipe      Recipe?                  @relation(fields: [recipeId], references: [id])
-  sortOrder   Int                      @default(0)
-  version     Int                      @default(1)
-  createdById String
-  createdBy   User                     @relation("MealItemAuthor", fields: [createdById], references: [id])
-  createdAt   DateTime                 @default(now())
-  updatedAt   DateTime                 @updatedAt
-  portions    MealParticipantPortion[]
+  id                String                   @id @default(cuid())
+  date              DateTime                 @db.Date
+  slot              MealSlot
+  kind              MealKind                 @default(RECIPE)
+  recipeId          String?
+  recipe            Recipe?                  @relation(fields: [recipeId], references: [id])
+  sortOrder         Int                      @default(0)
+  version           Int                      @default(1)
+  createdById       String
+  createdBy         User                     @relation("MealItemAuthor", fields: [createdById], references: [id])
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  portions          MealParticipantPortion[]
+  manualIngredients MealItemIngredient[]
 
   @@index([date, slot])
   @@index([recipeId])
+}
+
+/// Ingrédients saisis directement dans le planning, sans créer de recette.
+/// Les quantités sont exprimées pour une portion du repas.
+model MealItemIngredient {
+  id           String       @id @default(cuid())
+  mealItemId   String
+  mealItem     MealItem     @relation(fields: [mealItemId], references: [id], onDelete: Cascade)
+  ingredientId String
+  ingredient   Ingredient   @relation(fields: [ingredientId], references: [id])
+  quantity     Decimal      @db.Decimal(12, 4)
+  unit         QuantityUnit
+  grams        Decimal?     @db.Decimal(12, 4)
+  sortOrder    Int
+
+  @@index([mealItemId, sortOrder])
+  @@index([ingredientId])
 }
 
 model MealParticipantPortion {
