@@ -6,6 +6,7 @@ import { Check, Pencil, Plus, Refrigerator, Trash2, X } from 'lucide-react';
 import {
   STORAGE_AREAS,
   STORAGE_AREA_LABELS,
+  compactProductBrand,
   UNIT_LABELS,
   type QuantityUnit,
   type StorageArea,
@@ -170,6 +171,7 @@ function PantryRow({
   const [quantity, setQuantity] = useState(String(item.quantity));
   const [area, setArea] = useState<StorageArea>(item.area);
   const name = item.product.name;
+  const brand = compactProductBrand(item.product.brand);
   const image = item.product.imageUrl ?? item.ingredient.iconUrl;
 
   const startEditing = () => {
@@ -204,8 +206,8 @@ function PantryRow({
         <IngredientIcon src={image} />
         <span className="min-w-0 flex-1">
           <span className="line-clamp-2 text-sm leading-snug text-ink-900">{name}</span>
-          {item.product.brand ? (
-            <span className="mt-0.5 block truncate text-xs text-ink-500">{item.product.brand}</span>
+          {brand ? (
+            <span className="mt-0.5 block truncate text-xs text-ink-500">{brand}</span>
           ) : null}
           {!editing ? (
             <span className="tabular mt-1 block whitespace-nowrap text-sm text-ink-700">

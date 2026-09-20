@@ -1,4 +1,5 @@
 import type { QuantityUnit } from '../nutrition/units.js';
+import { normalizeSearchText } from '../search/normalize.js';
 
 export const RETAILERS = ['LECLERC', 'U', 'CARREFOUR', 'AUCHAN', 'LIDL', 'INTERMARCHE'] as const;
 
@@ -12,6 +13,33 @@ export const RETAILER_LABELS: Record<Retailer, string> = {
   LIDL: 'Lidl',
   INTERMARCHE: 'Intermarché',
 };
+
+const RETAILER_NEEDLES: Record<Retailer, readonly string[]> = {
+  LECLERC: ['leclerc'],
+  U: ['magasins u', 'systeme u'],
+  CARREFOUR: ['carrefour'],
+  AUCHAN: ['auchan'],
+  LIDL: ['lidl'],
+  INTERMARCHE: ['intermarche'],
+};
+
+/** Marque lisible : « Carrefour », pas « CMI (Carrefour Marchandises Internationales), Groupe Carrefour ». */
+export function compactProductBrand(brand: string | null | undefined): string | null {
+  if (!brand?.trim()) return null;
+  const folded = normalizeSearchText(brand);
+  for (const retailer of RETAILERS) {
+    if (RETAILER_NEEDLES[retailer].some((needle) => folded.includes(needle))) {
+      return RETAILER_LABELS[retailer];
+    }
+  }
+  const tokens = folded.split(' ').filter(Boolean);
+  if (tokens.includes('u')) return RETAILER_LABELS.U;
+  const first = brand
+    .split(',')[0]
+    ?.replace(/\s*\([^)]*\)\s*/g, ' ')
+    .trim();
+  return first || null;
+}
 
 export type ProductOffer = {
   barcode: string;

@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Check, PackageSearch } from 'lucide-react';
-import { STORAGE_AREA_LABELS, UNIT_LABELS, type StorageArea } from '@cuisinons/shared';
+import { compactProductBrand, STORAGE_AREA_LABELS, UNIT_LABELS, type StorageArea } from '@cuisinons/shared';
 import { Button, EmptyState, Input, Modal, SearchInput, Select, Skeleton } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 
@@ -110,8 +110,9 @@ export function PantryProductPicker({
             <span className="min-w-0">
               <span className="block line-clamp-2 text-sm font-medium">{selected.name}</span>
               <span className="block truncate text-xs text-ink-500">
-                {selected.brand ?? 'Sans marque'} · {String(selected.packageQuantity)}{' '}
-                {UNIT_LABELS[selected.packageUnit]}
+                {[compactProductBrand(selected.brand), `${String(selected.packageQuantity)} ${UNIT_LABELS[selected.packageUnit]}`]
+                  .filter(Boolean)
+                  .join(' · ')}
               </span>
             </span>
           </div>
@@ -181,8 +182,12 @@ export function PantryProductPicker({
                           {product.name}
                         </span>
                         <span className="block truncate text-xs text-ink-500">
-                          {product.brand ?? 'Sans marque'} · {String(product.packageQuantity)}{' '}
-                          {UNIT_LABELS[product.packageUnit]}
+                          {[
+                            compactProductBrand(product.brand),
+                            `${String(product.packageQuantity)} ${UNIT_LABELS[product.packageUnit]}`,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
                         </span>
                       </span>
                     </button>

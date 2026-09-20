@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Check, PackageSearch } from 'lucide-react';
-import { RETAILER_LABELS, UNIT_LABELS, type Retailer } from '@cuisinons/shared';
+import { compactProductBrand, RETAILER_LABELS, UNIT_LABELS, type Retailer } from '@cuisinons/shared';
 import { Button, EmptyState, Modal, Skeleton, cn } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 import { IngredientIcon } from './ingredient-icon';
@@ -102,6 +102,7 @@ export function ProductSwapModal({
         <ul className="space-y-2">
           {options.data?.map((option) => {
             const active = option.barcode === currentBarcode;
+            const brand = compactProductBrand(option.brand);
             return (
               <li key={option.barcode}>
                 <button
@@ -121,10 +122,9 @@ export function ProductSwapModal({
                     <span className="block line-clamp-2 text-sm font-medium text-ink-900">
                       {option.name}
                     </span>
-                    <span className="mt-0.5 block truncate text-xs text-ink-500">
-                      {[option.brand, option.storeName].filter(Boolean).join(' · ') ||
-                        'Sans marque'}
-                    </span>
+                    {brand ? (
+                      <span className="mt-0.5 block truncate text-xs text-ink-500">{brand}</span>
+                    ) : null}
                     <span className="mt-1 block text-xs text-ink-600">
                       {option.packageCount > 1 ? `${String(option.packageCount)} × ` : ''}
                       {String(option.packageQuantity)} {UNIT_LABELS[option.packageUnit]}

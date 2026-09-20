@@ -18,12 +18,12 @@ import {
   RETAILER_LABELS,
   RETAILERS,
   kitchenLabel,
+  compactProductBrand,
   type QuantityUnit,
   type Retailer,
   type UxCategory,
 } from '@cuisinons/shared';
 import {
-  Badge,
   Button,
   Card,
   EmptyState,
@@ -521,6 +521,7 @@ function ShoppingRow({
 }) {
   const name = item.product?.name ?? kitchenLabel(item.ingredient.nameFr);
   const unit = UNIT_LABELS[item.unit];
+  const brand = compactProductBrand(item.product?.brand);
   const price =
     item.product?.estimatedPrice !== null && item.product?.estimatedPrice !== undefined
       ? `${item.product.estimatedPrice.toFixed(2).replace('.', ',')} €`
@@ -559,9 +560,9 @@ function ShoppingRow({
         >
           {name}
         </span>
-        <span className="mt-0.5 block truncate text-xs text-ink-500 sm:hidden">
-          {item.product?.brand ?? 'Sans marque'}
-        </span>
+        {brand ? (
+          <span className="mt-0.5 block truncate text-xs text-ink-500 sm:hidden">{brand}</span>
+        ) : null}
         <span className="tabular mt-1 block text-xs font-medium text-ink-600 sm:hidden">
           {price}
         </span>
@@ -577,17 +578,15 @@ function ShoppingRow({
         {item.product ? (
           <span className="hidden sm:block">
             <span className="mt-0.5 block text-xs text-ink-500">
-              {[item.product.brand, item.product.storeName].filter(Boolean).join(' · ')}
-              {item.product.estimatedPrice !== null ? ` · ${price}` : ''}
+              {[brand, item.product.estimatedPrice !== null ? price : null]
+                .filter(Boolean)
+                .join(' · ')}
             </span>
             <span className="mt-0.5 block text-xs text-ink-500">
               Besoin : {String(item.neededQuantity)} {unit} · À acheter : {String(item.quantity)}{' '}
               {unit}
               {item.product.packageCount && item.product.packageQuantity
                 ? ` (${String(item.product.packageCount)} × ${String(item.product.packageQuantity)} ${unit})`
-                : ''}
-              {item.product.priceObservedAt
-                ? ` · prix relevé le ${new Intl.DateTimeFormat('fr-FR').format(new Date(item.product.priceObservedAt))}`
                 : ''}
             </span>
           </span>
@@ -603,12 +602,6 @@ function ShoppingRow({
           </span>
         ) : null}
       </span>
-
-      {item.origin === 'MANUAL' ? (
-        <Badge tone="peach" className="hidden sm:inline-flex">
-          Ajouté
-        </Badge>
-      ) : null}
 
       <span className="flex shrink-0 items-center gap-0.5">
         <IconButton

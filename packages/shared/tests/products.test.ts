@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { selectProductOffer, type ProductOffer } from '../src/products/retail.js';
+import { compactProductBrand, selectProductOffer, type ProductOffer } from '../src/products/retail.js';
 
 const offer = (quantity: number, price: number, barcode: string): ProductOffer => ({
   barcode,
@@ -57,5 +57,22 @@ describe('sélection de produits achetables', () => {
       offers: [offer(500, 1.4, 'mass')],
     });
     expect(selected).toBeNull();
+  });
+});
+
+describe('compactProductBrand', () => {
+  it('réduit une marque enseigne à son nom court', () => {
+    expect(
+      compactProductBrand(
+        'CMI (Carrefour Marchandises Internationales), Carrefour, Groupe Carrefour',
+      ),
+    ).toBe('Carrefour');
+    expect(compactProductBrand('E.Leclerc, Marque Repère')).toBe('E.Leclerc');
+    expect(compactProductBrand('U')).toBe('Magasins U');
+  });
+
+  it('garde une vraie marque produit', () => {
+    expect(compactProductBrand('Nescafé, Nestlé')).toBe('Nescafé');
+    expect(compactProductBrand(null)).toBeNull();
   });
 });
