@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Check, Search } from 'lucide-react';
-import { Button, Chip, EmptyState, Modal, SearchInput, Skeleton, Stepper, Switch, cn } from '@cuisinons/ui';
+import { Button, Chip, EmptyState, Modal, SearchInput, Segmented, Skeleton, Stepper, Switch, cn } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 import {
   MEAL_SLOT_LABELS,
@@ -288,31 +288,24 @@ export function AddMealDialog({
                   );
                 })}
               </div>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={weekdays.length === 7 ? 'primary' : 'glass'}
+              <div className="flex flex-wrap items-center gap-2">
+                <Chip
+                  selected={weekdays.length === 7}
                   onClick={() => setWeekdays(ALL_WEEKDAYS)}
+                  className="shrink-0"
                 >
                   Tous les jours
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={until === 'week' ? 'primary' : 'glass'}
-                  onClick={() => setUntil('week')}
-                >
-                  Cette semaine
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={until === 'following' ? 'primary' : 'glass'}
-                  onClick={() => setUntil('following')}
-                >
-                  Toutes les suivantes
-                </Button>
+                </Chip>
+                <Segmented
+                  label="Répéter"
+                  className="ml-auto h-10 [&_button]:whitespace-nowrap"
+                  value={until}
+                  onChange={setUntil}
+                  options={[
+                    { value: 'week', label: 'Cette semaine' },
+                    { value: 'following', label: 'Toutes les suivantes' },
+                  ]}
+                />
               </div>
             </div>
           ) : null}
