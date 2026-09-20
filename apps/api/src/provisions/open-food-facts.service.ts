@@ -49,7 +49,10 @@ export class OpenFoodFactsService {
       .map((product) => ({
         product,
         price: product.prices[0],
-        score: productRelevance(product.name, query),
+        score: productRelevance(product.name, query, {
+          categories: product.categories,
+          brand: product.brand,
+        }),
       }))
       .filter(({ price, score }) => price !== undefined && score !== -1)
       .sort(
@@ -106,7 +109,10 @@ export class OpenFoodFactsService {
       result[retailer] = products
         .flatMap((product) => {
           const price = product.prices.find((candidate) => candidate.retailer === retailer);
-          const score = productRelevance(product.name, query);
+          const score = productRelevance(product.name, query, {
+            categories: product.categories,
+            brand: product.brand,
+          });
           return price && score !== -1 ? [{ product, price, score }] : [];
         })
         .sort(

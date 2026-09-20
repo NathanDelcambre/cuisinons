@@ -21,11 +21,23 @@ describe('productRelevance', () => {
     expect(productRelevance('Abricot bio', query)).toBeGreaterThan(-1);
   });
 
-  it('refuse les mélanges et les desserts', () => {
+  it('refuse les mélanges, desserts et confitures', () => {
     expect(productRelevance('Abricot Ananas Pêche Poire', query)).toBe(-1);
     expect(productRelevance('Abricot et Yaourt', query)).toBe(-1);
     expect(productRelevance('Compote abricot', query)).toBe(-1);
     expect(productRelevance('Abricots au sirop', query)).toBe(-1);
+    expect(productRelevance("Préparation d'abricots", query)).toBe(-1);
+    expect(productRelevance('Clafoutis aux Abricots', query)).toBe(-1);
+    expect(
+      productRelevance("Préparation d'abricots", query, {
+        brand: 'Les Confituriers du Vieux Chérier',
+        categories: ['en:jams', 'en:fruit-jams'],
+      }),
+    ).toBe(-1);
+  });
+
+  it('accepte le clafoutis seulement si on le cherche', () => {
+    expect(productRelevance('Clafoutis aux Abricots', 'Clafoutis aux abricots')).toBeGreaterThan(-1);
   });
 
   it('écarte encore un dessert au riz', () => {

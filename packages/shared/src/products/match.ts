@@ -1,41 +1,85 @@
 import { kitchenLabel } from '../suggestions/names.js';
 import { normalizeSearchText } from '../search/normalize.js';
 
-const FORM_QUERY_WORDS = new Set(['sec', 'sirop', 'grille', 'fume', 'au']);
+const FORM_QUERY_WORDS = new Set(['sec', 'sirop', 'grille', 'fume', 'au', 'aux', 'a']);
 
-/** Formes transformées : pas un substitut de l'ingrédient brut. */
+/** Plat, dessert ou conserve : seulement si la requête le demande. */
 const PREPARED_FORMS = new Set([
   'arome',
+  'barre',
   'bebe',
   'biscuit',
   'boisson',
+  'brownie',
+  'cake',
+  'clafouti',
+  'clafoutis',
   'cocktail',
   'compote',
   'confiture',
+  'confiturier',
+  'cookie',
   'coulis',
   'creme',
+  'crumble',
   'dessert',
   'farine',
+  'flan',
   'fromage',
   'galette',
   'gateau',
+  'gaufre',
   'gelee',
+  'glace',
+  'granola',
   'infusion',
   'jus',
   'lait',
+  'madeleine',
   'marmelade',
   'melange',
+  'muesli',
+  'muffin',
   'nectar',
   'panache',
+  'pancake',
+  'preparation',
   'prepare',
   'salade',
   'sauce',
   'smoothie',
+  'sorbet',
   'soupe',
   'sirop',
+  'tarte',
   'yaourt',
   'yogourt',
   'yogurt',
+]);
+
+const HEAD_STOP = new Set(['le', 'la', 'les', 'l', 'un', 'une', 'des', 'du', 'de', 'd', 'au', 'aux', 'a']);
+
+/** Découpe / conditionnement de l'aliment lui-même. */
+const CUTS = new Set([
+  'aiguillette',
+  'blanc',
+  'cote',
+  'cotelette',
+  'cuisse',
+  'echine',
+  'escalope',
+  'filet',
+  'gigot',
+  'hache',
+  'magret',
+  'morceau',
+  'morceaux',
+  'oreillon',
+  'oreillons',
+  'roti',
+  'steak',
+  'tranche',
+  'tranches',
 ]);
 
 /** Qualificatifs de rayon, pas un second aliment. */
@@ -71,12 +115,8 @@ const QUALIFIERS = new Set([
   'long',
   'moelleuse',
   'moelleux',
-  'morceau',
-  'morceaux',
   'nature',
   'noir',
-  'oreillon',
-  'oreillons',
   'origine',
   'premier',
   'prix',
@@ -88,9 +128,8 @@ const QUALIFIERS = new Set([
   'seches',
   'secs',
   'thai',
-  'tranche',
-  'tranches',
   'turquie',
+  ...CUTS,
 ]);
 
 const FRUITS = new Set([
@@ -123,18 +162,61 @@ const FRUITS = new Set([
   'prune',
   'pruneau',
   'raisin',
-  'reine',
 ]);
 
 const DRIED = new Set(['sec', 'secs', 'seche', 'seches', 'sechee', 'sechees', 'moelleux', 'moelleuse']);
 const SYRUP = new Set(['sirop']);
+
+/** Catégories Open Food Facts d'un plat / d'une confiture, pas de l'ingrédient brut. */
+const PROCESSED_CATEGORY_NEEDLES = [
+  'baby',
+  'biscuit',
+  'cake',
+  'candy',
+  'cereal',
+  'clafoutis',
+  'compote',
+  'confection',
+  'confiture',
+  'cookie',
+  'dairy-dessert',
+  'dessert',
+  'drink',
+  'gateau',
+  'granola',
+  'ice-cream',
+  'infant',
+  'jam',
+  'jelly',
+  'juice',
+  'marmalade',
+  'meal',
+  'muesli',
+  'nectar',
+  'pastr',
+  'pie',
+  'puree',
+  'ready-meal',
+  'soda',
+  'sorbet',
+  'soup',
+  'spread',
+  'tart',
+  'yogurt',
+  'yoghurt',
+];
+
+export type ProductMatchContext = {
+  categories?: readonly string[];
+  brand?: string | null;
+};
 
 function tokens(value: string): string[] {
   return normalizeSearchText(value).split(' ').filter(Boolean);
 }
 
 function lemma(word: string): string {
-  if (word.length <= 3) return word;
+  if (word.length <= 4) return word;
   if (word.endsWith('s')) return word.slice(0, -1);
   return word;
 }
@@ -157,24 +239,38 @@ export function productSearchQuery(ingredientName: string): string {
 
 /** Mots à chercher en base : l'aliment, pas l'état (sec, sirop). */
 export function productCatalogTokens(query: string): string[] {
-  return tokens(query).filter((word) => !FORM_QUERY_WORDS.has(lemma(word)));
+  return tokens(query).filter((word) => !FORM_QUERY_WORDS.has(lemma(word)) && !HEAD_STOP.has(word));
 }
 
-function queryFruits(queryWords: readonly string[]): Set<string> {
-  return new Set(queryWords.map(lemma).filter((word) => FRUITS.has(word)));
+function firstContentWord(nameWords: readonly string[]): string | undefined {
+  return nameWords.find((word) => !HEAD_STOP.has(word));
 }
 
 function isMix(nameWords: readonly string[], queryWords: readonly string[]): boolean {
-  const asked = queryFruits(queryWords);
+  const asked = new Set(queryWords.map(lemma).filter((word) => FRUITS.has(word)));
   if (asked.size === 0) return false;
-  const extras = nameWords.map(lemma).filter((word) => FRUITS.has(word) && !asked.has(word));
-  return extras.length > 0;
+  return nameWords.map(lemma).some((word) => FRUITS.has(word) && !asked.has(word));
 }
 
 function hasPreparedForm(nameWords: readonly string[], queryWords: readonly string[]): boolean {
-  return nameWords.some(
-    (word) => PREPARED_FORMS.has(lemma(word)) && !hasLemma(queryWords, word),
-  );
+  return nameWords.some((word) => PREPARED_FORMS.has(lemma(word)) && !hasLemma(queryWords, word));
+}
+
+/** « Clafoutis aux abricots » : un plat parfumé, pas l'abricot. */
+function isFlavoredDish(nameWords: readonly string[], required: readonly string[]): boolean {
+  const flavorAt = nameWords.findIndex((word) => word === 'au' || word === 'aux');
+  if (flavorAt <= 0) return false;
+  const head = nameWords.slice(0, flavorAt).filter((word) => !HEAD_STOP.has(word));
+  if (head.some((word) => hasLemma(required, word))) return false;
+  return required.some((word) => hasLemma(nameWords.slice(flavorAt + 1), word));
+}
+
+function wrongHead(nameWords: readonly string[], required: readonly string[]): boolean {
+  const head = firstContentWord(nameWords);
+  if (!head) return true;
+  const folded = lemma(head);
+  if (hasLemma(required, head) || QUALIFIERS.has(folded) || CUTS.has(folded)) return false;
+  return true;
 }
 
 function hasComboEt(nameWords: readonly string[], queryWords: readonly string[]): boolean {
@@ -184,6 +280,15 @@ function hasComboEt(nameWords: readonly string[], queryWords: readonly string[])
   const right = nameWords[et + 1]!;
   if (QUALIFIERS.has(lemma(left)) || QUALIFIERS.has(lemma(right))) return false;
   return !hasLemma(queryWords, left) || !hasLemma(queryWords, right);
+}
+
+function processedCategory(categories: readonly string[] | undefined, queryWords: readonly string[]): boolean {
+  if (!categories?.length) return false;
+  const haystack = normalizeSearchText(categories.join(' '));
+  return PROCESSED_CATEGORY_NEEDLES.some((needle) => {
+    if (!haystack.includes(needle)) return false;
+    return !queryWords.some((word) => word.includes(needle) || needle.includes(lemma(word)));
+  });
 }
 
 function formPenalty(nameWords: readonly string[], queryWords: readonly string[]): number | null {
@@ -199,28 +304,33 @@ function formPenalty(nameWords: readonly string[], queryWords: readonly string[]
 
 /**
  * Score d'une offre commerciale pour un ingrédient.
- * `-1` = à écarter (yaourt à l'abricot, mélange de fruits, dessert…).
+ * `-1` = à écarter (clafoutis, confiture, yaourt, mélange…).
  */
-export function productRelevance(productName: string, query: string): number {
+export function productRelevance(
+  productName: string,
+  query: string,
+  context: ProductMatchContext = {},
+): number {
   const nameWords = tokens(productName);
   const queryWords = tokens(query);
   const required = productCatalogTokens(query);
   if (nameWords.length === 0 || required.length === 0) return -1;
   if (required.some((word) => !hasLemma(nameWords, word))) return -1;
   if (hasPreparedForm(nameWords, queryWords)) return -1;
+  if (wrongHead(nameWords, required)) return -1;
+  if (isFlavoredDish(nameWords, required)) return -1;
   if (isMix(nameWords, queryWords)) return -1;
   if (hasComboEt(nameWords, queryWords)) return -1;
+  if (processedCategory(context.categories, queryWords)) return -1;
+  const brandWords = context.brand ? tokens(context.brand) : [];
+  if (hasPreparedForm(brandWords, queryWords)) return -1;
   const form = formPenalty(nameWords, queryWords);
   if (form === null) return -1;
-  const extra = nameWords.filter(
-    (word) =>
-      word !== 'et' &&
-      word !== 'de' &&
-      word !== 'd' &&
-      !hasLemma(required, word) &&
-      !QUALIFIERS.has(lemma(word)),
+  const content = nameWords.filter((word) => !HEAD_STOP.has(word));
+  const extra = content.filter(
+    (word) => word !== 'et' && !hasLemma(required, word) && !QUALIFIERS.has(lemma(word)),
   ).length;
-  const exact = nameWords.map(lemma).join(' ') === queryWords.map(lemma).join(' ');
-  const startsWithQuery = required.every((word, index) => lemma(nameWords[index] ?? '') === lemma(word));
+  const exact = content.map(lemma).join(' ') === queryWords.map(lemma).join(' ');
+  const startsWithQuery = required.every((word, index) => lemma(content[index] ?? '') === lemma(word));
   return (exact ? 1_000 : 0) + (startsWithQuery ? 100 : 0) + form - extra * 8 - nameWords.length;
 }
