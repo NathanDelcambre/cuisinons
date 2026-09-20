@@ -136,6 +136,7 @@ export class PlannerService {
 
   async addItem(input: {
     date: Date;
+    dates?: Date[];
     slot: MealSlot;
     kind: MealKind;
     recipeId?: string;
@@ -143,6 +144,7 @@ export class PlannerService {
     portions: Array<{ userId: string; portions: number }>;
     ingredients?: Array<{ ingredientId: string; quantity: number; unit: QuantityUnit }>;
   }) {
+    const days = input.dates?.length ? input.dates : [input.date];
     return this.prisma.$transaction(async (tx) => {
       if (input.kind === 'RECIPE') {
         if (!input.recipeId) throw new BadRequestException('Choisis une recette.');
@@ -167,30 +169,37 @@ export class PlannerService {
       if (input.kind === 'IMPOSED' && manualIngredients.length === 0)
         throw new BadRequestException('Ajoute au moins un ingrédient.');
       const eaters = input.portions.filter((p) => p.portions > 0).map((p) => p.userId);
-      await this.releaseSlot(tx, input.date, input.slot, eaters);
-      const count = await tx.mealItem.count({
-        where: { date: input.date, slot: input.slot },
-      });
-      return tx.mealItem.create({
-        data: {
-          date: input.date,
-          slot: input.slot,
-          kind: input.kind,
-          recipeId: input.kind === 'RECIPE' ? input.recipeId : null,
-          createdById: input.createdById,
-          sortOrder: count,
-          portions: {
-            create: input.portions.map((p) => ({
-              userId: p.userId,
-              portions: p.portions,
-            })),
+      const anchor = input.date.toISOString().slice(0, 10);
+      let primary: Awaited<ReturnType<typeof tx.mealItem.create>> | null = null;
+      for (const day of days) {
+        await this.releaseSlot(tx, day, input.slot, eaters);
+        const count = await tx.mealItem.count({
+          where: { date: day, slot: input.slot },
+        });
+        const created = await tx.mealItem.create({
+          data: {
+            date: day,
+            slot: input.slot,
+            kind: input.kind,
+            recipeId: input.kind === 'RECIPE' ? input.recipeId : null,
+            createdById: input.createdById,
+            sortOrder: count,
+            portions: {
+              create: input.portions.map((p) => ({
+                userId: p.userId,
+                portions: p.portions,
+              })),
+            },
+            manualIngredients:
+              manualIngredients.length > 0 ? { create: manualIngredients } : undefined,
           },
-          manualIngredients:
-            manualIngredients.length > 0 ? { create: manualIngredients } : undefined,
-        },
-        include: { portions: true, recipe: true },
-      });
-    });
+          include: { portions: true, recipe: true },
+        });
+        if (!primary || day.toISOString().slice(0, 10) === anchor) primary = created;
+      }
+      if (!primary) throw new BadRequestException('Aucun jour à planifier.');
+      return { ...primary, createdCount: days.length };
+    }, { timeout: 120_000, maxWait: 10_000 });
   }
 
   async updateItem(

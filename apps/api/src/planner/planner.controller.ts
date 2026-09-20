@@ -11,12 +11,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { z } from 'zod';
-import { MEAL_KINDS, MEAL_SLOTS, QUANTITY_UNITS } from '@cuisinons/shared';
+import { MEAL_KINDS, MEAL_SLOTS, QUANTITY_UNITS, mealRepeatDates } from '@cuisinons/shared';
 import { InternalJwtGuard } from '../auth/internal-jwt.guard.js';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthUser } from '../auth/internal-jwt.guard.js';
 import { PlannerService } from './planner.service.js';
-import { maxFutureDate, parseIsoDate } from './dates.js';
+import { maxFutureDate, parseIsoDate, toIsoDate } from './dates.js';
 import { ForbiddenException } from '@nestjs/common';
 
 const portionLine = z.object({ userId: z.string(), portions: z.number().min(0).max(6) });
@@ -57,6 +57,12 @@ export class PlannerController {
         recipeId: z.string().min(1).optional(),
         portions: z.array(portionLine),
         ingredients: z.array(manualIngredientLine).max(30).optional(),
+        repeat: z
+          .object({
+            weekdays: z.array(z.number().int().min(0).max(6)).min(1).max(7),
+            until: z.enum(['week', 'following']),
+          })
+          .optional(),
       })
       .superRefine((val, ctx) => {
         const kind = val.kind ?? 'RECIPE';
@@ -92,11 +98,24 @@ export class PlannerController {
       })
       .parse(body);
     const date = parseIsoDate(parsed.date);
-    if (date.getTime() > maxFutureDate().getTime()) {
+    const limit = maxFutureDate();
+    if (date.getTime() > limit.getTime()) {
+      throw new ForbiddenException('Planning limité à 12 mois.');
+    }
+    const dates = parsed.repeat
+      ? mealRepeatDates({
+          startIso: parsed.date,
+          weekdays: parsed.repeat.weekdays,
+          until: parsed.repeat.until,
+          maxIso: toIsoDate(limit),
+        }).map(parseIsoDate)
+      : [date];
+    if (dates.length === 0) {
       throw new ForbiddenException('Planning limité à 12 mois.');
     }
     return this.planner.addItem({
       date,
+      dates,
       slot: parsed.slot,
       kind: parsed.kind ?? 'RECIPE',
       recipeId: parsed.recipeId,

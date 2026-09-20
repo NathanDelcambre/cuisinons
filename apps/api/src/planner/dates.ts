@@ -22,3 +22,7 @@ export function maxFutureDate(today = new Date()): Date {
   d.setUTCFullYear(d.getUTCFullYear() + 1);
   return d;
 }
+
+export function toIsoDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}

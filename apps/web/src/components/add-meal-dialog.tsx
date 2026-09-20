@@ -1,16 +1,29 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, Search } from 'lucide-react';
-import { Button, EmptyState, Modal, SearchInput, Skeleton, Stepper, cn } from '@cuisinons/ui';
+import { Button, Chip, EmptyState, Modal, SearchInput, Skeleton, Stepper, Switch, cn } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
-import { MEAL_SLOT_LABELS, type MealSlot, avatarUrlForEmail } from '@cuisinons/shared';
+import {
+  MEAL_SLOT_LABELS,
+  WEEKDAY_LABELS,
+  WEEKDAY_ORDER,
+  type MealRepeatUntil,
+  type MealSlot,
+  avatarUrlForEmail,
+} from '@cuisinons/shared';
 import { useAuth } from './auth-provider';
 import { Avatar } from './avatar';
 
 type Recipe = { id: string; name: string };
 type User = { id: string; email?: string; displayName: string; avatarUrl?: string | null };
+
+const ALL_WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
+
+function weekdayFromIso(iso: string): number {
+  return new Date(`${iso}T12:00:00`).getDay();
+}
 
 export function AddMealDialog({
   open,
@@ -36,6 +49,10 @@ export function AddMealDialog({
   const [query, setQuery] = useState('');
   const [recipeId, setRecipeId] = useState<string | null>(null);
   const [portions, setPortions] = useState<Record<string, number>>({});
+  const [repeat, setRepeat] = useState(false);
+  const [weekdays, setWeekdays] = useState<number[]>([]);
+  const [until, setUntil] = useState<MealRepeatUntil>('week');
+  const repeatPanelRef = useRef<HTMLDivElement>(null);
   const replacing = Boolean(replaceItemId);
 
   useEffect(() => {
@@ -43,7 +60,15 @@ export function AddMealDialog({
     setQuery('');
     setRecipeId(initialRecipeId ?? null);
     setPortions({});
+    setRepeat(false);
+    setWeekdays([weekdayFromIso(date)]);
+    setUntil('week');
   }, [open, date, slot, initialRecipeId]);
+
+  useEffect(() => {
+    if (!repeat) return;
+    repeatPanelRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [repeat]);
 
   const recipes = useQuery({
     queryKey: ['recipes', query, slot],
@@ -85,6 +110,7 @@ export function AddMealDialog({
           slot,
           recipeId,
           portions: portionsPayload,
+          ...(repeat && weekdays.length > 0 ? { repeat: { weekdays, until } } : {}),
         }),
       });
     },
@@ -116,7 +142,8 @@ export function AddMealDialog({
             icon={Check}
             disabled={
               !recipeId ||
-              (users.data ?? []).every((u) => (portions[u.id] ?? 1) <= 0)
+              (users.data ?? []).every((u) => (portions[u.id] ?? 1) <= 0) ||
+              (repeat && weekdays.length === 0)
             }
             loading={add.isPending}
             onClick={() => add.mutate()}
@@ -133,7 +160,7 @@ export function AddMealDialog({
         aria-label="Rechercher une recette"
       />
 
-      <div className="mt-3 max-h-56 overflow-y-auto">
+      <div className={cn('mt-3 overflow-y-auto', repeat ? 'max-h-36' : 'max-h-56')}>
         {recipes.isLoading ? (
           <div className="space-y-2">
             {Array.from({ length: 4 }, (_, i) => (
@@ -223,6 +250,74 @@ export function AddMealDialog({
           </div>
         ) : null}
       </div>
+
+      {!replacing ? (
+        <div className="mt-5 space-y-3 border-t border-white/70 pt-5">
+          <Switch
+            checked={repeat}
+            onChange={(next) => {
+              setRepeat(next);
+              if (next && weekdays.length === 0) setWeekdays([weekdayFromIso(date)]);
+            }}
+            label="Répéter"
+            className="w-full justify-between"
+          />
+          {repeat ? (
+            <div ref={repeatPanelRef} className="space-y-3">
+              <div className="flex gap-1.5">
+                {WEEKDAY_ORDER.map((day) => {
+                  const selected = weekdays.includes(day);
+                  const startDay = weekdayFromIso(date);
+                  return (
+                    <Chip
+                      key={day}
+                      selected={selected}
+                      aria-label={WEEKDAY_LABELS[day].name}
+                      className="h-10 min-w-0 flex-1 justify-center px-0"
+                      onClick={() =>
+                        setWeekdays((current) => {
+                          if (day === startDay && current.includes(day)) return current;
+                          return current.includes(day)
+                            ? current.filter((item) => item !== day)
+                            : [...current, day];
+                        })
+                      }
+                    >
+                      {WEEKDAY_LABELS[day].short}
+                    </Chip>
+                  );
+                })}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={weekdays.length === 7 ? 'primary' : 'glass'}
+                  onClick={() => setWeekdays(ALL_WEEKDAYS)}
+                >
+                  Tous les jours
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={until === 'week' ? 'primary' : 'glass'}
+                  onClick={() => setUntil('week')}
+                >
+                  Cette semaine
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={until === 'following' ? 'primary' : 'glass'}
+                  onClick={() => setUntil('following')}
+                >
+                  Toutes les suivantes
+                </Button>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </Modal>
   );
 }
