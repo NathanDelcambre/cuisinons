@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
-import { ChefHat, Plus, Sparkles, Star } from 'lucide-react';
+import { ChefHat, Leaf, Plus, Sparkles, Star, Vegan } from 'lucide-react';
 import {
   Button,
   CardLink,
@@ -250,8 +250,16 @@ function RecipesInner() {
             className="h-11 min-h-11 w-full md:w-[13.5rem] md:max-w-full md:shrink-0"
             options={[
               { value: '', label: 'Tous les repas' },
-              { value: 'vegetarien', label: 'Végétarien' },
-              { value: 'vegan', label: 'Vegan' },
+              {
+                value: 'vegetarien',
+                label: 'Végétarien',
+                icon: <Leaf className="size-4 text-sage-400" aria-hidden />,
+              },
+              {
+                value: 'vegan',
+                label: 'Vegan',
+                icon: <Vegan className="size-4 text-sage-700" aria-hidden />,
+              },
               ...DISH_KINDS.map((slug) => ({ value: slug, label: DISH_KIND_LABELS[slug] })),
             ]}
             onChange={(next) => update({ tag: next })}

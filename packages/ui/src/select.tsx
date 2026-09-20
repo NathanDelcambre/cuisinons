@@ -231,7 +231,7 @@ export function Select<T extends string>({
       >
         <span className={cn('flex min-w-0 flex-1 items-center gap-2', !selected && 'text-ink-400')}>
           {selected?.icon ? (
-            <span className="flex size-4 shrink-0 items-center justify-center text-ink-500">{selected.icon}</span>
+            <span className="flex size-4 shrink-0 items-center justify-center">{selected.icon}</span>
           ) : null}
           <span className="min-w-0 truncate">{selected?.label ?? placeholder}</span>
         </span>
@@ -296,7 +296,7 @@ export function Select<T extends string>({
                       >
                         <span className="flex min-w-0 flex-1 items-center gap-2">
                           {option.icon ? (
-                            <span className="flex size-4 shrink-0 items-center justify-center text-ink-500">
+                            <span className="flex size-4 shrink-0 items-center justify-center">
                               {option.icon}
                             </span>
                           ) : null}
