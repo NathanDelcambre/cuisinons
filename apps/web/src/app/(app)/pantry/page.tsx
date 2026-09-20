@@ -204,51 +204,56 @@ function PantryRow({
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm text-ink-900">{name}</span>
         {item.product.brand ? (
-          <span className="mt-0.5 block truncate text-xs text-ink-500">
-            {item.product.brand} · OpenFoodFacts
-          </span>
+          <span className="mt-0.5 block truncate text-xs text-ink-500">{item.product.brand}</span>
         ) : null}
       </span>
       {editing ? (
-        <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
-          <Select
-            className="h-11 min-h-11 min-w-0 flex-1 pl-3 text-[13px] sm:w-44 sm:flex-none sm:shrink-0"
-            value={area}
-            options={storageAreaOptions()}
-            aria-label={`Rangement de ${name}`}
-            onChange={setArea}
-          />
+        <div className="grid w-full min-w-0 gap-3 sm:flex sm:w-auto sm:items-end">
+          <div className="grid min-w-0 gap-1 sm:w-48">
+            <span className="px-1 text-[11px] font-medium text-ink-500">Emplacement</span>
+            <Select
+              className="h-11 min-h-11 w-full min-w-0 pl-3 text-[13px]"
+              value={area}
+              options={storageAreaOptions()}
+              aria-label={`Emplacement de ${name}`}
+              onChange={setArea}
+            />
+          </div>
 
-          <Input
-            className="tabular h-11 w-20 px-2 text-right"
-            inputMode="decimal"
-            value={quantity}
-            aria-label={`Quantité de ${name}`}
-            onChange={(event) => setQuantity(event.target.value)}
-          />
-          <span className="w-10 shrink-0 text-xs text-ink-500">{UNIT_LABELS[item.unit]}</span>
+          <div className="flex min-w-0 items-end gap-2">
+            <div className="grid min-w-0 flex-1 gap-1 sm:w-32 sm:flex-none">
+              <span className="px-1 text-[11px] font-medium text-ink-500">Quantité restante</span>
+              <div className="flex min-w-0 items-center gap-2">
+                <Input
+                  className="tabular h-11 min-w-0 flex-1 px-2 text-right"
+                  inputMode="decimal"
+                  value={quantity}
+                  aria-label={`Quantité restante de ${name}`}
+                  onChange={(event) => setQuantity(event.target.value)}
+                />
+                <span className="shrink-0 text-xs text-ink-500">{UNIT_LABELS[item.unit]}</span>
+              </div>
+            </div>
 
-          <IconButton
-            icon={Check}
-            label={`Enregistrer ${name}`}
-            size="sm"
-            disabled={saving}
-            onClick={() => void save()}
-          />
-          <IconButton
-            icon={X}
-            label="Annuler"
-            size="sm"
-            variant="ghost"
-            disabled={saving}
-            onClick={cancelEditing}
-          />
+            <IconButton
+              icon={Check}
+              label={`Enregistrer ${name}`}
+              size="sm"
+              disabled={saving}
+              onClick={() => void save()}
+            />
+            <IconButton
+              icon={X}
+              label="Annuler"
+              size="sm"
+              variant="ghost"
+              disabled={saving}
+              onClick={cancelEditing}
+            />
+          </div>
         </div>
       ) : (
-        <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
-          <span className="min-w-0 flex-1 truncate text-xs text-ink-500 sm:w-44 sm:flex-none">
-            {STORAGE_AREA_LABELS[item.area]}
-          </span>
+        <div className="flex w-full min-w-0 items-center justify-end gap-2 sm:w-auto">
           <span className="tabular whitespace-nowrap text-sm text-ink-700">
             {item.quantity} {UNIT_LABELS[item.unit]}
           </span>
