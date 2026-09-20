@@ -16,6 +16,9 @@ const PRICES_SOURCE =
   process.env.OPEN_PRICES_SOURCE ?? 'https://prices.openfoodfacts.org/data/prices.jsonl.gz';
 const MAX_PRODUCTS = Number(process.env.OFF_MAX_PRODUCTS ?? 50_000);
 const STAPLE_QUOTA = Math.min(MAX_PRODUCTS, Number(process.env.OFF_STAPLE_QUOTA ?? 10_000));
+const MAX_ALLOWED_PRODUCTS = 100_000;
+const MIN_PRODUCT_COMPLETENESS = 0.95;
+const MIN_PRICE_RETENTION = 0.25;
 const USER_AGENT =
   process.env.OPEN_FOOD_FACTS_USER_AGENT ??
   'Cuisinons/0.1 (https://github.com/NathanDelcambre/cuisinons)';
@@ -291,6 +294,12 @@ async function importPrices(batchId: string, barcodes: Set<string>) {
     });
   }
   const rows = [...latest.values()];
+  const previousPriceCount = await prisma.openFoodPrice.count();
+  if (previousPriceCount > 0 && rows.length < previousPriceCount * MIN_PRICE_RETENTION) {
+    throw new Error(
+      `Import Open Prices incomplet: ${rows.length} prix trouves pour ${previousPriceCount} existants.`,
+    );
+  }
   for (const batch of chunks(rows, 500))
     await prisma.$executeRawUnsafe(UPSERT_PRICES, JSON.stringify(batch));
   await prisma.openFoodPrice.deleteMany({ where: { importBatchId: { not: batchId } } });
@@ -298,12 +307,20 @@ async function importPrices(batchId: string, barcodes: Set<string>) {
 }
 
 async function main() {
-  if (!Number.isInteger(MAX_PRODUCTS) || MAX_PRODUCTS < 1 || MAX_PRODUCTS > 50_000)
-    throw new Error('OFF_MAX_PRODUCTS doit etre compris entre 1 et 50000.');
+  if (!Number.isInteger(MAX_PRODUCTS) || MAX_PRODUCTS < 1 || MAX_PRODUCTS > MAX_ALLOWED_PRODUCTS)
+    throw new Error(`OFF_MAX_PRODUCTS doit etre compris entre 1 et ${MAX_ALLOWED_PRODUCTS}.`);
+  if (!Number.isInteger(STAPLE_QUOTA) || STAPLE_QUOTA < 0)
+    throw new Error('OFF_STAPLE_QUOTA doit etre un entier positif.');
   const batchId = randomUUID();
   await prisma.openFoodImport.create({ data: { id: batchId } });
   try {
     const products = await selectProducts();
+    const minimumExpectedProducts = Math.floor(MAX_PRODUCTS * MIN_PRODUCT_COMPLETENESS);
+    if (products.length < minimumExpectedProducts) {
+      throw new Error(
+        `Import Open Food Facts incomplet: ${products.length} produits trouves, ${minimumExpectedProducts} minimum attendus.`,
+      );
+    }
     for (const batch of chunks(products, 500)) {
       const rows = batch.map(({ score: _score, ...row }) => ({ ...row, importBatchId: batchId }));
       await prisma.$executeRawUnsafe(UPSERT_PRODUCTS, JSON.stringify(rows));

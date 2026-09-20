@@ -2,6 +2,9 @@ name: Import Open Food Facts
 
 on:
   workflow_dispatch:
+  schedule:
+    # Every Sunday at 03:15 UTC, outside the application's busiest hours.
+    - cron: "15 3 * * 0"
 
 permissions:
   contents: read
@@ -16,7 +19,8 @@ jobs:
     timeout-minutes: 360
     env:
       DATABASE_URL: ${{ secrets.OFF_IMPORT_DATABASE_URL }}
-      OFF_MAX_PRODUCTS: "50000"
+      OFF_MAX_PRODUCTS: "100000"
+      OFF_STAPLE_QUOTA: "20000"
       NODE_OPTIONS: "--max-old-space-size=4096"
     steps:
       - uses: actions/checkout@v4
