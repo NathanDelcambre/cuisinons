@@ -1,20 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { RETAILERS, type ProductOffer, type Retailer } from '@cuisinons/shared';
+import {
+  RETAILERS,
+  productCatalogTokens,
+  productRelevance,
+  productSearchQuery,
+  type ProductOffer,
+  type Retailer,
+} from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
-
-const PRODUCT_FORM_WORDS = new Set([
-  'bebe',
-  'biscuit',
-  'boisson',
-  'creme',
-  'dessert',
-  'farine',
-  'galette',
-  'gateau',
-  'prepare',
-  'sauce',
-  'soupe',
-]);
 
 function words(value: string): string[] {
   return (
@@ -26,21 +19,7 @@ function words(value: string): string[] {
   );
 }
 
-function relevance(name: string, query: string): number {
-  const nameWords = words(name);
-  const queryWords = words(query);
-  if (nameWords.length === 0 || queryWords.some((word) => !nameWords.includes(word))) return -1;
-  if (nameWords.some((word) => PRODUCT_FORM_WORDS.has(word) && !queryWords.includes(word)))
-    return -1;
-  const exact = nameWords.join(' ') === queryWords.join(' ');
-  const startsWithQuery = queryWords.every((word, index) => nameWords[index] === word);
-  return (exact ? 1_000 : 0) + (startsWithQuery ? 100 : 0) - nameWords.length;
-}
-
 function productQuery(ingredientName: string): string {
-  // SIQual nomme par exemple la feta « fromage de brebis ... (type feta) ».
-  // Dans ce cas, le type culinaire est bien plus discriminant que le libellé
-  // de laboratoire complet pour retrouver les variantes commerciales.
   const typed = ingredientName.match(/\btype\s+([^,;)]+)/i)?.[1]?.trim();
   return typed || ingredientName.split(',')[0]?.trim() || ingredientName.trim();
 }
@@ -51,8 +30,8 @@ export class OpenFoodFactsService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
   async findOffers(ingredientName: string, retailer: Retailer): Promise<ProductOffer[]> {
-    const query = productQuery(ingredientName);
-    const queryWords = words(query);
+    const query = productSearchQuery(ingredientName);
+    const queryWords = productCatalogTokens(query);
     if (queryWords.length === 0) return [];
     const products = await this.prisma.openFoodProduct.findMany({
       where: {
@@ -70,9 +49,9 @@ export class OpenFoodFactsService {
       .map((product) => ({
         product,
         price: product.prices[0],
-        score: relevance(product.name, query),
+        score: productRelevance(product.name, query),
       }))
-      .filter(({ price, score }) => price !== undefined && score >= 0)
+      .filter(({ price, score }) => price !== undefined && score !== -1)
       .sort(
         (a, b) =>
           b.score - a.score ||
@@ -108,8 +87,8 @@ export class OpenFoodFactsService {
       LIDL: [],
       INTERMARCHE: [],
     };
-    const query = productQuery(ingredientName);
-    const queryWords = words(query);
+    const query = productSearchQuery(ingredientName);
+    const queryWords = productCatalogTokens(query);
     if (queryWords.length === 0) return result;
     const products = await this.prisma.openFoodProduct.findMany({
       where: {
@@ -127,8 +106,8 @@ export class OpenFoodFactsService {
       result[retailer] = products
         .flatMap((product) => {
           const price = product.prices.find((candidate) => candidate.retailer === retailer);
-          const score = relevance(product.name, query);
-          return price && score >= 0 ? [{ product, price, score }] : [];
+          const score = productRelevance(product.name, query);
+          return price && score !== -1 ? [{ product, price, score }] : [];
         })
         .sort(
           (a, b) =>
