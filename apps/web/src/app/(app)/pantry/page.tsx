@@ -199,17 +199,63 @@ function PantryRow({
   };
 
   return (
-    <Card className="flex flex-wrap items-center gap-3 py-3">
-      <IngredientIcon src={image} />
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm text-ink-900">{name}</span>
-        {item.product.brand ? (
-          <span className="mt-0.5 block truncate text-xs text-ink-500">{item.product.brand}</span>
-        ) : null}
-      </span>
+    <Card className="space-y-3 py-3">
+      <div className="flex min-w-0 items-center gap-3">
+        <IngredientIcon src={image} />
+        <span className="min-w-0 flex-1">
+          <span className="line-clamp-2 text-sm leading-snug text-ink-900">{name}</span>
+          {item.product.brand ? (
+            <span className="mt-0.5 block truncate text-xs text-ink-500">{item.product.brand}</span>
+          ) : null}
+          {!editing ? (
+            <span className="tabular mt-1 block whitespace-nowrap text-sm text-ink-700">
+              {item.quantity} {UNIT_LABELS[item.unit]}
+            </span>
+          ) : null}
+        </span>
+        <div className="flex shrink-0 items-center gap-1">
+          {editing ? (
+            <>
+              <IconButton
+                icon={Check}
+                label={`Enregistrer ${name}`}
+                size="sm"
+                disabled={saving}
+                onClick={() => void save()}
+              />
+              <IconButton
+                icon={X}
+                label="Annuler"
+                size="sm"
+                variant="ghost"
+                disabled={saving}
+                onClick={cancelEditing}
+              />
+            </>
+          ) : (
+            <>
+              <IconButton
+                icon={Pencil}
+                label={`Modifier ${name}`}
+                size="sm"
+                variant="ghost"
+                onClick={startEditing}
+              />
+              <IconButton
+                icon={Trash2}
+                label={`Retirer ${name}`}
+                size="sm"
+                variant="ghost"
+                onClick={onRemove}
+              />
+            </>
+          )}
+        </div>
+      </div>
+
       {editing ? (
-        <div className="grid w-full min-w-0 gap-3 sm:flex sm:w-auto sm:items-end">
-          <div className="grid min-w-0 gap-1 sm:w-48">
+        <div className="flex w-full min-w-0 items-end gap-2">
+          <div className="grid min-w-0 flex-1 gap-1">
             <span className="px-1 text-[11px] font-medium text-ink-500">Emplacement</span>
             <Select
               className="h-11 min-h-11 w-full min-w-0 pl-3 text-[13px]"
@@ -220,59 +266,21 @@ function PantryRow({
             />
           </div>
 
-          <div className="flex min-w-0 items-end gap-2">
-            <div className="grid min-w-0 flex-1 gap-1 sm:w-32 sm:flex-none">
-              <span className="px-1 text-[11px] font-medium text-ink-500">Quantité restante</span>
-              <div className="flex min-w-0 items-center gap-2">
-                <Input
-                  className="tabular h-11 min-w-0 flex-1 px-2 text-right"
-                  inputMode="decimal"
-                  value={quantity}
-                  aria-label={`Quantité restante de ${name}`}
-                  onChange={(event) => setQuantity(event.target.value)}
-                />
-                <span className="shrink-0 text-xs text-ink-500">{UNIT_LABELS[item.unit]}</span>
-              </div>
+          <div className="grid w-28 shrink-0 gap-1">
+            <span className="truncate px-1 text-[11px] font-medium text-ink-500">Quantité restante</span>
+            <div className="flex min-w-0 items-center gap-2">
+              <Input
+                className="tabular h-11 min-w-0 flex-1 px-2 text-right"
+                inputMode="decimal"
+                value={quantity}
+                aria-label={`Quantité restante de ${name}`}
+                onChange={(event) => setQuantity(event.target.value)}
+              />
+              <span className="shrink-0 text-xs text-ink-500">{UNIT_LABELS[item.unit]}</span>
             </div>
-
-            <IconButton
-              icon={Check}
-              label={`Enregistrer ${name}`}
-              size="sm"
-              disabled={saving}
-              onClick={() => void save()}
-            />
-            <IconButton
-              icon={X}
-              label="Annuler"
-              size="sm"
-              variant="ghost"
-              disabled={saving}
-              onClick={cancelEditing}
-            />
           </div>
         </div>
-      ) : (
-        <div className="flex w-full min-w-0 items-center justify-end gap-2 sm:w-auto">
-          <span className="tabular whitespace-nowrap text-sm text-ink-700">
-            {item.quantity} {UNIT_LABELS[item.unit]}
-          </span>
-          <IconButton
-            icon={Pencil}
-            label={`Modifier ${name}`}
-            size="sm"
-            variant="ghost"
-            onClick={startEditing}
-          />
-          <IconButton
-            icon={Trash2}
-            label={`Retirer ${name}`}
-            size="sm"
-            variant="ghost"
-            onClick={onRemove}
-          />
-        </div>
-      )}
+      ) : null}
     </Card>
   );
 }
