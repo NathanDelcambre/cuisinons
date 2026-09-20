@@ -94,6 +94,11 @@ export class ProvisionsController {
     return this.provisions.activeList(user.id);
   }
 
+  @Get('/shopping/retailer-estimates')
+  retailerEstimates(@CurrentUser() user: AuthUser) {
+    return this.provisions.retailerEstimates(user.id);
+  }
+
   @Patch('/shopping/retailer')
   retailer(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     const parsed = z.object({ retailer: z.enum(RETAILERS), economical: z.boolean() }).parse(body);

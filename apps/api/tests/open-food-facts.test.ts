@@ -68,4 +68,39 @@ describe('OpenFoodFactsService', () => {
       }),
     );
   });
+
+  it('charge une seule fois les produits pour comparer toutes les enseignes', async () => {
+    const { service, findMany } = serviceWith([
+      {
+        barcode: 'rice',
+        name: 'Riz',
+        brand: 'Test',
+        imageUrl: null,
+        packageQuantity: 1000,
+        packageUnit: 'G',
+        popularity: 100,
+        prices: [
+          {
+            retailer: 'LECLERC',
+            price: 2.5,
+            currency: 'EUR',
+            observedAt: new Date('2026-09-01'),
+            storeName: 'E.Leclerc Test',
+          },
+          {
+            retailer: 'LIDL',
+            price: 2.2,
+            currency: 'EUR',
+            observedAt: new Date('2026-09-01'),
+            storeName: 'Lidl Test',
+          },
+        ],
+      },
+    ]);
+    const offers = await service.findOffersForAllRetailers('riz');
+    expect(findMany).toHaveBeenCalledOnce();
+    expect(offers.LECLERC[0]?.price).toBe(2.5);
+    expect(offers.LIDL[0]?.price).toBe(2.2);
+    expect(offers.AUCHAN).toEqual([]);
+  });
 });

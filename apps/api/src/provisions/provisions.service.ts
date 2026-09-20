@@ -12,6 +12,7 @@ import {
   defaultStorageArea,
   portionRequirement,
   roundForPurchase,
+  RETAILERS,
   selectProductOffer,
   type ProductSelection,
   subtractStock,
@@ -213,6 +214,62 @@ export class ProvisionsService {
             : null,
       })),
     };
+  }
+
+  /** Compare les six paniers avec une seule recherche catalogue par ingrédient. */
+  async retailerEstimates(userId: string) {
+    const list = await this.prisma.shoppingList.findFirst({
+      where: { userId, completedAt: null },
+      orderBy: { createdAt: 'desc' },
+      include: { items: { include: { ingredient: { select: { nameFr: true } } } } },
+    });
+    if (!list) return [];
+    const uniqueNames = [...new Set(list.items.map((item) => item.ingredient.nameFr))];
+    const offersByName = new Map(
+      await Promise.all(
+        uniqueNames.map(
+          async (name) => [name, await this.products.findOffersForAllRetailers(name)] as const,
+        ),
+      ),
+    );
+    return RETAILERS.map((retailer) => {
+      let regularCents = 0;
+      let economicalCents = 0;
+      let regularPricedItems = 0;
+      let economicalPricedItems = 0;
+      for (const item of list.items) {
+        const offers = offersByName.get(item.ingredient.nameFr)!;
+        const neededQuantity = Number(item.neededQuantity ?? item.quantity);
+        const regular = selectProductOffer({
+          neededQuantity,
+          neededUnit: item.unit,
+          offers: offers[retailer],
+          economical: false,
+        });
+        const economical = selectProductOffer({
+          neededQuantity,
+          neededUnit: item.unit,
+          offers: offers[retailer],
+          economical: true,
+        });
+        if (regular) {
+          regularCents += Math.round(regular.totalPrice * 100);
+          regularPricedItems += 1;
+        }
+        if (economical) {
+          economicalCents += Math.round(economical.totalPrice * 100);
+          economicalPricedItems += 1;
+        }
+      }
+      return {
+        retailer,
+        regularTotal: regularPricedItems > 0 ? regularCents / 100 : null,
+        economicalTotal: economicalPricedItems > 0 ? economicalCents / 100 : null,
+        regularPricedItems,
+        economicalPricedItems,
+        totalItems: list.items.length,
+      };
+    });
   }
 
   /** Change les préférences d'achat et re-sélectionne chaque produit. */

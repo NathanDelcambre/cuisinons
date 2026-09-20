@@ -5,7 +5,7 @@ import { useState } from 'react';
 import {
   ArrowLeftRight,
   Check,
-  ChevronDown,
+  ChevronRight,
   ListChecks,
   Plus,
   ShoppingBasket,
@@ -80,10 +80,26 @@ type ShoppingList = {
   items: ShoppingItem[];
 } | null;
 
+type RetailerEstimate = {
+  retailer: Retailer;
+  regularTotal: number | null;
+  economicalTotal: number | null;
+  regularPricedItems: number;
+  economicalPricedItems: number;
+  totalItems: number;
+};
+
 const EUR_FORMAT = new Intl.NumberFormat('fr-FR', {
   style: 'currency',
   currency: 'EUR',
 });
+
+function itemsSignature(items: ShoppingItem[]) {
+  return items
+    .map((item) => `${item.id}:${String(item.neededQuantity)}:${item.unit}`)
+    .sort()
+    .join('|');
+}
 
 export default function ShoppingPage() {
   const queryClient = useQueryClient();
@@ -98,6 +114,16 @@ export default function ShoppingPage() {
   const list = useQuery({
     queryKey: ['shopping'],
     queryFn: () => apiJson<ShoppingList>('/api/bff/shopping/list'),
+  });
+  const retailerEstimates = useQuery({
+    queryKey: [
+      'shopping-retailer-estimates',
+      list.data?.id,
+      itemsSignature(list.data?.items ?? []),
+    ],
+    queryFn: () => apiJson<RetailerEstimate[]>('/api/bff/shopping/retailer-estimates'),
+    enabled: retailerOpen && Boolean(list.data),
+    staleTime: 5 * 60_000,
   });
 
   const refresh = () => {
@@ -247,7 +273,7 @@ export default function ShoppingPage() {
       ) : null}
 
       {list.data?.retailer ? (
-        <Card className="flex items-center justify-between gap-3 py-3.5">
+        <Card className="py-3.5">
           <button
             type="button"
             onClick={() => {
@@ -257,26 +283,26 @@ export default function ShoppingPage() {
               setEconomical(current.economical);
               setRetailerOpen(true);
             }}
-            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl text-left hover:bg-white/50"
+            className="flex w-full min-w-0 items-center gap-2.5 rounded-xl text-left hover:bg-white/50"
             aria-label="Changer de distributeur"
           >
-            <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex min-w-0 flex-1 items-center gap-2.5">
               <RetailerLogo retailer={list.data.retailer} className="size-9 rounded-lg" />
               <p className="min-w-0 text-sm text-ink-700">
                 Produits sélectionnés chez{' '}
                 <strong className="whitespace-nowrap">{RETAILER_LABELS[list.data.retailer]}</strong>
               </p>
             </div>
-            <ChevronDown className="size-4 shrink-0 text-ink-400" aria-hidden />
+            <div className="shrink-0 text-right">
+              <p className="text-[10px] font-medium uppercase tracking-wide text-ink-400">
+                Total estimé
+              </p>
+              <p className="tabular mt-0.5 font-display text-lg font-semibold text-ink-900">
+                {pricedItems.length > 0 ? EUR_FORMAT.format(estimatedTotal) : '—'}
+              </p>
+            </div>
+            <ChevronRight className="size-4 shrink-0 text-ink-400" aria-hidden />
           </button>
-          <div className="shrink-0 text-right">
-            <p className="text-[10px] font-medium uppercase tracking-wide text-ink-400">
-              Total estimé
-            </p>
-            <p className="tabular mt-0.5 font-display text-lg font-semibold text-ink-900">
-              {pricedItems.length > 0 ? EUR_FORMAT.format(estimatedTotal) : '—'}
-            </p>
-          </div>
         </Card>
       ) : null}
 
@@ -400,24 +426,51 @@ export default function ShoppingPage() {
         }
       >
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {RETAILERS.map((retailer) => (
-            <button
-              key={retailer}
-              type="button"
-              disabled={changeRetailer.isPending}
-              onClick={() => setSelectedRetailer(retailer)}
-              className={cn(
-                'flex min-h-16 items-center gap-2 rounded-2xl border px-3 text-left text-sm transition',
-                retailer === selectedRetailer
-                  ? 'border-sage-400 bg-sage-50 text-ink-900'
-                  : 'border-ink-100 bg-white/70 text-ink-700 hover:border-sage-300',
-              )}
-            >
-              <RetailerLogo retailer={retailer} className="size-8 rounded-lg" />
-              <span className="min-w-0 truncate">{RETAILER_LABELS[retailer]}</span>
-            </button>
-          ))}
+          {RETAILERS.map((retailer) => {
+            const estimate = retailerEstimates.data?.find((item) => item.retailer === retailer);
+            const total = economical ? estimate?.economicalTotal : estimate?.regularTotal;
+            const pricedItemsCount = economical
+              ? estimate?.economicalPricedItems
+              : estimate?.regularPricedItems;
+            return (
+              <button
+                key={retailer}
+                type="button"
+                aria-pressed={retailer === selectedRetailer}
+                disabled={changeRetailer.isPending}
+                onClick={() => setSelectedRetailer(retailer)}
+                className={cn(
+                  'flex min-h-20 items-center gap-2 rounded-2xl border px-3 text-left text-sm transition',
+                  retailer === selectedRetailer
+                    ? 'border-sage-400 bg-sage-50 text-ink-900'
+                    : 'border-ink-100 bg-white/70 text-ink-700 hover:border-sage-300',
+                )}
+              >
+                <RetailerLogo retailer={retailer} className="size-8 rounded-lg" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate">{RETAILER_LABELS[retailer]}</span>
+                  <span className="tabular mt-0.5 block text-xs text-ink-500">
+                    {retailerEstimates.isLoading
+                      ? 'Calcul…'
+                      : total === null || total === undefined
+                        ? 'Prix indisponible'
+                        : `${EUR_FORMAT.format(total)} estimés`}
+                  </span>
+                  {estimate && pricedItemsCount !== estimate.totalItems ? (
+                    <span className="block text-[10px] text-ink-400">
+                      {String(pricedItemsCount ?? 0)}/{String(estimate.totalItems)} produits tarifés
+                    </span>
+                  ) : null}
+                </span>
+              </button>
+            );
+          })}
         </div>
+        {retailerEstimates.isError ? (
+          <p className="mt-3 text-sm text-tomato-500">
+            Impossible de calculer les estimations pour le moment.
+          </p>
+        ) : null}
         <div className="mt-4 rounded-2xl bg-white/70 p-3.5">
           <Switch checked={economical} onChange={setEconomical} label="Faire des économies" />
         </div>
@@ -467,7 +520,6 @@ function ShoppingRow({
   onRemove: () => void;
 }) {
   const name = item.product?.name ?? kitchenLabel(item.ingredient.nameFr);
-  const image = item.product?.imageUrl ?? item.ingredient.iconUrl;
   const unit = UNIT_LABELS[item.unit];
   const price =
     item.product?.estimatedPrice !== null && item.product?.estimatedPrice !== undefined
@@ -476,7 +528,7 @@ function ShoppingRow({
   return (
     <Card
       className={cn(
-        'grid min-w-0 grid-cols-[auto_minmax(0,1fr)_auto_auto] items-center gap-2 px-3 py-3 sm:flex sm:gap-3 sm:px-5',
+        'grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)_auto_auto] items-center gap-2 px-3 py-3 sm:flex sm:gap-3 sm:px-5',
         item.checked && 'opacity-60',
       )}
     >
@@ -496,7 +548,7 @@ function ShoppingRow({
         {item.checked ? <Check className="size-3.5" aria-hidden /> : null}
       </button>
 
-      <IngredientIcon src={image} className="hidden sm:flex" />
+      <IngredientIcon src={item.ingredient.iconUrl} />
 
       <span className="min-w-0 flex-1">
         <span
@@ -506,6 +558,9 @@ function ShoppingRow({
           )}
         >
           {name}
+        </span>
+        <span className="mt-0.5 block truncate text-xs text-ink-500 sm:hidden">
+          {item.product?.brand ?? 'Sans marque'}
         </span>
         <span className="tabular mt-1 block text-xs font-medium text-ink-600 sm:hidden">
           {price}

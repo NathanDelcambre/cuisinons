@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { ProductOffer, Retailer } from '@cuisinons/shared';
+import { RETAILERS, type ProductOffer, type Retailer } from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
 
 const PRODUCT_FORM_WORDS = new Set([
@@ -90,5 +90,63 @@ export class OpenFoodFactsService {
         observedAt: price!.observedAt.toISOString().slice(0, 10),
         storeName: price!.storeName,
       }));
+  }
+
+  /**
+   * Charge les produits une seule fois puis répartit leurs prix entre les six
+   * enseignes. Utilisé pour comparer les paniers sans multiplier les recherches.
+   */
+  async findOffersForAllRetailers(
+    ingredientName: string,
+  ): Promise<Record<Retailer, ProductOffer[]>> {
+    const result: Record<Retailer, ProductOffer[]> = {
+      LECLERC: [],
+      U: [],
+      CARREFOUR: [],
+      AUCHAN: [],
+      LIDL: [],
+      INTERMARCHE: [],
+    };
+    const query = productQuery(ingredientName);
+    const queryWords = words(query);
+    if (queryWords.length === 0) return result;
+    const products = await this.prisma.openFoodProduct.findMany({
+      where: {
+        AND: queryWords.map((word) => ({ searchText: { contains: word, mode: 'insensitive' } })),
+        packageQuantity: { gt: 0 },
+        packageUnit: { in: ['G', 'ML'] },
+        prices: { some: { currency: 'EUR', price: { gt: 0 } } },
+      },
+      include: { prices: { where: { currency: 'EUR', price: { gt: 0 } } } },
+      orderBy: [{ isStaple: 'desc' }, { popularity: 'desc' }],
+      take: 150,
+    });
+    for (const retailer of RETAILERS) {
+      result[retailer] = products
+        .flatMap((product) => {
+          const price = product.prices.find((candidate) => candidate.retailer === retailer);
+          const score = relevance(product.name, query);
+          return price && score >= 0 ? [{ product, price, score }] : [];
+        })
+        .sort(
+          (a, b) =>
+            b.score - a.score ||
+            b.product.popularity - a.product.popularity ||
+            Number(a.price.price) - Number(b.price.price),
+        )
+        .map(({ product, price }) => ({
+          barcode: product.barcode,
+          name: product.name,
+          brand: product.brand,
+          imageUrl: product.imageUrl,
+          packageQuantity: Number(product.packageQuantity),
+          packageUnit: product.packageUnit as 'G' | 'ML',
+          price: Number(price.price),
+          currency: price.currency,
+          observedAt: price.observedAt.toISOString().slice(0, 10),
+          storeName: price.storeName,
+        }));
+    }
+    return result;
   }
 }
