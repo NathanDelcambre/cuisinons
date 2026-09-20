@@ -203,52 +203,55 @@ export function AddMealDialog({
 
       <div className="mt-5 space-y-3 border-t border-white/70 pt-5">
         <p className="text-sm font-medium text-ink-700">Portions</p>
-        {(users.data ?? []).map((u) => (
-          <div key={u.id} className="flex items-center justify-between gap-4">
-            <span className="flex min-w-0 items-center gap-2.5">
-              <Avatar
-                name={u.displayName}
-                src={u.avatarUrl ?? (u.email ? avatarUrlForEmail(u.email) : null)}
-                className="size-8 rounded-full text-xs"
-              />
-              <span className="min-w-0 truncate text-sm text-ink-600">
-                {u.displayName}
-                {u.id === user?.id ? ' (toi)' : ''}
-              </span>
-            </span>
-            <Stepper
-              value={portions[u.id] ?? 1}
-              onChange={(next) => setPortions((p) => ({ ...p, [u.id]: next }))}
-              step={0.5}
-              min={0}
-              max={6}
-              suffix="portion"
-              labelDecrease={`Diminuer les portions de ${u.displayName}`}
-              labelIncrease={`Augmenter les portions de ${u.displayName}`}
-            />
-          </div>
-        ))}
-        {(users.data ?? []).length >= 2 ? (
-          <div className="flex flex-wrap gap-2 pt-1">
-            {(users.data ?? []).map((u) => (
-              <Button
-                key={`only-${u.id}`}
-                type="button"
-                size="sm"
-                variant="glass"
-                onClick={() => {
-                  const next: Record<string, number> = {};
-                  for (const other of users.data ?? []) {
-                    next[other.id] = other.id === u.id ? 1 : 0;
+        {(users.data ?? []).map((u) => {
+          const amount = portions[u.id] ?? 1;
+          const included = amount > 0;
+          return (
+            <div key={u.id} className="flex items-center justify-between gap-4">
+              <span className="flex min-w-0 items-center gap-2.5">
+                <button
+                  type="button"
+                  role="checkbox"
+                  aria-checked={included}
+                  aria-label={u.displayName}
+                  onClick={() =>
+                    setPortions((current) => ({
+                      ...current,
+                      [u.id]: included ? 0 : 1,
+                    }))
                   }
-                  setPortions(next);
-                }}
-              >
-                {u.id === user?.id ? 'Pour moi seulement' : `Pour ${u.displayName} seulement`}
-              </Button>
-            ))}
-          </div>
-        ) : null}
+                  className={cn(
+                    'flex size-6 shrink-0 items-center justify-center rounded-md border transition duration-200 ease-out-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500',
+                    included
+                      ? 'border-sage-500 bg-sage-500 text-white'
+                      : 'border-ink-300 bg-white/70 hover:border-sage-400',
+                  )}
+                >
+                  {included ? <Check className="size-3.5" aria-hidden /> : null}
+                </button>
+                <Avatar
+                  name={u.displayName}
+                  src={u.avatarUrl ?? (u.email ? avatarUrlForEmail(u.email) : null)}
+                  className="size-8 rounded-full text-xs"
+                />
+                <span className="min-w-0 truncate text-sm text-ink-600">
+                  {u.displayName}
+                  {u.id === user?.id ? ' (toi)' : ''}
+                </span>
+              </span>
+              <Stepper
+                value={amount}
+                onChange={(next) => setPortions((p) => ({ ...p, [u.id]: next }))}
+                step={0.5}
+                min={0}
+                max={6}
+                suffix="portion"
+                labelDecrease={`Diminuer les portions de ${u.displayName}`}
+                labelIncrease={`Augmenter les portions de ${u.displayName}`}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {!replacing ? (
