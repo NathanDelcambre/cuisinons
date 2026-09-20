@@ -3,7 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Check, Search } from 'lucide-react';
-import { Button, Chip, EmptyState, Modal, SearchInput, Segmented, Skeleton, Stepper, Switch, cn } from '@cuisinons/ui';
+import { Button, Chip, EmptyState, Inset, Modal, SearchInput, Segmented, Skeleton, Stepper, Switch, cn } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 import {
   MEAL_SLOT_LABELS,
@@ -153,53 +153,59 @@ export function AddMealDialog({
         </>
       }
     >
-      <SearchInput
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Rechercher une recette"
-        aria-label="Rechercher une recette"
-      />
-
-      <div className={cn('mt-3 overflow-y-auto', repeat ? 'max-h-36' : 'max-h-56')}>
-        {recipes.isLoading ? (
-          <div className="space-y-2">
-            {Array.from({ length: 4 }, (_, i) => (
-              <Skeleton key={i} className="h-11" />
-            ))}
-          </div>
-        ) : list.length === 0 ? (
-          <EmptyState
-            icon={Search}
-            title="Aucune recette trouvée"
-            description="Essaie un autre mot-clé."
-            className="py-8"
-          />
-        ) : (
-          <ul className="space-y-1">
-            {list.map((recipe) => {
-              const selected = recipeId === recipe.id;
-              return (
-                <li key={recipe.id}>
-                  <button
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => setRecipeId(recipe.id)}
-                    className={cn(
-                      'flex min-h-11 w-full items-center justify-between gap-3 rounded-xl px-3 text-left text-sm transition duration-200 ease-out-soft',
-                      selected
-                        ? 'bg-ink-900 font-medium text-white'
-                        : 'text-ink-700 hover:bg-white/80',
-                    )}
-                  >
-                    <span className="min-w-0 truncate">{recipe.name}</span>
-                    {selected ? <Check className="size-4 shrink-0" aria-hidden /> : null}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
+      <Inset className="p-2">
+        <SearchInput
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Rechercher une recette"
+          aria-label="Rechercher une recette"
+        />
+        <div
+          className={cn(
+            'mt-2 overflow-y-auto',
+            list.length > 0 || recipes.isLoading ? 'min-h-44 max-h-56' : 'max-h-56',
+          )}
+        >
+          {recipes.isLoading ? (
+            <div className="space-y-1">
+              {Array.from({ length: 4 }, (_, i) => (
+                <Skeleton key={i} className="h-11" />
+              ))}
+            </div>
+          ) : list.length === 0 ? (
+            <EmptyState
+              icon={Search}
+              title="Aucune recette trouvée"
+              description="Essaie un autre mot-clé."
+              className="border-0 bg-transparent py-8"
+            />
+          ) : (
+            <ul className="space-y-0.5">
+              {list.map((recipe) => {
+                const selected = recipeId === recipe.id;
+                return (
+                  <li key={recipe.id}>
+                    <button
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setRecipeId(recipe.id)}
+                      className={cn(
+                        'flex min-h-11 w-full items-center justify-between gap-3 rounded-xl px-3 text-left text-sm transition duration-200 ease-out-soft',
+                        selected
+                          ? 'bg-ink-900 font-medium text-white'
+                          : 'text-ink-800 hover:bg-white',
+                      )}
+                    >
+                      <span className="min-w-0 truncate">{recipe.name}</span>
+                      {selected ? <Check className="size-4 shrink-0" aria-hidden /> : null}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </Inset>
 
       <div className="mt-5 space-y-3 border-t border-white/70 pt-5">
         <p className="text-sm font-medium text-ink-700">Portions</p>
