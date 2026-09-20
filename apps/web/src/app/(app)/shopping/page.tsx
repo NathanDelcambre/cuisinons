@@ -33,6 +33,7 @@ import {
   PageHeader,
   Panel,
   Skeleton,
+  Switch,
   cn,
 } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
@@ -90,6 +91,8 @@ export default function ShoppingPage() {
   const [picker, setPicker] = useState(false);
   const [swapItem, setSwapItem] = useState<ShoppingItem | null>(null);
   const [retailerOpen, setRetailerOpen] = useState(false);
+  const [selectedRetailer, setSelectedRetailer] = useState<Retailer>('LECLERC');
+  const [economical, setEconomical] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
 
   const list = useQuery({
@@ -121,10 +124,10 @@ export default function ShoppingPage() {
   });
 
   const changeRetailer = useMutation({
-    mutationFn: (retailer: Retailer) =>
+    mutationFn: (input: { retailer: Retailer; economical: boolean }) =>
       apiJson<ShoppingList>('/api/bff/shopping/retailer', {
         method: 'PATCH',
-        body: JSON.stringify({ retailer }),
+        body: JSON.stringify(input),
       }),
     onSuccess: (data) => {
       queryClient.setQueryData(['shopping'], data);
@@ -247,7 +250,13 @@ export default function ShoppingPage() {
         <Card className="flex items-center justify-between gap-3 py-3.5">
           <button
             type="button"
-            onClick={() => setRetailerOpen(true)}
+            onClick={() => {
+              const current = list.data;
+              if (!current?.retailer) return;
+              setSelectedRetailer(current.retailer);
+              setEconomical(current.economical);
+              setRetailerOpen(true);
+            }}
             className="flex min-w-0 flex-1 items-center gap-2.5 rounded-xl text-left hover:bg-white/50"
             aria-label="Changer de distributeur"
           >
@@ -367,6 +376,28 @@ export default function ShoppingPage() {
           setRetailerOpen(false);
         }}
         bodyClassName="overflow-y-auto"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              disabled={changeRetailer.isPending}
+              onClick={() => {
+                changeRetailer.reset();
+                setRetailerOpen(false);
+              }}
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="accent"
+              icon={Check}
+              loading={changeRetailer.isPending}
+              onClick={() => changeRetailer.mutate({ retailer: selectedRetailer, economical })}
+            >
+              Valider
+            </Button>
+          </>
+        }
       >
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {RETAILERS.map((retailer) => (
@@ -374,10 +405,10 @@ export default function ShoppingPage() {
               key={retailer}
               type="button"
               disabled={changeRetailer.isPending}
-              onClick={() => changeRetailer.mutate(retailer)}
+              onClick={() => setSelectedRetailer(retailer)}
               className={cn(
                 'flex min-h-16 items-center gap-2 rounded-2xl border px-3 text-left text-sm transition',
-                retailer === list.data?.retailer
+                retailer === selectedRetailer
                   ? 'border-sage-400 bg-sage-50 text-ink-900'
                   : 'border-ink-100 bg-white/70 text-ink-700 hover:border-sage-300',
               )}
@@ -386,6 +417,9 @@ export default function ShoppingPage() {
               <span className="min-w-0 truncate">{RETAILER_LABELS[retailer]}</span>
             </button>
           ))}
+        </div>
+        <div className="mt-4 rounded-2xl bg-white/70 p-3.5">
+          <Switch checked={economical} onChange={setEconomical} label="Faire des économies" />
         </div>
         {changeRetailer.error instanceof Error ? (
           <p className="mt-3 text-sm text-tomato-500">{changeRetailer.error.message}</p>

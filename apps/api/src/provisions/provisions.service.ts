@@ -215,8 +215,8 @@ export class ProvisionsService {
     };
   }
 
-  /** Change de magasin et re-selectionne chaque produit de la liste active. */
-  async changeRetailer(userId: string, retailer: Retailer) {
+  /** Change les préférences d'achat et re-sélectionne chaque produit. */
+  async changeRetailer(userId: string, input: { retailer: Retailer; economical: boolean }) {
     const list = await this.prisma.shoppingList.findFirst({
       where: { userId, completedAt: null },
       orderBy: { createdAt: 'desc' },
@@ -226,20 +226,23 @@ export class ProvisionsService {
     const selections = await Promise.all(
       list.items.map(async (item) => {
         const needed = Number(item.neededQuantity ?? item.quantity);
-        const offers = await this.products.findOffers(item.ingredient.nameFr, retailer);
+        const offers = await this.products.findOffers(item.ingredient.nameFr, input.retailer);
         return {
           item,
           selection: selectProductOffer({
             neededQuantity: needed,
             neededUnit: item.unit,
             offers,
-            economical: list.economical,
+            economical: input.economical,
           }),
         };
       }),
     );
     await this.prisma.$transaction(async (tx) => {
-      await tx.shoppingList.update({ where: { id: list.id }, data: { retailer } });
+      await tx.shoppingList.update({
+        where: { id: list.id },
+        data: { retailer: input.retailer, economical: input.economical },
+      });
       for (const { item, selection } of selections) {
         const needed = Number(item.neededQuantity ?? item.quantity);
         await tx.shoppingListItem.update({
