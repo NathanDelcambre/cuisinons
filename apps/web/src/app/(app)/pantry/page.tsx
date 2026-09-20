@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Plus, Refrigerator, Trash2 } from 'lucide-react';
+import { Check, Pencil, Plus, Refrigerator, Trash2, X } from 'lucide-react';
 import {
   STORAGE_AREAS,
   STORAGE_AREA_LABELS,
@@ -132,8 +132,7 @@ export default function PantryPage() {
                   <PantryRow
                     key={item.id}
                     item={item}
-                    onQuantity={(quantity) => patch.mutate({ id: item.id, quantity })}
-                    onArea={(next) => patch.mutate({ id: item.id, area: next })}
+                    onSave={(input) => patch.mutateAsync({ id: item.id, ...input })}
                     onRemove={() => remove.mutate(item.id)}
                   />
                 ))}
@@ -159,17 +158,46 @@ export default function PantryPage() {
 
 function PantryRow({
   item,
-  onQuantity,
-  onArea,
+  onSave,
   onRemove,
 }: {
   item: PantryItem;
-  onQuantity: (quantity: number) => void;
-  onArea: (area: StorageArea) => void;
+  onSave: (input: { quantity: number; area: StorageArea }) => Promise<unknown>;
   onRemove: () => void;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [quantity, setQuantity] = useState(String(item.quantity));
+  const [area, setArea] = useState<StorageArea>(item.area);
   const name = item.product.name;
   const image = item.product.imageUrl ?? item.ingredient.iconUrl;
+
+  const startEditing = () => {
+    setQuantity(String(item.quantity));
+    setArea(item.area);
+    setEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setQuantity(String(item.quantity));
+    setArea(item.area);
+    setEditing(false);
+  };
+
+  const save = async () => {
+    const nextQuantity = Number(quantity.replace(',', '.'));
+    if (!Number.isFinite(nextQuantity) || nextQuantity < 0) return;
+    setSaving(true);
+    try {
+      await onSave({ quantity: nextQuantity, area });
+      setEditing(false);
+    } catch {
+      // La mutation conserve son erreur et la ligne reste ouverte pour permettre une nouvelle tentative.
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <Card className="flex flex-wrap items-center gap-3 py-3">
       <IngredientIcon src={image} />
@@ -181,35 +209,65 @@ function PantryRow({
           </span>
         ) : null}
       </span>
-      <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
-        <Select
-          className="h-11 min-h-11 min-w-0 flex-1 sm:w-44 sm:flex-none sm:shrink-0 pl-3 text-[13px]"
-          value={item.area}
-          options={storageAreaOptions()}
-          aria-label={`Rangement de ${name}`}
-          onChange={onArea}
-        />
+      {editing ? (
+        <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
+          <Select
+            className="h-11 min-h-11 min-w-0 flex-1 pl-3 text-[13px] sm:w-44 sm:flex-none sm:shrink-0"
+            value={area}
+            options={storageAreaOptions()}
+            aria-label={`Rangement de ${name}`}
+            onChange={setArea}
+          />
 
-        <Input
-          className="tabular h-11 w-20 px-2 text-right"
-          inputMode="decimal"
-          defaultValue={String(item.quantity)}
-          aria-label={`Quantité de ${name}`}
-          onBlur={(e) => {
-            const next = Number(e.target.value.replace(',', '.'));
-            if (Number.isFinite(next) && next !== item.quantity) onQuantity(next);
-          }}
-        />
-        <span className="w-12 shrink-0 text-xs text-ink-500">{UNIT_LABELS[item.unit]}</span>
+          <Input
+            className="tabular h-11 w-20 px-2 text-right"
+            inputMode="decimal"
+            value={quantity}
+            aria-label={`Quantité de ${name}`}
+            onChange={(event) => setQuantity(event.target.value)}
+          />
+          <span className="w-10 shrink-0 text-xs text-ink-500">{UNIT_LABELS[item.unit]}</span>
 
-        <IconButton
-          icon={Trash2}
-          label={`Retirer ${name}`}
-          size="sm"
-          variant="ghost"
-          onClick={onRemove}
-        />
-      </div>
+          <IconButton
+            icon={Check}
+            label={`Enregistrer ${name}`}
+            size="sm"
+            disabled={saving}
+            onClick={() => void save()}
+          />
+          <IconButton
+            icon={X}
+            label="Annuler"
+            size="sm"
+            variant="ghost"
+            disabled={saving}
+            onClick={cancelEditing}
+          />
+        </div>
+      ) : (
+        <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto">
+          <span className="min-w-0 flex-1 truncate text-xs text-ink-500 sm:w-44 sm:flex-none">
+            {STORAGE_AREA_LABELS[item.area]}
+          </span>
+          <span className="tabular whitespace-nowrap text-sm text-ink-700">
+            {item.quantity} {UNIT_LABELS[item.unit]}
+          </span>
+          <IconButton
+            icon={Pencil}
+            label={`Modifier ${name}`}
+            size="sm"
+            variant="ghost"
+            onClick={startEditing}
+          />
+          <IconButton
+            icon={Trash2}
+            label={`Retirer ${name}`}
+            size="sm"
+            variant="ghost"
+            onClick={onRemove}
+          />
+        </div>
+      )}
     </Card>
   );
 }
