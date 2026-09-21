@@ -131,7 +131,9 @@ export async function importCiqual(): Promise<{ count: number }> {
   const proteinIdx = findHeader(headers, [/prot[eé]ines.*6\.?25/i, /prot[eé]ines/i]);
   const carbIdx = findHeader(headers, [/^glucides/i]);
   const fatIdx = findHeader(headers, [/^lipides/i]);
-  const fiberIdx = findHeader(headers, [/fibres/i]);
+  // Ne jamais faire correspondre « avec fibres » des colonnes d'énergie :
+  // la donnée attendue est la colonne dédiée « Fibres alimentaires ».
+  const fiberIdx = findHeader(headers, [/^fibres alimentaires\b/i, /^fibres\b/i]);
   const sugarIdx = findHeader(headers, [/^sucres/i]);
   const saltIdx = findHeader(headers, [/^sel/i]);
 

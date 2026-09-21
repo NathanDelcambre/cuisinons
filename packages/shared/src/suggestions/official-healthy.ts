@@ -317,7 +317,7 @@ function proteinKeys(spec: RecipeSpec): string[] {
     }
   }
   if (keys.length > 0) return keys;
-  if (isSeafoodPlate(spec.label)) return ['pollock', 'shrimp', 'mussels'];
+  if (isSeafoodPlate(spec.label)) return ['pollock', 'shrimp'];
 
   const tokens = tokensOf(spec.protein);
   if (isWhiteBag(tokens)) keys.push('chicken');
@@ -556,14 +556,14 @@ function isFishProtein(keys: readonly string[]): boolean {
 }
 
 function donenessOf(proteins: readonly string[]): string {
-  if (proteins.includes('shrimp')) return 'les crevettes sont roses et recroquevillées';
-  if (proteins.includes('mussels')) return 'les moules sont ouvertes (jeter celles qui restent fermées)';
-  if (isFishProtein(proteins)) return 'la chair est opaque et se détache à la fourchette';
-  if (proteins.includes('tofu')) return 'le tofu est doré';
+  if (proteins.includes('shrimp')) return 'les crevettes soient roses et recroquevillées';
+  if (proteins.includes('mussels')) return 'les moules soient ouvertes (jeter celles qui restent fermées)';
+  if (isFishProtein(proteins)) return 'la chair soit opaque et se détache à la fourchette';
+  if (proteins.includes('tofu')) return 'le tofu soit doré';
   if (proteins.some((key) => ['lentils', 'chickpeas', 'whiteBeans'].includes(key))) {
-    return 'c’est bien chaud tout au centre';
+    return 'ce soit bien chaud tout au centre';
   }
-  return 'la viande est cuite à cœur (le jus qui s’écoule est clair)';
+  return 'la viande soit cuite à cœur (le jus qui s’écoule est clair)';
 }
 
 function skilletTimeOf(proteins: readonly string[]): string {

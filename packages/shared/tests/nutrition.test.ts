@@ -78,6 +78,29 @@ describe('macros', () => {
     expect(result.total.kcal).toBe(0);
   });
 
+  it('calcule l'énergie depuis les macros officielles quand Ciqual ne la publie pas', () => {
+    const result = computeRecipeNutrition(
+      [
+        {
+          grams: 100,
+          energyKcalPer100g: null,
+          energyKcalKind: 'NA',
+          proteinPer100g: 1,
+          proteinKind: 'VALUE',
+          carbsPer100g: 7,
+          carbsKind: 'VALUE',
+          fatPer100g: 0.5,
+          fatKind: 'VALUE',
+          fiberPer100g: 4.5,
+          fiberKind: 'VALUE',
+        },
+      ],
+      1,
+    );
+    expect(result.complete).toBe(true);
+    expect(result.total.kcal).toBeCloseTo(45.5);
+  });
+
   it('compte une huile dont les glucides Ciqual sont inconnus', () => {
     const result = computeRecipeNutrition(
       [
@@ -135,7 +158,7 @@ describe('conversions', () => {
       unit: 'SACHET',
       conversions: [{ unit: 'SACHET', gramsPerUnit: 11 }],
     });
-    expect(halfSachet).toEqual({ grams: 5.5, estimated: true, source: 'conversion' });
+    expect(halfSachet).toEqual({ grams: 5.5, estimated: false, source: 'conversion' });
   });
 
   it('demande les grammes si aucune conversion fiable', () => {

@@ -236,7 +236,7 @@ describe('catalogue healthy officiel', () => {
         line.key,
       ),
     );
-    expect(couscousSeafood.map((line) => line.key).sort()).toEqual(['mussels', 'pollock', 'shrimp']);
+    expect(couscousSeafood.map((line) => line.key).sort()).toEqual(['pollock', 'shrimp']);
     expect(couscousSeafood.reduce((sum, line) => sum + line.grams, 0)).toBeLessThanOrEqual(320);
     expect(couscousMer?.ingredients.some((line) => line.key === 'couscous')).toBe(true);
     expect(couscousMer?.ingredients.find((line) => line.key === 'couscous')?.grams).toBe(120);

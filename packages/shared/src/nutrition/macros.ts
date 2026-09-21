@@ -6,13 +6,20 @@ export type MacroNutrients = {
   fiber: number | null;
 };
 
+export type MacroValueKind = 'VALUE' | 'TRACES' | 'LESS_THAN' | 'ABSENT' | 'NA';
+
 export type RecipeLineInput = {
   grams: number | null;
   energyKcalPer100g: number | null;
+  energyKcalKind?: MacroValueKind;
   proteinPer100g: number | null;
+  proteinKind?: MacroValueKind;
   carbsPer100g: number | null;
+  carbsKind?: MacroValueKind;
   fatPer100g: number | null;
+  fatKind?: MacroValueKind;
   fiberPer100g: number | null;
+  fiberKind?: MacroValueKind;
 };
 
 export type RecipeNutrition = {
@@ -39,23 +46,45 @@ function scaleMacros(macros: MacroNutrients, factor: number): MacroNutrients {
   };
 }
 
+function macroAmount(
+  value: number | null,
+  kind: MacroValueKind | undefined,
+): number | null {
+  if (value !== null) return value;
+  if (kind === 'TRACES' || kind === 'ABSENT') return 0;
+  // Compatibilité des appels historiques : avant l'ajout des kinds, les
+  // macros absentes étaient considérées comme nulles de contribution.
+  return kind === undefined ? 0 : null;
+}
+
 export function macrosFromGrams(line: RecipeLineInput): MacroNutrients | null {
   if (line.grams === null || line.grams < 0) {
     return null;
   }
-  // Ciqual laisse souvent glucides/protéines à NA pour les huiles : on garde
-  // l'énergie connue et on traite les macros manquantes comme 0, plutôt que
-  // d'ignorer toute la ligne (vinaigrette à 1 kcal, patate douce à 0 g de lipides).
-  if (line.energyKcalPer100g === null) {
+
+  const protein = macroAmount(line.proteinPer100g, line.proteinKind);
+  const carbs = macroAmount(line.carbsPer100g, line.carbsKind);
+  const fat = macroAmount(line.fatPer100g, line.fatKind);
+  if (protein === null || carbs === null || fat === null) {
     return null;
   }
+
+  const fiber = macroAmount(line.fiberPer100g, line.fiberKind);
+  const reportedEnergy =
+    line.energyKcalPer100g ??
+    (line.energyKcalKind === 'TRACES' || line.energyKcalKind === 'ABSENT' ? 0 : null);
+  // Quand Ciqual ne publie pas l'énergie mais publie les constituants, appliquer
+  // les facteurs UE 1169/2011 (4/4/9 kcal et 2 kcal/g de fibres) est un calcul,
+  // pas une estimation arbitraire.
+  const energy =
+    reportedEnergy ?? protein * 4 + carbs * 4 + fat * 9 + (fiber ?? 0) * 2;
   const factor = line.grams / 100;
   return {
-    kcal: line.energyKcalPer100g * factor,
-    protein: (line.proteinPer100g ?? 0) * factor,
-    carbs: (line.carbsPer100g ?? 0) * factor,
-    fat: (line.fatPer100g ?? 0) * factor,
-    fiber: line.fiberPer100g === null ? null : line.fiberPer100g * factor,
+    kcal: energy * factor,
+    protein: protein * factor,
+    carbs: carbs * factor,
+    fat: fat * factor,
+    fiber: fiber === null ? null : fiber * factor,
   };
 }
 

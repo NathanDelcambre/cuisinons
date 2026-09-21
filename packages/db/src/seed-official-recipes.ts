@@ -892,7 +892,7 @@ async function upsertOfficialRecipe(
         gramsManual: line.unit !== 'G' && line.unit !== 'KG',
         displayQuantity: line.displayQuantity ?? null,
         sortOrder: index,
-        estimated: line.unit !== 'G' && line.unit !== 'KG',
+        estimated: false,
       })),
     },
     steps: {

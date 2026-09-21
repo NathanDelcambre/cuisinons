@@ -3,10 +3,15 @@ import type { Prisma } from '../generated/client';
 
 /** Colonnes Ciqual utiles au calcul des macros — rien d’autre. */
 export const INGREDIENT_MACRO_SELECT = {
+  energyKcalKind: true,
   energyKcal: true,
+  proteinKind: true,
   proteinG: true,
+  carbKind: true,
   carbG: true,
+  fatKind: true,
   fatG: true,
+  fiberKind: true,
   fiberG: true,
 } as const;
 

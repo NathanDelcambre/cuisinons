@@ -24,7 +24,7 @@ export function resolveGrams(input: {
   manualGrams?: number | null;
 }): ResolvedGrams | { needsManualGrams: true } {
   if (input.manualGrams !== null && input.manualGrams !== undefined) {
-    return { grams: input.manualGrams, estimated: true, source: 'manual' };
+    return { grams: input.manualGrams, estimated: false, source: 'manual' };
   }
   const metric = metricQuantityToGrams(input.quantity, input.unit);
   if (metric !== null) {
@@ -34,7 +34,7 @@ export function resolveGrams(input: {
   if (exact) {
     return {
       grams: input.quantity * exact.gramsPerUnit,
-      estimated: true,
+      estimated: false,
       source: 'conversion',
     };
   }
@@ -45,7 +45,7 @@ export function resolveGrams(input: {
       input.conversions.find((c) => c.unit === 'ML')?.gramsPerUnit ??
       null;
     if (density !== null) {
-      return { grams: ml * density, estimated: true, source: 'density' };
+      return { grams: ml * density, estimated: false, source: 'density' };
     }
   }
   if (isMassUnit(input.unit)) {
