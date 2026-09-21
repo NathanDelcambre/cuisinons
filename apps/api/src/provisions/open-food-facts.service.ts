@@ -42,7 +42,7 @@ export class OpenFoodFactsService {
         prices: { some: { retailer, currency: 'EUR', price: { gt: 0 } } },
       },
       include: { prices: { where: { retailer, currency: 'EUR' }, take: 1 } },
-      orderBy: [{ isStaple: 'desc' }, { popularity: 'desc' }],
+      orderBy: [{ isBulk: 'desc' }, { isStaple: 'desc' }, { popularity: 'desc' }],
       take: 250,
     });
     return products
@@ -72,6 +72,7 @@ export class OpenFoodFactsService {
         currency: price!.currency,
         observedAt: price!.observedAt.toISOString().slice(0, 10),
         storeName: price!.storeName,
+        isBulk: product.isBulk,
       }));
   }
 
@@ -102,7 +103,7 @@ export class OpenFoodFactsService {
         prices: { some: { currency: 'EUR', price: { gt: 0 } } },
       },
       include: { prices: { where: { currency: 'EUR', price: { gt: 0 } } } },
-      orderBy: [{ isStaple: 'desc' }, { popularity: 'desc' }],
+      orderBy: [{ isBulk: 'desc' }, { isStaple: 'desc' }, { popularity: 'desc' }],
       take: 250,
     });
     for (const retailer of RETAILERS) {
@@ -132,6 +133,7 @@ export class OpenFoodFactsService {
           currency: price.currency,
           observedAt: price.observedAt.toISOString().slice(0, 10),
           storeName: price.storeName,
+          isBulk: product.isBulk,
         }));
     }
     return result;
@@ -156,7 +158,7 @@ export class OpenFoodFactsService {
         packageUnit: true,
         nutriScore: true,
       },
-      orderBy: [{ isStaple: 'desc' }, { popularity: 'desc' }],
+      orderBy: [{ isBulk: 'desc' }, { isStaple: 'desc' }, { popularity: 'desc' }],
       take: 30,
     });
   }

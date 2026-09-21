@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { compactProductBrand, selectProductOffer, type ProductOffer } from '../src/products/retail.js';
+import {
+  compactProductBrand,
+  selectProductOffer,
+  type ProductOffer,
+} from '../src/products/retail.js';
 
 const offer = (quantity: number, price: number, barcode: string): ProductOffer => ({
   barcode,
@@ -47,6 +51,18 @@ describe('sélection de produits achetables', () => {
     expect(selected?.packageCount).toBe(3);
     expect(selected?.purchaseQuantity).toBe(1500);
     expect(selected?.totalPrice).toBe(4.2);
+  });
+
+  it('facture le vrac au poids exact sans arrondir au kilo', () => {
+    const selected = selectProductOffer({
+      neededQuantity: 200,
+      neededUnit: 'G',
+      economical: false,
+      offers: [{ ...offer(1000, 3.5, 'raw:en:bell-peppers'), isBulk: true }],
+    });
+    expect(selected?.packageCount).toBe(1);
+    expect(selected?.purchaseQuantity).toBe(200);
+    expect(selected?.totalPrice).toBe(0.7);
   });
 
   it('refuse de mélanger masse et volume', () => {

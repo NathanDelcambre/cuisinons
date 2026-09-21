@@ -1,0 +1,2 @@
+ALTER TABLE "OpenFoodProduct"
+  ADD COLUMN "isBulk" BOOLEAN NOT NULL DEFAULT false;

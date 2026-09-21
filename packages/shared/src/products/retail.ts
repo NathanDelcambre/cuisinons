@@ -52,6 +52,7 @@ export type ProductOffer = {
   currency: string;
   observedAt: string;
   storeName: string | null;
+  isBulk?: boolean;
 };
 
 export type ProductSelection = ProductOffer & {
@@ -68,6 +69,16 @@ function unitPriceLabel(value: number, unit: 'G' | 'ML'): string {
 }
 
 function candidate(need: number, offer: ProductOffer): ProductSelection {
+  if (offer.isBulk) {
+    return {
+      ...offer,
+      packageCount: 1,
+      purchaseQuantity: need,
+      totalPrice: Math.round(need * (offer.price / offer.packageQuantity) * 100) / 100,
+      unitPrice: offer.price / offer.packageQuantity,
+      economyNote: null,
+    };
+  }
   const packageCount = Math.max(1, Math.ceil(need / offer.packageQuantity));
   const purchaseQuantity = packageCount * offer.packageQuantity;
   return {

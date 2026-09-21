@@ -506,6 +506,9 @@ model OpenFoodProduct {
   novaGroup          Int?
   popularity         Int                 @default(0)
   isStaple           Boolean             @default(false)
+  /// Produit brut Open Prices vendu au poids (sans code-barres commercial).
+  /// Son prix est au kilo et la quantité achetée n'est pas arrondie à un paquet.
+  isBulk             Boolean             @default(false)
   isActive           Boolean             @default(true)
   sourceUpdatedAt    DateTime?
   importBatchId      String

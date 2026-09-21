@@ -78,7 +78,7 @@ describe('macros', () => {
     expect(result.total.kcal).toBe(0);
   });
 
-  it('calcule l'énergie depuis les macros officielles quand Ciqual ne la publie pas', () => {
+  it("calcule l'énergie depuis les macros officielles quand Ciqual ne la publie pas", () => {
     const result = computeRecipeNutrition(
       [
         {
