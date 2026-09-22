@@ -631,13 +631,10 @@ function DayCard({
               today ? 'text-sage-600' : 'text-ink-900',
             )}
           >
-            {format(date, 'EEEE d MMMM', { locale: fr })}
+            {today ? 'Aujourd’hui' : format(date, 'EEEE d MMMM', { locale: fr })}
           </span>
-          {today ? (
-            <span className="text-[11px] font-medium text-sage-500">Aujourd’hui</span>
-          ) : null}
         </span>
-        <MacroCounts macros={macros} />
+        <MacroCounts macros={macros} chips />
       </button>
 
       <div className="flex min-h-0 flex-1 flex-col gap-1.5 px-2 pt-2 pb-4">
@@ -708,6 +705,7 @@ function SlotSection({
             const portion = item.portions.find((p) => p.userId === userId);
             const qty = portion ? Number(portion.portions) : 0;
             const validated = isValidated(item, portion, todayIso);
+            const past = item.date.slice(0, 10) < todayIso;
             const kind = item.kind ?? 'RECIPE';
             const recipe = kind === 'RECIPE' ? item.recipe : null;
             const title =
@@ -725,9 +723,11 @@ function SlotSection({
                 key={item.id}
                 className={cn(
                   'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-xl bg-white/75 py-3.5 pl-3.5 pr-2 shadow-[0_0_10px_rgba(28,25,23,0.08),0_2px_8px_rgba(28,25,23,0.08)]',
-                  validated
-                    ? 'border border-sage-500 border-l-[3px] border-l-sage-500'
-                    : cn('border border-white/70', chrome.rail),
+                  past
+                    ? 'border border-ink-100/30 bg-ink-50/30 opacity-55 shadow-none'
+                    : validated
+                      ? 'border border-sage-500 border-l-[3px] border-l-sage-500'
+                      : cn('border border-white/70', chrome.rail),
                 )}
               >
                 <span
@@ -1026,10 +1026,12 @@ function MacroCounts({
   macros,
   targets,
   className,
+  chips = false,
 }: {
   macros: Macros;
   targets?: MacroTargets;
   className?: string;
+  chips?: boolean;
 }) {
   const [asPercent, setAsPercent] = useState(false);
   const canToggle = Boolean(
@@ -1046,6 +1048,8 @@ function MacroCounts({
         className={cn(
           'flex min-w-0 items-center gap-1 whitespace-nowrap font-bold',
           item.className,
+          chips &&
+            'justify-center rounded-full border border-white/90 bg-white/80 px-1.5 py-1.5 shadow-sm',
         )}
       >
         <MacroIcon kind={item.key} className="size-3 shrink-0" />
@@ -1068,7 +1072,10 @@ function MacroCounts({
   });
 
   const classes = cn(
-    'tabular grid w-full grid-cols-[minmax(0,1.45fr)_repeat(3,minmax(0,1fr))] items-center gap-x-2.5 text-[11px] leading-none',
+    'tabular grid w-full items-center text-[11px] leading-none',
+    chips
+      ? 'grid-cols-[minmax(0,1.35fr)_repeat(3,minmax(0,1fr))] gap-1.5'
+      : 'grid-cols-[minmax(0,1.45fr)_repeat(3,minmax(0,1fr))] gap-x-2.5',
     canToggle ? 'cursor-pointer rounded-md text-left' : null,
     className,
   );
