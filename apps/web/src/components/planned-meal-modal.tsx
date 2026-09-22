@@ -9,9 +9,16 @@ import {
   type MealSlot,
   UNIT_LABELS,
 } from '@cuisinons/shared';
+import { RecipeCover } from './recipe-cover';
 import { RecipeModal } from './recipe-modal';
 import { IngredientIcon } from './ingredient-icon';
 import { MacroIcon } from './macro-icon';
+
+const KIND_COVER = {
+  RESTAURANT: '/meals/restaurant.png',
+  IMPOSED: '/meals/manual.png',
+  SKIPPED: '/meals/skipped.png',
+} as const;
 
 const KIND_ICON = {
   RESTAURANT: Utensils,
@@ -112,6 +119,10 @@ export function PlannedMealModal({
         ) : null
       }
     >
+      <RecipeCover
+        src={KIND_COVER[kind === 'RECIPE' ? 'IMPOSED' : kind]}
+        className="mb-4 aspect-[16/10] w-full rounded-2xl object-cover"
+      />
       <div className="flex items-center gap-3">
         <span
           aria-hidden

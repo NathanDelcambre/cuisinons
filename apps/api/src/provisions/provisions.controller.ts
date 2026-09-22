@@ -20,6 +20,8 @@ import { ProvisionsService } from './provisions.service.js';
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const quantity = z.number().positive().max(100_000);
+/** EAN (8–14) ou identifiant vrac Open Prices (`openprices:en:bananas`). */
+const productBarcode = z.string().min(1).max(64);
 
 const productSelection = {
   retailer: z.enum(RETAILERS),
@@ -67,7 +69,7 @@ export class ProvisionsController {
   addPantry(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     const parsed = z
       .object({
-        productBarcode: z.string().min(8).max(14),
+        productBarcode,
         quantity,
         area: z.enum(STORAGE_AREAS).optional(),
       })
@@ -163,7 +165,7 @@ export class ProvisionsController {
 
   @Patch('/shopping/items/:id/product')
   selectProduct(@CurrentUser() user: AuthUser, @Param('id') id: string, @Body() body: unknown) {
-    const parsed = z.object({ barcode: z.string().min(8).max(14) }).parse(body);
+    const parsed = z.object({ barcode: productBarcode }).parse(body);
     return this.provisions.selectShoppingProduct(user.id, id, parsed.barcode);
   }
 

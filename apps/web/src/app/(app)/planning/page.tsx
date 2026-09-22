@@ -33,7 +33,7 @@ import {
   IconButton,
   MacroRing,
   Meter,
-  PageHeader,
+  Modal,
   Panel,
   Skeleton,
   cn,
@@ -59,6 +59,12 @@ import { RecipeCover } from '@/components/recipe-cover';
 import { SlotAddMenu, SLOT_CHROME, type SpecialMealKind } from '@/components/slot-add-menu';
 import { OptimizePanel } from '@/components/optimize-panel';
 import { MacroIcon } from '@/components/macro-icon';
+
+const KIND_COVER: Partial<Record<MealKind, string>> = {
+  SKIPPED: '/meals/skipped.png',
+  RESTAURANT: '/meals/restaurant.png',
+  IMPOSED: '/meals/manual.png',
+};
 
 type MealItem = {
   id: string;
@@ -140,6 +146,7 @@ export default function PlanningPage() {
   } | null>(null);
   const [optimizeOpen, setOptimizeOpen] = useState(false);
   const [manualDialog, setManualDialog] = useState<{ date: string; slot: MealSlot } | null>(null);
+  const [skipDialog, setSkipDialog] = useState<{ date: string; slot: MealSlot } | null>(null);
   const [detail, setDetail] = useState<MealItem | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -169,18 +176,25 @@ export default function PlanningPage() {
   });
 
   const addKind = useMutation({
-    mutationFn: async (input: { date: string; slot: MealSlot; kind: SpecialMealKind }) => {
+    mutationFn: async (input: {
+      date: string;
+      slot: MealSlot;
+      kind: SpecialMealKind;
+      scope?: 'me' | 'all';
+    }) => {
       const users = await apiJson<Array<{ id: string }>>('/api/bff/users');
+      const portions = users.map((u) => ({
+        userId: u.id,
+        portions: input.scope === 'me' && u.id !== user?.id ? 0 : 1,
+      }));
+      if (!portions.some((line) => line.portions > 0) && portions[0]) portions[0].portions = 1;
       return apiJson('/api/bff/planner/items', {
         method: 'POST',
         body: JSON.stringify({
           date: input.date,
           slot: input.slot,
           kind: input.kind,
-          portions: users.map((u) => ({
-            userId: u.id,
-            portions: 1,
-          })),
+          portions,
         }),
       });
     },
@@ -286,7 +300,6 @@ export default function PlanningPage() {
       })),
     })),
   });
-  const todayMealCount = meals.filter((item) => item.date.slice(0, 10) === todayIso).length;
   const calorieTarget = num(goals?.caloriesValue);
   const calorieProgress =
     calorieTarget && calorieTarget > 0
@@ -295,9 +308,9 @@ export default function PlanningPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow={
-          <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+      <header className="flex flex-col gap-2">
+        <p className="text-sm text-ink-500">
+          <span className="inline-flex items-center gap-2">
             <img
               src="/brand/panier-fruits.png"
               alt=""
@@ -306,45 +319,13 @@ export default function PlanningPage() {
               className="size-6 shrink-0 object-contain"
             />
             <span>Bonjour {user?.displayName ?? ''}</span>
-            {days.some((day) => iso(day) === todayIso) ? (
-              <span className="text-ink-400">
-                · {todayMealCount} repas {todayMealCount === 1 ? 'planifié' : 'planifiés'}{' '}
-                aujourd’hui
-              </span>
-            ) : null}
           </span>
-        }
-        title="Planning"
-        actionsBesideTitle
-        actionsClassName="flex items-center justify-end gap-2"
-        description={
-          <div className="flex flex-wrap items-center gap-2 text-ink-900">
-            <IconButton
-              icon={ChevronLeft}
-              label="Semaine précédente"
-              onClick={() => setWeekStart(addDays(weekStart, -7))}
-            />
-            <span className="min-w-0 text-sm font-medium">{weekRangeLabel(weekStart)}</span>
-            <IconButton
-              icon={ChevronRight}
-              label="Semaine suivante"
-              onClick={() => setWeekStart(addDays(weekStart, 7))}
-            />
-            <Button
-              variant="glass"
-              onClick={() => {
-                const now = new Date();
-                const start = startOfWeek(now, { weekStartsOn: 1 });
-                setWeekStart(start);
-                setSelectedIndex(differenceInCalendarDays(now, start));
-              }}
-            >
-              Aujourd’hui
-            </Button>
-          </div>
-        }
-        actions={
-          <>
+        </p>
+        <div className="flex items-center justify-between gap-3">
+          <h1 className="min-w-0 font-display text-[1.75rem] font-semibold tracking-[-0.03em] text-ink-900 sm:text-[2rem]">
+            Planning
+          </h1>
+          <div className="flex shrink-0 items-center justify-end gap-2">
             <Button
               variant="glass"
               icon={Sparkles}
@@ -359,9 +340,33 @@ export default function PlanningPage() {
               className="shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft lg:hidden"
               onClick={() => setOptimizeOpen(true)}
             />
-          </>
-        }
-      />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-ink-900">
+          <IconButton
+            icon={ChevronLeft}
+            label="Semaine précédente"
+            onClick={() => setWeekStart(addDays(weekStart, -7))}
+          />
+          <span className="min-w-0 text-sm font-medium">{weekRangeLabel(weekStart)}</span>
+          <IconButton
+            icon={ChevronRight}
+            label="Semaine suivante"
+            onClick={() => setWeekStart(addDays(weekStart, 7))}
+          />
+          <Button
+            variant="glass"
+            onClick={() => {
+              const now = new Date();
+              const start = startOfWeek(now, { weekStartsOn: 1 });
+              setWeekStart(start);
+              setSelectedIndex(differenceInCalendarDays(now, start));
+            }}
+          >
+            Aujourd’hui
+          </Button>
+        </div>
+      </header>
 
       {notice ? (
         <Card className="flex flex-wrap items-center justify-between gap-3 py-3.5">
@@ -503,6 +508,7 @@ export default function PlanningPage() {
                   onAddRecipe={(slot) => setDialog({ date: iso(day), slot })}
                   onAddKind={(slot, kind) => {
                     if (kind === 'IMPOSED') setManualDialog({ date: iso(day), slot });
+                    else if (kind === 'SKIPPED') setSkipDialog({ date: iso(day), slot });
                     else addKind.mutate({ date: iso(day), slot, kind });
                   }}
                   onOpenItem={setDetail}
@@ -534,6 +540,45 @@ export default function PlanningPage() {
         onClose={() => setDialog(null)}
         onAdded={() => queryClient.invalidateQueries({ queryKey: ['planner'] })}
       />
+      <Modal
+        open={skipDialog !== null}
+        title="Repas sauté"
+        description="Qui saute ce repas ?"
+        onClose={() => setSkipDialog(null)}
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              loading={addKind.isPending}
+              onClick={() => {
+                if (!skipDialog) return;
+                addKind.mutate(
+                  { ...skipDialog, kind: 'SKIPPED', scope: 'me' },
+                  { onSuccess: () => setSkipDialog(null) },
+                );
+              }}
+            >
+              Pour moi seulement
+            </Button>
+            <Button
+              loading={addKind.isPending}
+              onClick={() => {
+                if (!skipDialog) return;
+                addKind.mutate(
+                  { ...skipDialog, kind: 'SKIPPED', scope: 'all' },
+                  { onSuccess: () => setSkipDialog(null) },
+                );
+              }}
+            >
+              Pour tout le monde
+            </Button>
+          </>
+        }
+      >
+        <p className="text-sm text-ink-600">
+          Le créneau reste vide pour les personnes qui ne sautent pas le repas.
+        </p>
+      </Modal>
       <ManualMealDialog
         open={manualDialog !== null}
         date={manualDialog?.date ?? iso(selectedDate)}
@@ -742,6 +787,7 @@ function SlotSection({
                     .join(' & ') ??
                   MEAL_KIND_LABELS[kind])
                 : MEAL_KIND_LABELS[kind]);
+            const cover = recipe?.photoUrl ?? KIND_COVER[kind] ?? null;
             return (
               <li
                 key={item.id}
@@ -754,10 +800,10 @@ function SlotSection({
                       : cn('border border-ink-200/70', chrome.rail),
                 )}
               >
-                {recipe ? (
+                {cover ? (
                   <RecipeCover
-                    src={recipe.photoUrl}
-                    className="mr-2.5 size-12 aspect-square rounded-lg border border-white/80 shadow-soft"
+                    src={cover}
+                    className="mr-2.5 size-12 aspect-square rounded-lg border border-white/80 object-cover shadow-soft"
                   />
                 ) : null}
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2">

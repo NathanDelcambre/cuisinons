@@ -465,12 +465,13 @@ export class ProvisionsService {
     const canonical = canonicalQuantity(input.quantity, input.unit);
     const list = await this.ensureList(userId);
     const selection = list.retailer
-      ? selectProductOffer({
-          neededQuantity: canonical.quantity,
-          neededUnit: canonical.unit,
-          offers: await this.products.findOffers(ingredient.nameFr, list.retailer),
-          economical: list.economical,
-        })
+      ? await this.quickProductSelection(
+          ingredient.nameFr,
+          canonical.quantity,
+          canonical.unit,
+          list.retailer,
+          list.economical,
+        )
       : null;
     await this.prisma.shoppingListItem.upsert({
       where: {
@@ -959,6 +960,36 @@ export class ProvisionsService {
       }),
     );
     return result;
+  }
+
+  /**
+   * Un ajout manuel ne doit pas attendre le catalogue entier : les produits
+   * vrac élargissent beaucoup la recherche. Sans réponse rapide, on garde
+   * l'ingrédient tel quel.
+   */
+  private async quickProductSelection(
+    name: string,
+    neededQuantity: number,
+    neededUnit: QuantityUnit,
+    retailer: Retailer,
+    economical: boolean,
+  ): Promise<ProductSelection | null> {
+    try {
+      const offersPromise = this.products.findOffers(name, retailer).catch(() => null);
+      const offers = await Promise.race([
+        offersPromise,
+        new Promise<null>((resolve) => setTimeout(() => resolve(null), 4_000)),
+      ]);
+      if (!offers) return null;
+      return selectProductOffer({
+        neededQuantity,
+        neededUnit,
+        offers,
+        economical,
+      });
+    } catch {
+      return null;
+    }
   }
 
   private shoppingProductData(selection: ProductSelection, neededQuantity: number) {
