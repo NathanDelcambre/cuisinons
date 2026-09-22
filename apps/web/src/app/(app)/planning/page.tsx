@@ -471,12 +471,6 @@ export default function PlanningPage() {
                   meals={meals}
                   userId={user?.id}
                   macros={macrosFor(day)}
-                  targets={{
-                    kcal: num(goals?.caloriesValue),
-                    protein: num(goals?.proteinValue),
-                    carbs: num(goals?.carbsValue),
-                    fat: num(goals?.fatValue),
-                  }}
                   selected={index === selectedIndex}
                   onSelect={() => setSelectedIndex(index)}
                   onAddRecipe={(slot) => setDialog({ date: iso(day), slot })}
@@ -585,7 +579,6 @@ function DayCard({
   meals,
   userId,
   macros,
-  targets,
   selected,
   onSelect,
   onAddRecipe,
@@ -599,7 +592,6 @@ function DayCard({
   meals: MealItem[];
   userId?: string;
   macros: Macros;
-  targets: MacroTargets;
   selected: boolean;
   onSelect?: () => void;
   onAddRecipe: (slot: MealSlot) => void;
@@ -645,7 +637,6 @@ function DayCard({
             slot={slot}
             items={meals.filter((m) => m.date.slice(0, 10) === key && m.slot === slot)}
             userId={userId}
-            targets={targets}
             onAddRecipe={() => onAddRecipe(slot)}
             onAddKind={(kind) => onAddKind(slot, kind)}
             onOpenItem={onOpenItem}
@@ -663,7 +654,6 @@ function SlotSection({
   slot,
   items,
   userId,
-  targets,
   onAddRecipe,
   onAddKind,
   onOpenItem,
@@ -674,7 +664,6 @@ function SlotSection({
   slot: MealSlot;
   items: MealItem[];
   userId?: string;
-  targets: MacroTargets;
   onAddRecipe: () => void;
   onAddKind: (kind: SpecialMealKind) => void;
   onOpenItem: (item: MealItem) => void;
@@ -744,21 +733,15 @@ function SlotSection({
                       <p className="line-clamp-2 text-sm font-medium leading-snug text-ink-900">
                         {title}
                       </p>
-                      {recipe ? <RecipeMeta recipe={recipe} /> : null}
+                      {recipe ? (
+                        <RecipeMeta recipe={recipe} kcal={item.nutrition.perServing.kcal * qty} />
+                      ) : kind === 'IMPOSED' ? (
+                        <p className="mt-2.5 flex items-center text-[11px] leading-none text-ink-400">
+                          <MealCalories kcal={item.nutrition.perServing.kcal * qty} />
+                        </p>
+                      ) : null}
                     </span>
                   </button>
-                  {recipe || kind === 'IMPOSED' ? (
-                    <MacroCounts
-                      macros={{
-                        kcal: item.nutrition.perServing.kcal * qty,
-                        protein: item.nutrition.perServing.protein * qty,
-                        carbs: item.nutrition.perServing.carbs * qty,
-                        fat: item.nutrition.perServing.fat * qty,
-                      }}
-                      targets={targets}
-                      className="pr-20"
-                    />
-                  ) : null}
                   {(recipe || kind === 'IMPOSED') && !item.nutrition.complete ? (
                     <p className="flex items-center gap-1 pr-20 text-[11px] text-peach-500">
                       <UtensilsCrossed className="size-3 shrink-0" aria-hidden />
@@ -993,12 +976,10 @@ function ActionMenu({
   );
 }
 
-function RecipeMeta({ recipe }: { recipe: NonNullable<MealItem['recipe']> }) {
+function RecipeMeta({ recipe, kcal }: { recipe: NonNullable<MealItem['recipe']>; kcal: number }) {
   const ingredientCount = recipe.ingredientCount ?? 0;
   const prep = recipe.prepTimeMinutes;
   const cook = recipe.cookTimeMinutes;
-  if (ingredientCount === 0 && prep == null && cook == null) return null;
-
   return (
     <p className="mt-2.5 flex flex-nowrap items-center gap-2.5 overflow-hidden whitespace-nowrap text-[11px] leading-none text-ink-400">
       {ingredientCount > 0 ? (
@@ -1019,7 +1000,17 @@ function RecipeMeta({ recipe }: { recipe: NonNullable<MealItem['recipe']> }) {
           <span className="tabular">{cook} min</span>
         </span>
       ) : null}
+      <MealCalories kcal={kcal} />
     </p>
+  );
+}
+
+function MealCalories({ kcal }: { kcal: number }) {
+  return (
+    <span className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap text-peach-500">
+      <MacroIcon kind="kcal" className="size-3 shrink-0" />
+      <span className="tabular">{Math.round(kcal)} kcal</span>
+    </span>
   );
 }
 
