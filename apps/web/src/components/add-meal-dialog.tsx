@@ -15,6 +15,7 @@ import {
 } from '@cuisinons/shared';
 import { useAuth } from './auth-provider';
 import { Avatar } from './avatar';
+import { SLOT_CHROME } from './slot-add-menu';
 
 type Recipe = { id: string; name: string };
 type User = { id: string; email?: string; displayName: string; avatarUrl?: string | null };
@@ -122,6 +123,8 @@ export function AddMealDialog({
   });
 
   const list = recipes.data ?? [];
+  const slotChrome = SLOT_CHROME[slot];
+  const SlotIcon = slotChrome.icon;
 
   return (
     <Modal
@@ -196,7 +199,18 @@ export function AddMealDialog({
                           : 'text-ink-800 hover:bg-white',
                       )}
                     >
-                      <span className="min-w-0 truncate">{recipe.name}</span>
+                      <span className="flex min-w-0 flex-1 items-center gap-2.5">
+                        <span
+                          aria-hidden
+                          className={cn(
+                            'flex size-8 shrink-0 items-center justify-center rounded-full',
+                            selected ? 'bg-white/15 text-white' : slotChrome.iconClass,
+                          )}
+                        >
+                          <SlotIcon className="size-4" />
+                        </span>
+                        <span className="min-w-0 truncate">{recipe.name}</span>
+                      </span>
                       {selected ? <Check className="size-4 shrink-0" aria-hidden /> : null}
                     </button>
                   </li>

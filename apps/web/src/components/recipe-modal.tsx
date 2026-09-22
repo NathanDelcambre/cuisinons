@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CalendarPlus, ChefHat, Clock, Pencil, Star, TriangleAlert } from 'lucide-react';
 import { Badge, Button, Modal, Select, Skeleton, Stepper, buttonClasses, cn } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
@@ -19,6 +19,7 @@ import {
   kitchenLabel,
   type MealSlot,
   type QuantityUnit,
+  type UxCategory,
 } from '@cuisinons/shared';
 import { Avatar } from './avatar';
 import { IngredientIcon } from './ingredient-icon';
@@ -41,7 +42,12 @@ export type RecipeDetail = {
     unit: string;
     grams: string | null;
     estimated: boolean;
-    ingredient: { id?: string; nameFr: string; iconUrl: string | null };
+    ingredient: {
+      id?: string;
+      nameFr: string;
+      iconUrl: string | null;
+      uxCategory?: UxCategory;
+    };
   }>;
   steps: Array<{ stepNumber: number; description: string; durationMinutes: number | null }>;
   tags: Array<{ tag: { label: string } }>;
@@ -203,6 +209,19 @@ function RecipeModalBody({
   const shown = servings ?? baseServings;
   const factor = shown / baseServings;
   const totalTime = (data.prepTimeMinutes ?? 0) + (data.cookTimeMinutes ?? 0);
+  const sortedIngredients = useMemo(
+    () =>
+      data.ingredients
+        .map((line, index) => ({ line, index }))
+        .sort(
+          (a, b) =>
+            ingredientDisplayPriority(a.line.ingredient.uxCategory) -
+              ingredientDisplayPriority(b.line.ingredient.uxCategory) ||
+            a.index - b.index,
+        )
+        .map(({ line }) => line),
+    [data.ingredients],
+  );
 
   return (
     <>
@@ -318,7 +337,7 @@ function RecipeModalBody({
             <p className="text-sm text-ink-500">Aucun ingrédient.</p>
           ) : (
             <ul className="divide-y divide-white/80 overflow-hidden rounded-2xl border border-white/70 bg-white/60">
-              {data.ingredients.map((line, index) => (
+              {sortedIngredients.map((line, index) => (
                 <li key={index} className="flex items-center gap-3 px-3 py-2.5">
                   <IngredientIcon
                     src={line.ingredient.iconUrl}
@@ -415,6 +434,30 @@ function RecipeModalBody({
       </div>
     </>
   );
+}
+
+function ingredientDisplayPriority(category: UxCategory | undefined) {
+  if (
+    category === 'MEATS' ||
+    category === 'FISH' ||
+    category === 'SEAFOOD' ||
+    category === 'CHARCUTERIE' ||
+    category === 'EGGS' ||
+    category === 'VEGETARIAN_PRODUCTS'
+  ) {
+    return 0;
+  }
+  if (
+    category === 'STARCHES' ||
+    category === 'CEREALS' ||
+    category === 'LEGUMES' ||
+    category === 'VEGETABLES' ||
+    category === 'BAKERY'
+  ) {
+    return 1;
+  }
+  if (category === 'SPICES' || category === 'AROMATICS') return 3;
+  return 2;
 }
 
 function RecipeModalSkeleton() {

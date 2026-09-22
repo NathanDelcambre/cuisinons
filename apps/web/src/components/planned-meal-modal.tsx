@@ -10,6 +10,8 @@ import {
   UNIT_LABELS,
 } from '@cuisinons/shared';
 import { RecipeModal } from './recipe-modal';
+import { IngredientIcon } from './ingredient-icon';
+import { MacroIcon } from './macro-icon';
 
 const KIND_ICON = {
   RESTAURANT: Utensils,
@@ -30,11 +32,16 @@ export function PlannedMealModal({
     slot: MealSlot;
     kind: MealKind;
     recipe: { id: string } | null;
+    manualTitle?: string;
+    nutrition: {
+      perServing: { kcal: number; protein: number; carbs: number; fat: number };
+      complete: boolean;
+    };
     manualIngredients?: Array<{
       id: string;
       quantity: number;
       unit: keyof typeof UNIT_LABELS;
-      ingredient: { nameFr: string };
+      ingredient: { nameFr: string; iconUrl?: string | null };
     }>;
   } | null;
   validated: boolean;
@@ -62,7 +69,8 @@ export function PlannedMealModal({
 
   const kind = item?.kind ?? 'RESTAURANT';
   const Icon = kind === 'RECIPE' ? Utensils : KIND_ICON[kind];
-  const title = MEAL_KIND_LABELS[kind];
+  const title =
+    kind === 'IMPOSED' && item.manualTitle ? item.manualTitle : MEAL_KIND_LABELS[kind];
   const when = item
     ? new Date(`${item.date.slice(0, 10)}T12:00:00`).toLocaleDateString('fr-FR', {
         weekday: 'long',
@@ -126,20 +134,80 @@ export function PlannedMealModal({
         </p>
       </div>
       {kind === 'IMPOSED' && item.manualIngredients?.length ? (
-        <ul className="mt-5 space-y-2 border-t border-white/70 pt-4">
-          {item.manualIngredients.map((line) => (
-            <li
-              key={line.id}
-              className="flex items-center justify-between gap-3 text-sm text-ink-700"
-            >
-              <span className="truncate">{line.ingredient.nameFr}</span>
-              <span className="shrink-0 tabular text-ink-500">
-                {line.quantity} {UNIT_LABELS[line.unit]}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <>
+          <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-white/70 pt-4 sm:grid-cols-4">
+            <ManualMacro
+              kind="kcal"
+              label="Calories"
+              value={item.nutrition.perServing.kcal}
+              unit="kcal"
+            />
+            <ManualMacro
+              kind="protein"
+              label="Protéines"
+              value={item.nutrition.perServing.protein}
+              unit="g"
+            />
+            <ManualMacro
+              kind="carbs"
+              label="Glucides"
+              value={item.nutrition.perServing.carbs}
+              unit="g"
+            />
+            <ManualMacro
+              kind="fat"
+              label="Lipides"
+              value={item.nutrition.perServing.fat}
+              unit="g"
+            />
+          </dl>
+          <ul className="mt-5 space-y-2 border-t border-white/70 pt-4">
+            {item.manualIngredients.map((line) => (
+              <li
+                key={line.id}
+                className="flex items-center justify-between gap-3 text-sm text-ink-700"
+              >
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <IngredientIcon
+                    src={line.ingredient.iconUrl ?? null}
+                    name={line.ingredient.nameFr}
+                    className="size-8 shrink-0"
+                  />
+                  <span className="truncate">{line.ingredient.nameFr}</span>
+                </span>
+                <span className="shrink-0 tabular text-ink-500">
+                  {line.quantity} {UNIT_LABELS[line.unit]}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
       ) : null}
     </Modal>
+  );
+}
+
+function ManualMacro({
+  kind,
+  label,
+  value,
+  unit,
+}: {
+  kind: 'kcal' | 'protein' | 'carbs' | 'fat';
+  label: string;
+  value: number;
+  unit: string;
+}) {
+  return (
+    <div>
+      <dt className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-ink-400">
+        <MacroIcon kind={kind} className="size-3" />
+        {label}
+      </dt>
+      <dd className="tabular mt-1 font-display text-lg font-semibold text-ink-900">
+        {Math.round(value)}
+        <span className="ml-0.5 text-xs font-medium text-ink-500">{unit}</span>
+      </dd>
+    </div>
   );
 }

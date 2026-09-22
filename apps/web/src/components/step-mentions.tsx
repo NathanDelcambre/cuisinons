@@ -413,7 +413,7 @@ export function StepMentionPreview({
             key={index}
             type="button"
             title={tip}
-            className="mx-0.5 inline rounded-md bg-sage-100 px-1.5 py-0.5 text-sage-700 underline-offset-2 hover:bg-sage-200"
+            className="mx-0.5 inline whitespace-normal break-normal rounded-md bg-sage-100 px-1.5 py-0.5 text-sage-700 underline-offset-2 [box-decoration-break:clone] [-webkit-box-decoration-break:clone] hover:bg-sage-200"
           >
             {part.name}
           </button>

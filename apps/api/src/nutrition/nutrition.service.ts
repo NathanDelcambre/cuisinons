@@ -2,7 +2,9 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   aggregateUserStats,
   avatarUrlForEmail,
+  manualMealName,
   periodDayCount,
+  resolveGrams,
   STATS_PERIODS,
   type StatsPeriod,
   type MealSlot,
@@ -56,9 +58,19 @@ export class NutritionService {
         recipe: { select: { name: true, servings: true, nutritionSnapshot: true } },
         manualIngredients: {
           select: {
+            quantity: true,
+            unit: true,
             grams: true,
             ingredient: {
-              select: { energyKcal: true, proteinG: true, carbG: true, fatG: true, fiberG: true },
+              select: {
+                nameFr: true,
+                energyKcal: true,
+                proteinG: true,
+                carbG: true,
+                fatG: true,
+                fiberG: true,
+                conversions: { select: { unit: true, gramsPerUnit: true } },
+              },
             },
           },
         },
@@ -69,12 +81,34 @@ export class NutritionService {
     });
 
     const meals = items.map((item) => {
+      const manualLines = item.manualIngredients.map((line) => {
+        const fallback =
+          line.grams === null
+            ? resolveGrams({
+                quantity: Number(line.quantity),
+                unit: line.unit,
+                conversions: line.ingredient.conversions.map((conversion) => ({
+                  unit: conversion.unit,
+                  gramsPerUnit: Number(conversion.gramsPerUnit),
+                })),
+              })
+            : null;
+        return {
+          ...line,
+          resolvedGrams:
+            line.grams !== null
+              ? Number(line.grams)
+              : fallback && !('needsManualGrams' in fallback)
+                ? fallback.grams
+                : null,
+        };
+      });
       const nutrition = item.recipe
         ? (nutritionFromSnapshot(item.recipe.nutritionSnapshot) ??
           computeRecipeNutrition([], Number(item.recipe.servings)))
         : computeRecipeNutrition(
-            item.manualIngredients.map((line) => ({
-              grams: line.grams === null ? null : Number(line.grams),
+            manualLines.map((line) => ({
+              grams: line.resolvedGrams,
               energyKcalPer100g:
                 line.ingredient.energyKcal === null ? null : Number(line.ingredient.energyKcal),
               proteinPer100g:
@@ -90,7 +124,16 @@ export class NutritionService {
         slot: item.slot as MealSlot,
         recipeId: item.recipeId,
         recipeName:
-          item.recipe?.name ?? (item.manualIngredients.length > 0 ? 'Ajouter manuellement' : null),
+          item.recipe?.name ??
+          (manualLines.length > 0
+            ? manualMealName(
+                manualLines.map((line) => ({
+                  nameFr: line.ingredient.nameFr,
+                  grams: line.resolvedGrams,
+                  quantity: Number(line.quantity),
+                })),
+              )
+            : null),
         perServing: nutrition.perServing,
         portions: item.portions.map((p) => ({
           userId: p.userId,

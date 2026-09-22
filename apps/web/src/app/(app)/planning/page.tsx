@@ -87,8 +87,10 @@ type MealItem = {
     id: string;
     quantity: number;
     unit: QuantityUnit;
+    grams?: number | null;
     ingredient: { id: string; nameFr: string; iconUrl: string | null };
   }>;
+  manualTitle?: string;
 };
 
 type Goal = {
@@ -409,7 +411,7 @@ export default function PlanningPage() {
         <div className="-mx-4 overflow-x-auto scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
           <div className="flex w-max gap-3">
             {Array.from({ length: 7 }, (_, i) => (
-              <Skeleton key={i} className="h-[30rem] w-[20rem] shrink-0 rounded-2xl" />
+              <Skeleton key={i} className="h-[32rem] w-[20rem] shrink-0 rounded-2xl" />
             ))}
           </div>
         </div>
@@ -570,7 +572,7 @@ function DayCard({
   return (
     <Card
       className={cn(
-        'flex h-[30rem] w-[20rem] shrink-0 flex-col p-0 transition duration-300 ease-out-soft',
+        'flex h-[32rem] w-[20rem] shrink-0 flex-col p-0 transition duration-300 ease-out-soft',
         selected && 'ring-2 ring-sage-300',
       )}
     >
@@ -596,7 +598,7 @@ function DayCard({
         <MacroCounts macros={macros} />
       </button>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-1.5 p-2">
+      <div className="flex min-h-0 flex-1 flex-col gap-1.5 px-2 pt-2 pb-4">
         {MEAL_SLOTS.map((slot) => (
           <SlotSection
             key={slot}
@@ -666,45 +668,54 @@ function SlotSection({
             const validated = isValidated(item, portion, todayIso);
             const kind = item.kind ?? 'RECIPE';
             const recipe = kind === 'RECIPE' ? item.recipe : null;
-            const title = recipe?.name ?? MEAL_KIND_LABELS[kind];
+            const title =
+              recipe?.name ??
+              (kind === 'IMPOSED'
+                ? (item.manualTitle ??
+                  item.manualIngredients
+                    ?.slice(0, 3)
+                    .map((line) => line.ingredient.nameFr)
+                    .join(' & ') ??
+                  MEAL_KIND_LABELS[kind])
+                : MEAL_KIND_LABELS[kind]);
             return (
               <li
                 key={item.id}
                 className={cn(
-                  'group relative flex min-h-[5.25rem] flex-1 items-center overflow-hidden rounded-xl bg-white/75 py-2.5 pl-3.5 pr-2 shadow-[0_0_10px_rgba(28,25,23,0.08),0_2px_8px_rgba(28,25,23,0.08)]',
+                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-xl bg-white/75 py-3.5 pl-3.5 pr-2 shadow-[0_0_10px_rgba(28,25,23,0.08),0_2px_8px_rgba(28,25,23,0.08)]',
                   validated
                     ? 'border border-sage-500 border-l-[3px] border-l-sage-500'
                     : cn('border border-white/70', chrome.rail),
                 )}
               >
+                <span
+                  aria-hidden
+                  className={cn(
+                    'absolute left-3.5 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full',
+                    validated ? 'bg-sage-200 text-sage-800' : chrome.iconClass,
+                  )}
+                >
+                  {validated ? (
+                    <Check className="size-3.5" strokeWidth={2.75} />
+                  ) : (
+                    <SlotIcon className="size-3" />
+                  )}
+                </span>
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2.5">
                   <button
                     type="button"
                     onClick={() => onOpenItem(item)}
                     aria-label={validated ? `${label}, ${title}, validé` : `${label}, ${title}`}
-                    className="flex min-w-0 items-center gap-2.5 rounded-lg pr-24 text-left"
+                    className="block min-w-0 rounded-lg pr-24 pl-[2.125rem] text-left"
                   >
-                    <span
-                      aria-hidden
-                      className={cn(
-                        'flex size-6 shrink-0 items-center justify-center rounded-full',
-                        validated ? 'bg-sage-200 text-sage-800' : chrome.iconClass,
-                      )}
-                    >
-                      {validated ? (
-                        <Check className="size-3.5" strokeWidth={2.75} />
-                      ) : (
-                        <SlotIcon className="size-3" />
-                      )}
-                    </span>
-                    <span className="min-w-0 flex-1">
+                    <span className="block min-w-0">
                       <p className="line-clamp-2 text-sm font-medium leading-snug text-ink-900">
                         {title}
                       </p>
                       {recipe ? <RecipeMeta recipe={recipe} /> : null}
                     </span>
                   </button>
-                  {recipe ? (
+                  {recipe || kind === 'IMPOSED' ? (
                     <MacroCounts
                       macros={{
                         kcal: item.nutrition.perServing.kcal * qty,
@@ -716,7 +727,7 @@ function SlotSection({
                       className="pr-1 pl-[2.125rem]"
                     />
                   ) : null}
-                  {recipe && !item.nutrition.complete ? (
+                  {(recipe || kind === 'IMPOSED') && !item.nutrition.complete ? (
                     <p className="flex items-center gap-1 pl-[2.125rem] text-[11px] text-peach-500">
                       <UtensilsCrossed className="size-3 shrink-0" aria-hidden />
                       Incomplet
@@ -939,21 +950,21 @@ function RecipeMeta({ recipe }: { recipe: NonNullable<MealItem['recipe']> }) {
   if (ingredientCount === 0 && prep == null && cook == null) return null;
 
   return (
-    <p className="mt-2.5 flex items-center gap-2.5 text-[11px] leading-none text-ink-400">
+    <p className="mt-2.5 flex flex-nowrap items-center gap-2.5 overflow-hidden whitespace-nowrap text-[11px] leading-none text-ink-400">
       {ingredientCount > 0 ? (
-        <span className="inline-flex items-center gap-0.5">
+        <span className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap">
           <Carrot className="size-3 shrink-0" aria-hidden />
           <span className="tabular">{ingredientCount}</span>
         </span>
       ) : null}
       {prep != null && prep > 0 ? (
-        <span className="inline-flex items-center gap-0.5">
+        <span className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap">
           <Clock className="size-3 shrink-0" aria-hidden />
           <span className="tabular">{prep} min</span>
         </span>
       ) : null}
       {cook != null && cook > 0 ? (
-        <span className="inline-flex items-center gap-0.5">
+        <span className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap">
           <CookingPot className="size-3 shrink-0" aria-hidden />
           <span className="tabular">{cook} min</span>
         </span>

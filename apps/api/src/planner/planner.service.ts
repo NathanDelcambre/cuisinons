@@ -13,7 +13,9 @@ import { publicRecipePhotoUrl } from '../recipes/recipe-photo.js';
 import {
   canonicalQuantity,
   computeRecipeNutrition,
+  manualMealName,
   mealsForEater,
+  resolveGrams,
   type MacroNutrients,
   type MealKind,
 } from '@cuisinons/shared';
@@ -58,6 +60,7 @@ export class PlannerService {
                 carbG: true,
                 fatG: true,
                 fiberG: true,
+                conversions: { select: { unit: true, gramsPerUnit: true } },
               },
             },
           },
@@ -81,22 +84,47 @@ export class PlannerService {
           ).map((row) => [row.id, row.photoUrl]),
     );
     return items.map((item) => {
-      const manualIngredients = item.manualIngredients.map((line) => ({
-        id: line.id,
-        ingredientId: line.ingredientId,
-        quantity: Number(line.quantity),
-        unit: line.unit,
-        grams: line.grams === null ? null : Number(line.grams),
-        ingredient: {
-          id: line.ingredient.id,
+      const manualIngredients = item.manualIngredients.map((line) => {
+        const fallback =
+          line.grams === null
+            ? resolveGrams({
+                quantity: Number(line.quantity),
+                unit: line.unit,
+                conversions: line.ingredient.conversions.map((conversion) => ({
+                  unit: conversion.unit,
+                  gramsPerUnit: Number(conversion.gramsPerUnit),
+                })),
+              })
+            : null;
+        return {
+          id: line.id,
+          ingredientId: line.ingredientId,
+          quantity: Number(line.quantity),
+          unit: line.unit,
+          grams:
+            line.grams !== null
+              ? Number(line.grams)
+              : fallback && !('needsManualGrams' in fallback)
+                ? fallback.grams
+                : null,
+          ingredient: {
+            id: line.ingredient.id,
+            nameFr: line.ingredient.nameFr,
+            iconUrl: line.ingredient.iconUrl,
+          },
+        };
+      });
+      const manualTitle = manualMealName(
+        manualIngredients.map((line) => ({
           nameFr: line.ingredient.nameFr,
-          iconUrl: line.ingredient.iconUrl,
-        },
-      }));
+          grams: line.grams,
+          quantity: line.quantity,
+        })),
+      );
       if (!item.recipe) {
         const nutrition = computeRecipeNutrition(
-          item.manualIngredients.map((line) => ({
-            grams: line.grams === null ? null : Number(line.grams),
+          item.manualIngredients.map((line, index) => ({
+            grams: manualIngredients[index]?.grams ?? null,
             energyKcalPer100g:
               line.ingredient.energyKcal === null ? null : Number(line.ingredient.energyKcal),
             proteinPer100g:
@@ -107,7 +135,7 @@ export class PlannerService {
           })),
           1,
         );
-        return { ...item, manualIngredients, recipe: null, nutrition };
+        return { ...item, manualIngredients, manualTitle, recipe: null, nutrition };
       }
       const nutrition =
         nutritionFromSnapshot(item.recipe.nutritionSnapshot) ??
@@ -153,19 +181,46 @@ export class PlannerService {
       } else if (input.recipeId) {
         throw new BadRequestException('Pas de recette pour ce type de repas.');
       }
-      const manualIngredients =
-        input.kind === 'IMPOSED'
-          ? (input.ingredients ?? []).map((line, sortOrder) => {
-              const canonical = canonicalQuantity(line.quantity, line.unit);
-              return {
-                ingredientId: line.ingredientId,
-                quantity: canonical.quantity,
-                unit: canonical.unit,
-                grams: canonical.unit === 'G' ? canonical.quantity : null,
-                sortOrder,
-              };
+      const inputIngredients = input.kind === 'IMPOSED' ? (input.ingredients ?? []) : [];
+      const ingredientRows =
+        inputIngredients.length > 0
+          ? await tx.ingredient.findMany({
+              where: { id: { in: inputIngredients.map((line) => line.ingredientId) } },
+              select: {
+                id: true,
+                conversions: { select: { unit: true, gramsPerUnit: true } },
+              },
             })
           : [];
+      if (
+        ingredientRows.length !== new Set(inputIngredients.map((line) => line.ingredientId)).size
+      ) {
+        throw new NotFoundException('Un ingrédient est introuvable.');
+      }
+      const conversionsByIngredient = new Map(
+        ingredientRows.map((ingredient) => [
+          ingredient.id,
+          ingredient.conversions.map((conversion) => ({
+            unit: conversion.unit,
+            gramsPerUnit: Number(conversion.gramsPerUnit),
+          })),
+        ]),
+      );
+      const manualIngredients = inputIngredients.map((line, sortOrder) => {
+        const canonical = canonicalQuantity(line.quantity, line.unit);
+        const resolved = resolveGrams({
+          quantity: line.quantity,
+          unit: line.unit,
+          conversions: conversionsByIngredient.get(line.ingredientId) ?? [],
+        });
+        return {
+          ingredientId: line.ingredientId,
+          quantity: canonical.quantity,
+          unit: canonical.unit,
+          grams: 'needsManualGrams' in resolved ? null : resolved.grams,
+          sortOrder,
+        };
+      });
       if (input.kind === 'IMPOSED' && manualIngredients.length === 0)
         throw new BadRequestException('Ajoute au moins un ingrédient.');
       const eaters = input.portions.filter((p) => p.portions > 0).map((p) => p.userId);

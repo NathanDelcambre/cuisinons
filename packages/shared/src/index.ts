@@ -12,6 +12,7 @@ export * from './nutrition/conversions.js';
 export * from './optimization/engine.js';
 export * from './planner/slots.js';
 export * from './planner/repeat.js';
+export * from './planner/manual-meal.js';
 export * from './provisions/storage.js';
 export * from './provisions/quantities.js';
 export * from './products/retail.js';
