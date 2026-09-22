@@ -142,6 +142,7 @@ export default function PlanningPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const scrollSettleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const from = iso(weekStart);
   const todayIso = new Date().toISOString().slice(0, 10);
   const days = useMemo(
@@ -218,6 +219,39 @@ export default function PlanningPage() {
       (scroller.clientWidth - cardRect.width) / 2;
     scroller.scrollTo({ left: Math.max(0, left) });
   }, [selectedIndex, mealsQuery.isLoading, weekStart]);
+
+  const selectCenteredDay = useCallback(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller || !window.matchMedia('(max-width: 639px)').matches) return;
+
+    if (scrollSettleRef.current) clearTimeout(scrollSettleRef.current);
+    scrollSettleRef.current = setTimeout(() => {
+      const scrollerCenter = scroller.getBoundingClientRect().left + scroller.clientWidth / 2;
+      const cards = Array.from(scroller.querySelectorAll<HTMLElement>('[data-day-index]'));
+      let nearestIndex = selectedIndex;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+
+      for (const card of cards) {
+        const rect = card.getBoundingClientRect();
+        const distance = Math.abs(rect.left + rect.width / 2 - scrollerCenter);
+        const index = Number(card.dataset.dayIndex);
+        if (distance < nearestDistance && Number.isInteger(index)) {
+          nearestDistance = distance;
+          nearestIndex = index;
+        }
+      }
+
+      setSelectedIndex(nearestIndex);
+      scrollSettleRef.current = null;
+    }, 140);
+  }, [selectedIndex]);
+
+  useEffect(
+    () => () => {
+      if (scrollSettleRef.current) clearTimeout(scrollSettleRef.current);
+    },
+    [],
+  );
   const rawMeals = mealsQuery.data ?? [];
   const meals = user?.id ? mealsForEater(rawMeals, user.id) : rawMeals;
 
@@ -408,52 +442,60 @@ export default function PlanningPage() {
       </Panel>
 
       {mealsQuery.isLoading ? (
-        <div className="-mx-4 overflow-x-auto scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
+        <div className="-mx-4 overflow-x-auto scroll-smooth px-[max(1rem,calc((100vw-20rem)/2))] py-3 sm:-mx-8 sm:px-8">
           <div className="flex w-max gap-3">
             {Array.from({ length: 7 }, (_, i) => (
-              <Skeleton key={i} className="h-[32rem] w-[20rem] shrink-0 rounded-2xl" />
+              <Skeleton
+                key={i}
+                className="h-[32rem] w-[calc(100vw-2rem)] max-w-[20rem] shrink-0 rounded-2xl sm:w-[20rem]"
+              />
             ))}
           </div>
         </div>
       ) : (
         <div
           ref={scrollerRef}
-          className="-mx-4 overflow-x-auto overscroll-x-contain scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8"
+          onScroll={selectCenteredDay}
+          className="-mx-4 snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth px-[max(1rem,calc((100vw-20rem)/2))] py-3 sm:-mx-8 sm:snap-none sm:px-8"
         >
           <div className="flex w-max items-stretch gap-3">
             {days.map((day, index) => (
-              <div key={iso(day)} data-day-index={index} className="shrink-0">
+              <div
+                key={iso(day)}
+                data-day-index={index}
+                className="shrink-0 snap-center snap-always"
+              >
                 <DayCard
-                date={day}
-                meals={meals}
-                userId={user?.id}
-                macros={macrosFor(day)}
-                targets={{
-                  kcal: num(goals?.caloriesValue),
-                  protein: num(goals?.proteinValue),
-                  carbs: num(goals?.carbsValue),
-                  fat: num(goals?.fatValue),
-                }}
-                selected={index === selectedIndex}
-                onSelect={() => setSelectedIndex(index)}
-                onAddRecipe={(slot) => setDialog({ date: iso(day), slot })}
-                onAddKind={(slot, kind) => {
-                  if (kind === 'IMPOSED') setManualDialog({ date: iso(day), slot });
-                  else addKind.mutate({ date: iso(day), slot, kind });
-                }}
-                onOpenItem={setDetail}
-                onChangeRecipe={(item, scope) =>
-                  setDialog({
-                    date: item.date.slice(0, 10),
-                    slot: item.slot,
-                    replaceItemId: item.id,
-                    recipeId: item.recipe?.id,
-                    replaceScope: scope,
-                  })
-                }
-                onRemove={(id, scope) => remove.mutate({ id, scope })}
-                todayIso={todayIso}
-              />
+                  date={day}
+                  meals={meals}
+                  userId={user?.id}
+                  macros={macrosFor(day)}
+                  targets={{
+                    kcal: num(goals?.caloriesValue),
+                    protein: num(goals?.proteinValue),
+                    carbs: num(goals?.carbsValue),
+                    fat: num(goals?.fatValue),
+                  }}
+                  selected={index === selectedIndex}
+                  onSelect={() => setSelectedIndex(index)}
+                  onAddRecipe={(slot) => setDialog({ date: iso(day), slot })}
+                  onAddKind={(slot, kind) => {
+                    if (kind === 'IMPOSED') setManualDialog({ date: iso(day), slot });
+                    else addKind.mutate({ date: iso(day), slot, kind });
+                  }}
+                  onOpenItem={setDetail}
+                  onChangeRecipe={(item, scope) =>
+                    setDialog({
+                      date: item.date.slice(0, 10),
+                      slot: item.slot,
+                      replaceItemId: item.id,
+                      recipeId: item.recipe?.id,
+                      replaceScope: scope,
+                    })
+                  }
+                  onRemove={(id, scope) => remove.mutate({ id, scope })}
+                  todayIso={todayIso}
+                />
               </div>
             ))}
           </div>
@@ -572,7 +614,7 @@ function DayCard({
   return (
     <Card
       className={cn(
-        'flex h-[32rem] w-[20rem] shrink-0 flex-col p-0 transition duration-300 ease-out-soft',
+        'flex h-[32rem] w-[calc(100vw-2rem)] max-w-[20rem] shrink-0 flex-col p-0 transition duration-300 ease-out-soft sm:w-[20rem]',
         selected && 'ring-2 ring-sage-300',
       )}
     >
