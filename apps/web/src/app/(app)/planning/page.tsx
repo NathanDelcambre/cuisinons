@@ -706,8 +706,8 @@ function SlotSection({
             const qty = portion ? Number(portion.portions) : 0;
             const validated = isValidated(item, portion, todayIso);
             const past = item.date.slice(0, 10) < todayIso;
-            const participants = item.portions.filter((participant) =>
-              Number(participant.portions) > 0,
+            const participants = item.portions.filter(
+              (participant) => Number(participant.portions) > 0,
             );
             const kind = item.kind ?? 'RECIPE';
             const recipe = kind === 'RECIPE' ? item.recipe : null;
@@ -725,12 +725,12 @@ function SlotSection({
               <li
                 key={item.id}
                 className={cn(
-                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-xl bg-white/75 py-3.5 pl-3.5 pr-2 shadow-[0_0_10px_rgba(28,25,23,0.08),0_2px_8px_rgba(28,25,23,0.08)]',
+                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-white/75 py-3.5 pl-3.5 pr-2 shadow-[0_0_10px_rgba(28,25,23,0.08),0_2px_8px_rgba(28,25,23,0.08)]',
                   past
                     ? 'border border-ink-300/70 bg-ink-50/50 opacity-75 shadow-none'
                     : validated
                       ? 'border border-sage-500 border-l-[3px] border-l-sage-500'
-                      : cn('border border-white/70', chrome.rail),
+                      : cn('border border-ink-200/70', chrome.rail),
                 )}
               >
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2.5">
@@ -779,7 +779,7 @@ function SlotSection({
                         key={participant.id}
                         name={participant.user.displayName}
                         src={avatarUrlForEmail(participant.user.email)}
-                        className="size-6 border-2 border-white text-[9px] shadow-sm"
+                        className="size-6 rounded-full border-2 border-white text-[9px] shadow-sm"
                       />
                     ))}
                   </div>
