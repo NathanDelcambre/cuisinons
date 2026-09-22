@@ -107,6 +107,8 @@ const RETAILER_TERMS: Array<[Retailer, string[]]> = [
   ['LIDL', ['lidl']],
   ['INTERMARCHE', ['intermarche']],
 ];
+const RETAILERS = RETAILER_TERMS.map(([retailer]) => retailer);
+const NATIONAL_REFERENCE_STORE = 'Référence nationale Open Prices';
 
 function normalize(value: string) {
   return value
@@ -418,6 +420,58 @@ async function collectLatestPrices(
   return { latest, rawProducts: [...rawProducts.values()] };
 }
 
+/**
+ * Open Prices ne contient pas toujours une observation pour chaque couple
+ * produit brut / enseigne. Le produit reste pourtant un essentiel vendu en
+ * vrac. Pour éviter qu'il disparaisse du catalogue d'une enseigne, on complète
+ * uniquement les trous avec la médiane des prix Open Prices observés dans les
+ * autres enseignes. La provenance reste explicite dans storeName.
+ */
+function completeBulkRetailerCoverage(
+  batchId: string,
+  latest: Map<string, PriceRow>,
+  rawProducts: ProductRow[],
+) {
+  let fallbackCount = 0;
+  for (const product of rawProducts) {
+    const references = RETAILERS.flatMap((retailer) => {
+      const row = latest.get(`${product.barcode}|${retailer}`);
+      return row ? [row] : [];
+    });
+    if (references.length === 0) continue;
+
+    const prices = references.map((row) => row.price).sort((a, b) => a - b);
+    const middle = Math.floor(prices.length / 2);
+    const median =
+      prices.length % 2 === 0
+        ? (prices[middle - 1]! + prices[middle]!) / 2
+        : prices[middle]!;
+    const referencePrice = Math.round(median * 100) / 100;
+    const observedAt = references.reduce(
+      (latestDate, row) => (row.observedAt > latestDate ? row.observedAt : latestDate),
+      references[0]!.observedAt,
+    );
+
+    for (const retailer of RETAILERS) {
+      const key = `${product.barcode}|${retailer}`;
+      if (latest.has(key)) continue;
+      latest.set(key, {
+        id: randomUUID(),
+        productBarcode: product.barcode,
+        retailer,
+        locationId: 0,
+        storeName: NATIONAL_REFERENCE_STORE,
+        price: referencePrice,
+        currency: 'EUR',
+        observedAt,
+        importBatchId: batchId,
+      });
+      fallbackCount += 1;
+    }
+  }
+  return fallbackCount;
+}
+
 async function writePrices(batchId: string, latest: Map<string, PriceRow>, barcodes: Set<string>) {
   const rows = [...latest.values()].filter((row) => barcodes.has(row.productBarcode));
   const previousPriceCount = await prisma.openFoodPrice.count();
@@ -447,6 +501,7 @@ async function main() {
       locations,
       rawCategories,
     );
+    const bulkFallbackCount = completeBulkRetailerCoverage(batchId, latestPrices, rawProducts);
     const pricedBarcodes = new Set([...latestPrices.values()].map((row) => row.productBarcode));
     const packagedProducts = await selectProducts(pricedBarcodes);
     const minimumExpectedProducts = Math.floor(MAX_PRODUCTS * MIN_PRODUCT_COMPLETENESS);
@@ -488,7 +543,9 @@ async function main() {
         priceCount,
       },
     });
-    console.log(`Import termine: ${products.length} produits, ${priceCount} prix.`);
+    console.log(
+      `Import termine: ${products.length} produits, ${priceCount} prix, ${bulkFallbackCount} prix vrac de reference nationale.`,
+    );
   } catch (error) {
     await prisma.openFoodImport.update({
       where: { id: batchId },
