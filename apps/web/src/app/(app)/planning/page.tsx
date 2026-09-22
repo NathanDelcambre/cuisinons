@@ -16,7 +16,6 @@ import {
 import { createPortal } from 'react-dom';
 import {
   Carrot,
-  Check,
   ChevronLeft,
   ChevronRight,
   Clock,
@@ -42,6 +41,7 @@ import {
 import { apiJson } from '@/lib/api';
 import { useAuth } from '@/components/auth-provider';
 import {
+  avatarUrlForEmail,
   MEAL_KIND_LABELS,
   MEAL_SLOTS,
   MEAL_SLOT_LABELS,
@@ -52,6 +52,7 @@ import {
   type QuantityUnit,
 } from '@cuisinons/shared';
 import { AddMealDialog } from '@/components/add-meal-dialog';
+import { Avatar } from '@/components/avatar';
 import { ManualMealDialog } from '@/components/manual-meal-dialog';
 import { PlannedMealModal } from '@/components/planned-meal-modal';
 import { SlotAddMenu, SLOT_CHROME, type SpecialMealKind } from '@/components/slot-add-menu';
@@ -77,7 +78,7 @@ type MealItem = {
     portions: string;
     consumedAt: string | null;
     skipAutoConsume?: boolean;
-    user: { displayName: string };
+    user: { displayName: string; email: string };
   }>;
   nutrition: {
     perServing: { kcal: number; protein: number; carbs: number; fat: number };
@@ -682,7 +683,6 @@ function SlotSection({
   todayIso: string;
 }) {
   const chrome = SLOT_CHROME[slot];
-  const SlotIcon = chrome.icon;
   const label = MEAL_SLOT_LABELS[slot];
 
   return (
@@ -706,6 +706,9 @@ function SlotSection({
             const qty = portion ? Number(portion.portions) : 0;
             const validated = isValidated(item, portion, todayIso);
             const past = item.date.slice(0, 10) < todayIso;
+            const participants = item.portions.filter((participant) =>
+              Number(participant.portions) > 0,
+            );
             const kind = item.kind ?? 'RECIPE';
             const recipe = kind === 'RECIPE' ? item.recipe : null;
             const title =
@@ -724,31 +727,18 @@ function SlotSection({
                 className={cn(
                   'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-xl bg-white/75 py-3.5 pl-3.5 pr-2 shadow-[0_0_10px_rgba(28,25,23,0.08),0_2px_8px_rgba(28,25,23,0.08)]',
                   past
-                    ? 'border border-ink-100/30 bg-ink-50/30 opacity-55 shadow-none'
+                    ? 'border border-ink-300/70 bg-ink-50/50 opacity-75 shadow-none'
                     : validated
                       ? 'border border-sage-500 border-l-[3px] border-l-sage-500'
                       : cn('border border-white/70', chrome.rail),
                 )}
               >
-                <span
-                  aria-hidden
-                  className={cn(
-                    'absolute left-3.5 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full',
-                    validated ? 'bg-sage-200 text-sage-800' : chrome.iconClass,
-                  )}
-                >
-                  {validated ? (
-                    <Check className="size-3.5" strokeWidth={2.75} />
-                  ) : (
-                    <SlotIcon className="size-3" />
-                  )}
-                </span>
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2.5">
                   <button
                     type="button"
                     onClick={() => onOpenItem(item)}
                     aria-label={validated ? `${label}, ${title}, validé` : `${label}, ${title}`}
-                    className="block min-w-0 rounded-lg pr-24 pl-[2.125rem] text-left"
+                    className="block min-w-0 rounded-lg pr-20 text-left"
                   >
                     <span className="block min-w-0">
                       <p className="line-clamp-2 text-sm font-medium leading-snug text-ink-900">
@@ -766,20 +756,38 @@ function SlotSection({
                         fat: item.nutrition.perServing.fat * qty,
                       }}
                       targets={targets}
-                      className="pr-1 pl-[2.125rem]"
+                      className="pr-20"
                     />
                   ) : null}
                   {(recipe || kind === 'IMPOSED') && !item.nutrition.complete ? (
-                    <p className="flex items-center gap-1 pl-[2.125rem] text-[11px] text-peach-500">
+                    <p className="flex items-center gap-1 pr-20 text-[11px] text-peach-500">
                       <UtensilsCrossed className="size-3 shrink-0" aria-hidden />
                       Incomplet
                     </p>
                   ) : null}
                 </div>
+                {participants.length > 0 ? (
+                  <div
+                    className="absolute right-2 bottom-2 flex -space-x-1.5"
+                    role="group"
+                    aria-label={`Repas de ${participants
+                      .map((participant) => participant.user.displayName)
+                      .join(' et ')}`}
+                  >
+                    {participants.map((participant) => (
+                      <Avatar
+                        key={participant.id}
+                        name={participant.user.displayName}
+                        src={avatarUrlForEmail(participant.user.email)}
+                        className="size-6 border-2 border-white text-[9px] shadow-sm"
+                      />
+                    ))}
+                  </div>
+                ) : null}
                 <div className="absolute right-1.5 top-1.5 flex items-center">
                   <MealItemActions
                     title={title}
-                    shared={item.portions.filter((p) => Number(p.portions) > 0).length >= 2}
+                    shared={participants.length >= 2}
                     onChange={(scope) => onChangeRecipe(item, scope)}
                     onRemove={(scope) => onRemove(item.id, scope)}
                   />

@@ -47,7 +47,7 @@ export class PlannerService {
             _count: { select: { ingredients: true } },
           },
         },
-        portions: { include: { user: { select: { id: true, displayName: true } } } },
+        portions: { include: { user: { select: { id: true, displayName: true, email: true } } } },
         manualIngredients: {
           include: {
             ingredient: {
