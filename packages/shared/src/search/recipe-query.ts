@@ -1,4 +1,5 @@
 import { normalizeSearchText } from './normalize.js';
+import { searchRelevanceScore } from './relevance.js';
 
 const VEGETARIAN_NEEDLES = [
   'vege',
@@ -37,4 +38,21 @@ export function recipeDietSlugsForQuery(q: string): string[] {
     for (const slug of slugsForToken(token)) slugs.add(slug);
   }
   return [...slugs];
+}
+
+export function recipeSearchScore(input: {
+  query: string;
+  name: string;
+  description?: string | null;
+  tags?: readonly string[];
+}): number {
+  const nameScore = searchRelevanceScore(input.query, input.name);
+  const tagScore = Math.max(
+    0,
+    ...(input.tags ?? []).map((tag) => searchRelevanceScore(input.query, tag)),
+  );
+  const descriptionScore = input.description
+    ? searchRelevanceScore(input.query, input.description)
+    : 0;
+  return nameScore * 10 + tagScore * 2 + descriptionScore * 0.35;
 }

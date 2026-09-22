@@ -1,4 +1,5 @@
 import { foldText, kitchenLabel } from '../suggestions/names.js';
+import { searchRelevanceScore } from '../search/relevance.js';
 
 const NOISE = [
   'preleve a',
@@ -34,6 +35,39 @@ export function kitchenPickScore(input: {
   if (isKitchenNoise(input.nameFr, input.groupName)) score -= 80;
   if (folded.includes(' au sirop')) score -= 15;
   if (folded.includes(' nectar')) score -= 20;
+  return score;
+}
+
+const SPECIALIZED_FOOD_WORDS = [
+  'aile',
+  'cuisse',
+  'foie',
+  'gesier',
+  'peau',
+  'pane',
+  'farci',
+  'fume',
+  'roti',
+  'sauce',
+  'nugget',
+] as const;
+
+/** Classe une recherche cuisine avant les variantes transformées ou les découpes rares. */
+export function ingredientSearchScore(input: {
+  query: string;
+  nameFr: string;
+  dedicatedIcon?: boolean;
+  groupName?: string | null;
+}): number {
+  const label = kitchenLabel(input.nameFr);
+  const folded = foldText(label);
+  let score = Math.max(
+    searchRelevanceScore(input.query, label),
+    searchRelevanceScore(input.query, input.nameFr) * 0.92,
+  );
+  score += kitchenPickScore(input);
+  if (input.dedicatedIcon) score += 65;
+  if (SPECIALIZED_FOOD_WORDS.some((word) => folded.includes(word))) score -= 45;
   return score;
 }
 

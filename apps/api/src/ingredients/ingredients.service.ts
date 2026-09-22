@@ -2,6 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@cuisinons/db';
 import {
   collapseKitchenIngredients,
+  ingredientSearchScore,
   isKitchenNoise,
   kitchenLabel,
   normalizeSearchText,
@@ -62,7 +63,23 @@ export class IngredientsService {
     })).filter(
       (item) => !isKitchenNoise(item.nameFr, item.groupName) || queryWantsIndustrial(query),
     );
-    const labeled = collapsed.map((item) => ({
+    const ranked = query
+      ? collapsed
+          .map((item) => ({
+            item,
+            score: ingredientSearchScore({
+              query,
+              nameFr: item.nameFr,
+              dedicatedIcon: item.dedicatedIcon,
+              groupName: item.groupName,
+            }),
+          }))
+          .sort(
+            (a, b) => b.score - a.score || a.item.nameFr.localeCompare(b.item.nameFr, 'fr'),
+          )
+          .map(({ item }) => item)
+      : collapsed;
+    const labeled = ranked.map((item) => ({
       id: item.id,
       nameFr: kitchenLabel(item.nameFr),
       iconUrl: item.iconUrl,

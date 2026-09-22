@@ -1,6 +1,7 @@
 export * from './auth/emails.js';
 export * from './auth/password.js';
 export * from './search/normalize.js';
+export * from './search/relevance.js';
 export * from './search/recipe-query.js';
 export * from './nutrition/units.js';
 export * from './nutrition/fractions.js';

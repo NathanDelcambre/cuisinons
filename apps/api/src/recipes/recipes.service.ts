@@ -5,6 +5,7 @@ import {
   type QuantityUnit as SharedUnit,
   compareRecipesForSlot,
   recipeDietSlugsForQuery,
+  recipeSearchScore,
   type RecipeNutrition,
 } from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -72,6 +73,7 @@ const recipeInclude = {
 const listSelect = {
   id: true,
   name: true,
+  description: true,
   source: true,
   servings: true,
   updatedAt: true,
@@ -304,6 +306,17 @@ export class RecipesService {
       select: listSelect,
       orderBy: { updatedAt: 'desc' },
     });
+    const relevanceById = new Map(
+      recipes.map((recipe) => [
+        recipe.id,
+        recipeSearchScore({
+          query: input.q ?? '',
+          name: recipe.name,
+          description: recipe.description,
+          tags: recipe.tags.flatMap(({ tag }) => [tag.label, tag.slug]),
+        }),
+      ]),
+    );
     const [photos, nutritionById] = await Promise.all([
       this.photoUrlById(
         recipes.map((recipe) => recipe.id),
@@ -356,16 +369,31 @@ export class RecipesService {
         sorted.sort((a, b) => pick(b, 'kcal') - pick(a, 'kcal'));
         break;
       default:
+        if (input.q) {
+          sorted.sort(
+            (a, b) =>
+              (relevanceById.get(b.id) ?? 0) - (relevanceById.get(a.id) ?? 0) ||
+              b.rating.count - a.rating.count ||
+              (b.rating.average ?? 0) - (a.rating.average ?? 0) ||
+              a.name.localeCompare(b.name, 'fr'),
+          );
+        }
         break;
     }
     if (input.slot) {
-      sorted.sort((a, b) =>
-        compareRecipesForSlot(
+      const useRelevance = Boolean(input.q && !input.sort);
+      sorted.sort((a, b) => {
+        if (useRelevance) {
+          const relevance =
+            (relevanceById.get(b.id) ?? 0) - (relevanceById.get(a.id) ?? 0);
+          if (relevance !== 0) return relevance;
+        }
+        return compareRecipesForSlot(
           { tags: a.tags.map((t) => t.tag.slug), name: a.name },
           { tags: b.tags.map((t) => t.tag.slug), name: b.name },
           input.slot!,
-        ),
-      );
+        );
+      });
     }
     return sorted;
   }
