@@ -442,12 +442,12 @@ export default function PlanningPage() {
       </Panel>
 
       {mealsQuery.isLoading ? (
-        <div className="-mx-4 overflow-x-auto scroll-smooth px-[max(1rem,calc((100vw-20rem)/2))] py-3 sm:-mx-8 sm:px-8">
+        <div className="-mx-4 overflow-x-auto scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
           <div className="flex w-max gap-3">
             {Array.from({ length: 7 }, (_, i) => (
               <Skeleton
                 key={i}
-                className="h-[32rem] w-[calc(100vw-2rem)] max-w-[20rem] shrink-0 rounded-2xl sm:w-[20rem]"
+                className="h-[32rem] w-[calc(100vw-2rem)] shrink-0 rounded-2xl sm:w-[20rem]"
               />
             ))}
           </div>
@@ -456,7 +456,7 @@ export default function PlanningPage() {
         <div
           ref={scrollerRef}
           onScroll={selectCenteredDay}
-          className="-mx-4 snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth px-[max(1rem,calc((100vw-20rem)/2))] py-3 sm:-mx-8 sm:snap-none sm:px-8"
+          className="-mx-4 snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth px-4 py-3 sm:-mx-8 sm:snap-none sm:px-8"
         >
           <div className="flex w-max items-stretch gap-3">
             {days.map((day, index) => (
@@ -614,7 +614,7 @@ function DayCard({
   return (
     <Card
       className={cn(
-        'flex h-[32rem] w-[calc(100vw-2rem)] max-w-[20rem] shrink-0 flex-col p-0 transition duration-300 ease-out-soft sm:w-[20rem]',
+        'flex h-[32rem] w-[calc(100vw-2rem)] shrink-0 flex-col p-0 transition duration-300 ease-out-soft sm:w-[20rem]',
         selected && 'ring-2 ring-sage-300',
       )}
     >
