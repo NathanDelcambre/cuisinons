@@ -55,6 +55,7 @@ import { AddMealDialog } from '@/components/add-meal-dialog';
 import { Avatar } from '@/components/avatar';
 import { ManualMealDialog } from '@/components/manual-meal-dialog';
 import { PlannedMealModal } from '@/components/planned-meal-modal';
+import { RecipeCover } from '@/components/recipe-cover';
 import { SlotAddMenu, SLOT_CHROME, type SpecialMealKind } from '@/components/slot-add-menu';
 import { OptimizePanel } from '@/components/optimize-panel';
 import { MacroIcon } from '@/components/macro-icon';
@@ -285,12 +286,18 @@ export default function PlanningPage() {
       })),
     })),
   });
+  const todayMealCount = meals.filter((item) => item.date.slice(0, 10) === todayIso).length;
+  const calorieTarget = num(goals?.caloriesValue);
+  const calorieProgress =
+    calorieTarget && calorieTarget > 0
+      ? Math.round((weekAverages.planned.kcal / calorieTarget) * 100)
+      : null;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow={
-          <span className="inline-flex items-center gap-2">
+          <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1">
             <img
               src="/brand/panier-fruits.png"
               alt=""
@@ -298,7 +305,13 @@ export default function PlanningPage() {
               height={24}
               className="size-6 shrink-0 object-contain"
             />
-            Bonjour {user?.displayName ?? ''}
+            <span>Bonjour {user?.displayName ?? ''}</span>
+            {days.some((day) => iso(day) === todayIso) ? (
+              <span className="text-ink-400">
+                · {todayMealCount} repas {todayMealCount === 1 ? 'planifié' : 'planifiés'}{' '}
+                aujourd’hui
+              </span>
+            ) : null}
           </span>
         }
         title="Planning"
@@ -335,7 +348,7 @@ export default function PlanningPage() {
             <Button
               variant="glass"
               icon={Sparkles}
-              className="hidden shrink-0 lg:inline-flex"
+              className="hidden shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft hover:bg-sage-100 lg:inline-flex"
               onClick={() => setOptimizeOpen(true)}
             >
               Ajustement intelligent
@@ -343,7 +356,7 @@ export default function PlanningPage() {
             <IconButton
               icon={Sparkles}
               label="Ajustement intelligent"
-              className="shrink-0 lg:hidden"
+              className="shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft lg:hidden"
               onClick={() => setOptimizeOpen(true)}
             />
           </>
@@ -359,10 +372,24 @@ export default function PlanningPage() {
         </Card>
       ) : null}
 
-      <Panel className="p-5 sm:p-6">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-medium text-ink-900">Moyennes de la semaine</p>
-          {goals ? null : <Badge tone="peach">Aucun objectif défini</Badge>}
+      <Panel className="relative overflow-hidden border border-white/80 bg-white/70 p-5 shadow-[0_14px_40px_rgba(61,52,44,0.07)] sm:p-6">
+        <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-sage-300/70 to-transparent" />
+        <div className="mb-5 flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <p className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
+              Moyennes de la semaine
+            </p>
+            <p className="mt-0.5 text-xs text-ink-400">
+              {meals.length} repas planifiés · progression nutritionnelle quotidienne
+            </p>
+          </div>
+          {goals ? (
+            calorieProgress === null ? null : (
+              <Badge tone="sage">{calorieProgress}% de l’objectif kcal</Badge>
+            )
+          ) : (
+            <Badge tone="peach">Aucun objectif défini</Badge>
+          )}
         </div>
         <div className="grid grid-cols-4 gap-2 md:hidden">
           <MacroRing
@@ -607,7 +634,9 @@ function DayCard({
   return (
     <Card
       className={cn(
-        'flex h-[32rem] w-[calc(100vw-2rem)] shrink-0 flex-col p-0 transition duration-300 ease-out-soft sm:w-[20rem]',
+        'relative flex h-[32rem] w-[calc(100vw-2rem)] shrink-0 flex-col overflow-hidden p-0 transition duration-300 ease-out-soft sm:w-[20rem]',
+        today &&
+          'border border-sage-300/70 bg-sage-50/55 shadow-[0_18px_45px_rgba(74,117,87,0.13)] before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-1 before:bg-sage-400',
         selected && 'ring-2 ring-sage-300',
       )}
     >
@@ -615,7 +644,10 @@ function DayCard({
         type="button"
         onClick={onSelect}
         disabled={!onSelect}
-        className="flex w-full shrink-0 flex-col gap-1.5 rounded-t-2xl border-b border-white/70 px-4 py-3 text-left transition-colors duration-200 ease-out-soft enabled:hover:bg-white/50"
+        className={cn(
+          'flex w-full shrink-0 flex-col gap-1.5 rounded-t-2xl border-b border-white/70 px-4 py-3 text-left transition-colors duration-200 ease-out-soft enabled:hover:bg-white/50',
+          today && 'bg-sage-100/35',
+        )}
       >
         <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
           <span
@@ -714,7 +746,7 @@ function SlotSection({
               <li
                 key={item.id}
                 className={cn(
-                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-white/75 py-3.5 pl-3.5 pr-2 shadow-[0_0_10px_rgba(28,25,23,0.08),0_2px_8px_rgba(28,25,23,0.08)]',
+                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-white/75 py-3.5 pl-3.5 pr-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] transition duration-200 ease-out-soft hover:-translate-y-0.5 hover:shadow-card',
                   past
                     ? 'border border-ink-300/70 bg-ink-50/50 opacity-75 shadow-none'
                     : validated
@@ -722,28 +754,34 @@ function SlotSection({
                       : cn('border border-ink-200/70', chrome.rail),
                 )}
               >
-                <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2.5">
+                {recipe ? (
+                  <RecipeCover
+                    src={recipe.photoUrl}
+                    className="mr-2.5 size-12 aspect-square rounded-lg border border-white/80 shadow-soft"
+                  />
+                ) : null}
+                <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2">
                   <button
                     type="button"
                     onClick={() => onOpenItem(item)}
                     aria-label={validated ? `${label}, ${title}, validé` : `${label}, ${title}`}
-                    className="block min-w-0 rounded-lg pr-20 text-left"
+                    className="block min-w-0 rounded-lg text-left"
                   >
                     <span className="block min-w-0">
-                      <p className="line-clamp-2 text-sm font-medium leading-snug text-ink-900">
+                      <p className="line-clamp-2 pr-16 text-sm font-medium leading-snug text-ink-900">
                         {title}
                       </p>
                       {recipe ? (
                         <RecipeMeta recipe={recipe} kcal={item.nutrition.perServing.kcal * qty} />
                       ) : kind === 'IMPOSED' ? (
-                        <p className="mt-2.5 flex items-center text-[11px] leading-none text-ink-400">
+                        <p className="mt-2.5 flex items-center pr-12 text-[11px] leading-none text-ink-400">
                           <MealCalories kcal={item.nutrition.perServing.kcal * qty} />
                         </p>
                       ) : null}
                     </span>
                   </button>
                   {(recipe || kind === 'IMPOSED') && !item.nutrition.complete ? (
-                    <p className="flex items-center gap-1 pr-20 text-[11px] text-peach-500">
+                    <p className="flex items-center gap-1 pr-12 text-[11px] text-peach-500">
                       <UtensilsCrossed className="size-3 shrink-0" aria-hidden />
                       Incomplet
                     </p>
@@ -767,7 +805,7 @@ function SlotSection({
                     ))}
                   </div>
                 ) : null}
-                <div className="absolute right-1.5 top-1.5 flex items-center">
+                <div className="absolute right-1.5 top-1.5 flex items-center opacity-45 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
                   <MealItemActions
                     title={title}
                     shared={participants.length >= 2}
@@ -981,7 +1019,7 @@ function RecipeMeta({ recipe, kcal }: { recipe: NonNullable<MealItem['recipe']>;
   const prep = recipe.prepTimeMinutes;
   const cook = recipe.cookTimeMinutes;
   return (
-    <p className="mt-2.5 flex flex-nowrap items-center gap-2.5 overflow-hidden whitespace-nowrap text-[11px] leading-none text-ink-400">
+    <p className="mt-2.5 flex flex-nowrap items-center gap-1.5 overflow-hidden whitespace-nowrap pr-12 text-[11px] leading-none text-ink-400">
       {ingredientCount > 0 ? (
         <span className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap">
           <Carrot className="size-3 shrink-0" aria-hidden />

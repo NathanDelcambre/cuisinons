@@ -255,9 +255,7 @@ export function SlotAddMenu({
           onClick={() => setOpen((current) => !current)}
           onKeyDown={onTriggerKeyDown}
           className={cn(
-            'group flex h-full min-h-[5.25rem] w-full items-center gap-2.5 rounded-xl border border-dashed px-3 text-left transition-colors duration-200 ease-out-soft',
-            chrome.border,
-            chrome.tint,
+            'group flex h-full min-h-[5.25rem] w-full items-center gap-2.5 rounded-lg border border-dashed border-ink-200/55 bg-white/20 px-3 text-left transition duration-200 ease-out-soft hover:border-sage-300/70 hover:bg-white/45',
           )}
         >
           <span
@@ -268,8 +266,13 @@ export function SlotAddMenu({
           >
             <SlotIcon className="size-4" aria-hidden />
           </span>
-          <span className={cn('min-w-0 flex-1 text-[11px] font-medium', chrome.labelClass)}>
-            {slotLabel}
+          <span className="min-w-0 flex-1">
+            <span className={cn('block text-[11px] font-medium', chrome.labelClass)}>
+              {slotLabel}
+            </span>
+            <span className="mt-0.5 block text-[10px] text-ink-300 transition-colors group-hover:text-ink-500">
+              Ajouter un repas
+            </span>
           </span>
           <Plus
             className="size-3.5 shrink-0 text-ink-300 transition-colors group-hover:text-sage-600"
