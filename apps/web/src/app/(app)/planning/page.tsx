@@ -342,45 +342,11 @@ export default function PlanningPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-col gap-2">
-        <p className="text-sm text-ink-500">
-          <span className="inline-flex items-center gap-2">
-            <img
-              src="/brand/panier-fruits.png"
-              alt=""
-              width={24}
-              height={24}
-              className="size-6 shrink-0 object-contain"
-            />
-            <span>Bonjour {user?.displayName ?? ''}</span>
-          </span>
-        </p>
-        <div className="flex items-center justify-between gap-3">
-          <h1 className="min-w-0 font-display text-[1.75rem] font-semibold tracking-[-0.03em] text-ink-900 sm:text-[2rem]">
-            Planning
-          </h1>
-          <div className="flex shrink-0 items-center justify-end gap-2">
-            {isSelf ? (
-              <>
-                <Button
-                  variant="glass"
-                  icon={Sparkles}
-                  className="hidden shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft hover:bg-sage-100 lg:inline-flex"
-                  onClick={() => setOptimizeOpen(true)}
-                >
-                  Ajustement intelligent
-                </Button>
-                <IconButton
-                  icon={Sparkles}
-                  label="Ajustement intelligent"
-                  className="shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft lg:hidden"
-                  onClick={() => setOptimizeOpen(true)}
-                />
-              </>
-            ) : null}
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 text-ink-900">
+      <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <h1 className="shrink-0 font-display text-[1.75rem] font-semibold tracking-[-0.03em] text-ink-900 sm:text-[2rem]">
+          Planning
+        </h1>
+        <div className="flex min-w-0 flex-wrap items-center gap-2 text-ink-900">
           <IconButton
             icon={ChevronLeft}
             label="Semaine précédente"
@@ -403,13 +369,28 @@ export default function PlanningPage() {
           >
             Aujourd’hui
           </Button>
+        </div>
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
           {household.data && household.data.length > 1 ? (
-            <PersonSwitch
-              className="ml-auto"
-              people={household.data}
-              selectedId={subjectId}
-              onChange={setViewUserId}
-            />
+            <PersonSwitch people={household.data} selectedId={subjectId} onChange={setViewUserId} />
+          ) : null}
+          {isSelf ? (
+            <>
+              <Button
+                variant="glass"
+                icon={Sparkles}
+                className="hidden shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft hover:bg-sage-100 lg:inline-flex"
+                onClick={() => setOptimizeOpen(true)}
+              >
+                Ajustement intelligent
+              </Button>
+              <IconButton
+                icon={Sparkles}
+                label="Ajustement intelligent"
+                className="shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft lg:hidden"
+                onClick={() => setOptimizeOpen(true)}
+              />
+            </>
           ) : null}
         </div>
       </header>
