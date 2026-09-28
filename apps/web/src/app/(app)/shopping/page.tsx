@@ -1,7 +1,8 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ArrowLeftRight,
   Check,
@@ -383,43 +384,41 @@ export default function ShoppingPage() {
             </section>
           ))}
 
-          <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 border-t border-ink-200 bg-[#fffdfb] lg:bottom-0 lg:left-[17rem]">
-            <div className="mx-auto flex w-full max-w-[88rem] items-center justify-between gap-2 px-4 py-3 sm:px-8">
-              {/* Une seule chaine : deux noeuds de texte voisins seraient annonces
-                  « coché s » par un lecteur d'ecran. */}
-              <p className="tabular min-w-0 text-sm text-ink-600">
-                <span className="sm:hidden">{`${String(checked.length)}/${String(items.length)}`}</span>
-                <span className="hidden sm:inline">
-                  {`${String(checked.length)} sur ${String(items.length)} coché${checked.length > 1 ? 's' : ''}`}
-                </span>
-              </p>
-              <div className="flex shrink-0 items-center gap-2">
-                <Button
-                  variant="ghost"
-                  icon={ListChecks}
-                  aria-label="Tout cocher"
-                  title="Tout cocher"
-                  className="max-sm:size-9 max-sm:p-0"
-                  loading={checkAll.isPending}
-                  disabled={checked.length === items.length}
-                  onClick={() =>
-                    checkAll.mutate(items.filter((item) => !item.checked).map((item) => item.id))
-                  }
-                >
-                  <span className="max-sm:sr-only">Tout cocher</span>
-                </Button>
-                <Button
-                  icon={Check}
-                  size="sm"
-                  loading={validate.isPending}
-                  disabled={checked.length === 0}
-                  onClick={() => validate.mutate()}
-                >
-                  J’ai fait les courses
-                </Button>
-              </div>
+          <ShoppingDock>
+            {/* Une seule chaine : deux noeuds de texte voisins seraient annonces
+                « coché s » par un lecteur d'ecran. */}
+            <p className="tabular min-w-0 text-sm text-ink-600">
+              <span className="sm:hidden">{`${String(checked.length)}/${String(items.length)}`}</span>
+              <span className="hidden sm:inline">
+                {`${String(checked.length)} sur ${String(items.length)} coché${checked.length > 1 ? 's' : ''}`}
+              </span>
+            </p>
+            <div className="flex shrink-0 items-center gap-2">
+              <Button
+                variant="ghost"
+                icon={ListChecks}
+                aria-label="Tout cocher"
+                title="Tout cocher"
+                className="max-sm:size-9 max-sm:p-0"
+                loading={checkAll.isPending}
+                disabled={checked.length === items.length}
+                onClick={() =>
+                  checkAll.mutate(items.filter((item) => !item.checked).map((item) => item.id))
+                }
+              >
+                <span className="max-sm:sr-only">Tout cocher</span>
+              </Button>
+              <Button
+                icon={Check}
+                size="sm"
+                loading={validate.isPending}
+                disabled={checked.length === 0}
+                onClick={() => validate.mutate()}
+              >
+                J’ai fait les courses
+              </Button>
             </div>
-          </div>
+          </ShoppingDock>
         </div>
       )}
 
@@ -457,6 +456,26 @@ export default function ShoppingPage() {
         onClose={() => setSwapItem(null)}
       />
     </div>
+  );
+}
+
+/**
+ * Barre d'actions hors du flux de la page. Le contenu est dans un ancêtre
+ * animé (`transform`) et borné en largeur : un `fixed` ou un `sticky` y
+ * resterait en retrait. Le portail la cale sur le bas de l'écran, sur toute
+ * la largeur utile.
+ */
+function ShoppingDock({ children }: { children: ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+  return createPortal(
+    <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 bg-[#fffdfb] shadow-[0_-10px_28px_rgba(28,25,23,0.12)] lg:bottom-0 lg:left-[17rem]">
+      <div className="mx-auto flex w-full max-w-[88rem] items-center justify-between gap-2 px-4 py-3 sm:px-8">
+        {children}
+      </div>
+    </div>,
+    document.body,
   );
 }
 
