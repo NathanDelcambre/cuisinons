@@ -350,16 +350,19 @@ export default function PlanningPage() {
           <IconButton
             icon={ChevronLeft}
             label="Semaine précédente"
+            size="sm"
             onClick={() => setWeekStart(addDays(weekStart, -7))}
           />
           <span className="min-w-0 text-sm font-medium">{weekRangeLabel(weekStart)}</span>
           <IconButton
             icon={ChevronRight}
             label="Semaine suivante"
+            size="sm"
             onClick={() => setWeekStart(addDays(weekStart, 7))}
           />
           <Button
             variant="glass"
+            size="sm"
             onClick={() => {
               const now = new Date();
               const start = startOfWeek(now, { weekStartsOn: 1 });
@@ -378,6 +381,7 @@ export default function PlanningPage() {
             <>
               <Button
                 variant="glass"
+                size="sm"
                 icon={Sparkles}
                 className="hidden shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft hover:bg-sage-100 lg:inline-flex"
                 onClick={() => setOptimizeOpen(true)}
@@ -387,6 +391,7 @@ export default function PlanningPage() {
               <IconButton
                 icon={Sparkles}
                 label="Ajustement intelligent"
+                size="sm"
                 className="shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft lg:hidden"
                 onClick={() => setOptimizeOpen(true)}
               />
@@ -403,6 +408,91 @@ export default function PlanningPage() {
           </Button>
         </Card>
       ) : null}
+
+      {mealsQuery.isLoading ? (
+        <div className="-mx-4 overflow-x-auto scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
+          <div className="flex w-max gap-3">
+            {Array.from({ length: 7 }, (_, i) => (
+              <Skeleton
+                key={i}
+                className="h-[32rem] w-[calc(100vw-2rem)] shrink-0 rounded-2xl sm:w-[20rem]"
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div
+          ref={scrollerRef}
+          onScroll={selectCenteredDay}
+          className="-mx-4 snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth px-4 py-3 sm:-mx-8 sm:snap-none sm:px-8"
+        >
+          <div className="flex w-max items-stretch gap-3">
+            {days.map((day, index) => (
+              <div
+                key={iso(day)}
+                data-day-index={index}
+                className="shrink-0 snap-center snap-always"
+              >
+                <DayCard
+                  date={day}
+                  meals={meals}
+                  userId={subjectId}
+                  selfLabel={subjectLabel}
+                  macros={macrosFor(day)}
+                  selected={index === selectedIndex}
+                  onSelect={() => setSelectedIndex(index)}
+                  onAddRecipe={(slot) =>
+                    setDialog({
+                      date: iso(day),
+                      slot,
+                      soloUserId: isSelf ? undefined : subjectId,
+                    })
+                  }
+                  onAddKind={(slot, kind) => {
+                    if (kind === 'IMPOSED')
+                      setManualDialog({
+                        date: iso(day),
+                        slot,
+                        soloUserId: isSelf ? undefined : subjectId,
+                      });
+                    else if (kind === 'SKIPPED') setSkipDialog({ date: iso(day), slot });
+                    else
+                      addKind.mutate({
+                        date: iso(day),
+                        slot,
+                        kind,
+                        scope: isSelf ? undefined : 'me',
+                        subjectId,
+                      });
+                  }}
+                  onOpenItem={setDetail}
+                  onChangeRecipe={(item, scope) =>
+                    setDialog({
+                      date: item.date.slice(0, 10),
+                      slot: item.slot,
+                      replaceItemId: item.id,
+                      recipeId: item.recipe?.id,
+                      replaceScope: scope,
+                      targetUserId: scope === 'me' ? subjectId : undefined,
+                      initialPortions: Object.fromEntries(
+                        item.portions.map((portion) => [portion.userId, Number(portion.portions)]),
+                      ),
+                    })
+                  }
+                  onRemove={(id, scope) =>
+                    remove.mutate({
+                      id,
+                      scope,
+                      userId: scope === 'me' ? subjectId : undefined,
+                    })
+                  }
+                  todayIso={todayIso}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <Panel className="relative overflow-hidden border border-white/80 bg-white/70 p-5 shadow-[0_14px_40px_rgba(61,52,44,0.07)] sm:p-6">
         <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-sage-300/70 to-transparent" />
@@ -502,91 +592,6 @@ export default function PlanningPage() {
           />
         </div>
       </Panel>
-
-      {mealsQuery.isLoading ? (
-        <div className="-mx-4 overflow-x-auto scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
-          <div className="flex w-max gap-3">
-            {Array.from({ length: 7 }, (_, i) => (
-              <Skeleton
-                key={i}
-                className="h-[32rem] w-[calc(100vw-2rem)] shrink-0 rounded-2xl sm:w-[20rem]"
-              />
-            ))}
-          </div>
-        </div>
-      ) : (
-        <div
-          ref={scrollerRef}
-          onScroll={selectCenteredDay}
-          className="-mx-4 snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth px-4 py-3 sm:-mx-8 sm:snap-none sm:px-8"
-        >
-          <div className="flex w-max items-stretch gap-3">
-            {days.map((day, index) => (
-              <div
-                key={iso(day)}
-                data-day-index={index}
-                className="shrink-0 snap-center snap-always"
-              >
-                <DayCard
-                  date={day}
-                  meals={meals}
-                  userId={subjectId}
-                  selfLabel={subjectLabel}
-                  macros={macrosFor(day)}
-                  selected={index === selectedIndex}
-                  onSelect={() => setSelectedIndex(index)}
-                  onAddRecipe={(slot) =>
-                    setDialog({
-                      date: iso(day),
-                      slot,
-                      soloUserId: isSelf ? undefined : subjectId,
-                    })
-                  }
-                  onAddKind={(slot, kind) => {
-                    if (kind === 'IMPOSED')
-                      setManualDialog({
-                        date: iso(day),
-                        slot,
-                        soloUserId: isSelf ? undefined : subjectId,
-                      });
-                    else if (kind === 'SKIPPED') setSkipDialog({ date: iso(day), slot });
-                    else
-                      addKind.mutate({
-                        date: iso(day),
-                        slot,
-                        kind,
-                        scope: isSelf ? undefined : 'me',
-                        subjectId,
-                      });
-                  }}
-                  onOpenItem={setDetail}
-                  onChangeRecipe={(item, scope) =>
-                    setDialog({
-                      date: item.date.slice(0, 10),
-                      slot: item.slot,
-                      replaceItemId: item.id,
-                      recipeId: item.recipe?.id,
-                      replaceScope: scope,
-                      targetUserId: scope === 'me' ? subjectId : undefined,
-                      initialPortions: Object.fromEntries(
-                        item.portions.map((portion) => [portion.userId, Number(portion.portions)]),
-                      ),
-                    })
-                  }
-                  onRemove={(id, scope) =>
-                    remove.mutate({
-                      id,
-                      scope,
-                      userId: scope === 'me' ? subjectId : undefined,
-                    })
-                  }
-                  todayIso={todayIso}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <AddMealDialog
         open={dialog !== null}
@@ -1279,7 +1284,7 @@ function PersonSwitch({
             aria-checked={active}
             onClick={() => onChange(person.id)}
             className={cn(
-              'relative flex min-h-11 items-center gap-2 rounded-full py-1 pl-1.5 pr-3.5 text-sm font-medium transition-colors duration-200 ease-out-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500',
+              'relative flex min-h-9 items-center gap-1.5 rounded-full py-0.5 pl-1 pr-3 text-[13px] font-medium transition-colors duration-200 ease-out-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500',
               active ? 'text-ink-900' : 'text-ink-500 hover:text-ink-800',
             )}
           >
@@ -1294,7 +1299,7 @@ function PersonSwitch({
               name={person.displayName}
               src={person.avatarUrl}
               className={cn(
-                'relative size-8 rounded-full text-xs transition-opacity duration-200 ease-out-soft',
+                'relative size-6 rounded-full text-[10px] transition-opacity duration-200 ease-out-soft',
                 active ? 'opacity-100' : 'opacity-70',
               )}
             />
