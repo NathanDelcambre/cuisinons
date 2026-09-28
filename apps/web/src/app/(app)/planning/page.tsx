@@ -344,7 +344,7 @@ export default function PlanningPage() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <h1 className="shrink-0 font-display text-[1.75rem] font-semibold tracking-[-0.03em] text-ink-900 sm:text-[2rem]">
-          Planning
+          Planning de {subject?.displayName ?? user?.displayName ?? '…'}
         </h1>
         <div className="flex min-w-0 flex-wrap items-center gap-2 text-ink-900">
           <IconButton
@@ -398,7 +398,7 @@ export default function PlanningPage() {
       ) : null}
 
       {mealsQuery.isLoading ? (
-        <div className="-mx-4 overflow-x-auto scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
+        <div className="scrollbar-none -mx-4 overflow-x-auto scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
           <div className="flex w-max gap-3">
             {Array.from({ length: 7 }, (_, i) => (
               <Skeleton
@@ -412,7 +412,7 @@ export default function PlanningPage() {
         <div
           ref={scrollerRef}
           onScroll={selectCenteredDay}
-          className="-mx-4 snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth px-4 py-3 sm:-mx-8 sm:snap-none sm:px-8"
+          className="scrollbar-none -mx-4 snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth px-4 py-3 sm:-mx-8 sm:snap-none sm:px-8"
         >
           <div className="flex w-max items-stretch gap-3">
             {days.map((day, index) => (
@@ -765,7 +765,7 @@ function DayCard({
             {today ? 'Aujourd’hui' : format(date, 'EEEE d MMMM', { locale: fr })}
           </span>
         </span>
-        <MacroCounts macros={macros} chips />
+        <MacroCounts macros={macros} />
       </button>
 
       <div className="flex min-h-0 flex-1 flex-col gap-1.5 px-2 pt-2 pb-4">
@@ -853,10 +853,10 @@ function SlotSection({
                 className={cn(
                   'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-white/75 py-3.5 pl-3.5 pr-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] transition duration-200 ease-out-soft hover:-translate-y-0.5 hover:shadow-card',
                   past
-                    ? 'border border-ink-300/70 bg-ink-50/50 opacity-75 shadow-none'
+                    ? 'border-[3px] border-ink-300/70 bg-ink-50/50 opacity-75 shadow-none'
                     : validated
-                      ? 'border border-sage-500 border-l-[3px] border-l-sage-500'
-                      : cn('border border-ink-200/70', chrome.rail),
+                      ? 'border-[3px] border-sage-500'
+                      : chrome.rail,
                 )}
               >
                 {cover ? (
