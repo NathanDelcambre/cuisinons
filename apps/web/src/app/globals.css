@@ -174,7 +174,7 @@ body {
   min-height: 100%;
   background:
     radial-gradient(1200px 600px at 10% -10%, rgba(125, 155, 138, 0.12), transparent 50%),
-    radial-gradient(900px 500px at 100% 0%, rgba(232, 178, 152, 0.14), transparent 45%), #ebe6e0;
+    radial-gradient(900px 500px at 100% 0%, rgba(232, 178, 152, 0.14), transparent 45%), #d5ccc3;
   color: var(--color-ink-900);
 }
 

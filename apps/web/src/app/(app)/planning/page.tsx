@@ -348,11 +348,11 @@ export default function PlanningPage() {
   });
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <header className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2">
         <h1 className="shrink-0 font-display text-[1.75rem] font-semibold tracking-[-0.03em] text-ink-900 sm:text-[2rem]">
           Planning de {subject?.displayName ?? user?.displayName ?? '…'}
         </h1>
-        <div className="flex min-w-0 flex-wrap items-center gap-2 text-ink-900">
+        <div className="flex w-full min-w-0 flex-wrap items-center justify-center gap-2 text-ink-900 sm:w-auto sm:justify-start">
           <IconButton
             icon={ChevronLeft}
             label="Semaine précédente"
@@ -371,7 +371,7 @@ export default function PlanningPage() {
             onClick={() => setWeekStart(addDays(weekStart, 7))}
           />
         </div>
-        <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+        <div className="flex w-full flex-wrap items-center justify-center gap-2 sm:ml-auto sm:w-auto sm:justify-end">
           {household.data && household.data.length > 1 ? (
             <PersonSwitch people={household.data} selectedId={subjectId} onChange={setViewUserId} />
           ) : null}
@@ -737,8 +737,8 @@ function DayCard({
   return (
     <Card
       className={cn(
-        'relative flex h-[32rem] w-[calc(100vw-2rem)] shrink-0 flex-col overflow-hidden p-0 shadow-[0_16px_36px_-12px_rgba(28,25,23,0.28)] transition duration-300 ease-out-soft sm:w-[20rem]',
-        today && 'border border-sage-300/70 bg-sage-50/55 shadow-[0_20px_44px_-10px_rgba(74,117,87,0.38)]',
+        'relative flex h-[32rem] w-[calc(100vw-2rem)] shrink-0 flex-col overflow-hidden bg-[#fffdfb]! p-0 shadow-[0_16px_36px_-12px_rgba(28,25,23,0.28)] transition duration-300 ease-out-soft sm:w-[20rem]',
+        today && 'border border-sage-400/80 shadow-[0_20px_44px_-10px_rgba(74,117,87,0.38)]',
         selected && 'ring-2 ring-sage-300',
       )}
     >
@@ -747,14 +747,14 @@ function DayCard({
         onClick={onSelect}
         disabled={!onSelect}
         className={cn(
-          'flex w-full shrink-0 flex-col gap-1.5 rounded-t-2xl border-b border-white/50 bg-ink-300 px-4 py-3 text-left transition-colors duration-200 ease-out-soft enabled:hover:bg-ink-300/80',
+          'flex w-full shrink-0 flex-col gap-1.5 rounded-t-2xl border-b border-white/15 bg-[#5c554e] px-4 py-3 text-left text-[#fffaf6] transition-colors duration-200 ease-out-soft enabled:hover:bg-[#4f4944]',
         )}
       >
         <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
           <span
             className={cn(
               'text-sm font-medium first-letter:uppercase',
-              today ? 'text-sage-600' : 'text-ink-900',
+              today ? 'text-sage-100' : 'text-[#fffaf6]',
             )}
           >
             {today ? 'Aujourd’hui' : format(date, 'EEEE d MMMM', { locale: fr })}
@@ -1152,10 +1152,10 @@ function MealCalories({ kcal }: { kcal: number }) {
 }
 
 const MACRO_LINE = [
-  { key: 'kcal', suffix: 'kcal', className: 'text-peach-500' },
-  { key: 'protein', suffix: 'P', className: 'text-sage-600' },
-  { key: 'carbs', suffix: 'G', className: 'text-ink-800' },
-  { key: 'fat', suffix: 'L', className: 'text-tomato-500' },
+  { key: 'kcal', suffix: 'kcal', className: 'text-peach-200' },
+  { key: 'protein', suffix: 'P', className: 'text-sage-200' },
+  { key: 'carbs', suffix: 'G', className: 'text-ink-100' },
+  { key: 'fat', suffix: 'L', className: 'text-tomato-100' },
 ] as const;
 
 function MacroCounts({
@@ -1188,7 +1188,7 @@ function MacroCounts({
             'justify-center rounded-full border border-white/90 bg-white/80 px-1.5 py-1.5 shadow-sm',
         )}
       >
-        <MacroIcon kind={item.key} className="size-3 shrink-0" />
+        <MacroIcon kind={item.key} className={cn('size-3 shrink-0', item.className)} />
         <span className="tabular">
           {showPercent ? (
             percent === null ? (
