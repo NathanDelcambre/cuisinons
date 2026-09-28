@@ -360,18 +360,6 @@ export default function PlanningPage() {
             size="sm"
             onClick={() => setWeekStart(addDays(weekStart, 7))}
           />
-          <Button
-            variant="glass"
-            size="sm"
-            onClick={() => {
-              const now = new Date();
-              const start = startOfWeek(now, { weekStartsOn: 1 });
-              setWeekStart(start);
-              setSelectedIndex(differenceInCalendarDays(now, start));
-            }}
-          >
-            Aujourd’hui
-          </Button>
         </div>
         <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
           {household.data && household.data.length > 1 ? (
@@ -383,7 +371,7 @@ export default function PlanningPage() {
                 variant="glass"
                 size="sm"
                 icon={Sparkles}
-                className="hidden shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft hover:bg-sage-100 lg:inline-flex"
+                className="hidden shrink-0 border-white bg-white text-ink-800 shadow-soft hover:bg-white lg:inline-flex"
                 onClick={() => setOptimizeOpen(true)}
               >
                 Ajustement intelligent
@@ -392,7 +380,7 @@ export default function PlanningPage() {
                 icon={Sparkles}
                 label="Ajustement intelligent"
                 size="sm"
-                className="shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft lg:hidden"
+                className="shrink-0 border-white bg-white text-ink-800 shadow-soft lg:hidden"
                 onClick={() => setOptimizeOpen(true)}
               />
             </>
@@ -753,9 +741,8 @@ function DayCard({
   return (
     <Card
       className={cn(
-        'relative flex h-[32rem] w-[calc(100vw-2rem)] shrink-0 flex-col overflow-hidden p-0 transition duration-300 ease-out-soft sm:w-[20rem]',
-        today &&
-          'border border-sage-300/70 bg-sage-50/55 shadow-[0_18px_45px_rgba(74,117,87,0.13)] before:absolute before:inset-x-0 before:top-0 before:z-10 before:h-1 before:bg-sage-400',
+        'relative flex h-[32rem] w-[calc(100vw-2rem)] shrink-0 flex-col overflow-hidden p-0 shadow-[0_16px_36px_-12px_rgba(28,25,23,0.28)] transition duration-300 ease-out-soft sm:w-[20rem]',
+        today && 'border border-sage-300/70 bg-sage-50/55 shadow-[0_20px_44px_-10px_rgba(74,117,87,0.38)]',
         selected && 'ring-2 ring-sage-300',
       )}
     >
