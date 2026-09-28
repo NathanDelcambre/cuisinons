@@ -13,6 +13,7 @@ import { publicRecipePhotoUrl } from '../recipes/recipe-photo.js';
 import {
   canonicalQuantity,
   computeRecipeNutrition,
+  estimatedMealNutrition,
   manualMealName,
   mealsForEater,
   resolveGrams,
@@ -135,7 +136,11 @@ export class PlannerService {
           })),
           1,
         );
-        return { ...item, manualIngredients, manualTitle, recipe: null, nutrition };
+        const withEstimate =
+          item.kind === 'RESTAURANT' && item.estimatedKcal != null
+            ? estimatedMealNutrition(item.estimatedKcal)
+            : nutrition;
+        return { ...item, manualIngredients, manualTitle, recipe: null, nutrition: withEstimate };
       }
       const nutrition =
         nutritionFromSnapshot(item.recipe.nutritionSnapshot) ??
@@ -171,6 +176,7 @@ export class PlannerService {
     createdById: string;
     portions: Array<{ userId: string; portions: number }>;
     ingredients?: Array<{ ingredientId: string; quantity: number; unit: QuantityUnit }>;
+    estimatedKcal?: number;
   }) {
     const days = input.dates?.length ? input.dates : [input.date];
     return this.prisma.$transaction(async (tx) => {
@@ -237,6 +243,7 @@ export class PlannerService {
             slot: input.slot,
             kind: input.kind,
             recipeId: input.kind === 'RECIPE' ? input.recipeId : null,
+            estimatedKcal: input.kind === 'RESTAURANT' ? (input.estimatedKcal ?? null) : null,
             createdById: input.createdById,
             sortOrder: count,
             portions: {

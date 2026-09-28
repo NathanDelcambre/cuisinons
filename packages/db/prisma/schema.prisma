@@ -354,6 +354,8 @@ model MealItem {
   recipe            Recipe?                  @relation(fields: [recipeId], references: [id])
   sortOrder         Int                      @default(0)
   version           Int                      @default(1)
+  /// kcal estimées pour une portion, quand le repas est pris au restaurant.
+  estimatedKcal     Int?
   createdById       String
   createdBy         User                     @relation("MealItemAuthor", fields: [createdById], references: [id])
   createdAt         DateTime                 @default(now())

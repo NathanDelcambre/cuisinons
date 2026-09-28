@@ -39,7 +39,6 @@ export const SLOT_CHROME: Record<
     tint: string;
     iconClass: string;
     labelClass: string;
-    rail: string;
   }
 > = {
   BREAKFAST: {
@@ -48,7 +47,6 @@ export const SLOT_CHROME: Record<
     tint: 'bg-gold-200/22 hover:bg-gold-200/40',
     iconClass: 'bg-gold-200/75 text-gold-500',
     labelClass: 'text-gold-500',
-    rail: 'border border-gold-300',
   },
   LUNCH: {
     icon: Sun,
@@ -56,7 +54,6 @@ export const SLOT_CHROME: Record<
     tint: 'bg-sage-50/70 hover:bg-sage-100/80',
     iconClass: 'bg-sage-100 text-sage-600',
     labelClass: 'text-sage-600',
-    rail: 'border border-sage-400',
   },
   SNACK: {
     icon: Cookie,
@@ -64,7 +61,6 @@ export const SLOT_CHROME: Record<
     tint: 'bg-peach-200/20 hover:bg-peach-200/40',
     iconClass: 'bg-peach-200/70 text-peach-400',
     labelClass: 'text-peach-400',
-    rail: 'border border-peach-400',
   },
   DINNER: {
     icon: Moon,
@@ -72,7 +68,6 @@ export const SLOT_CHROME: Record<
     tint: 'bg-ink-100/50 hover:bg-ink-100/80',
     iconClass: 'bg-ink-100 text-ink-600',
     labelClass: 'text-ink-600',
-    rail: 'border border-ink-400',
   },
 };
 

@@ -142,6 +142,20 @@ export function computeRecipeNutrition(
   };
 }
 
+/** Calories saisies à la main pour un repas dont on ne connaît pas le détail. */
+export function estimatedMealNutrition(kcal: number): RecipeNutrition {
+  const perServing: MacroNutrients = { kcal, protein: 0, carbs: 0, fat: 0, fiber: 0 };
+  return {
+    total: { ...perServing },
+    perServing,
+    per100g: null,
+    totalWeightGrams: 0,
+    usedCookedWeight: false,
+    incompleteLines: 0,
+    complete: false,
+  };
+}
+
 export function scaleNutritionByPortions(macros: MacroNutrients, portions: number): MacroNutrients {
   return scaleMacros(macros, portions);
 }

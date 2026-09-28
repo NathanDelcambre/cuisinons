@@ -16,6 +16,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  BarChart3,
   Carrot,
   ChevronLeft,
   ChevronRight,
@@ -28,14 +29,13 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import {
-  Badge,
   Button,
   Card,
+  Field,
   IconButton,
+  Input,
   MacroRing,
-  Meter,
   Modal,
-  Panel,
   Skeleton,
   cn,
   transitions,
@@ -58,7 +58,7 @@ import { Avatar } from '@/components/avatar';
 import { ManualMealDialog } from '@/components/manual-meal-dialog';
 import { PlannedMealModal } from '@/components/planned-meal-modal';
 import { RecipeCover } from '@/components/recipe-cover';
-import { SlotAddMenu, SLOT_CHROME, type SpecialMealKind } from '@/components/slot-add-menu';
+import { SlotAddMenu, type SpecialMealKind } from '@/components/slot-add-menu';
 import { OptimizePanel } from '@/components/optimize-panel';
 import { MacroIcon } from '@/components/macro-icon';
 import { specialMealCover } from '@/components/meal-covers';
@@ -96,6 +96,7 @@ type MealItem = {
     ingredient: { id: string; nameFr: string; iconUrl: string | null };
   }>;
   manualTitle?: string;
+  estimatedKcal?: number | null;
 };
 
 type Goal = {
@@ -153,12 +154,20 @@ export default function PlanningPage() {
   } | null>(null);
   const [viewUserId, setViewUserId] = useState<string | null>(null);
   const [optimizeOpen, setOptimizeOpen] = useState(false);
+  const [averagesOpen, setAveragesOpen] = useState(false);
   const [manualDialog, setManualDialog] = useState<{
     date: string;
     slot: MealSlot;
     soloUserId?: string;
   } | null>(null);
   const [skipDialog, setSkipDialog] = useState<{ date: string; slot: MealSlot } | null>(null);
+  const [restaurantDialog, setRestaurantDialog] = useState<{
+    date: string;
+    slot: MealSlot;
+    scope?: 'me';
+    subjectId?: string;
+  } | null>(null);
+  const [restaurantKcal, setRestaurantKcal] = useState('');
   const [detail, setDetail] = useState<MealItem | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -209,6 +218,7 @@ export default function PlanningPage() {
       kind: SpecialMealKind;
       scope?: 'me' | 'all';
       subjectId?: string;
+      estimatedKcal?: number;
     }) => {
       const users = await apiJson<Array<{ id: string }>>('/api/bff/users');
       const onlyId = input.scope === 'me' ? (input.subjectId ?? user?.id) : undefined;
@@ -224,6 +234,7 @@ export default function PlanningPage() {
           slot: input.slot,
           kind: input.kind,
           portions,
+          ...(input.estimatedKcal === undefined ? {} : { estimatedKcal: input.estimatedKcal }),
         }),
       });
     },
@@ -315,6 +326,12 @@ export default function PlanningPage() {
   }
 
   const goals = goalsQuery.data;
+  const restaurantEstimate = Number(restaurantKcal.replace(',', '.'));
+  const restaurantEstimateValid =
+    restaurantKcal.trim() !== '' &&
+    Number.isInteger(restaurantEstimate) &&
+    restaurantEstimate >= 0 &&
+    restaurantEstimate <= 8000;
   const weekAverages = weekMacroAverages({
     userId: subjectId ?? '',
     todayIso,
@@ -329,12 +346,6 @@ export default function PlanningPage() {
       })),
     })),
   });
-  const calorieTarget = num(goals?.caloriesValue);
-  const calorieProgress =
-    calorieTarget && calorieTarget > 0
-      ? Math.round((weekAverages.planned.kcal / calorieTarget) * 100)
-      : null;
-
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -373,6 +384,13 @@ export default function PlanningPage() {
               onClick={() => setOptimizeOpen(true)}
             />
           ) : null}
+          <IconButton
+            icon={BarChart3}
+            label="Moyennes de la semaine"
+            size="sm"
+            className="shrink-0 border-white bg-white text-ink-800 shadow-soft"
+            onClick={() => setAveragesOpen(true)}
+          />
         </div>
       </header>
 
@@ -432,14 +450,15 @@ export default function PlanningPage() {
                         soloUserId: isSelf ? undefined : subjectId,
                       });
                     else if (kind === 'SKIPPED') setSkipDialog({ date: iso(day), slot });
-                    else
-                      addKind.mutate({
+                    else {
+                      setRestaurantKcal('');
+                      setRestaurantDialog({
                         date: iso(day),
                         slot,
-                        kind,
                         scope: isSelf ? undefined : 'me',
                         subjectId,
                       });
+                    }
                   }}
                   onOpenItem={setDetail}
                   onChangeRecipe={(item, scope) =>
@@ -469,105 +488,6 @@ export default function PlanningPage() {
           </div>
         </div>
       )}
-
-      <Panel className="relative overflow-hidden border border-white/80 bg-white/70 p-5 shadow-[0_14px_40px_rgba(61,52,44,0.07)] sm:p-6">
-        <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-sage-300/70 to-transparent" />
-        <div className="mb-5 flex flex-wrap items-start justify-between gap-2">
-          <div>
-            <p className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
-              Moyennes de la semaine
-            </p>
-            <p className="mt-0.5 text-xs text-ink-400">
-              {meals.length} repas{' '}
-              {isSelf ? 'pour toi' : `pour ${subject?.displayName ?? 'l’autre'}`} · progression
-              nutritionnelle quotidienne
-            </p>
-          </div>
-          {goals ? (
-            calorieProgress === null ? null : (
-              <Badge tone="sage">{calorieProgress}% de l’objectif kcal</Badge>
-            )
-          ) : (
-            <Badge tone="peach">Aucun objectif défini</Badge>
-          )}
-        </div>
-        <div className="grid grid-cols-4 gap-2 md:hidden">
-          <MacroRing
-            label="kcal"
-            planned={weekAverages.planned.kcal}
-            consumed={weekAverages.consumed.kcal}
-            target={num(goals?.caloriesValue)}
-            unit=""
-            tone="peach"
-            icon={<MacroIcon kind="kcal" />}
-          />
-          <MacroRing
-            label="Protéines"
-            planned={weekAverages.planned.protein}
-            consumed={weekAverages.consumed.protein}
-            target={num(goals?.proteinValue)}
-            unit="g"
-            tone="sage"
-            icon={<MacroIcon kind="protein" />}
-          />
-          <MacroRing
-            label="Glucides"
-            planned={weekAverages.planned.carbs}
-            consumed={weekAverages.consumed.carbs}
-            target={num(goals?.carbsValue)}
-            unit="g"
-            tone="gold"
-            icon={<MacroIcon kind="carbs" />}
-          />
-          <MacroRing
-            label="Lipides"
-            planned={weekAverages.planned.fat}
-            consumed={weekAverages.consumed.fat}
-            target={num(goals?.fatValue)}
-            unit="g"
-            tone="tomato"
-            icon={<MacroIcon kind="fat" />}
-          />
-        </div>
-        <div className="hidden md:grid md:grid-cols-2 md:gap-4 lg:grid-cols-4">
-          <Meter
-            label="kcal"
-            value={weekAverages.planned.kcal}
-            consumed={weekAverages.consumed.kcal}
-            target={num(goals?.caloriesValue)}
-            unit=""
-            tone="peach"
-            icon={<MacroIcon kind="kcal" />}
-          />
-          <Meter
-            label="Protéines"
-            value={weekAverages.planned.protein}
-            consumed={weekAverages.consumed.protein}
-            target={num(goals?.proteinValue)}
-            unit="g"
-            tone="sage"
-            icon={<MacroIcon kind="protein" />}
-          />
-          <Meter
-            label="Glucides"
-            value={weekAverages.planned.carbs}
-            consumed={weekAverages.consumed.carbs}
-            target={num(goals?.carbsValue)}
-            unit="g"
-            tone="gold"
-            icon={<MacroIcon kind="carbs" />}
-          />
-          <Meter
-            label="Lipides"
-            value={weekAverages.planned.fat}
-            consumed={weekAverages.consumed.fat}
-            target={num(goals?.fatValue)}
-            unit="g"
-            tone="tomato"
-            icon={<MacroIcon kind="fat" />}
-          />
-        </div>
-      </Panel>
 
       <AddMealDialog
         open={dialog !== null}
@@ -621,6 +541,45 @@ export default function PlanningPage() {
           Le créneau reste vide pour les personnes qui ne sautent pas le repas.
         </p>
       </Modal>
+      <Modal
+        open={restaurantDialog !== null}
+        title="Restaurant"
+        description="À peu près combien de calories ?"
+        onClose={() => setRestaurantDialog(null)}
+        footer={
+          <Button
+            loading={addKind.isPending}
+            disabled={restaurantEstimateValid ? undefined : true}
+            onClick={() => {
+              if (!restaurantDialog || !restaurantEstimateValid) return;
+              addKind.mutate(
+                {
+                  ...restaurantDialog,
+                  kind: 'RESTAURANT',
+                  estimatedKcal: restaurantEstimate,
+                },
+                { onSuccess: () => setRestaurantDialog(null) },
+              );
+            }}
+          >
+            Ajouter
+          </Button>
+        }
+      >
+        <Field label="Calories" hint="Une estimation suffit, pour une personne.">
+          {({ id, describedBy }) => (
+            <Input
+              id={id}
+              aria-describedby={describedBy}
+              inputMode="numeric"
+              placeholder="650"
+              suffix="kcal"
+              value={restaurantKcal}
+              onChange={(event) => setRestaurantKcal(event.target.value)}
+            />
+          )}
+        </Field>
+      </Modal>
       <ManualMealDialog
         open={manualDialog !== null}
         date={manualDialog?.date ?? iso(selectedDate)}
@@ -665,6 +624,55 @@ export default function PlanningPage() {
           setDetail(null);
         }}
       />
+      <Modal
+        open={averagesOpen}
+        title="Moyennes de la semaine"
+        description={
+          isSelf
+            ? 'Moyenne par jour, pour toi.'
+            : `Moyenne par jour, pour ${subject?.displayName ?? 'l’autre'}.`
+        }
+        onClose={() => setAveragesOpen(false)}
+      >
+        <div className="grid grid-cols-4 gap-2">
+          <MacroRing
+            label="kcal"
+            planned={weekAverages.planned.kcal}
+            consumed={weekAverages.consumed.kcal}
+            target={num(goals?.caloriesValue)}
+            unit=""
+            tone="peach"
+            icon={<MacroIcon kind="kcal" />}
+          />
+          <MacroRing
+            label="Protéines"
+            planned={weekAverages.planned.protein}
+            consumed={weekAverages.consumed.protein}
+            target={num(goals?.proteinValue)}
+            unit="g"
+            tone="sage"
+            icon={<MacroIcon kind="protein" />}
+          />
+          <MacroRing
+            label="Glucides"
+            planned={weekAverages.planned.carbs}
+            consumed={weekAverages.consumed.carbs}
+            target={num(goals?.carbsValue)}
+            unit="g"
+            tone="gold"
+            icon={<MacroIcon kind="carbs" />}
+          />
+          <MacroRing
+            label="Lipides"
+            planned={weekAverages.planned.fat}
+            consumed={weekAverages.consumed.fat}
+            target={num(goals?.fatValue)}
+            unit="g"
+            tone="tomato"
+            icon={<MacroIcon kind="fat" />}
+          />
+        </div>
+      </Modal>
       <OptimizePanel
         open={optimizeOpen}
         date={iso(selectedDate)}
@@ -740,7 +748,6 @@ function DayCard({
         disabled={!onSelect}
         className={cn(
           'flex w-full shrink-0 flex-col gap-1.5 rounded-t-2xl border-b border-white/50 bg-ink-300 px-4 py-3 text-left transition-colors duration-200 ease-out-soft enabled:hover:bg-ink-300/80',
-          today && 'bg-sage-200 enabled:hover:bg-sage-200/80',
         )}
       >
         <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
@@ -756,7 +763,7 @@ function DayCard({
         <MacroCounts macros={macros} />
       </button>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-1.5 px-2 pt-2 pb-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-2 px-3 pt-3 pb-4">
         {MEAL_SLOTS.map((slot) => (
           <SlotSection
             key={slot}
@@ -800,7 +807,6 @@ function SlotSection({
   onRemove: (id: string, scope?: 'me' | 'all') => void;
   todayIso: string;
 }) {
-  const chrome = SLOT_CHROME[slot];
   const label = MEAL_SLOT_LABELS[slot];
 
   return (
@@ -839,12 +845,8 @@ function SlotSection({
               <li
                 key={item.id}
                 className={cn(
-                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-white/75 py-3.5 pl-3.5 pr-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] transition duration-200 ease-out-soft hover:-translate-y-0.5 hover:shadow-card',
-                  past
-                    ? 'border border-ink-300/70 bg-ink-50/50 opacity-75 shadow-none'
-                    : validated
-                      ? 'border border-sage-500'
-                      : chrome.rail,
+                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-white/75 py-3.5 pl-3.5 pr-2 shadow-[0_0_18px_rgba(28,25,23,0.12)] transition duration-200 ease-out-soft hover:-translate-y-0.5 hover:shadow-[0_0_24px_rgba(28,25,23,0.16)]',
+                  past && 'bg-ink-50/70 opacity-75',
                 )}
               >
                 {cover ? (
@@ -866,7 +868,8 @@ function SlotSection({
                       </p>
                       {recipe ? (
                         <RecipeMeta recipe={recipe} kcal={item.nutrition.perServing.kcal * qty} />
-                      ) : kind === 'IMPOSED' ? (
+                      ) : kind === 'IMPOSED' ||
+                        (kind === 'RESTAURANT' && item.estimatedKcal != null) ? (
                         <p className="mt-2.5 flex items-center pr-12 text-[11px] leading-none text-ink-400">
                           <MealCalories kcal={item.nutrition.perServing.kcal * qty} />
                         </p>

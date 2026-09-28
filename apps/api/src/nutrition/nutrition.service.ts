@@ -12,7 +12,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { parseIsoDate, startOfWeek, addDays } from '../planner/dates.js';
 import { nutritionFromSnapshot } from '@cuisinons/db';
-import { computeRecipeNutrition } from '@cuisinons/shared';
+import { computeRecipeNutrition, estimatedMealNutrition } from '@cuisinons/shared';
 
 function bounds(period: StatsPeriod, date: Date): { from: Date; to: Date } {
   if (period === 'day') return { from: date, to: date };
@@ -54,6 +54,8 @@ export class NutritionService {
       select: {
         date: true,
         slot: true,
+        kind: true,
+        estimatedKcal: true,
         recipeId: true,
         recipe: { select: { name: true, servings: true, nutritionSnapshot: true } },
         manualIngredients: {
@@ -103,7 +105,10 @@ export class NutritionService {
                 : null,
         };
       });
-      const nutrition = item.recipe
+      const nutrition =
+        item.kind === 'RESTAURANT' && item.estimatedKcal != null
+          ? estimatedMealNutrition(item.estimatedKcal)
+          : item.recipe
         ? (nutritionFromSnapshot(item.recipe.nutritionSnapshot) ??
           computeRecipeNutrition([], Number(item.recipe.servings)))
         : computeRecipeNutrition(

@@ -57,6 +57,7 @@ export class PlannerController {
         recipeId: z.string().min(1).optional(),
         portions: z.array(portionLine),
         ingredients: z.array(manualIngredientLine).max(30).optional(),
+        estimatedKcal: z.number().int().min(0).max(8000).optional(),
         repeat: z
           .object({
             weekdays: z.array(z.number().int().min(0).max(6)).min(1).max(7),
@@ -94,6 +95,13 @@ export class PlannerController {
             path: ['ingredients'],
           });
         }
+        if (kind !== 'RESTAURANT' && val.estimatedKcal !== undefined) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'L’estimation de calories est réservée au restaurant.',
+            path: ['estimatedKcal'],
+          });
+        }
         assertSomePortions(val.portions, ctx);
       })
       .parse(body);
@@ -122,6 +130,7 @@ export class PlannerController {
       createdById: user.id,
       portions: parsed.portions,
       ingredients: parsed.ingredients,
+      estimatedKcal: parsed.estimatedKcal,
     });
   }
 

@@ -35,6 +35,7 @@ export function PlannedMealModal({
     kind: MealKind;
     recipe: { id: string } | null;
     manualTitle?: string;
+    estimatedKcal?: number | null;
     nutrition: {
       perServing: { kcal: number; protein: number; carbs: number; fat: number };
       complete: boolean;
@@ -136,7 +137,9 @@ export function PlannedMealModal({
             ? 'Ce créneau est marqué comme sauté.'
             : kind === 'IMPOSED'
               ? 'Ajout manuel'
-              : 'Repas pris à l’extérieur.'}
+              : item.estimatedKcal != null
+                ? `Repas pris à l’extérieur, environ ${Math.round(item.nutrition.perServing.kcal)} kcal.`
+                : 'Repas pris à l’extérieur.'}
         </p>
       </div>
       {kind === 'IMPOSED' && item.manualIngredients?.length ? (
