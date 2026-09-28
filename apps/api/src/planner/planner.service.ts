@@ -324,6 +324,11 @@ export class PlannerService {
   }
 
   async removeForUser(id: string, userId: string) {
+    const target = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!target) throw new NotFoundException('Utilisateur introuvable.');
     const item = await this.prisma.mealItem.findUnique({
       where: { id },
       include: { portions: true },
@@ -341,6 +346,11 @@ export class PlannerService {
   }
 
   async replaceForUser(id: string, userId: string, input: { recipeId: string; portions: number }) {
+    const target = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
+    });
+    if (!target) throw new NotFoundException('Utilisateur introuvable.');
     const item = await this.prisma.mealItem.findUnique({
       where: { id },
       include: { portions: true },

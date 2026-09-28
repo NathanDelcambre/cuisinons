@@ -43,3 +43,31 @@ export function mealsForEater<
   }
   return [...latest.values()];
 }
+
+/**
+ * Repas visibles pour le foyer : le repas de chaque convive, y compris quand
+ * il mange seul. Un même repas partagé n'apparaît qu'une fois.
+ */
+export function mealsForHousehold<
+  T extends {
+    id: string;
+    date: string | Date;
+    slot: string;
+    portions: ReadonlyArray<{ userId: string; portions: unknown }>;
+  },
+>(items: readonly T[], userIds: readonly string[]): T[] {
+  const ids =
+    userIds.length > 0
+      ? userIds
+      : [...new Set(items.flatMap((item) => item.portions.map((portion) => portion.userId)))];
+  const seen = new Set<string>();
+  const result: T[] = [];
+  for (const userId of ids) {
+    for (const item of mealsForEater(items, userId)) {
+      if (seen.has(item.id)) continue;
+      seen.add(item.id);
+      result.push(item);
+    }
+  }
+  return result;
+}

@@ -3,7 +3,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Check, Search } from 'lucide-react';
-import { Button, Chip, EmptyState, Inset, Modal, SearchInput, Segmented, Skeleton, Stepper, Switch, cn } from '@cuisinons/ui';
+import {
+  Button,
+  Chip,
+  EmptyState,
+  Inset,
+  Modal,
+  SearchInput,
+  Segmented,
+  Skeleton,
+  Stepper,
+  Switch,
+  cn,
+} from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 import {
   MEAL_SLOT_LABELS,
@@ -32,6 +44,9 @@ export function AddMealDialog({
   slot,
   replaceItemId,
   replaceScope = 'all',
+  targetUserId,
+  initialPortions,
+  soloUserId,
   initialRecipeId,
   onClose,
   onAdded,
@@ -41,6 +56,11 @@ export function AddMealDialog({
   slot: MealSlot;
   replaceItemId?: string | null;
   replaceScope?: 'me' | 'all';
+  /** Convive visé quand on remplace seulement sa part. */
+  targetUserId?: string | null;
+  initialPortions?: Record<string, number> | null;
+  /** Ajout à côté du repas de l'autre : lui laisser son plat. */
+  soloUserId?: string | null;
   initialRecipeId?: string | null;
   onClose: () => void;
   onAdded: () => void;
@@ -60,11 +80,11 @@ export function AddMealDialog({
     if (!open) return;
     setQuery('');
     setRecipeId(initialRecipeId ?? null);
-    setPortions({});
+    setPortions(initialPortions ?? {});
     setRepeat(false);
     setWeekdays([weekdayFromIso(date)]);
     setUntil('week');
-  }, [open, date, slot, initialRecipeId]);
+  }, [open, date, slot, initialRecipeId, initialPortions]);
 
   useEffect(() => {
     if (!repeat) return;
@@ -83,18 +103,33 @@ export function AddMealDialog({
     queryFn: () => apiJson<User[]>('/api/bff/users'),
     enabled: open,
   });
+  function portionOf(userId: string) {
+    if (userId in portions) return portions[userId] ?? 0;
+    if (initialPortions) return initialPortions[userId] ?? 0;
+    if (soloUserId) return userId === soloUserId ? 1 : 0;
+    return 1;
+  }
+
+  const subjectId = targetUserId ?? user?.id ?? '';
+  const shownUsers =
+    replacing && replaceScope === 'me'
+      ? (users.data ?? []).filter((person) => person.id === subjectId)
+      : (users.data ?? []);
+
   const add = useMutation({
     mutationFn: () => {
-      const portionsPayload = (users.data ?? []).map((u) => ({
+      const household = users.data ?? [];
+      const portionsPayload = household.map((u) => ({
         userId: u.id,
-        portions: portions[u.id] ?? 1,
+        portions: portionOf(u.id),
       }));
       if (replaceItemId && replaceScope === 'me') {
         return apiJson(`/api/bff/planner/items/${replaceItemId}/replace-for-me`, {
           method: 'POST',
           body: JSON.stringify({
             recipeId,
-            portions: portions[user?.id ?? ''] ?? 1,
+            portions: portionOf(subjectId) || 1,
+            userId: subjectId,
           }),
         });
       }
@@ -145,7 +180,8 @@ export function AddMealDialog({
             icon={Check}
             disabled={
               !recipeId ||
-              (users.data ?? []).every((u) => (portions[u.id] ?? 1) <= 0) ||
+              shownUsers.length === 0 ||
+              shownUsers.every((u) => portionOf(u.id) <= 0) ||
               (repeat && weekdays.length === 0)
             }
             loading={add.isPending}
@@ -223,8 +259,8 @@ export function AddMealDialog({
 
       <div className="mt-5 space-y-3 border-t border-white/70 pt-5">
         <p className="text-sm font-medium text-ink-700">Portions</p>
-        {(users.data ?? []).map((u) => {
-          const amount = portions[u.id] ?? 1;
+        {shownUsers.map((u) => {
+          const amount = portionOf(u.id);
           const included = amount > 0;
           return (
             <div key={u.id} className="flex items-center justify-between gap-4">

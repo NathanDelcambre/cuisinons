@@ -18,12 +18,15 @@ export function ManualMealDialog({
   open,
   date,
   slot,
+  soloUserId,
   onClose,
   onAdded,
 }: {
   open: boolean;
   date: string;
   slot: MealSlot;
+  /** Ajout à côté du repas de l'autre : lui laisser son plat. */
+  soloUserId?: string | null;
   onClose: () => void;
   onAdded: () => void;
 }) {
@@ -59,7 +62,7 @@ export function ManualMealDialog({
           })),
           portions: (users.data ?? []).map((u) => ({
             userId: u.id,
-            portions: portions[u.id] ?? 1,
+            portions: portions[u.id] ?? (soloUserId ? (u.id === soloUserId ? 1 : 0) : 1),
           })),
         }),
       }),
@@ -69,7 +72,11 @@ export function ManualMealDialog({
       onClose();
     },
   });
-  const canSubmit = lines.length > 0 && (users.data ?? []).some((u) => (portions[u.id] ?? 1) > 0);
+  const canSubmit =
+    lines.length > 0 &&
+    (users.data ?? []).some(
+      (u) => (portions[u.id] ?? (soloUserId ? (u.id === soloUserId ? 1 : 0) : 1)) > 0,
+    );
   return (
     <>
       <Modal
@@ -133,7 +140,7 @@ export function ManualMealDialog({
                 {u.id === user?.id ? ' (toi)' : ''}
               </span>
               <Stepper
-                value={portions[u.id] ?? 1}
+                value={portions[u.id] ?? (soloUserId ? (u.id === soloUserId ? 1 : 0) : 1)}
                 onChange={(next) => setPortions((current) => ({ ...current, [u.id]: next }))}
                 step={0.5}
                 min={0}

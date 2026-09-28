@@ -46,6 +46,7 @@ import {
   MEAL_SLOTS,
   MEAL_SLOT_LABELS,
   mealsForEater,
+  mealsForHousehold,
   weekMacroAverages,
   type MealKind,
   type MealSlot,
@@ -143,9 +144,16 @@ export default function PlanningPage() {
     replaceItemId?: string;
     recipeId?: string;
     replaceScope?: 'me' | 'all';
+    targetUserId?: string;
+    initialPortions?: Record<string, number>;
+    soloUserId?: string;
   } | null>(null);
   const [optimizeOpen, setOptimizeOpen] = useState(false);
-  const [manualDialog, setManualDialog] = useState<{ date: string; slot: MealSlot } | null>(null);
+  const [manualDialog, setManualDialog] = useState<{
+    date: string;
+    slot: MealSlot;
+    soloUserId?: string;
+  } | null>(null);
   const [skipDialog, setSkipDialog] = useState<{ date: string; slot: MealSlot } | null>(null);
   const [detail, setDetail] = useState<MealItem | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -168,10 +176,15 @@ export default function PlanningPage() {
     queryFn: () => apiJson<Goal | null>('/api/bff/nutrition-goals'),
   });
   const remove = useMutation({
-    mutationFn: (input: { id: string; scope?: 'me' | 'all' }) =>
-      apiJson(`/api/bff/planner/items/${input.id}${input.scope === 'me' ? '?scope=me' : ''}`, {
+    mutationFn: (input: { id: string; scope?: 'me' | 'all'; userId?: string }) => {
+      const params = new URLSearchParams();
+      if (input.scope === 'me') params.set('scope', 'me');
+      if (input.userId) params.set('userId', input.userId);
+      const query = params.toString();
+      return apiJson(`/api/bff/planner/items/${input.id}${query ? `?${query}` : ''}`, {
         method: 'DELETE',
-      }),
+      });
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['planner'] }),
   });
 
@@ -269,12 +282,22 @@ export default function PlanningPage() {
     [],
   );
   const rawMeals = mealsQuery.data ?? [];
-  const meals = user?.id ? mealsForEater(rawMeals, user.id) : rawMeals;
+  const myMeals = user?.id ? mealsForEater(rawMeals, user.id) : rawMeals;
+  const eaterIds = [
+    ...new Set([
+      ...(user?.id ? [user.id] : []),
+      ...rawMeals.flatMap((item) => item.portions.map((portion) => portion.userId)),
+    ]),
+  ];
+  const meals = mealsForHousehold(rawMeals, eaterIds);
+  const otherMealCount = meals.filter(
+    (item) => !myMeals.some((mine) => mine.id === item.id),
+  ).length;
 
   function macrosFor(date: Date): Macros {
     const key = iso(date);
     const acc: Macros = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
-    for (const item of meals.filter((m) => m.date.slice(0, 10) === key)) {
+    for (const item of myMeals.filter((m) => m.date.slice(0, 10) === key)) {
       const portion = item.portions.find((p) => p.userId === user?.id);
       const qty = portion ? Number(portion.portions) : 0;
       acc.kcal += item.nutrition.perServing.kcal * qty;
@@ -289,7 +312,7 @@ export default function PlanningPage() {
   const weekAverages = weekMacroAverages({
     userId: user?.id ?? '',
     todayIso,
-    meals: meals.map((item) => ({
+    meals: myMeals.map((item) => ({
       date: item.date,
       perServing: { ...item.nutrition.perServing, fiber: 0 },
       portions: item.portions.map((p) => ({
@@ -385,7 +408,9 @@ export default function PlanningPage() {
               Moyennes de la semaine
             </p>
             <p className="mt-0.5 text-xs text-ink-400">
-              {meals.length} repas planifiés · progression nutritionnelle quotidienne
+              {myMeals.length} repas pour toi
+              {otherMealCount > 0 ? ` · ${otherMealCount} repas de l’autre` : ''} · progression
+              nutritionnelle quotidienne
             </p>
           </div>
           {goals ? (
@@ -505,23 +530,42 @@ export default function PlanningPage() {
                   macros={macrosFor(day)}
                   selected={index === selectedIndex}
                   onSelect={() => setSelectedIndex(index)}
-                  onAddRecipe={(slot) => setDialog({ date: iso(day), slot })}
-                  onAddKind={(slot, kind) => {
-                    if (kind === 'IMPOSED') setManualDialog({ date: iso(day), slot });
+                  onAddRecipe={(slot, forMe) =>
+                    setDialog({ date: iso(day), slot, soloUserId: forMe ? user?.id : undefined })
+                  }
+                  onAddKind={(slot, kind, forMe) => {
+                    if (kind === 'IMPOSED')
+                      setManualDialog({
+                        date: iso(day),
+                        slot,
+                        soloUserId: forMe ? user?.id : undefined,
+                      });
                     else if (kind === 'SKIPPED') setSkipDialog({ date: iso(day), slot });
-                    else addKind.mutate({ date: iso(day), slot, kind });
+                    else
+                      addKind.mutate({
+                        date: iso(day),
+                        slot,
+                        kind,
+                        scope: forMe ? 'me' : undefined,
+                      });
                   }}
                   onOpenItem={setDetail}
-                  onChangeRecipe={(item, scope) =>
+                  onChangeRecipe={(item, scope, targetUserId) =>
                     setDialog({
                       date: item.date.slice(0, 10),
                       slot: item.slot,
                       replaceItemId: item.id,
                       recipeId: item.recipe?.id,
                       replaceScope: scope,
+                      targetUserId,
+                      initialPortions: Object.fromEntries(
+                        item.portions.map((portion) => [portion.userId, Number(portion.portions)]),
+                      ),
                     })
                   }
-                  onRemove={(id, scope) => remove.mutate({ id, scope })}
+                  onRemove={(id, scope, targetUserId) =>
+                    remove.mutate({ id, scope, userId: targetUserId })
+                  }
                   todayIso={todayIso}
                 />
               </div>
@@ -536,6 +580,9 @@ export default function PlanningPage() {
         slot={dialog?.slot ?? 'DINNER'}
         replaceItemId={dialog?.replaceItemId}
         replaceScope={dialog?.replaceScope}
+        targetUserId={dialog?.targetUserId}
+        initialPortions={dialog?.initialPortions}
+        soloUserId={dialog?.soloUserId}
         initialRecipeId={dialog?.recipeId}
         onClose={() => setDialog(null)}
         onAdded={() => queryClient.invalidateQueries({ queryKey: ['planner'] })}
@@ -583,24 +630,17 @@ export default function PlanningPage() {
         open={manualDialog !== null}
         date={manualDialog?.date ?? iso(selectedDate)}
         slot={manualDialog?.slot ?? 'DINNER'}
+        soloUserId={manualDialog?.soloUserId}
         onClose={() => setManualDialog(null)}
         onAdded={() => queryClient.invalidateQueries({ queryKey: ['planner'] })}
       />
       <PlannedMealModal
         item={detail}
-        validated={
-          detail
-            ? isValidated(
-                detail,
-                detail.portions.find((p) => p.userId === user?.id),
-                todayIso,
-              )
-            : false
-        }
+        validated={detail ? isValidated(detail, eatingPortion(detail, user?.id), todayIso) : false}
         loading={consume.isPending}
         onClose={() => setDetail(null)}
         onCancelValidation={() => {
-          const portion = detail?.portions.find((p) => p.userId === user?.id);
+          const portion = detail ? eatingPortion(detail, user?.id) : undefined;
           if (!portion) return;
           consume.mutate(
             { portionId: portion.id, consumed: false },
@@ -614,6 +654,10 @@ export default function PlanningPage() {
             slot: detail.slot,
             replaceItemId: detail.id,
             recipeId: detail.recipe?.id,
+            replaceScope: 'all',
+            initialPortions: Object.fromEntries(
+              detail.portions.map((portion) => [portion.userId, Number(portion.portions)]),
+            ),
           });
           setDetail(null);
         }}
@@ -628,13 +672,22 @@ export default function PlanningPage() {
   );
 }
 
+function eatingPortion(item: MealItem, userId?: string) {
+  const mine = item.portions.find(
+    (portion) => portion.userId === userId && Number(portion.portions) > 0,
+  );
+  if (mine) return mine;
+  return item.portions.find((portion) => Number(portion.portions) > 0);
+}
+
 function isValidated(
   item: MealItem,
   portion: MealItem['portions'][number] | undefined,
   todayIso: string,
 ) {
-  if (portion?.consumedAt) return true;
-  if (portion?.skipAutoConsume) return false;
+  if (!portion || Number(portion.portions) <= 0) return false;
+  if (portion.consumedAt) return true;
+  if (portion.skipAutoConsume) return false;
   return item.date.slice(0, 10) < todayIso;
 }
 
@@ -666,11 +719,11 @@ function DayCard({
   macros: Macros;
   selected: boolean;
   onSelect?: () => void;
-  onAddRecipe: (slot: MealSlot) => void;
-  onAddKind: (slot: MealSlot, kind: SpecialMealKind) => void;
+  onAddRecipe: (slot: MealSlot, forMe?: boolean) => void;
+  onAddKind: (slot: MealSlot, kind: SpecialMealKind, forMe?: boolean) => void;
   onOpenItem: (item: MealItem) => void;
-  onChangeRecipe: (item: MealItem, scope?: 'me' | 'all') => void;
-  onRemove: (id: string, scope?: 'me' | 'all') => void;
+  onChangeRecipe: (item: MealItem, scope?: 'me' | 'all', userId?: string) => void;
+  onRemove: (id: string, scope?: 'me' | 'all', userId?: string) => void;
   todayIso: string;
 }) {
   const key = iso(date);
@@ -714,8 +767,8 @@ function DayCard({
             slot={slot}
             items={meals.filter((m) => m.date.slice(0, 10) === key && m.slot === slot)}
             userId={userId}
-            onAddRecipe={() => onAddRecipe(slot)}
-            onAddKind={(kind) => onAddKind(slot, kind)}
+            onAddRecipe={(forMe) => onAddRecipe(slot, forMe)}
+            onAddKind={(kind, forMe) => onAddKind(slot, kind, forMe)}
             onOpenItem={onOpenItem}
             onChangeRecipe={onChangeRecipe}
             onRemove={onRemove}
@@ -741,15 +794,25 @@ function SlotSection({
   slot: MealSlot;
   items: MealItem[];
   userId?: string;
-  onAddRecipe: () => void;
-  onAddKind: (kind: SpecialMealKind) => void;
+  onAddRecipe: (forMe?: boolean) => void;
+  onAddKind: (kind: SpecialMealKind, forMe?: boolean) => void;
   onOpenItem: (item: MealItem) => void;
-  onChangeRecipe: (item: MealItem, scope?: 'me' | 'all') => void;
-  onRemove: (id: string, scope?: 'me' | 'all') => void;
+  onChangeRecipe: (item: MealItem, scope?: 'me' | 'all', userId?: string) => void;
+  onRemove: (id: string, scope?: 'me' | 'all', userId?: string) => void;
   todayIso: string;
 }) {
   const chrome = SLOT_CHROME[slot];
   const label = MEAL_SLOT_LABELS[slot];
+  const iEat = items.some((item) =>
+    item.portions.some((portion) => portion.userId === userId && Number(portion.portions) > 0),
+  );
+  const ordered = [...items].sort((a, b) => {
+    const mine = (item: MealItem) =>
+      item.portions.some((portion) => portion.userId === userId && Number(portion.portions) > 0)
+        ? 0
+        : 1;
+    return mine(a) - mine(b);
+  });
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -757,24 +820,28 @@ function SlotSection({
         <SlotAddMenu
           slot={slot}
           variant="empty"
-          onChooseRecipe={onAddRecipe}
-          onChooseKind={onAddKind}
+          onChooseRecipe={() => onAddRecipe(false)}
+          onChooseKind={(kind) => onAddKind(kind, false)}
         />
       ) : (
         <ul
           className={cn(
             'flex min-h-0 flex-1 flex-col gap-1.5',
-            items.length > 1 && 'overflow-y-auto',
+            (ordered.length > 1 || !iEat) && 'overflow-y-auto',
           )}
         >
-          {items.map((item) => {
-            const portion = item.portions.find((p) => p.userId === userId);
-            const qty = portion ? Number(portion.portions) : 0;
+          {ordered.map((item) => {
+            const portion = eatingPortion(item, userId);
+            const mine = item.portions.find((p) => p.userId === userId);
+            const qty = mine ? Number(mine.portions) : 0;
+            const includesMe = qty > 0;
+            const displayQty = includesMe ? qty : Number(portion?.portions ?? 0);
             const validated = isValidated(item, portion, todayIso);
             const past = item.date.slice(0, 10) < todayIso;
             const participants = item.portions.filter(
               (participant) => Number(participant.portions) > 0,
             );
+            const others = participants.filter((participant) => participant.userId !== userId);
             const kind = item.kind ?? 'RECIPE';
             const recipe = kind === 'RECIPE' ? item.recipe : null;
             const title =
@@ -818,10 +885,13 @@ function SlotSection({
                         {title}
                       </p>
                       {recipe ? (
-                        <RecipeMeta recipe={recipe} kcal={item.nutrition.perServing.kcal * qty} />
+                        <RecipeMeta
+                          recipe={recipe}
+                          kcal={item.nutrition.perServing.kcal * displayQty}
+                        />
                       ) : kind === 'IMPOSED' ? (
                         <p className="mt-2.5 flex items-center pr-12 text-[11px] leading-none text-ink-400">
-                          <MealCalories kcal={item.nutrition.perServing.kcal * qty} />
+                          <MealCalories kcal={item.nutrition.perServing.kcal * displayQty} />
                         </p>
                       ) : null}
                     </span>
@@ -835,12 +905,17 @@ function SlotSection({
                 </div>
                 {participants.length > 0 ? (
                   <div
-                    className="absolute right-2 bottom-2 flex -space-x-1.5"
+                    className="absolute right-2 bottom-2 flex items-center -space-x-1.5"
                     role="group"
                     aria-label={`Repas de ${participants
                       .map((participant) => participant.user.displayName)
                       .join(' et ')}`}
                   >
+                    {!includesMe ? (
+                      <span className="mr-1.5 max-w-16 truncate text-[10px] font-medium text-ink-500">
+                        {others.map((participant) => participant.user.displayName).join(' & ')}
+                      </span>
+                    ) : null}
                     {participants.map((participant) => (
                       <Avatar
                         key={participant.id}
@@ -854,14 +929,28 @@ function SlotSection({
                 <div className="absolute right-1.5 top-1.5 flex items-center opacity-45 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
                   <MealItemActions
                     title={title}
-                    shared={participants.length >= 2}
-                    onChange={(scope) => onChangeRecipe(item, scope)}
-                    onRemove={(scope) => onRemove(item.id, scope)}
+                    includesMe={includesMe}
+                    others={others.map((participant) => ({
+                      userId: participant.userId,
+                      displayName: participant.user.displayName,
+                    }))}
+                    onChange={(scope, targetUserId) => onChangeRecipe(item, scope, targetUserId)}
+                    onRemove={(scope, targetUserId) => onRemove(item.id, scope, targetUserId)}
                   />
                 </div>
               </li>
             );
           })}
+          {!iEat ? (
+            <li className="shrink-0">
+              <SlotAddMenu
+                slot={slot}
+                variant="companion"
+                onChooseRecipe={() => onAddRecipe(true)}
+                onChooseKind={(kind) => onAddKind(kind, true)}
+              />
+            </li>
+          ) : null}
         </ul>
       )}
     </div>
@@ -870,21 +959,26 @@ function SlotSection({
 
 function MealItemActions({
   title,
-  shared,
+  includesMe,
+  others,
   onChange,
   onRemove,
 }: {
   title: string;
-  shared: boolean;
-  onChange: (scope?: 'me' | 'all') => void;
-  onRemove: (scope?: 'me' | 'all') => void;
+  includesMe: boolean;
+  others: Array<{ userId: string; displayName: string }>;
+  onChange: (scope?: 'me' | 'all', userId?: string) => void;
+  onRemove: (scope?: 'me' | 'all', userId?: string) => void;
 }) {
-  if (!shared) {
+  const alone = others.length === 0;
+  const onlyTheirs = !includesMe && others.length === 1;
+  if (alone || onlyTheirs) {
+    const owner = onlyTheirs ? others[0]?.displayName : null;
     return (
       <>
         <IconButton
           icon={RefreshCw}
-          label={`Changer ${title}`}
+          label={owner ? `Changer le repas de ${owner}` : `Changer ${title}`}
           size="sm"
           variant="ghost"
           className="size-8 text-ink-400 hover:text-sage-600"
@@ -892,7 +986,7 @@ function MealItemActions({
         />
         <IconButton
           icon={Trash2}
-          label={`Retirer ${title}`}
+          label={owner ? `Retirer le repas de ${owner}` : `Retirer ${title}`}
           size="sm"
           variant="ghost"
           className="size-8 text-ink-400 hover:text-tomato-500"
@@ -911,13 +1005,25 @@ function MealItemActions({
         >
           Échanger pour tout le monde
         </button>
-        <button
-          type="button"
-          className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm"
-          onClick={() => onChange('me')}
-        >
-          Échanger pour moi seulement
-        </button>
+        {includesMe ? (
+          <button
+            type="button"
+            className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm"
+            onClick={() => onChange('me')}
+          >
+            Échanger pour moi seulement
+          </button>
+        ) : null}
+        {others.map((person) => (
+          <button
+            key={person.userId}
+            type="button"
+            className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm"
+            onClick={() => onChange('me', person.userId)}
+          >
+            Échanger pour {person.displayName} seulement
+          </button>
+        ))}
       </ActionMenu>
       <ActionMenu icon={Trash2} label={`Retirer ${title}`} hoverClass="hover:text-tomato-500">
         <button
@@ -927,13 +1033,25 @@ function MealItemActions({
         >
           Supprimer pour tout le monde
         </button>
-        <button
-          type="button"
-          className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm text-tomato-500"
-          onClick={() => onRemove('me')}
-        >
-          Supprimer pour moi seulement
-        </button>
+        {includesMe ? (
+          <button
+            type="button"
+            className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm text-tomato-500"
+            onClick={() => onRemove('me')}
+          >
+            Supprimer pour moi seulement
+          </button>
+        ) : null}
+        {others.map((person) => (
+          <button
+            key={person.userId}
+            type="button"
+            className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm text-tomato-500"
+            onClick={() => onRemove('me', person.userId)}
+          >
+            Supprimer pour {person.displayName} seulement
+          </button>
+        ))}
       </ActionMenu>
     </>
   );
@@ -965,10 +1083,10 @@ function ActionMenu({
     if (!trigger) return;
     const rect = trigger.getBoundingClientRect();
     const gap = 8;
-    const width = 240;
+    const width = 280;
     const viewportPad = 12;
     const spaceBelow = window.innerHeight - rect.bottom - viewportPad;
-    const menuHeight = 96;
+    const menuHeight = 168;
     const placeAbove = spaceBelow < menuHeight && rect.top - viewportPad > menuHeight;
     let left = rect.right - width;
     if (left < viewportPad) left = viewportPad;

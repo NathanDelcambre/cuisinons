@@ -663,7 +663,7 @@ export class ProvisionsService {
    * `consumedAt` rend l'operation idempotente, et l'annulation recredite les
    * memes quantites.
    */
-  async setConsumption(userId: string, portionId: string, consumed: boolean) {
+  async setConsumption(_actorId: string, portionId: string, consumed: boolean) {
     const portion = await this.prisma.mealParticipantPortion.findUnique({
       where: { id: portionId },
       include: {
@@ -685,9 +685,8 @@ export class ProvisionsService {
       },
     });
     if (!portion) throw new NotFoundException('Portion introuvable.');
-    if (portion.userId !== userId) {
-      throw new ForbiddenException('Seul le convive concerné peut valider sa portion.');
-    }
+    // Le stock débité est toujours celui du convive, même si l'autre agit sur son repas.
+    const userId = portion.userId;
     const already = portion.consumedAt !== null;
     if (already === consumed) {
       // Jour passé jamais déduit : le refus de validation doit quand même

@@ -154,8 +154,14 @@ export class PlannerController {
   }
 
   @Delete('/planner/items/:id')
-  remove(@CurrentUser() user: AuthUser, @Param('id') id: string, @Query('scope') scope?: string) {
-    if (scope === 'me') return this.planner.removeForUser(id, user.id);
+  remove(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Query('scope') scope?: string,
+    @Query('userId') userId?: string,
+  ) {
+    const targetId = userId?.trim() || (scope === 'me' ? user.id : undefined);
+    if (targetId) return this.planner.removeForUser(id, targetId);
     return this.planner.remove(id);
   }
 
@@ -165,9 +171,10 @@ export class PlannerController {
       .object({
         recipeId: z.string().min(1),
         portions: z.number().min(0.5).max(6).optional(),
+        userId: z.string().min(1).optional(),
       })
       .parse(body);
-    return this.planner.replaceForUser(id, user.id, {
+    return this.planner.replaceForUser(id, parsed.userId ?? user.id, {
       recipeId: parsed.recipeId,
       portions: parsed.portions ?? 1,
     });

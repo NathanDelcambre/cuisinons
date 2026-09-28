@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mealsForEater } from '../src/planner/slots.js';
+import { mealsForEater, mealsForHousehold } from '../src/planner/slots.js';
 
 describe('mealsForEater', () => {
   const jade = 'jade';
@@ -61,5 +61,42 @@ describe('mealsForEater', () => {
       },
     ];
     expect(mealsForEater(items, nathan).map((item) => item.id)).toEqual(['new']);
+  });
+
+  it('montre le repas solo de l’autre à côté du sien', () => {
+    const items = [
+      {
+        id: 'jade-lunch',
+        date: '2026-09-18',
+        slot: 'LUNCH',
+        portions: [
+          { userId: jade, portions: 1 },
+          { userId: nathan, portions: 0 },
+        ],
+      },
+      {
+        id: 'nathan-lunch',
+        date: '2026-09-18',
+        slot: 'LUNCH',
+        portions: [
+          { userId: jade, portions: 0 },
+          { userId: nathan, portions: 1 },
+        ],
+      },
+      {
+        id: 'shared-dinner',
+        date: '2026-09-18',
+        slot: 'DINNER',
+        portions: [
+          { userId: jade, portions: 1 },
+          { userId: nathan, portions: 1 },
+        ],
+      },
+    ];
+    expect(mealsForHousehold(items, [nathan, jade]).map((item) => item.id)).toEqual([
+      'nathan-lunch',
+      'shared-dinner',
+      'jade-lunch',
+    ]);
   });
 });
