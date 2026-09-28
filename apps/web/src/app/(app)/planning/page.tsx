@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { addDays, differenceInCalendarDays, format, isToday, startOfWeek } from 'date-fns';
+import { motion } from 'motion/react';
 import { fr } from 'date-fns/locale';
 import {
   useCallback,
@@ -37,6 +38,7 @@ import {
   Panel,
   Skeleton,
   cn,
+  transitions,
 } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 import { useAuth } from '@/components/auth-provider';
@@ -46,7 +48,6 @@ import {
   MEAL_SLOTS,
   MEAL_SLOT_LABELS,
   mealsForEater,
-  mealsForHousehold,
   weekMacroAverages,
   type MealKind,
   type MealSlot,
@@ -117,6 +118,13 @@ type MacroTargets = {
 };
 type Macros = { kcal: number; protein: number; carbs: number; fat: number };
 
+type HouseholdUser = {
+  id: string;
+  email: string;
+  displayName: string;
+  avatarUrl: string | null;
+};
+
 function iso(date: Date) {
   return format(date, 'yyyy-MM-dd');
 }
@@ -148,6 +156,7 @@ export default function PlanningPage() {
     initialPortions?: Record<string, number>;
     soloUserId?: string;
   } | null>(null);
+  const [viewUserId, setViewUserId] = useState<string | null>(null);
   const [optimizeOpen, setOptimizeOpen] = useState(false);
   const [manualDialog, setManualDialog] = useState<{
     date: string;
@@ -171,9 +180,19 @@ export default function PlanningPage() {
     queryKey: ['planner', from],
     queryFn: () => apiJson<MealItem[]>(`/api/bff/planner/week?from=${from}`),
   });
+  const household = useQuery({
+    queryKey: ['users'],
+    queryFn: () => apiJson<HouseholdUser[]>('/api/bff/users'),
+  });
+  const subjectId = viewUserId ?? user?.id;
+  const subject = household.data?.find((member) => member.id === subjectId);
+  const isSelf = !subjectId || subjectId === user?.id;
+  const subjectLabel = isSelf ? 'moi' : (subject?.displayName ?? 'l’autre');
   const goalsQuery = useQuery({
-    queryKey: ['goals'],
-    queryFn: () => apiJson<Goal | null>('/api/bff/nutrition-goals'),
+    queryKey: ['goals', subjectId],
+    queryFn: () =>
+      apiJson<Goal | null>(`/api/bff/nutrition-goals?userId=${encodeURIComponent(subjectId!)}`),
+    enabled: Boolean(subjectId),
   });
   const remove = useMutation({
     mutationFn: (input: { id: string; scope?: 'me' | 'all'; userId?: string }) => {
@@ -194,11 +213,13 @@ export default function PlanningPage() {
       slot: MealSlot;
       kind: SpecialMealKind;
       scope?: 'me' | 'all';
+      subjectId?: string;
     }) => {
       const users = await apiJson<Array<{ id: string }>>('/api/bff/users');
+      const onlyId = input.scope === 'me' ? (input.subjectId ?? user?.id) : undefined;
       const portions = users.map((u) => ({
         userId: u.id,
-        portions: input.scope === 'me' && u.id !== user?.id ? 0 : 1,
+        portions: onlyId && u.id !== onlyId ? 0 : 1,
       }));
       if (!portions.some((line) => line.portions > 0) && portions[0]) portions[0].portions = 1;
       return apiJson('/api/bff/planner/items', {
@@ -282,23 +303,13 @@ export default function PlanningPage() {
     [],
   );
   const rawMeals = mealsQuery.data ?? [];
-  const myMeals = user?.id ? mealsForEater(rawMeals, user.id) : rawMeals;
-  const eaterIds = [
-    ...new Set([
-      ...(user?.id ? [user.id] : []),
-      ...rawMeals.flatMap((item) => item.portions.map((portion) => portion.userId)),
-    ]),
-  ];
-  const meals = mealsForHousehold(rawMeals, eaterIds);
-  const otherMealCount = meals.filter(
-    (item) => !myMeals.some((mine) => mine.id === item.id),
-  ).length;
+  const meals = subjectId ? mealsForEater(rawMeals, subjectId) : rawMeals;
 
   function macrosFor(date: Date): Macros {
     const key = iso(date);
     const acc: Macros = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
-    for (const item of myMeals.filter((m) => m.date.slice(0, 10) === key)) {
-      const portion = item.portions.find((p) => p.userId === user?.id);
+    for (const item of meals.filter((m) => m.date.slice(0, 10) === key)) {
+      const portion = item.portions.find((p) => p.userId === subjectId);
       const qty = portion ? Number(portion.portions) : 0;
       acc.kcal += item.nutrition.perServing.kcal * qty;
       acc.protein += item.nutrition.perServing.protein * qty;
@@ -310,9 +321,9 @@ export default function PlanningPage() {
 
   const goals = goalsQuery.data;
   const weekAverages = weekMacroAverages({
-    userId: user?.id ?? '',
+    userId: subjectId ?? '',
     todayIso,
-    meals: myMeals.map((item) => ({
+    meals: meals.map((item) => ({
       date: item.date,
       perServing: { ...item.nutrition.perServing, fiber: 0 },
       portions: item.portions.map((p) => ({
@@ -349,20 +360,24 @@ export default function PlanningPage() {
             Planning
           </h1>
           <div className="flex shrink-0 items-center justify-end gap-2">
-            <Button
-              variant="glass"
-              icon={Sparkles}
-              className="hidden shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft hover:bg-sage-100 lg:inline-flex"
-              onClick={() => setOptimizeOpen(true)}
-            >
-              Ajustement intelligent
-            </Button>
-            <IconButton
-              icon={Sparkles}
-              label="Ajustement intelligent"
-              className="shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft lg:hidden"
-              onClick={() => setOptimizeOpen(true)}
-            />
+            {isSelf ? (
+              <>
+                <Button
+                  variant="glass"
+                  icon={Sparkles}
+                  className="hidden shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft hover:bg-sage-100 lg:inline-flex"
+                  onClick={() => setOptimizeOpen(true)}
+                >
+                  Ajustement intelligent
+                </Button>
+                <IconButton
+                  icon={Sparkles}
+                  label="Ajustement intelligent"
+                  className="shrink-0 border-sage-200/80 bg-sage-100/70 text-sage-700 shadow-soft lg:hidden"
+                  onClick={() => setOptimizeOpen(true)}
+                />
+              </>
+            ) : null}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-ink-900">
@@ -388,6 +403,14 @@ export default function PlanningPage() {
           >
             Aujourd’hui
           </Button>
+          {household.data && household.data.length > 1 ? (
+            <PersonSwitch
+              className="ml-auto"
+              people={household.data}
+              selectedId={subjectId}
+              onChange={setViewUserId}
+            />
+          ) : null}
         </div>
       </header>
 
@@ -408,8 +431,8 @@ export default function PlanningPage() {
               Moyennes de la semaine
             </p>
             <p className="mt-0.5 text-xs text-ink-400">
-              {myMeals.length} repas pour toi
-              {otherMealCount > 0 ? ` · ${otherMealCount} repas de l’autre` : ''} · progression
+              {meals.length} repas{' '}
+              {isSelf ? 'pour toi' : `pour ${subject?.displayName ?? 'l’autre'}`} · progression
               nutritionnelle quotidienne
             </p>
           </div>
@@ -526,19 +549,24 @@ export default function PlanningPage() {
                 <DayCard
                   date={day}
                   meals={meals}
-                  userId={user?.id}
+                  userId={subjectId}
+                  selfLabel={subjectLabel}
                   macros={macrosFor(day)}
                   selected={index === selectedIndex}
                   onSelect={() => setSelectedIndex(index)}
-                  onAddRecipe={(slot, forMe) =>
-                    setDialog({ date: iso(day), slot, soloUserId: forMe ? user?.id : undefined })
+                  onAddRecipe={(slot) =>
+                    setDialog({
+                      date: iso(day),
+                      slot,
+                      soloUserId: isSelf ? undefined : subjectId,
+                    })
                   }
-                  onAddKind={(slot, kind, forMe) => {
+                  onAddKind={(slot, kind) => {
                     if (kind === 'IMPOSED')
                       setManualDialog({
                         date: iso(day),
                         slot,
-                        soloUserId: forMe ? user?.id : undefined,
+                        soloUserId: isSelf ? undefined : subjectId,
                       });
                     else if (kind === 'SKIPPED') setSkipDialog({ date: iso(day), slot });
                     else
@@ -546,25 +574,30 @@ export default function PlanningPage() {
                         date: iso(day),
                         slot,
                         kind,
-                        scope: forMe ? 'me' : undefined,
+                        scope: isSelf ? undefined : 'me',
+                        subjectId,
                       });
                   }}
                   onOpenItem={setDetail}
-                  onChangeRecipe={(item, scope, targetUserId) =>
+                  onChangeRecipe={(item, scope) =>
                     setDialog({
                       date: item.date.slice(0, 10),
                       slot: item.slot,
                       replaceItemId: item.id,
                       recipeId: item.recipe?.id,
                       replaceScope: scope,
-                      targetUserId,
+                      targetUserId: scope === 'me' ? subjectId : undefined,
                       initialPortions: Object.fromEntries(
                         item.portions.map((portion) => [portion.userId, Number(portion.portions)]),
                       ),
                     })
                   }
-                  onRemove={(id, scope, targetUserId) =>
-                    remove.mutate({ id, scope, userId: targetUserId })
+                  onRemove={(id, scope) =>
+                    remove.mutate({
+                      id,
+                      scope,
+                      userId: scope === 'me' ? subjectId : undefined,
+                    })
                   }
                   todayIso={todayIso}
                 />
@@ -600,12 +633,12 @@ export default function PlanningPage() {
               onClick={() => {
                 if (!skipDialog) return;
                 addKind.mutate(
-                  { ...skipDialog, kind: 'SKIPPED', scope: 'me' },
+                  { ...skipDialog, kind: 'SKIPPED', scope: 'me', subjectId },
                   { onSuccess: () => setSkipDialog(null) },
                 );
               }}
             >
-              Pour moi seulement
+              {isSelf ? 'Pour moi seulement' : `Pour ${subjectLabel} seulement`}
             </Button>
             <Button
               loading={addKind.isPending}
@@ -636,11 +669,19 @@ export default function PlanningPage() {
       />
       <PlannedMealModal
         item={detail}
-        validated={detail ? isValidated(detail, eatingPortion(detail, user?.id), todayIso) : false}
+        validated={
+          detail
+            ? isValidated(
+                detail,
+                detail.portions.find((portion) => portion.userId === subjectId),
+                todayIso,
+              )
+            : false
+        }
         loading={consume.isPending}
         onClose={() => setDetail(null)}
         onCancelValidation={() => {
-          const portion = detail ? eatingPortion(detail, user?.id) : undefined;
+          const portion = detail?.portions.find((item) => item.userId === subjectId);
           if (!portion) return;
           consume.mutate(
             { portionId: portion.id, consumed: false },
@@ -672,14 +713,6 @@ export default function PlanningPage() {
   );
 }
 
-function eatingPortion(item: MealItem, userId?: string) {
-  const mine = item.portions.find(
-    (portion) => portion.userId === userId && Number(portion.portions) > 0,
-  );
-  if (mine) return mine;
-  return item.portions.find((portion) => Number(portion.portions) > 0);
-}
-
 function isValidated(
   item: MealItem,
   portion: MealItem['portions'][number] | undefined,
@@ -703,6 +736,7 @@ function DayCard({
   date,
   meals,
   userId,
+  selfLabel,
   macros,
   selected,
   onSelect,
@@ -716,14 +750,15 @@ function DayCard({
   date: Date;
   meals: MealItem[];
   userId?: string;
+  selfLabel: string;
   macros: Macros;
   selected: boolean;
   onSelect?: () => void;
-  onAddRecipe: (slot: MealSlot, forMe?: boolean) => void;
-  onAddKind: (slot: MealSlot, kind: SpecialMealKind, forMe?: boolean) => void;
+  onAddRecipe: (slot: MealSlot) => void;
+  onAddKind: (slot: MealSlot, kind: SpecialMealKind) => void;
   onOpenItem: (item: MealItem) => void;
-  onChangeRecipe: (item: MealItem, scope?: 'me' | 'all', userId?: string) => void;
-  onRemove: (id: string, scope?: 'me' | 'all', userId?: string) => void;
+  onChangeRecipe: (item: MealItem, scope?: 'me' | 'all') => void;
+  onRemove: (id: string, scope?: 'me' | 'all') => void;
   todayIso: string;
 }) {
   const key = iso(date);
@@ -767,8 +802,9 @@ function DayCard({
             slot={slot}
             items={meals.filter((m) => m.date.slice(0, 10) === key && m.slot === slot)}
             userId={userId}
-            onAddRecipe={(forMe) => onAddRecipe(slot, forMe)}
-            onAddKind={(kind, forMe) => onAddKind(slot, kind, forMe)}
+            selfLabel={selfLabel}
+            onAddRecipe={() => onAddRecipe(slot)}
+            onAddKind={(kind) => onAddKind(slot, kind)}
             onOpenItem={onOpenItem}
             onChangeRecipe={onChangeRecipe}
             onRemove={onRemove}
@@ -784,6 +820,7 @@ function SlotSection({
   slot,
   items,
   userId,
+  selfLabel,
   onAddRecipe,
   onAddKind,
   onOpenItem,
@@ -794,25 +831,16 @@ function SlotSection({
   slot: MealSlot;
   items: MealItem[];
   userId?: string;
-  onAddRecipe: (forMe?: boolean) => void;
-  onAddKind: (kind: SpecialMealKind, forMe?: boolean) => void;
+  selfLabel: string;
+  onAddRecipe: () => void;
+  onAddKind: (kind: SpecialMealKind) => void;
   onOpenItem: (item: MealItem) => void;
-  onChangeRecipe: (item: MealItem, scope?: 'me' | 'all', userId?: string) => void;
-  onRemove: (id: string, scope?: 'me' | 'all', userId?: string) => void;
+  onChangeRecipe: (item: MealItem, scope?: 'me' | 'all') => void;
+  onRemove: (id: string, scope?: 'me' | 'all') => void;
   todayIso: string;
 }) {
   const chrome = SLOT_CHROME[slot];
   const label = MEAL_SLOT_LABELS[slot];
-  const iEat = items.some((item) =>
-    item.portions.some((portion) => portion.userId === userId && Number(portion.portions) > 0),
-  );
-  const ordered = [...items].sort((a, b) => {
-    const mine = (item: MealItem) =>
-      item.portions.some((portion) => portion.userId === userId && Number(portion.portions) > 0)
-        ? 0
-        : 1;
-    return mine(a) - mine(b);
-  });
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -820,28 +848,19 @@ function SlotSection({
         <SlotAddMenu
           slot={slot}
           variant="empty"
-          onChooseRecipe={() => onAddRecipe(false)}
-          onChooseKind={(kind) => onAddKind(kind, false)}
+          onChooseRecipe={onAddRecipe}
+          onChooseKind={onAddKind}
         />
       ) : (
-        <ul
-          className={cn(
-            'flex min-h-0 flex-1 flex-col gap-1.5',
-            (ordered.length > 1 || !iEat) && 'overflow-y-auto',
-          )}
-        >
-          {ordered.map((item) => {
-            const portion = eatingPortion(item, userId);
-            const mine = item.portions.find((p) => p.userId === userId);
-            const qty = mine ? Number(mine.portions) : 0;
-            const includesMe = qty > 0;
-            const displayQty = includesMe ? qty : Number(portion?.portions ?? 0);
+        <ul className="flex min-h-0 flex-1 flex-col gap-1.5">
+          {items.map((item) => {
+            const portion = item.portions.find((p) => p.userId === userId);
+            const qty = portion ? Number(portion.portions) : 0;
             const validated = isValidated(item, portion, todayIso);
             const past = item.date.slice(0, 10) < todayIso;
             const participants = item.portions.filter(
               (participant) => Number(participant.portions) > 0,
             );
-            const others = participants.filter((participant) => participant.userId !== userId);
             const kind = item.kind ?? 'RECIPE';
             const recipe = kind === 'RECIPE' ? item.recipe : null;
             const title =
@@ -885,13 +904,10 @@ function SlotSection({
                         {title}
                       </p>
                       {recipe ? (
-                        <RecipeMeta
-                          recipe={recipe}
-                          kcal={item.nutrition.perServing.kcal * displayQty}
-                        />
+                        <RecipeMeta recipe={recipe} kcal={item.nutrition.perServing.kcal * qty} />
                       ) : kind === 'IMPOSED' ? (
                         <p className="mt-2.5 flex items-center pr-12 text-[11px] leading-none text-ink-400">
-                          <MealCalories kcal={item.nutrition.perServing.kcal * displayQty} />
+                          <MealCalories kcal={item.nutrition.perServing.kcal * qty} />
                         </p>
                       ) : null}
                     </span>
@@ -905,17 +921,12 @@ function SlotSection({
                 </div>
                 {participants.length > 0 ? (
                   <div
-                    className="absolute right-2 bottom-2 flex items-center -space-x-1.5"
+                    className="absolute right-2 bottom-2 flex -space-x-1.5"
                     role="group"
                     aria-label={`Repas de ${participants
                       .map((participant) => participant.user.displayName)
                       .join(' et ')}`}
                   >
-                    {!includesMe ? (
-                      <span className="mr-1.5 max-w-16 truncate text-[10px] font-medium text-ink-500">
-                        {others.map((participant) => participant.user.displayName).join(' & ')}
-                      </span>
-                    ) : null}
                     {participants.map((participant) => (
                       <Avatar
                         key={participant.id}
@@ -929,28 +940,15 @@ function SlotSection({
                 <div className="absolute right-1.5 top-1.5 flex items-center opacity-45 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
                   <MealItemActions
                     title={title}
-                    includesMe={includesMe}
-                    others={others.map((participant) => ({
-                      userId: participant.userId,
-                      displayName: participant.user.displayName,
-                    }))}
-                    onChange={(scope, targetUserId) => onChangeRecipe(item, scope, targetUserId)}
-                    onRemove={(scope, targetUserId) => onRemove(item.id, scope, targetUserId)}
+                    shared={participants.length >= 2}
+                    selfLabel={selfLabel}
+                    onChange={(scope) => onChangeRecipe(item, scope)}
+                    onRemove={(scope) => onRemove(item.id, scope)}
                   />
                 </div>
               </li>
             );
           })}
-          {!iEat ? (
-            <li className="shrink-0">
-              <SlotAddMenu
-                slot={slot}
-                variant="companion"
-                onChooseRecipe={() => onAddRecipe(true)}
-                onChooseKind={(kind) => onAddKind(kind, true)}
-              />
-            </li>
-          ) : null}
         </ul>
       )}
     </div>
@@ -959,26 +957,23 @@ function SlotSection({
 
 function MealItemActions({
   title,
-  includesMe,
-  others,
+  shared,
+  selfLabel,
   onChange,
   onRemove,
 }: {
   title: string;
-  includesMe: boolean;
-  others: Array<{ userId: string; displayName: string }>;
-  onChange: (scope?: 'me' | 'all', userId?: string) => void;
-  onRemove: (scope?: 'me' | 'all', userId?: string) => void;
+  shared: boolean;
+  selfLabel: string;
+  onChange: (scope?: 'me' | 'all') => void;
+  onRemove: (scope?: 'me' | 'all') => void;
 }) {
-  const alone = others.length === 0;
-  const onlyTheirs = !includesMe && others.length === 1;
-  if (alone || onlyTheirs) {
-    const owner = onlyTheirs ? others[0]?.displayName : null;
+  if (!shared) {
     return (
       <>
         <IconButton
           icon={RefreshCw}
-          label={owner ? `Changer le repas de ${owner}` : `Changer ${title}`}
+          label={`Changer ${title}`}
           size="sm"
           variant="ghost"
           className="size-8 text-ink-400 hover:text-sage-600"
@@ -986,7 +981,7 @@ function MealItemActions({
         />
         <IconButton
           icon={Trash2}
-          label={owner ? `Retirer le repas de ${owner}` : `Retirer ${title}`}
+          label={`Retirer ${title}`}
           size="sm"
           variant="ghost"
           className="size-8 text-ink-400 hover:text-tomato-500"
@@ -1005,25 +1000,13 @@ function MealItemActions({
         >
           Échanger pour tout le monde
         </button>
-        {includesMe ? (
-          <button
-            type="button"
-            className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm"
-            onClick={() => onChange('me')}
-          >
-            Échanger pour moi seulement
-          </button>
-        ) : null}
-        {others.map((person) => (
-          <button
-            key={person.userId}
-            type="button"
-            className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm"
-            onClick={() => onChange('me', person.userId)}
-          >
-            Échanger pour {person.displayName} seulement
-          </button>
-        ))}
+        <button
+          type="button"
+          className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm"
+          onClick={() => onChange('me')}
+        >
+          Échanger pour {selfLabel} seulement
+        </button>
       </ActionMenu>
       <ActionMenu icon={Trash2} label={`Retirer ${title}`} hoverClass="hover:text-tomato-500">
         <button
@@ -1033,25 +1016,13 @@ function MealItemActions({
         >
           Supprimer pour tout le monde
         </button>
-        {includesMe ? (
-          <button
-            type="button"
-            className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm text-tomato-500"
-            onClick={() => onRemove('me')}
-          >
-            Supprimer pour moi seulement
-          </button>
-        ) : null}
-        {others.map((person) => (
-          <button
-            key={person.userId}
-            type="button"
-            className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm text-tomato-500"
-            onClick={() => onRemove('me', person.userId)}
-          >
-            Supprimer pour {person.displayName} seulement
-          </button>
-        ))}
+        <button
+          type="button"
+          className="flex min-h-10 w-full items-center rounded-lg px-3 text-left text-sm text-tomato-500"
+          onClick={() => onRemove('me')}
+        >
+          Supprimer pour {selfLabel} seulement
+        </button>
       </ActionMenu>
     </>
   );
@@ -1083,10 +1054,10 @@ function ActionMenu({
     if (!trigger) return;
     const rect = trigger.getBoundingClientRect();
     const gap = 8;
-    const width = 280;
+    const width = 240;
     const viewportPad = 12;
     const spaceBelow = window.innerHeight - rect.bottom - viewportPad;
-    const menuHeight = 168;
+    const menuHeight = 96;
     const placeAbove = spaceBelow < menuHeight && rect.top - viewportPad > menuHeight;
     let left = rect.right - width;
     if (left < viewportPad) left = viewportPad;
@@ -1298,4 +1269,58 @@ function MacroCounts({
   }
 
   return <p className={classes}>{body}</p>;
+}
+
+function PersonSwitch({
+  people,
+  selectedId,
+  onChange,
+  className,
+}: {
+  people: HouseholdUser[];
+  selectedId?: string;
+  onChange: (id: string) => void;
+  className?: string;
+}) {
+  return (
+    <div
+      role="radiogroup"
+      aria-label="Planning"
+      className={cn('segmented-track inline-flex rounded-full p-[3px]', className)}
+    >
+      {people.map((person) => {
+        const active = person.id === selectedId;
+        return (
+          <button
+            key={person.id}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(person.id)}
+            className={cn(
+              'relative flex min-h-11 items-center gap-2 rounded-full py-1 pl-1.5 pr-3.5 text-sm font-medium transition-colors duration-200 ease-out-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500',
+              active ? 'text-ink-900' : 'text-ink-500 hover:text-ink-800',
+            )}
+          >
+            {active ? (
+              <motion.span
+                layoutId="planning-person"
+                transition={transitions.spring}
+                className="segmented-thumb absolute inset-0 rounded-full"
+              />
+            ) : null}
+            <Avatar
+              name={person.displayName}
+              src={person.avatarUrl}
+              className={cn(
+                'relative size-8 rounded-full text-xs transition-opacity duration-200 ease-out-soft',
+                active ? 'opacity-100' : 'opacity-70',
+              )}
+            />
+            <span className="relative">{person.displayName}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
 }

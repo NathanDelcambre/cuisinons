@@ -99,7 +99,7 @@ export function SlotAddMenu({
   onChooseKind,
 }: {
   slot: MealSlot;
-  variant: 'empty' | 'plus' | 'companion';
+  variant: 'empty' | 'plus';
   pending?: boolean;
   onChooseRecipe: () => void;
   onChooseKind: (kind: SpecialMealKind) => void;
@@ -237,31 +237,13 @@ export function SlotAddMenu({
   }
 
   const triggerLabel =
-    variant === 'companion'
-      ? `Ajouter mon repas au ${slotLabel.toLowerCase()}`
-      : variant === 'empty'
-        ? `Ajouter un repas au ${slotLabel.toLowerCase()}`
-        : `Ajouter au ${slotLabel.toLowerCase()}`;
+    variant === 'empty'
+      ? `Ajouter un repas au ${slotLabel.toLowerCase()}`
+      : `Ajouter au ${slotLabel.toLowerCase()}`;
 
   return (
     <>
-      {variant === 'companion' ? (
-        <button
-          ref={triggerRef}
-          type="button"
-          disabled={pending}
-          aria-label={triggerLabel}
-          aria-haspopup="menu"
-          aria-expanded={open}
-          aria-controls={open ? menuId : undefined}
-          onClick={() => setOpen((current) => !current)}
-          onKeyDown={onTriggerKeyDown}
-          className="flex min-h-11 w-full items-center gap-2 rounded-lg border border-dashed border-ink-200/70 bg-white/30 px-3 text-left text-sm text-ink-500 transition duration-200 ease-out-soft hover:border-sage-300/70 hover:bg-white/55 hover:text-ink-800"
-        >
-          <Plus className="size-3.5 shrink-0" aria-hidden />
-          <span>Ajouter mon repas</span>
-        </button>
-      ) : variant === 'empty' ? (
+      {variant === 'empty' ? (
         <button
           ref={triggerRef}
           type="button"
