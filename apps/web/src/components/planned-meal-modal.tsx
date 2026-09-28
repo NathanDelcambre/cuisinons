@@ -10,7 +10,6 @@ import {
   UNIT_LABELS,
 } from '@cuisinons/shared';
 import { specialMealCover } from './meal-covers';
-import { RecipeCover } from './recipe-cover';
 import { RecipeModal } from './recipe-modal';
 import { IngredientIcon } from './ingredient-icon';
 import { MacroIcon } from './macro-icon';
@@ -28,6 +27,7 @@ export function PlannedMealModal({
   onClose,
   onCancelValidation,
   onChangeRecipe,
+  onEdit,
 }: {
   item: {
     date: string;
@@ -52,6 +52,7 @@ export function PlannedMealModal({
   onClose: () => void;
   onCancelValidation: () => void;
   onChangeRecipe: () => void;
+  onEdit?: () => void;
 }) {
   const recipeId = item?.kind === 'RECIPE' ? (item.recipe?.id ?? null) : null;
   if (!item) return null;
@@ -103,6 +104,16 @@ export function PlannedMealModal({
                 Annuler la validation
               </Button>
             ) : null}
+            {onEdit && (kind === 'RESTAURANT' || kind === 'IMPOSED') ? (
+              <Button
+                variant="glass"
+                size="sm"
+                className="shrink-0 sm:h-11 sm:min-h-11 sm:px-5 sm:text-sm"
+                onClick={onEdit}
+              >
+                Modifier
+              </Button>
+            ) : null}
             <Button
               size="sm"
               className="shrink-0 sm:h-11 sm:min-h-11 sm:px-5 sm:text-sm"
@@ -115,10 +126,13 @@ export function PlannedMealModal({
         ) : null
       }
     >
-      <RecipeCover
-        src={specialMealCover(kind === 'RECIPE' ? 'IMPOSED' : kind, item.slot)}
-        className="mb-4 aspect-[16/10] w-full rounded-2xl object-cover"
-      />
+      <div className="mb-4 aspect-[16/10] w-full overflow-hidden rounded-2xl bg-ink-100">
+        <img
+          src={specialMealCover(kind === 'RECIPE' ? 'IMPOSED' : kind, item.slot) ?? ''}
+          alt=""
+          className="size-full object-cover object-center"
+        />
+      </div>
       <div className="flex items-center gap-3">
         <span
           aria-hidden

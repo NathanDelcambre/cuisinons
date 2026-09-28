@@ -718,5 +718,14 @@
   { "id": "official-h197", "name": "Bowl avocat, œuf et quinoa", "en": "quinoa bowl with avocado and a poached egg" },
   { "id": "official-h198", "name": "Filet de porc aux poivrons", "en": "pork tenderloin with sautéed bell peppers" },
   { "id": "official-h199", "name": "Gratin de chou-fleur léger", "en": "light cauliflower gratin in a baking dish" },
-  { "id": "official-h200", "name": "Poulet rôti, citron et olives", "en": "roasted chicken with lemon wedges and green olives" }
+  { "id": "official-h200", "name": "Poulet rôti, citron et olives", "en": "roasted chicken with lemon wedges and green olives" },
+  { "id": "official-salade-cobb", "name": "Salade Cobb", "en": "a Cobb salad arranged in neat rows of romaine, sliced grilled chicken, crispy bacon, quartered eggs, avocado, tomato and crumbled blue cheese" },
+  { "id": "official-avocado-toast-oeuf", "name": "Avocado toast avec œuf poché", "en": "two slices of toasted whole-grain bread topped with mashed avocado and a poached egg with a runny yolk" },
+  { "id": "official-oeufs-benedicte-leger", "name": "Œufs Bénédicte version légère", "en": "eggs benedict on toasted bread with wilted spinach, smoked salmon, a poached egg and a light yogurt sauce instead of hollandaise" },
+  { "id": "official-poulet-tikka-leger", "name": "Poulet tikka masala léger", "en": "chicken tikka masala in a tomato sauce without cream, served in a wide bowl" },
+  { "id": "official-poulet-teriyaki", "name": "Poulet teriyaki avec riz et brocoli", "en": "glossy teriyaki chicken with white rice and bright green broccoli, sesame seeds on top" },
+  { "id": "official-chili-con-carne-leger", "name": "Chili con carne léger", "en": "a bowl of lean beef chili with red kidney beans, tomato and bell pepper" },
+  { "id": "official-chili-sin-carne", "name": "Chili sin carne", "en": "a vegetarian chili bowl with red kidney beans, sweetcorn, carrot and tomato sauce" },
+  { "id": "official-pad-thai-crevettes-leger", "name": "Pad thaï aux crevettes version légère", "en": "a plate of shrimp pad thai with rice noodles, egg, bean sprouts and crushed peanuts" },
+  { "id": "official-lasagnes-legumes", "name": "Lasagnes de légumes", "en": "a square portion of vegetable lasagna with zucchini, eggplant, spinach and a golden melted cheese top" }
 ]

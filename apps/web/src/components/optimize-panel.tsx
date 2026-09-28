@@ -9,6 +9,16 @@ import { apiJson } from '@/lib/api';
 type Macros = { protein: number; carbs: number; fat: number; kcal: number };
 type DayPreview = { summary: string; before: Macros; after: Macros };
 type WeekPreview = { mode: string; days: Array<{ date: string; result: DayPreview }> };
+type PersonResult<T> = { userId: string; displayName: string; result: T };
+type PeoplePreview<T> = { people: PersonResult<T>[] };
+
+function isDayPreview(value: unknown): value is DayPreview {
+  return Boolean(value && typeof value === 'object' && 'summary' in value);
+}
+
+function isWeekPreview(value: unknown): value is WeekPreview {
+  return Boolean(value && typeof value === 'object' && 'days' in value && !('people' in value));
+}
 
 const ROWS = [
   { key: 'kcal', label: 'Calories', unit: 'kcal' },
@@ -23,17 +33,29 @@ export function OptimizePanel({
   open,
   date,
   weekFrom,
+  people,
+  selfId,
+  subjectId,
   onClose,
 }: {
   open: boolean;
   date: string;
   weekFrom: string;
+  people: Array<{ id: string; displayName: string }>;
+  selfId?: string;
+  subjectId?: string;
   onClose: () => void;
 }) {
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<Mode>('day');
   const [day, setDay] = useState(date);
+  const [audience, setAudience] = useState(subjectId ?? selfId ?? '');
   const [confirmReplace, setConfirmReplace] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    setAudience(subjectId ?? selfId ?? '');
+  }, [open, subjectId, selfId]);
 
   useEffect(() => {
     setDay(date);
@@ -45,17 +67,26 @@ export function OptimizePanel({
     enabled: open,
   });
 
+  const userIds =
+    people.length > 1 && audience === 'all'
+      ? people.map((person) => person.id)
+      : [audience || selfId].filter((id): id is string => Boolean(id));
+
   const preview = useMutation({
     mutationFn: async () => {
       if (mode === 'day') {
-        return apiJson<DayPreview>('/api/bff/optimization/day/preview', {
+        return apiJson<DayPreview | PeoplePreview<DayPreview>>('/api/bff/optimization/day/preview', {
           method: 'POST',
-          body: JSON.stringify({ date: day }),
+          body: JSON.stringify({ date: day, userIds }),
         });
       }
-      return apiJson<WeekPreview>('/api/bff/optimization/week/preview', {
+      return apiJson<WeekPreview | PeoplePreview<WeekPreview>>('/api/bff/optimization/week/preview', {
         method: 'POST',
-        body: JSON.stringify({ from: weekFrom, mode: mode === 'fill' ? 'fill' : 'replace' }),
+        body: JSON.stringify({
+          from: weekFrom,
+          mode: mode === 'fill' ? 'fill' : 'replace',
+          userIds,
+        }),
       });
     },
   });
@@ -65,12 +96,16 @@ export function OptimizePanel({
       if (mode === 'day') {
         return apiJson('/api/bff/optimization/day/apply', {
           method: 'POST',
-          body: JSON.stringify({ date: day }),
+          body: JSON.stringify({ date: day, userIds }),
         });
       }
       return apiJson('/api/bff/optimization/week/apply', {
         method: 'POST',
-        body: JSON.stringify({ from: weekFrom, mode: mode === 'fill' ? 'fill' : 'replace' }),
+        body: JSON.stringify({
+          from: weekFrom,
+          mode: mode === 'fill' ? 'fill' : 'replace',
+          userIds,
+        }),
       });
     },
     onSuccess: () => {
@@ -89,14 +124,18 @@ export function OptimizePanel({
     },
   });
 
-  const dayPreview = preview.data && 'summary' in preview.data ? preview.data : null;
-  const weekPreview = preview.data && 'days' in preview.data ? preview.data : null;
+  const dayPreview = isDayPreview(preview.data) ? preview.data : null;
+  const weekPreview = isWeekPreview(preview.data) ? preview.data : null;
+  const peoplePreview =
+    preview.data && typeof preview.data === 'object' && 'people' in preview.data
+      ? preview.data.people
+      : null;
 
   return (
     <Modal
       open={open}
       title="Ajustement intelligent"
-      description="Propose des repas pour coller à tes objectifs, sans LLM."
+      description="Propose des repas pour coller aux objectifs, sans LLM."
       onClose={onClose}
       footer={
         <>
@@ -126,6 +165,34 @@ export function OptimizePanel({
         </>
       }
     >
+      {people.length > 1 ? (
+        <div className="mb-4 space-y-2">
+          <p className="text-sm font-medium text-ink-700">Pour qui</p>
+          <div className="flex flex-wrap gap-2">
+            {people.map((person) => (
+              <AudienceChoice
+                key={person.id}
+                checked={audience === person.id}
+                label={person.id === selfId ? 'Pour moi seulement' : `Pour ${person.displayName} seulement`}
+                onChange={() => {
+                  setAudience(person.id);
+                  preview.reset();
+                  setConfirmReplace(false);
+                }}
+              />
+            ))}
+            <AudienceChoice
+              checked={audience === 'all'}
+              label="Pour les deux"
+              onChange={() => {
+                setAudience('all');
+                preview.reset();
+                setConfirmReplace(false);
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
       <div className="space-y-3">
         {(
           [
@@ -189,17 +256,59 @@ export function OptimizePanel({
           <PreviewBlock preview={dayPreview} />
         </Inset>
       ) : null}
-      {weekPreview ? (
-        <div className="mt-4 space-y-3">
-          {weekPreview.days.map((entry) => (
-            <Inset key={entry.date} className="p-4">
-              <p className="mb-2 text-xs font-medium uppercase tracking-wide text-ink-400">{entry.date}</p>
-              <PreviewBlock preview={entry.result} />
-            </Inset>
+      {weekPreview ? <WeekBlocks preview={weekPreview} /> : null}
+      {peoplePreview ? (
+        <div className="mt-4 space-y-4">
+          {peoplePreview.map((person) => (
+            <div key={person.userId}>
+              <p className="mb-2 text-sm font-medium text-ink-800">{person.displayName}</p>
+              {isDayPreview(person.result) ? (
+                <Inset className="p-4">
+                  <PreviewBlock preview={person.result} />
+                </Inset>
+              ) : isWeekPreview(person.result) ? (
+                <WeekBlocks preview={person.result} />
+              ) : null}
+            </div>
           ))}
         </div>
       ) : null}
     </Modal>
+  );
+}
+
+function AudienceChoice({
+  checked,
+  label,
+  onChange,
+}: {
+  checked: boolean;
+  label: string;
+  onChange: () => void;
+}) {
+  return (
+    <label
+      className={cn(
+        'cursor-pointer rounded-full border px-3 py-1.5 text-sm',
+        checked ? 'border-sage-400 bg-sage-50/80 text-ink-900' : 'border-white/80 bg-white/60 text-ink-600',
+      )}
+    >
+      <input type="radio" name="optimize-audience" className="sr-only" checked={checked} onChange={onChange} />
+      {label}
+    </label>
+  );
+}
+
+function WeekBlocks({ preview }: { preview: WeekPreview }) {
+  return (
+    <div className="mt-4 space-y-3">
+      {preview.days.map((entry) => (
+        <Inset key={entry.date} className="p-4">
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-ink-400">{entry.date}</p>
+          <PreviewBlock preview={entry.result} />
+        </Inset>
+      ))}
+    </div>
   );
 }
 

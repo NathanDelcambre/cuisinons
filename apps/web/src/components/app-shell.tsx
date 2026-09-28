@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
-import { Fragment } from 'react';
 import {
   CalendarDays,
   ChefHat,
@@ -16,14 +15,13 @@ import {
   UserRound,
   type LucideIcon,
 } from 'lucide-react';
-import { STORAGE_AREAS, STORAGE_AREA_LABELS, type StorageArea } from '@cuisinons/shared';
+import { type StorageArea } from '@cuisinons/shared';
 import { buttonClasses, cn, IconButton, transitions } from '@cuisinons/ui';
 import { apiFetch, apiJson } from '@/lib/api';
 import { routes } from '@/lib/routes';
 import { useAuth } from './auth-provider';
 import { Avatar } from './avatar';
 import { BrandMark } from './brand-mark';
-import { StorageAreaIcon } from './storage-area-icon';
 
 type NavItem = { href: string; label: string; icon: LucideIcon };
 
@@ -93,15 +91,11 @@ function useProvisionsSummary() {
       apiJson<{ counts: Partial<Record<StorageArea, number>>; toBuy: number }>('/api/bff/provisions/summary'),
     staleTime: 30_000,
   });
-  const counts = new Map<StorageArea, number>();
-  for (const [area, n] of Object.entries(summary.data?.counts ?? {})) {
-    counts.set(area as StorageArea, n);
-  }
-  return { counts, toBuy: summary.data?.toBuy ?? 0 };
+  return { toBuy: summary.data?.toBuy ?? 0 };
 }
 
 function DesktopSidebar({ pathname }: { pathname: string }) {
-  const { counts, toBuy } = useProvisionsSummary();
+  const { toBuy } = useProvisionsSummary();
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[17rem] flex-col border-r border-white/60 bg-white/40 px-4 py-6 backdrop-blur-xl lg:flex">
@@ -120,14 +114,12 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
 
       <nav aria-label="Navigation principale" className="mt-6 flex flex-col gap-1">
         {NAV.map((item) => (
-          <Fragment key={item.href}>
-            <SidebarItem
-              item={item}
-              pathname={pathname}
-              badge={item.href === routes.courses && toBuy > 0 ? toBuy : undefined}
-            />
-            {item.href === routes.reserves ? <PantryStatus counts={counts} /> : null}
-          </Fragment>
+          <SidebarItem
+            key={item.href}
+            item={item}
+            pathname={pathname}
+            badge={item.href === routes.courses && toBuy > 0 ? toBuy : undefined}
+          />
         ))}
       </nav>
 
@@ -172,36 +164,6 @@ function SidebarItem({
         </span>
       ) : null}
     </Link>
-  );
-}
-
-/**
- * Etat du stock par zone de rangement. C'est un panneau d'information et non un
- * sous-menu : il reste visible depuis n'importe quel ecran, pour savoir ce qu'on
- * a sous la main sans quitter la page en cours. Les zones vides sont masquees,
- * sinon la liste dirait surtout ce qu'on ne possede pas.
- */
-function PantryStatus({ counts }: { counts: Map<StorageArea, number> }) {
-  const filled = STORAGE_AREAS.filter((area) => (counts.get(area) ?? 0) > 0);
-  if (filled.length === 0) return null;
-
-  return (
-    <ul className="mb-1 ml-[1.6rem] border-l border-ink-200 pl-2">
-      {filled.map((area) => (
-        <li key={area}>
-          <Link
-            href={`${routes.reserves}#${area}`}
-            className="flex min-h-8 items-center justify-between gap-2 rounded-lg px-2 text-[13px] text-ink-500 transition-colors duration-200 ease-out-soft hover:text-ink-900"
-          >
-            <span className="flex min-w-0 items-center gap-1.5">
-              <StorageAreaIcon area={area} className="size-3.5 shrink-0" />
-              <span className="truncate">{STORAGE_AREA_LABELS[area]}</span>
-            </span>
-            <span className="tabular shrink-0 text-xs text-ink-400">{counts.get(area)}</span>
-          </Link>
-        </li>
-      ))}
-    </ul>
   );
 }
 

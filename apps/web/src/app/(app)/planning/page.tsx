@@ -159,6 +159,12 @@ export default function PlanningPage() {
     date: string;
     slot: MealSlot;
     soloUserId?: string;
+    initialLines?: Array<{
+      ingredient: { id: string; nameFr: string; iconUrl: string | null };
+      quantity: number;
+      unit: QuantityUnit;
+    }>;
+    initialPortions?: Record<string, number>;
   } | null>(null);
   const [skipDialog, setSkipDialog] = useState<{ date: string; slot: MealSlot } | null>(null);
   const [restaurantDialog, setRestaurantDialog] = useState<{
@@ -375,15 +381,13 @@ export default function PlanningPage() {
           {household.data && household.data.length > 1 ? (
             <PersonSwitch people={household.data} selectedId={subjectId} onChange={setViewUserId} />
           ) : null}
-          {isSelf ? (
-            <IconButton
-              icon={Sparkles}
-              label="Ajustement intelligent"
-              size="sm"
-              className="shrink-0 border-white bg-white text-ink-800 shadow-soft"
-              onClick={() => setOptimizeOpen(true)}
-            />
-          ) : null}
+          <IconButton
+            icon={Sparkles}
+            label="Ajustement intelligent"
+            size="sm"
+            className="shrink-0 border-white bg-white text-ink-800 shadow-soft"
+            onClick={() => setOptimizeOpen(true)}
+          />
           <IconButton
             icon={BarChart3}
             label="Moyennes de la semaine"
@@ -547,26 +551,51 @@ export default function PlanningPage() {
         description="À peu près combien de calories ?"
         onClose={() => setRestaurantDialog(null)}
         footer={
-          <Button
-            loading={addKind.isPending}
-            disabled={restaurantEstimateValid ? undefined : true}
-            onClick={() => {
-              if (!restaurantDialog || !restaurantEstimateValid) return;
-              addKind.mutate(
-                {
-                  ...restaurantDialog,
-                  kind: 'RESTAURANT',
-                  estimatedKcal: restaurantEstimate,
-                },
-                { onSuccess: () => setRestaurantDialog(null) },
-              );
-            }}
-          >
-            Ajouter
-          </Button>
+          <>
+            <Button
+              variant="ghost"
+              loading={addKind.isPending}
+              disabled={restaurantEstimateValid ? undefined : true}
+              onClick={() => {
+                if (!restaurantDialog || !restaurantEstimateValid) return;
+                addKind.mutate(
+                  {
+                    date: restaurantDialog.date,
+                    slot: restaurantDialog.slot,
+                    kind: 'RESTAURANT',
+                    estimatedKcal: restaurantEstimate,
+                    scope: 'me',
+                    subjectId,
+                  },
+                  { onSuccess: () => setRestaurantDialog(null) },
+                );
+              }}
+            >
+              {isSelf ? 'Pour moi seulement' : `Pour ${subjectLabel} seulement`}
+            </Button>
+            <Button
+              loading={addKind.isPending}
+              disabled={restaurantEstimateValid ? undefined : true}
+              onClick={() => {
+                if (!restaurantDialog || !restaurantEstimateValid) return;
+                addKind.mutate(
+                  {
+                    date: restaurantDialog.date,
+                    slot: restaurantDialog.slot,
+                    kind: 'RESTAURANT',
+                    estimatedKcal: restaurantEstimate,
+                    scope: 'all',
+                  },
+                  { onSuccess: () => setRestaurantDialog(null) },
+                );
+              }}
+            >
+              Pour tout le monde
+            </Button>
+          </>
         }
       >
-        <Field label="Calories" hint="Une estimation suffit, pour une personne.">
+        <Field label="Calories" hint="Une estimation suffit.">
           {({ id, describedBy }) => (
             <Input
               id={id}
@@ -585,6 +614,8 @@ export default function PlanningPage() {
         date={manualDialog?.date ?? iso(selectedDate)}
         slot={manualDialog?.slot ?? 'DINNER'}
         soloUserId={manualDialog?.soloUserId}
+        initialLines={manualDialog?.initialLines}
+        initialPortions={manualDialog?.initialPortions}
         onClose={() => setManualDialog(null)}
         onAdded={() => queryClient.invalidateQueries({ queryKey: ['planner'] })}
       />
@@ -622,6 +653,40 @@ export default function PlanningPage() {
             ),
           });
           setDetail(null);
+        }}
+        onEdit={() => {
+          if (!detail) return;
+          if (detail.kind === 'RESTAURANT') {
+            setRestaurantKcal(
+              detail.estimatedKcal != null ? String(Math.round(detail.estimatedKcal)) : '',
+            );
+            setRestaurantDialog({
+              date: detail.date.slice(0, 10),
+              slot: detail.slot,
+              subjectId,
+            });
+            setDetail(null);
+            return;
+          }
+          if (detail.kind === 'IMPOSED') {
+            setManualDialog({
+              date: detail.date.slice(0, 10),
+              slot: detail.slot,
+              initialLines: (detail.manualIngredients ?? []).map((line) => ({
+                ingredient: {
+                  id: line.ingredient.id,
+                  nameFr: line.ingredient.nameFr,
+                  iconUrl: line.ingredient.iconUrl,
+                },
+                quantity: line.quantity,
+                unit: line.unit,
+              })),
+              initialPortions: Object.fromEntries(
+                detail.portions.map((portion) => [portion.userId, Number(portion.portions)]),
+              ),
+            });
+            setDetail(null);
+          }
         }}
       />
       <Modal
@@ -677,6 +742,9 @@ export default function PlanningPage() {
         open={optimizeOpen}
         date={iso(selectedDate)}
         weekFrom={from}
+        people={household.data ?? []}
+        selfId={user?.id}
+        subjectId={subjectId}
         onClose={() => setOptimizeOpen(false)}
       />
     </div>

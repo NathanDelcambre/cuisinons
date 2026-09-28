@@ -110,7 +110,7 @@ export class ProvisionsService {
     const [areas, active] = await Promise.all([
       this.prisma.pantryItem.groupBy({
         by: ['area'],
-        where: { userId },
+        where: { userId, quantity: { gt: 0 } },
         _count: { _all: true },
       }),
       this.prisma.shoppingList.findFirst({
@@ -767,12 +767,18 @@ export class ProvisionsService {
           let remaining = line.quantity;
           for (const stock of stocks) {
             if (remaining <= 0) break;
-            const debit = Math.min(remaining, Number(stock.quantity));
+            const available = Number(stock.quantity);
+            const debit = Math.min(remaining, available);
             if (debit <= 0) continue;
-            await tx.pantryItem.update({
-              where: { id: stock.id },
-              data: { quantity: { decrement: debit } },
-            });
+            const leftover = Math.round((available - debit) * 1000) / 1000;
+            if (leftover <= 0) {
+              await tx.pantryItem.delete({ where: { id: stock.id } });
+            } else {
+              await tx.pantryItem.update({
+                where: { id: stock.id },
+                data: { quantity: leftover },
+              });
+            }
             await tx.pantryConsumption.upsert({
               where: {
                 portionId_productBarcode: { portionId, productBarcode: stock.productBarcode },
@@ -922,7 +928,7 @@ export class ProvisionsService {
 
   private async pantryLines(userId: string): Promise<QuantityLine[]> {
     const items = await this.prisma.pantryItem.findMany({
-      where: { userId },
+      where: { userId, quantity: { gt: 0 } },
       select: { ingredientId: true, quantity: true, unit: true },
     });
     return items.map((item) => ({

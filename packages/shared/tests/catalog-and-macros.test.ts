@@ -171,7 +171,7 @@ describe('catalogue healthy officiel', () => {
     expect(
       specs.every((s) => s.steps.reduce((n, step) => n + step.description.length, 0) >= 350),
     ).toBe(true);
-    expect(OFFICIAL_RECIPE_COUNT).toBe(222);
+    expect(OFFICIAL_RECIPE_COUNT).toBe(231);
     expect(IDEAS_RECIPE_IDS).toHaveLength(200);
     expect(IDEAS_RECIPE_COUNT).toBe(200);
     expect(IDEAS_RECIPE_IDS.every((id) => id.startsWith('official-h'))).toBe(true);

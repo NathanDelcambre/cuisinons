@@ -19,6 +19,8 @@ export function ManualMealDialog({
   date,
   slot,
   soloUserId,
+  initialLines,
+  initialPortions,
   onClose,
   onAdded,
 }: {
@@ -27,6 +29,8 @@ export function ManualMealDialog({
   slot: MealSlot;
   /** Ajout à côté du repas de l'autre : lui laisser son plat. */
   soloUserId?: string | null;
+  initialLines?: Line[];
+  initialPortions?: Record<string, number>;
   onClose: () => void;
   onAdded: () => void;
 }) {
@@ -42,11 +46,11 @@ export function ManualMealDialog({
   });
   useEffect(() => {
     if (open) {
-      setLines([]);
-      setPortions({});
+      setLines(initialLines ?? []);
+      setPortions(initialPortions ?? {});
       setPickerOpen(false);
     }
-  }, [open, date, slot]);
+  }, [open, date, slot, initialLines, initialPortions]);
   const add = useMutation({
     mutationFn: () =>
       apiJson('/api/bff/planner/items', {
@@ -81,7 +85,7 @@ export function ManualMealDialog({
     <>
       <Modal
         open={open && !pickerOpen}
-        title="Ajouter manuellement"
+        title={initialLines?.length ? 'Modifier le repas' : 'Ajouter manuellement'}
         description="Ajoute les ingrédients et les quantités de ce repas."
         onClose={onClose}
         footer={
@@ -95,7 +99,7 @@ export function ManualMealDialog({
               loading={add.isPending}
               onClick={() => add.mutate()}
             >
-              Ajouter au planning
+              {initialLines?.length ? 'Enregistrer' : 'Ajouter au planning'}
             </Button>
           </>
         }

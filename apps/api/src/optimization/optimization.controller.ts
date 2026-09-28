@@ -5,6 +5,12 @@ import { CurrentUser } from '../auth/current-user.decorator.js';
 import type { AuthUser } from '../auth/internal-jwt.guard.js';
 import { OptimizationService } from './optimization.service.js';
 
+const userIdsField = z.array(z.string().min(1)).min(1).max(4).optional();
+
+function targetIds(actorId: string, userIds: string[] | undefined) {
+  return [...new Set(userIds?.length ? userIds : [actorId])];
+}
+
 @Controller()
 @UseGuards(InternalJwtGuard)
 export class OptimizationController {
@@ -30,14 +36,24 @@ export class OptimizationController {
 
   @Post('/optimization/day/preview')
   preview(@CurrentUser() user: AuthUser, @Body() body: unknown) {
-    const { date } = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }).parse(body);
-    return this.optimization.preview(user.id, date);
+    const parsed = z
+      .object({
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        userIds: userIdsField,
+      })
+      .parse(body);
+    return this.optimization.previewTargets(targetIds(user.id, parsed.userIds), parsed.date);
   }
 
   @Post('/optimization/day/apply')
   apply(@CurrentUser() user: AuthUser, @Body() body: unknown) {
-    const { date } = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) }).parse(body);
-    return this.optimization.apply(user.id, date);
+    const parsed = z
+      .object({
+        date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        userIds: userIdsField,
+      })
+      .parse(body);
+    return this.optimization.apply(user.id, targetIds(user.id, parsed.userIds), parsed.date);
   }
 
   @Post('/optimization/week/preview')
@@ -46,9 +62,14 @@ export class OptimizationController {
       .object({
         from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         mode: z.enum(['fill', 'replace']),
+        userIds: userIdsField,
       })
       .parse(body);
-    return this.optimization.previewWeek(user.id, parsed.from, parsed.mode);
+    return this.optimization.previewWeekTargets(
+      targetIds(user.id, parsed.userIds),
+      parsed.from,
+      parsed.mode,
+    );
   }
 
   @Post('/optimization/week/apply')
@@ -57,9 +78,15 @@ export class OptimizationController {
       .object({
         from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
         mode: z.enum(['fill', 'replace']),
+        userIds: userIdsField,
       })
       .parse(body);
-    return this.optimization.applyWeek(user.id, parsed.from, parsed.mode);
+    return this.optimization.applyWeek(
+      user.id,
+      targetIds(user.id, parsed.userIds),
+      parsed.from,
+      parsed.mode,
+    );
   }
 
   @Post('/optimization/undo')

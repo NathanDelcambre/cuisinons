@@ -285,10 +285,11 @@ export function SuggestDishModal({
       description="Rien n’est enregistré tant que tu n’as pas validé."
       size="2xl"
       onClose={onClose}
+      bodyClassName="flex flex-col overflow-y-hidden pb-4 pt-4"
       footer={
         <>
           <Link href={routes.recetteNouvelle} className={buttonClasses({ variant: 'glass' })}>
-            Créer à la main
+            Nouvelle recette
           </Link>
           {selected ? (
             <Button
@@ -302,10 +303,10 @@ export function SuggestDishModal({
         </>
       }
     >
-      <div className="space-y-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden">
         <InventoryBanner count={pantryCount} names={pantryNames} status={bannerStatus} />
 
-        <div className="space-y-3">
+        <div className="shrink-0 space-y-3">
           <Segmented
             label="Régime"
             options={DIETS.map((value) => ({ value, label: DIET_LABELS[value] }))}
@@ -358,7 +359,7 @@ export function SuggestDishModal({
             icon={Refrigerator}
             title={empty.title}
             description={empty.description}
-            className="py-8"
+            className="min-h-0 flex-1 justify-center py-4"
             action={
               <div className="flex flex-wrap items-center justify-center gap-2">
                 {preview.isError && !knownEmpty ? (
@@ -373,7 +374,7 @@ export function SuggestDishModal({
             }
           />
         ) : (
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,16rem)_1fr]">
+          <div className="grid min-h-0 flex-1 gap-4 overflow-y-auto lg:grid-cols-[minmax(0,16rem)_1fr]">
             <div className="space-y-2">
               {dishes.map((dish) => (
                 <button
@@ -503,7 +504,7 @@ function DishDetail({ dish, error }: { dish: SuggestedDish; error: string | null
             <li key={index} className="flex gap-3 text-sm text-ink-800">
               <span
                 aria-hidden
-                className="tabular mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-sage-100 text-xs font-semibold text-sage-700"
+                className="font-display mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-sage-100 text-base font-bold tracking-[-0.03em] text-sage-700"
               >
                 {index + 1}
               </span>

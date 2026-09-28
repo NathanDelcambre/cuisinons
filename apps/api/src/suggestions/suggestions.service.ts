@@ -30,7 +30,7 @@ export class SuggestionsService {
   async preview(userId: string, input: SuggestInput) {
     const [pantry, tags, equipment, catalogRows] = await Promise.all([
       this.prisma.pantryItem.findMany({
-        where: { userId },
+        where: { userId, quantity: { gt: 0 } },
         select: {
           ingredientId: true,
           quantity: true,

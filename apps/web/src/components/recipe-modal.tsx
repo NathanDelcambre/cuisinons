@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { CalendarPlus, ChefHat, Clock, Pencil, Star, TriangleAlert } from 'lucide-react';
-import { Badge, Button, Modal, Select, Skeleton, Stepper, buttonClasses, cn } from '@cuisinons/ui';
+import { Badge, Button, Field, Input, Modal, Select, Skeleton, Stepper, buttonClasses, cn } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 import { routes } from '@/lib/routes';
 import { useAuth } from './auth-provider';
@@ -100,43 +100,36 @@ export function RecipeModal({
   const title = data?.name ?? 'Recette';
 
   return (
+    <>
     <Modal
       open={open}
       title={title}
       chrome="bare"
       size="xl"
       onClose={() => {
-        setPlanning(false);
+        if (planning) {
+          setPlanning(false);
+          return;
+        }
         setServings(null);
         onClose();
       }}
       footerClassName={
-        data && !planning && plan
-          ? 'flex-nowrap gap-1.5 px-3 py-3 sm:gap-2 sm:px-6 sm:py-4'
-          : undefined
+        data && plan ? 'flex-nowrap gap-1.5 px-3 py-3 sm:gap-2 sm:px-6 sm:py-4' : undefined
       }
       footer={
         data ? (
-          planning ? (
-            <AddToPlan
-              recipeId={data.id}
-              onCancel={() => setPlanning(false)}
-              onAdded={() => setPlanning(false)}
-            />
-          ) : (
             <>
               <Link
                 href={routes.recetteModifier(data.id)}
-                aria-label={plan ? 'Modifier' : undefined}
-                title={plan ? 'Modifier' : undefined}
                 className={buttonClasses({
                   variant: 'glass',
                   size: 'sm',
-                  className: plan ? 'size-9 shrink-0 p-0 sm:size-11' : undefined,
+                  className: 'shrink-0',
                 })}
               >
                 <Pencil className="size-3.5 sm:size-4" aria-hidden />
-                {plan ? null : 'Modifier'}
+                Modifier
               </Link>
               {plan ? (
                 <>
@@ -166,7 +159,6 @@ export function RecipeModal({
                 </Button>
               )}
             </>
-          )
         ) : null
       }
     >
@@ -180,6 +172,15 @@ export function RecipeModal({
         <RecipeModalBody data={data} servings={servings} onServings={setServings} />
       )}
     </Modal>
+    {planning && data ? (
+      <AddToPlan
+        recipeId={data.id}
+        recipeName={data.name}
+        onCancel={() => setPlanning(false)}
+        onAdded={() => setPlanning(false)}
+      />
+    ) : null}
+    </>
   );
 }
 
@@ -371,7 +372,7 @@ function RecipeModalBody({
                 <li key={step.stepNumber} className="flex gap-3">
                   <span
                     aria-hidden
-                    className="tabular mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-sage-100 text-xs font-semibold text-sage-700"
+                    className="font-display mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-sage-100 text-base font-bold tracking-[-0.03em] text-sage-700"
                   >
                     {step.stepNumber}
                   </span>
@@ -545,10 +546,12 @@ function EquipmentReadList({
 
 function AddToPlan({
   recipeId,
+  recipeName,
   onCancel,
   onAdded,
 }: {
   recipeId: string;
+  recipeName: string;
   onCancel: () => void;
   onAdded: () => void;
 }) {
@@ -559,7 +562,6 @@ function AddToPlan({
     queryKey: ['users'],
     queryFn: () => apiJson<Array<{ id: string }>>('/api/bff/users'),
   });
-  const [onlyMe, setOnlyMe] = useState(false);
   const { user } = useAuth();
   const add = useMutation({
     mutationFn: (solo?: boolean) =>
@@ -571,7 +573,7 @@ function AddToPlan({
           recipeId,
           portions: (users.data ?? []).map((u) => ({
             userId: u.id,
-            portions: solo || onlyMe ? (u.id === user?.id ? 1 : 0) : 1,
+            portions: solo ? (u.id === user?.id ? 1 : 0) : 1,
           })),
         }),
       }),
@@ -582,31 +584,66 @@ function AddToPlan({
   });
 
   return (
-    <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-      <p className="mr-auto hidden text-sm font-medium text-ink-700 sm:block">Au planning</p>
-      <input
-        type="date"
-        value={date}
-        aria-label="Date"
-        onChange={(e) => setDate(e.target.value)}
-        className="h-11 rounded-xl border border-ink-200 bg-ink-100 px-4 text-sm text-ink-900 hover:border-ink-300 hover:bg-white focus:border-sage-300 focus:bg-white"
-      />
-      <Select
-        value={slot}
-        aria-label="Créneau"
-        className="w-auto min-w-36 shrink-0"
-        options={MEAL_SLOTS.map((s) => ({ value: s, label: MEAL_SLOT_LABELS[s] }))}
-        onChange={setSlot}
-      />
-      <Button variant="ghost" onClick={onCancel}>
-        Annuler
-      </Button>
-      <Button variant="glass" onClick={() => add.mutate(true)}>
-        Pour moi seulement
-      </Button>
-      <Button disabled={!users.data?.length} loading={add.isPending} onClick={() => add.mutate()}>
-        Valider
-      </Button>
-    </div>
+    <Modal
+      open
+      title="Ajouter au planning"
+      description={recipeName}
+      size="md"
+      onClose={onCancel}
+      footerClassName="flex-col sm:flex-row"
+      footer={
+        <>
+          <Button variant="ghost" className="w-full sm:w-auto" onClick={onCancel}>
+            Annuler
+          </Button>
+          <Button
+            variant="glass"
+            className="w-full sm:w-auto"
+            disabled={users.data?.length && !add.isPending ? undefined : true}
+            loading={add.isPending && add.variables === true}
+            onClick={() => add.mutate(true)}
+          >
+            Pour moi seulement
+          </Button>
+          <Button
+            className="w-full sm:w-auto"
+            disabled={users.data?.length && !add.isPending ? undefined : true}
+            loading={add.isPending && add.variables !== true}
+            onClick={() => add.mutate()}
+          >
+            Pour tout le monde
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Field label="Date">
+          {({ id, describedBy }) => (
+            <Input
+              id={id}
+              type="date"
+              value={date}
+              aria-describedby={describedBy}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          )}
+        </Field>
+        <Field label="Créneau">
+          {({ id }) => (
+            <Select
+              id={id}
+              value={slot}
+              options={MEAL_SLOTS.map((s) => ({ value: s, label: MEAL_SLOT_LABELS[s] }))}
+              onChange={setSlot}
+            />
+          )}
+        </Field>
+        {add.isError ? (
+          <p className="text-sm font-medium text-tomato-500">
+            Impossible d’ajouter ce repas. Réessaie.
+          </p>
+        ) : null}
+      </div>
+    </Modal>
   );
 }

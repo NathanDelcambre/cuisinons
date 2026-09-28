@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   optimizeDay,
   mealsForEater,
@@ -153,6 +153,44 @@ export class OptimizationService {
     });
   }
 
+  private async resolveTargets(userIds: string[]) {
+    const unique = [...new Set(userIds)];
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: unique } },
+      select: { id: true, displayName: true },
+    });
+    if (users.length !== unique.length) throw new NotFoundException('Utilisateur introuvable.');
+    return unique.map((id) => users.find((user) => user.id === id)!);
+  }
+
+  async previewTargets(userIds: string[], dateIso: string) {
+    const targets = await this.resolveTargets(userIds);
+    if (targets.length === 1) return this.preview(targets[0]!.id, dateIso);
+    const people = [];
+    for (const person of targets) {
+      people.push({
+        userId: person.id,
+        displayName: person.displayName,
+        result: await this.preview(person.id, dateIso),
+      });
+    }
+    return { people };
+  }
+
+  async previewWeekTargets(userIds: string[], fromIso: string, mode: WeekMode) {
+    const targets = await this.resolveTargets(userIds);
+    if (targets.length === 1) return this.previewWeek(targets[0]!.id, fromIso, mode);
+    const people = [];
+    for (const person of targets) {
+      people.push({
+        userId: person.id,
+        displayName: person.displayName,
+        result: await this.previewWeek(person.id, fromIso, mode),
+      });
+    }
+    return { people };
+  }
+
   async previewWeek(userId: string, fromIso: string, mode: WeekMode) {
     const start = startOfWeek(parseIsoDate(fromIso));
     const days = Array.from({ length: 7 }, (_, i) => addDays(start, i).toISOString().slice(0, 10));
@@ -206,7 +244,27 @@ export class OptimizationService {
     const date = parseIsoDate(dateIso);
     await this.prisma.$transaction(async (tx) => {
       if (options?.replaceRecipes) {
-        await tx.mealItem.deleteMany({ where: { date, kind: 'RECIPE' } });
+        const recipes = await tx.mealItem.findMany({
+          where: {
+            date,
+            kind: 'RECIPE',
+            portions: { some: { userId, portions: { gt: 0 } } },
+          },
+          include: { portions: true },
+        });
+        for (const item of recipes) {
+          const others = item.portions.filter(
+            (portion) => portion.userId !== userId && Number(portion.portions) > 0,
+          );
+          if (others.length === 0) {
+            await tx.mealItem.delete({ where: { id: item.id } });
+          } else {
+            await tx.mealParticipantPortion.update({
+              where: { mealItemId_userId: { mealItemId: item.id, userId } },
+              data: { portions: 0 },
+            });
+          }
+        }
       }
       for (const change of preview.portionChanges) {
         await tx.mealParticipantPortion.upsert({
@@ -245,23 +303,51 @@ export class OptimizationService {
     });
   }
 
-  async apply(userId: string, dateIso: string) {
+  async apply(actorId: string, targetIds: string[], dateIso: string) {
     const date = parseIsoDate(dateIso);
-    await this.snapshotWindow(userId, date, date);
-    const preview = await this.preview(userId, dateIso);
-    await this.applyPreview(userId, dateIso, preview);
-    return preview;
+    const targets = await this.resolveTargets(targetIds);
+    const previews = [];
+    for (const person of targets) {
+      previews.push({ person, result: await this.preview(person.id, dateIso) });
+    }
+    await this.snapshotWindow(actorId, date, date);
+    for (const item of previews) {
+      await this.applyPreview(item.person.id, dateIso, item.result);
+    }
+    if (previews.length === 1) return previews[0]!.result;
+    return {
+      people: previews.map((item) => ({
+        userId: item.person.id,
+        displayName: item.person.displayName,
+        result: item.result,
+      })),
+    };
   }
 
-  async applyWeek(userId: string, fromIso: string, mode: WeekMode) {
+  async applyWeek(actorId: string, targetIds: string[], fromIso: string, mode: WeekMode) {
     const start = startOfWeek(parseIsoDate(fromIso));
     const end = addDays(start, 6);
-    await this.snapshotWindow(userId, start, end);
-    const preview = await this.previewWeek(userId, fromIso, mode);
-    for (const day of preview.days) {
-      await this.applyPreview(userId, day.date, day.result, { replaceRecipes: mode === 'replace' });
+    const targets = await this.resolveTargets(targetIds);
+    const previews = [];
+    for (const person of targets) {
+      previews.push({ person, result: await this.previewWeek(person.id, fromIso, mode) });
     }
-    return preview;
+    await this.snapshotWindow(actorId, start, end);
+    for (const item of previews) {
+      for (const day of item.result.days) {
+        await this.applyPreview(item.person.id, day.date, day.result, {
+          replaceRecipes: mode === 'replace',
+        });
+      }
+    }
+    if (previews.length === 1) return previews[0]!.result;
+    return {
+      people: previews.map((item) => ({
+        userId: item.person.id,
+        displayName: item.person.displayName,
+        result: item.result,
+      })),
+    };
   }
 
   async undo(userId: string) {

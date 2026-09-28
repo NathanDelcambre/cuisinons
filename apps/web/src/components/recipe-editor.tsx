@@ -376,7 +376,7 @@ export function RecipeEditor({ existing }: { existing?: Record<string, unknown> 
           <div key={index} className="flex items-start gap-2.5">
             <span
               aria-hidden
-              className="tabular mt-2.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-sage-100 text-xs font-semibold text-sage-700"
+              className="font-display mt-2.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-sage-100 text-base font-bold tracking-[-0.03em] text-sage-700"
             >
               {index + 1}
             </span>

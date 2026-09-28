@@ -1064,7 +1064,7 @@ export function buildHealthyOfficialSpecs(): OfficialHealthySpec[] {
 }
 
 export const HEALTHY_OFFICIAL_COUNT = HEALTHY_RECIPES.length;
-export const HANDCRAFTED_OFFICIAL_COUNT = 22;
+export const HANDCRAFTED_OFFICIAL_COUNT = 31;
 export const OFFICIAL_RECIPE_COUNT = HANDCRAFTED_OFFICIAL_COUNT + HEALTHY_OFFICIAL_COUNT;
 
 /** Banque « Idées » : toutes les fiches healthy déjà photographiées. */
