@@ -3,6 +3,7 @@ import {
   aggregateQuantities,
   bulkPieceSuggestion,
   canonicalQuantity,
+  countsTowardShopping,
   portionRequirement,
   roundForPurchase,
   subtractStock,
@@ -122,6 +123,25 @@ describe('besoin d’un convive', () => {
     expect(
       portionRequirement({ ingredientId: 'x', quantity: 1, unit: 'G', grams: 1 }, 2, 0),
     ).toBeNull();
+  });
+});
+
+describe('ce qui entre dans les courses', () => {
+  it('laisse de côté les condiments et l’eau du robinet', () => {
+    expect(countsTowardShopping({ uxCategory: 'CONDIMENTS', nameFr: 'Moutarde' })).toBe(false);
+    expect(countsTowardShopping({ uxCategory: 'CONDIMENTS', nameFr: 'Sel marin gris' })).toBe(false);
+    expect(
+      countsTowardShopping({ uxCategory: 'BEVERAGES', ciqualCode: 18066, nameFr: 'Eau du robinet' }),
+    ).toBe(false);
+    expect(countsTowardShopping({ uxCategory: 'BEVERAGES', nameFr: 'Eau du robinet' })).toBe(false);
+  });
+
+  it('garde l’eau en bouteille et le reste du repas', () => {
+    expect(
+      countsTowardShopping({ uxCategory: 'BEVERAGES', ciqualCode: 18044, nameFr: 'Eau minérale' }),
+    ).toBe(true);
+    expect(countsTowardShopping({ uxCategory: 'VEGETABLES', nameFr: 'Courgette, crue' })).toBe(true);
+    expect(countsTowardShopping({ uxCategory: 'SAUCES', nameFr: 'Sauce soja' })).toBe(true);
   });
 });
 

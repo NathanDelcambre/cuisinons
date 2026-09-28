@@ -286,13 +286,25 @@ export function SuggestDishModal({
       size="2xl"
       onClose={onClose}
       bodyClassName="flex flex-col overflow-y-hidden pb-4 pt-4"
+      footerClassName="gap-2 py-3 sm:flex-nowrap"
       footer={
         <>
-          <Link href={routes.recetteNouvelle} className={buttonClasses({ variant: 'glass' })}>
+          {preview.isError && !knownEmpty ? (
+            <Button variant="glass" size="sm" onClick={() => void preview.refetch()}>
+              Réessayer
+            </Button>
+          ) : null}
+          <Link href={routes.recetteNouvelle} className={buttonClasses({ variant: 'glass', size: 'sm' })}>
             Nouvelle recette
           </Link>
+          {empty.show ? (
+            <Link href={routes.reserves} className={buttonClasses({ size: 'sm' })}>
+              Ouvrir les réserves
+            </Link>
+          ) : null}
           {selected ? (
             <Button
+              size="sm"
               icon={Sparkles}
               loading={accept.isPending}
               onClick={() => accept.mutate(selected.recipeDraft)}
@@ -313,7 +325,7 @@ export function SuggestDishModal({
             value={diet}
             onChange={setDiet}
           />
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <Field label="Type de plat">
               {({ id }) => <Select id={id} value={kind} options={KIND_OPTIONS} onChange={setKind} />}
             </Field>
@@ -335,6 +347,7 @@ export function SuggestDishModal({
             <Field label="Portions">
               {() => (
                 <Stepper
+                  className="justify-between gap-2"
                   value={servings}
                   onChange={setServings}
                   step={1}
@@ -360,18 +373,6 @@ export function SuggestDishModal({
             title={empty.title}
             description={empty.description}
             className="min-h-0 flex-1 justify-center py-4"
-            action={
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                {preview.isError && !knownEmpty ? (
-                  <Button variant="glass" size="sm" onClick={() => void preview.refetch()}>
-                    Réessayer
-                  </Button>
-                ) : null}
-                <Link href={routes.reserves} className={buttonClasses({ size: 'sm' })}>
-                  Ouvrir les réserves
-                </Link>
-              </div>
-            }
           />
         ) : (
           <div className="grid min-h-0 flex-1 gap-4 overflow-y-auto lg:grid-cols-[minmax(0,16rem)_1fr]">

@@ -5,7 +5,6 @@ import { useState } from 'react';
 import {
   ArrowLeftRight,
   Check,
-  ChevronRight,
   ListChecks,
   Plus,
   ShoppingBasket,
@@ -28,9 +27,7 @@ import {
   Card,
   EmptyState,
   IconButton,
-  Modal,
   PageHeader,
-  Panel,
   Skeleton,
   Switch,
   cn,
@@ -106,9 +103,6 @@ export default function ShoppingPage() {
   const [generateOpen, setGenerateOpen] = useState(false);
   const [picker, setPicker] = useState(false);
   const [swapItem, setSwapItem] = useState<ShoppingItem | null>(null);
-  const [retailerOpen, setRetailerOpen] = useState(false);
-  const [selectedRetailer, setSelectedRetailer] = useState<Retailer>('LECLERC');
-  const [economical, setEconomical] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
 
   const list = useQuery({
@@ -122,7 +116,7 @@ export default function ShoppingPage() {
       itemsSignature(list.data?.items ?? []),
     ],
     queryFn: () => apiJson<RetailerEstimate[]>('/api/bff/shopping/retailer-estimates'),
-    enabled: retailerOpen && Boolean(list.data),
+    enabled: (list.data?.items.length ?? 0) > 0,
     staleTime: Number.POSITIVE_INFINITY,
     gcTime: Number.POSITIVE_INFINITY,
     refetchOnWindowFocus: false,
@@ -159,7 +153,6 @@ export default function ShoppingPage() {
       }),
     onSuccess: (data) => {
       queryClient.setQueryData(['shopping'], data);
-      setRetailerOpen(false);
     },
   });
 
@@ -218,12 +211,10 @@ export default function ShoppingPage() {
   });
 
   const items = list.data?.items ?? [];
+  const pendingChoice = changeRetailer.isPending ? changeRetailer.variables : undefined;
+  const activeRetailer = pendingChoice?.retailer ?? list.data?.retailer ?? null;
+  const activeEconomical = pendingChoice?.economical ?? list.data?.economical ?? true;
   const checked = items.filter((item) => item.checked);
-  const pricedItems = items.filter((item) => typeof item.product?.estimatedPrice === 'number');
-  const estimatedTotal = pricedItems.reduce(
-    (total, item) => total + (item.product?.estimatedPrice ?? 0),
-    0,
-  );
 
   // Regroupement par categorie : on fait ses courses par rayon, pas par ordre
   // d'apparition dans les recettes.
@@ -235,7 +226,7 @@ export default function ShoppingPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-6 lg:pb-16">
       <PageHeader
         title="Courses"
         description="Générée depuis ton planning, à partir de ce qu'il te manque vraiment."
@@ -274,38 +265,81 @@ export default function ShoppingPage() {
         </Card>
       ) : null}
 
-      {list.data?.retailer ? (
-        <Card className="py-3.5">
-          <button
-            type="button"
-            onClick={() => {
-              const current = list.data;
-              if (!current?.retailer) return;
-              setSelectedRetailer(current.retailer);
-              setEconomical(current.economical);
-              setRetailerOpen(true);
-            }}
-            className="flex w-full min-w-0 items-center gap-2.5 rounded-xl text-left hover:bg-white/50"
-            aria-label="Changer de distributeur"
+      {items.length > 0 ? (
+        <section className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+            <h2 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink-900">
+              Distributeurs
+            </h2>
+            <Switch
+              checked={activeEconomical}
+              disabled={!activeRetailer || changeRetailer.isPending}
+              onChange={(next) => {
+                if (!activeRetailer) return;
+                changeRetailer.mutate({ retailer: activeRetailer, economical: next });
+              }}
+              label="Faire des économies"
+            />
+          </div>
+          <div
+            role="radiogroup"
+            aria-label="Distributeur"
+            className="scrollbar-none -mx-1 flex gap-2 overflow-x-auto px-1"
           >
-            <div className="flex min-w-0 flex-1 items-center gap-2.5">
-              <RetailerLogo retailer={list.data.retailer} className="size-9 rounded-lg" />
-              <p className="min-w-0 text-sm text-ink-700">
-                Produits sélectionnés chez{' '}
-                <strong className="whitespace-nowrap">{RETAILER_LABELS[list.data.retailer]}</strong>
-              </p>
-            </div>
-            <div className="shrink-0 text-right">
-              <p className="text-[10px] font-medium uppercase tracking-wide text-ink-400">
-                Total estimé
-              </p>
-              <p className="tabular mt-0.5 font-display text-lg font-semibold text-ink-900">
-                {pricedItems.length > 0 ? EUR_FORMAT.format(estimatedTotal) : '—'}
-              </p>
-            </div>
-            <ChevronRight className="size-4 shrink-0 text-ink-400" aria-hidden />
-          </button>
-        </Card>
+            {RETAILERS.map((retailer) => {
+              const estimate = retailerEstimates.data?.find((item) => item.retailer === retailer);
+              const total = activeEconomical ? estimate?.economicalTotal : estimate?.regularTotal;
+              const pricedCount = activeEconomical
+                ? estimate?.economicalPricedItems
+                : estimate?.regularPricedItems;
+              const selected = retailer === activeRetailer;
+              return (
+                <button
+                  key={retailer}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  disabled={changeRetailer.isPending}
+                  onClick={() => {
+                    if (selected && activeEconomical === (list.data?.economical ?? true)) return;
+                    changeRetailer.mutate({ retailer, economical: activeEconomical });
+                  }}
+                  className={cn(
+                    'flex min-h-16 min-w-[10.75rem] flex-1 items-center gap-2 rounded-2xl border px-3 py-2 text-left text-sm transition',
+                    selected
+                      ? 'border-sage-400 bg-sage-50 text-ink-900'
+                      : 'border-ink-100 bg-white/70 text-ink-700 hover:border-sage-300',
+                  )}
+                >
+                  <RetailerLogo retailer={retailer} className="size-8 shrink-0 rounded-lg" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate">{RETAILER_LABELS[retailer]}</span>
+                    <span className="tabular mt-0.5 block text-xs text-ink-500">
+                      {retailerEstimates.isLoading
+                        ? 'Calcul…'
+                        : total === null || total === undefined
+                          ? 'Prix indisponible'
+                          : `${EUR_FORMAT.format(total)} estimés`}
+                    </span>
+                    {estimate && pricedCount !== estimate.totalItems ? (
+                      <span className="block text-[10px] text-ink-400">
+                        {String(pricedCount ?? 0)}/{String(estimate.totalItems)} produits tarifés
+                      </span>
+                    ) : null}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {retailerEstimates.isError ? (
+            <p className="text-sm text-tomato-500">
+              Impossible de calculer les estimations pour le moment.
+            </p>
+          ) : null}
+          {changeRetailer.error instanceof Error ? (
+            <p className="text-sm text-tomato-500">{changeRetailer.error.message}</p>
+          ) : null}
+        </section>
       ) : null}
 
       {list.isLoading ? (
@@ -333,54 +367,59 @@ export default function ShoppingPage() {
                 <CategoryIcon category={category} className="size-5" />
                 {UX_CATEGORY_LABELS[category]}
               </h2>
-              {rows.map((item) => (
-                <ShoppingRow
-                  key={item.id}
-                  item={item}
-                  onToggle={() => patch.mutate({ id: item.id, checked: !item.checked })}
-                  onSwap={() => setSwapItem(item)}
-                  canSwap={Boolean(list.data?.retailer)}
-                  onRemove={() => remove.mutate(item.id)}
-                />
-              ))}
+              <div className="overflow-hidden rounded-2xl bg-[#fffdfb] shadow-[0_0_18px_rgba(28,25,23,0.08)]">
+                {rows.map((item, index) => (
+                  <ShoppingRow
+                    key={item.id}
+                    item={item}
+                    className={index > 0 ? 'border-t border-ink-200/70' : undefined}
+                    onToggle={() => patch.mutate({ id: item.id, checked: !item.checked })}
+                    onSwap={() => setSwapItem(item)}
+                    canSwap={Boolean(list.data?.retailer)}
+                    onRemove={() => remove.mutate(item.id)}
+                  />
+                ))}
+              </div>
             </section>
           ))}
 
-          <Panel className="sticky bottom-20 flex items-center justify-between gap-2 p-3 sm:gap-3 sm:p-4 lg:bottom-6">
-            {/* Une seule chaine : deux noeuds de texte voisins seraient annonces
-                « coché s » par un lecteur d'ecran. */}
-            <p className="tabular min-w-0 text-sm text-ink-600">
-              <span className="sm:hidden">{`${String(checked.length)}/${String(items.length)}`}</span>
-              <span className="hidden sm:inline">
-                {`${String(checked.length)} sur ${String(items.length)} coché${checked.length > 1 ? 's' : ''}`}
-              </span>
-            </p>
-            <div className="flex shrink-0 items-center gap-2">
-              <Button
-                variant="ghost"
-                icon={ListChecks}
-                aria-label="Tout cocher"
-                title="Tout cocher"
-                className="max-sm:size-9 max-sm:p-0"
-                loading={checkAll.isPending}
-                disabled={checked.length === items.length}
-                onClick={() =>
-                  checkAll.mutate(items.filter((item) => !item.checked).map((item) => item.id))
-                }
-              >
-                <span className="max-sm:sr-only">Tout cocher</span>
-              </Button>
-              <Button
-                icon={Check}
-                size="sm"
-                loading={validate.isPending}
-                disabled={checked.length === 0}
-                onClick={() => validate.mutate()}
-              >
-                J’ai fait les courses
-              </Button>
+          <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 border-t border-ink-200 bg-[#fffdfb] lg:bottom-0 lg:left-[17rem]">
+            <div className="mx-auto flex w-full max-w-[88rem] items-center justify-between gap-2 px-4 py-3 sm:px-8">
+              {/* Une seule chaine : deux noeuds de texte voisins seraient annonces
+                  « coché s » par un lecteur d'ecran. */}
+              <p className="tabular min-w-0 text-sm text-ink-600">
+                <span className="sm:hidden">{`${String(checked.length)}/${String(items.length)}`}</span>
+                <span className="hidden sm:inline">
+                  {`${String(checked.length)} sur ${String(items.length)} coché${checked.length > 1 ? 's' : ''}`}
+                </span>
+              </p>
+              <div className="flex shrink-0 items-center gap-2">
+                <Button
+                  variant="ghost"
+                  icon={ListChecks}
+                  aria-label="Tout cocher"
+                  title="Tout cocher"
+                  className="max-sm:size-9 max-sm:p-0"
+                  loading={checkAll.isPending}
+                  disabled={checked.length === items.length}
+                  onClick={() =>
+                    checkAll.mutate(items.filter((item) => !item.checked).map((item) => item.id))
+                  }
+                >
+                  <span className="max-sm:sr-only">Tout cocher</span>
+                </Button>
+                <Button
+                  icon={Check}
+                  size="sm"
+                  loading={validate.isPending}
+                  disabled={checked.length === 0}
+                  onClick={() => validate.mutate()}
+                >
+                  J’ai fait les courses
+                </Button>
+              </div>
             </div>
-          </Panel>
+          </div>
         </div>
       )}
 
@@ -394,91 +433,6 @@ export default function ShoppingPage() {
         }}
         onGenerate={(input) => generate.mutate(input)}
       />
-      <Modal
-        open={retailerOpen}
-        title="Choisir un distributeur"
-        description="Les produits et prix seront recalculés pour ce magasin."
-        onClose={() => {
-          changeRetailer.reset();
-          setRetailerOpen(false);
-        }}
-        bodyClassName="overflow-y-auto"
-        footer={
-          <>
-            <Button
-              variant="ghost"
-              disabled={changeRetailer.isPending}
-              onClick={() => {
-                changeRetailer.reset();
-                setRetailerOpen(false);
-              }}
-            >
-              Annuler
-            </Button>
-            <Button
-              variant="accent"
-              icon={Check}
-              loading={changeRetailer.isPending}
-              onClick={() => changeRetailer.mutate({ retailer: selectedRetailer, economical })}
-            >
-              Valider
-            </Button>
-          </>
-        }
-      >
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {RETAILERS.map((retailer) => {
-            const estimate = retailerEstimates.data?.find((item) => item.retailer === retailer);
-            const total = economical ? estimate?.economicalTotal : estimate?.regularTotal;
-            const pricedItemsCount = economical
-              ? estimate?.economicalPricedItems
-              : estimate?.regularPricedItems;
-            return (
-              <button
-                key={retailer}
-                type="button"
-                aria-pressed={retailer === selectedRetailer}
-                disabled={changeRetailer.isPending}
-                onClick={() => setSelectedRetailer(retailer)}
-                className={cn(
-                  'flex min-h-20 items-center gap-2 rounded-2xl border px-3 text-left text-sm transition',
-                  retailer === selectedRetailer
-                    ? 'border-sage-400 bg-sage-50 text-ink-900'
-                    : 'border-ink-100 bg-white/70 text-ink-700 hover:border-sage-300',
-                )}
-              >
-                <RetailerLogo retailer={retailer} className="size-8 rounded-lg" />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate">{RETAILER_LABELS[retailer]}</span>
-                  <span className="tabular mt-0.5 block text-xs text-ink-500">
-                    {retailerEstimates.isLoading
-                      ? 'Calcul…'
-                      : total === null || total === undefined
-                        ? 'Prix indisponible'
-                        : `${EUR_FORMAT.format(total)} estimés`}
-                  </span>
-                  {estimate && pricedItemsCount !== estimate.totalItems ? (
-                    <span className="block text-[10px] text-ink-400">
-                      {String(pricedItemsCount ?? 0)}/{String(estimate.totalItems)} produits tarifés
-                    </span>
-                  ) : null}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-        {retailerEstimates.isError ? (
-          <p className="mt-3 text-sm text-tomato-500">
-            Impossible de calculer les estimations pour le moment.
-          </p>
-        ) : null}
-        <div className="mt-4 rounded-2xl bg-white/70 p-3.5">
-          <Switch checked={economical} onChange={setEconomical} label="Faire des économies" />
-        </div>
-        {changeRetailer.error instanceof Error ? (
-          <p className="mt-3 text-sm text-tomato-500">{changeRetailer.error.message}</p>
-        ) : null}
-      </Modal>
       <IngredientPicker
         open={picker}
         onClose={() => {
@@ -508,12 +462,14 @@ export default function ShoppingPage() {
 
 function ShoppingRow({
   item,
+  className,
   onToggle,
   onSwap,
   canSwap,
   onRemove,
 }: {
   item: ShoppingItem;
+  className?: string;
   onToggle: () => void;
   onSwap: () => void;
   canSwap: boolean;
@@ -525,12 +481,22 @@ function ShoppingRow({
   const price =
     item.product?.estimatedPrice !== null && item.product?.estimatedPrice !== undefined
       ? `${item.product.estimatedPrice.toFixed(2).replace('.', ',')} €`
-      : 'Prix indisponible';
+      : null;
+  const purchase =
+    item.product !== null
+      ? `Besoin : ${String(item.neededQuantity)} ${unit} · À acheter : ${String(item.quantity)} ${unit}${
+          item.product.packageCount && item.product.packageQuantity
+            ? ` (${String(item.product.packageCount)} × ${String(item.product.packageQuantity)} ${unit})`
+            : ''
+        }`
+      : (item.bulkSuggestion?.label ?? null);
+  const meta = [brand, price].filter(Boolean).join(' · ');
   return (
-    <Card
+    <div
       className={cn(
-        'grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-2 px-3 py-3 sm:flex sm:gap-3 sm:px-5',
+        'grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4',
         item.checked && 'opacity-60',
+        className,
       )}
     >
       <button
@@ -543,7 +509,7 @@ function ShoppingRow({
           'flex size-6 shrink-0 items-center justify-center rounded-full border transition duration-200 ease-out-soft',
           item.checked
             ? 'border-sage-500 bg-sage-500 text-white'
-            : 'border-ink-300 bg-white/70 hover:border-sage-400',
+            : 'border-ink-300 bg-white hover:border-sage-400',
         )}
       >
         {item.checked ? <Check className="size-3.5" aria-hidden /> : null}
@@ -554,52 +520,17 @@ function ShoppingRow({
       <span className="min-w-0 flex-1">
         <span
           className={cn(
-            'block line-clamp-2 text-sm leading-snug text-ink-900 sm:truncate',
+            'block truncate text-sm font-semibold leading-tight text-ink-900',
             item.checked && 'line-through',
           )}
         >
           {name}
         </span>
-        {brand ? (
-          <span className="mt-0.5 block truncate text-xs text-ink-500 sm:hidden">{brand}</span>
+        {meta ? (
+          <span className="mt-0.5 block truncate text-xs leading-tight text-ink-500">{meta}</span>
         ) : null}
-        <span className="tabular mt-1 block text-xs font-medium text-ink-600 sm:hidden">
-          {price}
-        </span>
-        {item.product?.packageCount ? (
-          <span className="mt-0.5 block text-xs text-ink-500 sm:hidden">
-            {String(item.product.packageCount)} × {String(item.product.packageQuantity)} {unit}
-          </span>
-        ) : item.bulkSuggestion ? (
-          <span className="mt-0.5 block text-xs text-ink-500 sm:hidden">
-            {item.bulkSuggestion.label}
-          </span>
-        ) : null}
-        {item.product ? (
-          <span className="hidden sm:block">
-            <span className="mt-0.5 block text-xs text-ink-500">
-              {[brand, item.product.estimatedPrice !== null ? price : null]
-                .filter(Boolean)
-                .join(' · ')}
-            </span>
-            <span className="mt-0.5 block text-xs text-ink-500">
-              Besoin : {String(item.neededQuantity)} {unit} · À acheter : {String(item.quantity)}{' '}
-              {unit}
-              {item.product.packageCount && item.product.packageQuantity
-                ? ` (${String(item.product.packageCount)} × ${String(item.product.packageQuantity)} ${unit})`
-                : ''}
-            </span>
-          </span>
-        ) : null}
-        {item.product?.economyNote ? (
-          <span className="mt-1 hidden text-xs text-sage-700 sm:block">
-            {item.product.economyNote}
-          </span>
-        ) : null}
-        {!item.product && item.bulkSuggestion ? (
-          <span className="mt-1 hidden text-xs text-ink-500 sm:block">
-            {item.bulkSuggestion.label}
-          </span>
+        {purchase ? (
+          <span className="mt-0.5 block truncate text-xs leading-tight text-ink-500">{purchase}</span>
         ) : null}
       </span>
 
@@ -621,6 +552,6 @@ function ShoppingRow({
           onClick={onRemove}
         />
       </span>
-    </Card>
+    </div>
   );
 }

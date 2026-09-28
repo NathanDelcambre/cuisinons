@@ -8,6 +8,7 @@ import {
 import type { QuantityUnit, StorageArea } from '@cuisinons/db';
 import {
   aggregateQuantities,
+  countsTowardShopping,
   bulkPieceSuggestion,
   canonicalQuantity,
   defaultStorageArea,
@@ -890,12 +891,24 @@ export class ProvisionsService {
           select: {
             servings: true,
             ingredients: {
-              select: { ingredientId: true, quantity: true, unit: true, grams: true },
+              select: {
+                ingredientId: true,
+                quantity: true,
+                unit: true,
+                grams: true,
+                ingredient: { select: { uxCategory: true, nameFr: true, ciqualCode: true } },
+              },
             },
           },
         },
         manualIngredients: {
-          select: { ingredientId: true, quantity: true, unit: true, grams: true },
+          select: {
+            ingredientId: true,
+            quantity: true,
+            unit: true,
+            grams: true,
+            ingredient: { select: { uxCategory: true, nameFr: true, ciqualCode: true } },
+          },
         },
         portions: { where: { userId }, select: { portions: true, consumedAt: true } },
       },
@@ -910,6 +923,7 @@ export class ProvisionsService {
       const source = item.recipe?.ingredients ?? item.manualIngredients;
       if (source.length === 0) continue;
       for (const line of source) {
+        if (!countsTowardShopping(line.ingredient)) continue;
         const need = portionRequirement(
           {
             ingredientId: line.ingredientId,

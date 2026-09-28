@@ -1,5 +1,32 @@
 import { volumeToMilliliters, type QuantityUnit } from '../nutrition/units.js';
 
+/** Eau du robinet, code Ciqual. L'eau en bouteille reste à acheter. */
+const TAP_WATER_CIQUAL_CODE = 18066;
+
+function foldName(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/œ/g, 'oe');
+}
+
+/**
+ * Ce qu'on ne met pas dans les courses : les condiments (sel, vinaigre,
+ * moutarde…) se puisent dans le placard, et l'eau du robinet ne s'achète pas.
+ * Un ajout manuel reste possible.
+ */
+export function countsTowardShopping(ingredient: {
+  uxCategory: string;
+  ciqualCode?: number | null;
+  nameFr?: string | null;
+}): boolean {
+  if (ingredient.uxCategory === 'CONDIMENTS') return false;
+  if (ingredient.ciqualCode === TAP_WATER_CIQUAL_CODE) return false;
+  if (ingredient.nameFr && foldName(ingredient.nameFr) === 'eau du robinet') return false;
+  return true;
+}
+
 /** Une quantite d'un ingredient, exprimee dans une unite donnee. */
 export type QuantityLine = {
   ingredientId: string;
