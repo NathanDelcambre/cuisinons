@@ -61,12 +61,7 @@ import { RecipeCover } from '@/components/recipe-cover';
 import { SlotAddMenu, SLOT_CHROME, type SpecialMealKind } from '@/components/slot-add-menu';
 import { OptimizePanel } from '@/components/optimize-panel';
 import { MacroIcon } from '@/components/macro-icon';
-
-const KIND_COVER: Partial<Record<MealKind, string>> = {
-  SKIPPED: '/meals/skipped.png',
-  RESTAURANT: '/meals/restaurant.png',
-  IMPOSED: '/meals/manual.png',
-};
+import { specialMealCover } from '@/components/meal-covers';
 
 type MealItem = {
   id: string;
@@ -744,8 +739,8 @@ function DayCard({
         onClick={onSelect}
         disabled={!onSelect}
         className={cn(
-          'flex w-full shrink-0 flex-col gap-1.5 rounded-t-2xl border-b border-white/70 bg-ink-200/80 px-4 py-3 text-left transition-colors duration-200 ease-out-soft enabled:hover:bg-ink-200',
-          today && 'bg-sage-100/80 enabled:hover:bg-sage-100',
+          'flex w-full shrink-0 flex-col gap-1.5 rounded-t-2xl border-b border-white/50 bg-ink-300 px-4 py-3 text-left transition-colors duration-200 ease-out-soft enabled:hover:bg-ink-300/80',
+          today && 'bg-sage-200 enabled:hover:bg-sage-200/80',
         )}
       >
         <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
@@ -839,7 +834,7 @@ function SlotSection({
                     .join(' & ') ??
                   MEAL_KIND_LABELS[kind])
                 : MEAL_KIND_LABELS[kind]);
-            const cover = recipe?.photoUrl ?? KIND_COVER[kind] ?? null;
+            const cover = recipe?.photoUrl ?? specialMealCover(kind, slot);
             return (
               <li
                 key={item.id}
