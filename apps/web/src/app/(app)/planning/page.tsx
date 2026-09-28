@@ -351,6 +351,8 @@ export default function PlanningPage() {
             icon={ChevronLeft}
             label="Semaine précédente"
             size="sm"
+            variant="ghost"
+            className="size-7 text-ink-400 hover:text-ink-600"
             onClick={() => setWeekStart(addDays(weekStart, -7))}
           />
           <span className="min-w-0 text-sm font-medium">{weekRangeLabel(weekStart)}</span>
@@ -358,6 +360,8 @@ export default function PlanningPage() {
             icon={ChevronRight}
             label="Semaine suivante"
             size="sm"
+            variant="ghost"
+            className="size-7 text-ink-400 hover:text-ink-600"
             onClick={() => setWeekStart(addDays(weekStart, 7))}
           />
         </div>
@@ -366,24 +370,13 @@ export default function PlanningPage() {
             <PersonSwitch people={household.data} selectedId={subjectId} onChange={setViewUserId} />
           ) : null}
           {isSelf ? (
-            <>
-              <Button
-                variant="glass"
-                size="sm"
-                icon={Sparkles}
-                className="hidden shrink-0 border-white bg-white text-ink-800 shadow-soft hover:bg-white lg:inline-flex"
-                onClick={() => setOptimizeOpen(true)}
-              >
-                Ajustement intelligent
-              </Button>
-              <IconButton
-                icon={Sparkles}
-                label="Ajustement intelligent"
-                size="sm"
-                className="shrink-0 border-white bg-white text-ink-800 shadow-soft lg:hidden"
-                onClick={() => setOptimizeOpen(true)}
-              />
-            </>
+            <IconButton
+              icon={Sparkles}
+              label="Ajustement intelligent"
+              size="sm"
+              className="shrink-0 border-white bg-white text-ink-800 shadow-soft"
+              onClick={() => setOptimizeOpen(true)}
+            />
           ) : null}
         </div>
       </header>
@@ -751,8 +744,8 @@ function DayCard({
         onClick={onSelect}
         disabled={!onSelect}
         className={cn(
-          'flex w-full shrink-0 flex-col gap-1.5 rounded-t-2xl border-b border-white/70 px-4 py-3 text-left transition-colors duration-200 ease-out-soft enabled:hover:bg-white/50',
-          today && 'bg-sage-100/35',
+          'flex w-full shrink-0 flex-col gap-1.5 rounded-t-2xl border-b border-white/70 bg-ink-200/80 px-4 py-3 text-left transition-colors duration-200 ease-out-soft enabled:hover:bg-ink-200',
+          today && 'bg-sage-100/80 enabled:hover:bg-sage-100',
         )}
       >
         <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
@@ -853,9 +846,9 @@ function SlotSection({
                 className={cn(
                   'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-white/75 py-3.5 pl-3.5 pr-2 shadow-[0_2px_8px_rgba(28,25,23,0.06)] transition duration-200 ease-out-soft hover:-translate-y-0.5 hover:shadow-card',
                   past
-                    ? 'border-[3px] border-ink-300/70 bg-ink-50/50 opacity-75 shadow-none'
+                    ? 'border border-ink-300/70 bg-ink-50/50 opacity-75 shadow-none'
                     : validated
-                      ? 'border-[3px] border-sage-500'
+                      ? 'border border-sage-500'
                       : chrome.rail,
                 )}
               >
