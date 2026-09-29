@@ -13,6 +13,7 @@ import {
   useState,
   type KeyboardEvent,
   type ReactNode,
+  type RefObject,
 } from 'react';
 import { createPortal } from 'react-dom';
 import {
@@ -125,6 +126,73 @@ function iso(date: Date) {
   return format(date, 'yyyy-MM-dd');
 }
 
+/** Largeur confortable, qui s'élargit dès que l'écran peut montrer environ cinq jours. */
+const DAY_CARD_FRAME =
+  'h-full min-h-[32rem] w-[calc(100vw-2rem)] shrink-0 sm:w-[20rem] xl:w-[max(20rem,calc((100vw-18.5rem)/5))]';
+
+/**
+ * Glisser horizontalement la bande des jours, sans voler les clics :
+ * un mouvement de souris trop court reste un clic sur le repas ou le bouton.
+ */
+function useDayStripDrag(scrollerRef: RefObject<HTMLDivElement | null>, enabled: boolean) {
+  const [dragging, setDragging] = useState(false);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller || !enabled) return;
+
+    let pointerId = -1;
+    let startX = 0;
+    let startScroll = 0;
+    let moved = false;
+
+    const onDown = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse' || event.button !== 0) return;
+      pointerId = event.pointerId;
+      startX = event.clientX;
+      startScroll = scroller.scrollLeft;
+      moved = false;
+    };
+    const onMove = (event: PointerEvent) => {
+      if (event.pointerId !== pointerId) return;
+      const dx = event.clientX - startX;
+      if (!moved && Math.abs(dx) < 6) return;
+      if (!moved) {
+        moved = true;
+        setDragging(true);
+        window.getSelection()?.removeAllRanges();
+      }
+      scroller.scrollLeft = startScroll - dx;
+    };
+    const end = (event: PointerEvent) => {
+      if (event.pointerId !== pointerId) return;
+      pointerId = -1;
+      setDragging(false);
+    };
+    const onClick = (event: MouseEvent) => {
+      if (!moved) return;
+      event.preventDefault();
+      event.stopPropagation();
+      moved = false;
+    };
+
+    scroller.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
+    window.addEventListener('click', onClick, true);
+    return () => {
+      scroller.removeEventListener('pointerdown', onDown);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+      window.removeEventListener('click', onClick, true);
+    };
+  }, [scrollerRef, enabled]);
+
+  return dragging;
+}
+
 function weekRangeLabel(start: Date) {
   const end = addDays(start, 6);
   const sameMonth =
@@ -190,6 +258,7 @@ export default function PlanningPage() {
     queryKey: ['planner', from],
     queryFn: () => apiJson<MealItem[]>(`/api/bff/planner/week?from=${from}`),
   });
+  const draggingDays = useDayStripDrag(scrollerRef, !mealsQuery.isLoading);
   const household = useQuery({
     queryKey: ['users'],
     queryFn: () => apiJson<HouseholdUser[]>('/api/bff/users'),
@@ -353,7 +422,7 @@ export default function PlanningPage() {
     })),
   });
   return (
-    <div className="space-y-6">
+    <div className="flex min-h-[calc(100dvh-8.5rem)] flex-col gap-6 lg:min-h-[calc(100dvh-6rem)]">
       <header className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2">
         <h1 className="shrink-0 font-display text-[1.75rem] font-semibold tracking-[-0.03em] text-ink-900 sm:text-[2rem]">
           Planning de {subject?.displayName ?? user?.displayName ?? '…'}
@@ -408,13 +477,10 @@ export default function PlanningPage() {
       ) : null}
 
       {mealsQuery.isLoading ? (
-        <div className="scrollbar-none -mx-4 overflow-x-auto scroll-smooth px-4 py-3 sm:-mx-8 sm:px-8">
-          <div className="flex w-max gap-3">
+        <div className="scrollbar-none -mx-4 min-h-0 flex-1 overflow-x-auto px-4 py-3 sm:-mx-8 sm:px-8">
+          <div className="flex h-full w-max gap-3">
             {Array.from({ length: 7 }, (_, i) => (
-              <Skeleton
-                key={i}
-                className="h-[32rem] w-[calc(100vw-2rem)] shrink-0 rounded-2xl sm:w-[20rem]"
-              />
+              <Skeleton key={i} className={cn(DAY_CARD_FRAME, 'rounded-2xl')} />
             ))}
           </div>
         </div>
@@ -422,14 +488,17 @@ export default function PlanningPage() {
         <div
           ref={scrollerRef}
           onScroll={selectCenteredDay}
-          className="scrollbar-none -mx-4 snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth px-4 py-3 sm:-mx-8 sm:snap-none sm:px-8"
+          className={cn(
+            'scrollbar-none -mx-4 min-h-0 flex-1 snap-x snap-mandatory overflow-x-auto overscroll-x-contain px-4 py-3 sm:-mx-8 sm:snap-none sm:px-8 [&_button]:cursor-pointer',
+            draggingDays ? 'cursor-grabbing select-none' : 'cursor-grab',
+          )}
         >
-          <div className="flex w-max items-stretch gap-3">
+          <div className="flex h-full w-max items-stretch gap-3">
             {days.map((day, index) => (
               <div
                 key={iso(day)}
                 data-day-index={index}
-                className="shrink-0 snap-center snap-always"
+                className="h-full shrink-0 snap-center snap-always"
               >
                 <DayCard
                   date={day}
@@ -805,8 +874,9 @@ function DayCard({
   return (
     <Card
       className={cn(
-        'relative flex h-[32rem] w-[calc(100vw-2rem)] shrink-0 flex-col overflow-hidden bg-[#fffdfb]! p-0 shadow-[0_16px_36px_-12px_rgba(28,25,23,0.28)] transition duration-300 ease-out-soft sm:w-[20rem]',
-        today && 'border border-sage-400/80 shadow-[0_20px_44px_-10px_rgba(74,117,87,0.38)]',
+        DAY_CARD_FRAME,
+        'relative flex flex-col overflow-hidden border-transparent! bg-[#fffdfb]! p-0 shadow-[0_16px_36px_-12px_rgba(28,25,23,0.28)]',
+        today && 'shadow-[0_20px_44px_-10px_rgba(74,117,87,0.28)]',
         selected && 'ring-2 ring-sage-300',
       )}
     >
@@ -815,7 +885,7 @@ function DayCard({
         onClick={onSelect}
         disabled={!onSelect}
         className={cn(
-          'flex w-full shrink-0 flex-col gap-1.5 rounded-t-2xl border-b border-white/15 bg-[#5c554e] px-4 py-3 text-left text-[#fffaf6] transition-colors duration-200 ease-out-soft enabled:hover:bg-[#4f4944]',
+          'flex w-full shrink-0 cursor-pointer flex-col gap-1.5 rounded-t-2xl bg-[#6e665e] px-4 py-3 text-left text-[#fffaf6] transition-colors duration-200 ease-out-soft enabled:hover:bg-[#625c54]',
         )}
       >
         <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
@@ -913,14 +983,14 @@ function SlotSection({
               <li
                 key={item.id}
                 className={cn(
-                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-white/75 py-3.5 pl-3.5 pr-2 shadow-[0_0_18px_rgba(28,25,23,0.12)] transition duration-200 ease-out-soft hover:-translate-y-0.5 hover:shadow-[0_0_24px_rgba(28,25,23,0.16)]',
+                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-white/75 py-3.5 pl-3.5 pr-2',
                   past && 'bg-ink-50/70 opacity-75',
                 )}
               >
                 {cover ? (
                   <RecipeCover
                     src={cover}
-                    className="mr-2.5 size-12 aspect-square rounded-lg border border-white/80 object-cover shadow-soft"
+                    className="mr-2.5 size-12 aspect-square rounded-lg object-cover"
                   />
                 ) : null}
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2">

@@ -60,9 +60,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         decaler d'une page a l'autre.
       */}
       <main className="lg:pl-[17rem]">
-        {/* Large : la grille de sept jours du planning a besoin de respirer. Les
-            ecrans plus etroits en texte posent leur propre largeur maximale. */}
-        <div className="mx-auto w-full max-w-[88rem] px-4 pb-28 pt-6 sm:px-8 lg:pb-14 lg:pt-10">
+        {/* Le planning occupe toute la largeur utile : les colonnes de jours
+            grandissent avec l'ecran. Les autres pages gardent une mesure de texte. */}
+        <div
+          className={cn(
+            'mx-auto w-full px-4 pb-28 pt-6 sm:px-8 lg:pb-14 lg:pt-10',
+            pathname === routes.planning ? 'max-w-none' : 'max-w-[88rem]',
+          )}
+        >
           {/*
             Animation d'entree en CSS et non en JS : un `initial: opacity 0` pose
             par Motion serait rendu tel quel cote serveur, donc la page resterait
