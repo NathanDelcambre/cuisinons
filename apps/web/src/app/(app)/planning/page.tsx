@@ -874,7 +874,6 @@ function DayCard({
       className={cn(
         DAY_CARD_FRAME,
         'relative flex flex-col overflow-hidden rounded-2xl border-0 bg-[#f6f3ee] p-0 shadow-[0_10px_28px_-16px_rgba(28,25,23,0.35)]',
-        past && '[&_img]:grayscale',
       )}
     >
       <button
@@ -981,12 +980,16 @@ function SlotSection({
                 key={item.id}
                 className={cn(
                   'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg border border-ink-200/80 bg-white py-3.5 pl-3.5 pr-2',
+                  past && 'border-[#ddd9d4] bg-[#f3f1ef] saturate-0',
                 )}
               >
                 {cover ? (
                   <RecipeCover
                     src={cover}
-                    className="mr-2.5 size-12 aspect-square rounded-lg object-cover"
+                    className={cn(
+                      'mr-2.5 size-12 aspect-square rounded-lg object-cover',
+                      past && 'contrast-50 brightness-125',
+                    )}
                   />
                 ) : null}
                 <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center gap-2">
