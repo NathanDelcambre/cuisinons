@@ -368,7 +368,7 @@ export default function ShoppingPage() {
                 <CategoryIcon category={category} className="size-5" />
                 {UX_CATEGORY_LABELS[category]}
               </h2>
-              <div className="overflow-hidden rounded-md bg-[#fffdfb] shadow-[0_0_18px_rgba(28,25,23,0.08)]">
+              <div className="overflow-hidden rounded-md bg-[#f4f0ea] shadow-[0_0_18px_rgba(28,25,23,0.08)]">
                 {rows.map((item, index) => (
                   <ShoppingRow
                     key={item.id}
