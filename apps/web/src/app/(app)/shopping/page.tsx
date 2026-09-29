@@ -374,7 +374,7 @@ export default function ShoppingPage() {
         <div className="space-y-6">
           {[...groups.entries()].map(([category, rows]) => (
             <section key={category} className="space-y-2">
-              <h2 className="flex items-center gap-2 px-1 text-sm font-medium text-ink-500">
+              <h2 className="flex items-center gap-2 px-1 text-sm font-semibold text-ink-900">
                 <CategoryIcon category={category} className="size-5" />
                 {UX_CATEGORY_LABELS[category]}
               </h2>
