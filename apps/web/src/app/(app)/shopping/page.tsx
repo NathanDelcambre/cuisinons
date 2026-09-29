@@ -346,7 +346,7 @@ export default function ShoppingPage() {
       {list.isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }, (_, i) => (
-            <Skeleton key={i} className="h-14" />
+            <Skeleton key={i} className="h-[4.5rem]" />
           ))}
         </div>
       ) : items.length === 0 ? (
@@ -509,11 +509,11 @@ function ShoppingRow({
             : ''
         }`
       : (item.bulkSuggestion?.label ?? null);
-  const meta = [brand, price].filter(Boolean).join(' · ');
+  const secondary = [brand, purchase].filter(Boolean).join(' · ');
   return (
     <div
       className={cn(
-        'grid min-w-0 grid-cols-[auto_auto_minmax(0,1fr)_auto] items-center gap-2 px-3 py-2 sm:gap-3 sm:px-4',
+        'grid h-[4.5rem] min-w-0 grid-cols-[auto_auto_minmax(0,1fr)_auto_auto] items-center gap-2 px-3 sm:gap-3 sm:px-4',
         item.checked && 'opacity-60',
         className,
       )}
@@ -545,12 +545,13 @@ function ShoppingRow({
         >
           {name}
         </span>
-        {meta ? (
-          <span className="mt-0.5 block truncate text-xs leading-tight text-ink-500">{meta}</span>
+        {secondary ? (
+          <span className="mt-0.5 block truncate text-xs leading-tight text-ink-500">{secondary}</span>
         ) : null}
-        {purchase ? (
-          <span className="mt-0.5 block truncate text-xs leading-tight text-ink-500">{purchase}</span>
-        ) : null}
+      </span>
+
+      <span className="w-[4.75rem] shrink-0 text-right text-base font-bold tabular-nums leading-none text-ink-900">
+        {price ?? ''}
       </span>
 
       <span className="flex shrink-0 items-center gap-0.5">
