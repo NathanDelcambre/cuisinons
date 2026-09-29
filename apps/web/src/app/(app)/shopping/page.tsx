@@ -280,6 +280,7 @@ export default function ShoppingPage() {
                 changeRetailer.mutate({ retailer: activeRetailer, economical: next });
               }}
               label="Faire des économies"
+              className="rounded-full border border-ink-300 bg-white px-3 py-1.5 shadow-soft"
             />
           </div>
           <div

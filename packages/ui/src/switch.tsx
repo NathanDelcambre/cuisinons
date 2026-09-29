@@ -41,8 +41,8 @@ export function Switch({
         disabled={disabled}
         onClick={() => onChange(!checked)}
         className={cn(
-          'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full p-0.5 transition-colors duration-200 ease-out-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500 disabled:opacity-55',
-          checked ? 'bg-sage-500' : 'bg-ink-300',
+          'relative inline-flex h-7 w-12 shrink-0 items-center rounded-full p-0.5 shadow-[inset_0_0_0_1px_rgba(28,25,23,0.18)] transition-colors duration-200 ease-out-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500 disabled:opacity-55',
+          checked ? 'bg-sage-600' : 'bg-ink-400',
         )}
       >
         <motion.span
