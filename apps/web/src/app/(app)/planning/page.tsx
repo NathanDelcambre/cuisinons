@@ -872,10 +872,10 @@ function DayCard({
   const today = isToday(date);
 
   return (
-    <Card
+    <div
       className={cn(
         DAY_CARD_FRAME,
-        'relative flex flex-col overflow-hidden border-transparent! bg-[#fffdfb]! p-0 shadow-[0_16px_36px_-12px_rgba(28,25,23,0.28)]',
+        'relative flex flex-col overflow-hidden rounded-2xl border-0 bg-[#fffdfb] p-0 shadow-[0_16px_36px_-12px_rgba(28,25,23,0.28)]',
         today && 'shadow-[0_20px_44px_-10px_rgba(74,117,87,0.28)]',
         selected && 'ring-2 ring-sage-300',
       )}
@@ -918,7 +918,7 @@ function DayCard({
           />
         ))}
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -983,8 +983,8 @@ function SlotSection({
               <li
                 key={item.id}
                 className={cn(
-                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-white/75 py-3.5 pl-3.5 pr-2',
-                  past && 'bg-ink-50/70 opacity-75',
+                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-[#efeae3] py-3.5 pl-3.5 pr-2',
+                  past && 'bg-[#e4ddd4] opacity-75',
                 )}
               >
                 {cover ? (
