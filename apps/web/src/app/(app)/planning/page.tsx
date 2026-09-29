@@ -506,7 +506,6 @@ export default function PlanningPage() {
                   userId={subjectId}
                   selfLabel={subjectLabel}
                   macros={macrosFor(day)}
-                  selected={index === selectedIndex}
                   onSelect={() => setSelectedIndex(index)}
                   onAddRecipe={(slot) =>
                     setDialog({
@@ -845,7 +844,6 @@ function DayCard({
   userId,
   selfLabel,
   macros,
-  selected,
   onSelect,
   onAddRecipe,
   onAddKind,
@@ -859,7 +857,6 @@ function DayCard({
   userId?: string;
   selfLabel: string;
   macros: Macros;
-  selected: boolean;
   onSelect?: () => void;
   onAddRecipe: (slot: MealSlot) => void;
   onAddKind: (slot: MealSlot, kind: SpecialMealKind) => void;
@@ -876,8 +873,6 @@ function DayCard({
       className={cn(
         DAY_CARD_FRAME,
         'relative flex flex-col overflow-hidden rounded-2xl border-0 bg-[#fffdfb] p-0 shadow-[0_16px_36px_-12px_rgba(28,25,23,0.28)]',
-        today && 'shadow-[0_20px_44px_-10px_rgba(74,117,87,0.28)]',
-        selected && 'ring-2 ring-sage-300',
       )}
     >
       <button
@@ -983,8 +978,8 @@ function SlotSection({
               <li
                 key={item.id}
                 className={cn(
-                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-[#efeae3] py-3.5 pl-3.5 pr-2',
-                  past && 'bg-[#e4ddd4] opacity-75',
+                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-[#f6f2ec] py-3.5 pl-3.5 pr-2',
+                  past && 'bg-[#efeae3] opacity-75',
                 )}
               >
                 {cover ? (
