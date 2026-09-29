@@ -873,8 +873,8 @@ function DayCard({
     <div
       className={cn(
         DAY_CARD_FRAME,
-        'relative flex flex-col overflow-hidden rounded-2xl border-0 bg-[#fffdfb] p-0 shadow-[0_16px_36px_-12px_rgba(28,25,23,0.28)]',
-        past && 'bg-[#f0ece7] [&_img]:grayscale',
+        'relative flex flex-col overflow-hidden rounded-2xl border-0 bg-[#f6f3ee] p-0 shadow-[0_10px_28px_-16px_rgba(28,25,23,0.35)]',
+        past && '[&_img]:grayscale',
       )}
     >
       <button
@@ -882,29 +882,23 @@ function DayCard({
         onClick={onSelect}
         disabled={!onSelect}
         className={cn(
-          'flex w-full shrink-0 cursor-pointer flex-col gap-1.5 rounded-t-2xl px-4 py-3 text-left text-[#fffaf6] transition-colors duration-200 ease-out-soft',
-          past ? 'bg-[#b7b0a8]' : 'bg-[#6e665e] enabled:hover:bg-[#625c54]',
+          'flex w-full shrink-0 cursor-pointer flex-col gap-1.5 rounded-t-2xl px-4 py-3 text-left text-[#faf6f1] transition-colors duration-200 ease-out-soft',
+          today
+            ? 'bg-[#3c5246] enabled:hover:bg-[#33463c]'
+            : past
+              ? 'bg-[#3a342f] enabled:hover:bg-[#322d29]'
+              : 'bg-[#2c2824] enabled:hover:bg-[#24211e]',
         )}
       >
         <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
-          <span
-            className={cn(
-              'text-sm font-medium first-letter:uppercase',
-              today ? 'text-sage-100' : 'text-[#fffaf6]',
-            )}
-          >
+          <span className="text-sm font-medium text-[#faf6f1] first-letter:uppercase">
             {today ? 'Aujourd’hui' : format(date, 'EEEE d MMMM', { locale: fr })}
           </span>
         </span>
         <MacroCounts macros={macros} />
       </button>
 
-      <div
-        className={cn(
-          'flex min-h-0 flex-1 flex-col gap-2 px-3 pt-3 pb-4',
-          past && 'saturate-0',
-        )}
-      >
+      <div className="flex min-h-0 flex-1 flex-col gap-2 px-3 pt-3 pb-4">
         {MEAL_SLOTS.map((slot) => (
           <SlotSection
             key={slot}
@@ -986,8 +980,7 @@ function SlotSection({
               <li
                 key={item.id}
                 className={cn(
-                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-[#f6f2ec] py-3.5 pl-3.5 pr-2',
-                  past && 'bg-[#ddd6cc]',
+                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg border border-ink-200/80 bg-white py-3.5 pl-3.5 pr-2',
                 )}
               >
                 {cover ? (
@@ -1004,12 +997,7 @@ function SlotSection({
                     className="block min-w-0 rounded-lg text-left"
                   >
                     <span className="block min-w-0">
-                      <p
-                        className={cn(
-                          'line-clamp-2 pr-16 text-sm font-medium leading-snug',
-                          past ? 'text-ink-400' : 'text-ink-900',
-                        )}
-                      >
+                      <p className="line-clamp-2 pr-16 text-sm font-medium leading-snug text-ink-900">
                         {title}
                       </p>
                       {recipe ? (
@@ -1298,10 +1286,10 @@ function MealCalories({ kcal }: { kcal: number }) {
 }
 
 const MACRO_LINE = [
-  { key: 'kcal', suffix: 'kcal', className: 'text-peach-200' },
-  { key: 'protein', suffix: 'P', className: 'text-sage-200' },
-  { key: 'carbs', suffix: 'G', className: 'text-ink-100' },
-  { key: 'fat', suffix: 'L', className: 'text-tomato-100' },
+  { key: 'kcal', suffix: 'kcal', className: 'text-[#f3c7a6]' },
+  { key: 'protein', suffix: 'P', className: 'text-[#c9e0d4]' },
+  { key: 'carbs', suffix: 'G', className: 'text-[#f3e6c4]' },
+  { key: 'fat', suffix: 'L', className: 'text-[#f3c4b8]' },
 ] as const;
 
 function MacroCounts({
