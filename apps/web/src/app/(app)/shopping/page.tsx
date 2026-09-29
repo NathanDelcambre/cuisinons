@@ -306,7 +306,7 @@ export default function ShoppingPage() {
                     changeRetailer.mutate({ retailer, economical: activeEconomical });
                   }}
                   className={cn(
-                    'flex min-h-16 min-w-[10.75rem] flex-1 items-center gap-2 rounded-2xl border px-3 py-2 text-left text-sm transition',
+                    'flex min-h-16 min-w-[10.75rem] flex-1 items-center gap-2 rounded-md border px-3 py-2 text-left text-sm transition',
                     selected
                       ? 'border-sage-400 bg-sage-50 text-ink-900'
                       : 'border-ink-100 bg-white/70 text-ink-700 hover:border-sage-300',
@@ -314,19 +314,28 @@ export default function ShoppingPage() {
                 >
                   <RetailerLogo retailer={retailer} className="size-8 shrink-0 rounded-lg" />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate">{RETAILER_LABELS[retailer]}</span>
-                    <span className="tabular mt-0.5 block text-xs text-ink-500">
+                    <span className="flex min-w-0 items-baseline gap-2">
+                      <span className="min-w-0 flex-1 truncate">{RETAILER_LABELS[retailer]}</span>
+                      {estimate ? (
+                        <span className="shrink-0 tabular-nums text-xs text-ink-400">
+                          {String(pricedCount ?? 0)}/{String(estimate.totalItems)}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span
+                      className={cn(
+                        'tabular mt-0.5 block',
+                        total === null || total === undefined
+                          ? 'text-xs font-medium text-ink-500'
+                          : 'text-sm font-bold text-ink-900',
+                      )}
+                    >
                       {retailerEstimates.isLoading
                         ? 'Calcul…'
                         : total === null || total === undefined
                           ? 'Prix indisponible'
-                          : `${EUR_FORMAT.format(total)} estimés`}
+                          : EUR_FORMAT.format(total)}
                     </span>
-                    {estimate && pricedCount !== estimate.totalItems ? (
-                      <span className="block text-[10px] text-ink-400">
-                        {String(pricedCount ?? 0)}/{String(estimate.totalItems)} produits tarifés
-                      </span>
-                    ) : null}
                   </span>
                 </button>
               );
