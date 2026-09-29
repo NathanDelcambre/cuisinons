@@ -68,6 +68,9 @@ export function ingredientSearchScore(input: {
   score += kitchenPickScore(input);
   if (input.dedicatedIcon) score += 65;
   if (SPECIALIZED_FOOD_WORDS.some((word) => folded.includes(word))) score -= 45;
+  const queryFold = foldText(input.query);
+  const flavored = /(?:^| )au /.test(folded) || /(?:^| )aux /.test(folded);
+  if (flavored && !/(?:^| )au /.test(queryFold) && !/(?:^| )aux /.test(queryFold)) score -= 500;
   return score;
 }
 

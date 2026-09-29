@@ -36,6 +36,17 @@ describe('productRelevance', () => {
     ).toBe(-1);
   });
 
+  it('met le poulet avant le plat au poulet', () => {
+    expect(productRelevance('Poulet aux olives', 'poulet')).toBe(-1);
+    expect(productRelevance('Poulet au curry', 'poulet')).toBe(-1);
+    expect(productRelevance('Filet de poulet', 'poulet')).toBeGreaterThan(
+      productRelevance('Blanc de poulet - 25% de sel', 'poulet'),
+    );
+    expect(productRelevance('Poulet fermier', 'poulet')).toBeGreaterThan(
+      productRelevance('Filet de poulet', 'poulet'),
+    );
+  });
+
   it('accepte le clafoutis seulement si on le cherche', () => {
     expect(productRelevance('Clafoutis aux Abricots', 'Clafoutis aux abricots')).toBeGreaterThan(-1);
   });

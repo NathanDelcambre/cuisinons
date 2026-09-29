@@ -8,6 +8,14 @@ describe('priorisation des recherches', () => {
     );
   });
 
+  it('préfère le poulet cru au poulet en plat', () => {
+    expect(
+      ingredientSearchScore({ query: 'poulet', nameFr: 'Poulet, viande crue' }),
+    ).toBeGreaterThan(
+      ingredientSearchScore({ query: 'poulet', nameFr: 'Poulet aux olives, préemballé', dedicatedIcon: true }),
+    );
+  });
+
   it('préfère le poulet courant aux variantes transformées', () => {
     expect(
       ingredientSearchScore({ query: 'poulet', nameFr: 'Poulet blanc', dedicatedIcon: true }),

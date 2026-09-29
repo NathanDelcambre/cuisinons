@@ -105,6 +105,7 @@ const QUALIFIERS = new Set([
   'equitable',
   'espagne',
   'extra',
+  'fermier',
   'france',
   'frais',
   'fraiche',
@@ -379,13 +380,52 @@ function hasPreparedForm(nameWords: readonly string[], queryWords: readonly stri
   return nameWords.some((word) => PREPARED_FORMS.has(lemma(word)) && !hasLemma(queryWords, word));
 }
 
-/** « Clafoutis aux abricots » : un plat parfumé, pas l'abricot. */
-function isFlavoredDish(nameWords: readonly string[], required: readonly string[]): boolean {
-  const flavorAt = nameWords.findIndex((word) => word === 'au' || word === 'aux');
+/** Plats cuisinés dont le nom commence par l'aliment : « poulet tikka », « poulet basquaise ». */
+const DISH_HINTS = new Set([
+  'basquaise',
+  'colombo',
+  'curry',
+  'farci',
+  'farcie',
+  'mexicaine',
+  'nugget',
+  'nuggets',
+  'pane',
+  'panee',
+  'tandoori',
+  'teriyaki',
+  'tikka',
+]);
+
+/**
+ * « Poulet aux olives » n'est pas du poulet, et « clafoutis aux abricots » n'est pas un abricot.
+ * On garde le plat seulement si la recherche demande elle-même cet assaisonnement.
+ */
+function isFlavoredDish(
+  nameWords: readonly string[],
+  queryWords: readonly string[],
+  required: readonly string[],
+): boolean {
+  if (nameWords.some((word) => DISH_HINTS.has(lemma(word)) && !queryWords.some((asked) => lemma(asked) === lemma(word)))) {
+    return true;
+  }
+  const flavorAt = nameWords.findIndex((word, index) => {
+    if (word === 'au' || word === 'aux') return true;
+    if (word !== 'a') return false;
+    return nameWords
+      .slice(index + 1)
+      .some((next) => !HEAD_STOP.has(next) && !/^\d/.test(next) && !QUALIFIERS.has(lemma(next)));
+  });
   if (flavorAt <= 0) return false;
   const head = nameWords.slice(0, flavorAt).filter((word) => !HEAD_STOP.has(word));
-  if (head.some((word) => hasLemma(required, word))) return false;
-  return required.some((word) => hasLemma(nameWords.slice(flavorAt + 1), word));
+  const flavor = nameWords
+    .slice(flavorAt + 1)
+    .filter((word) => !HEAD_STOP.has(word) && !QUALIFIERS.has(lemma(word)));
+  if (flavor.length === 0) return false;
+  const headIsFood = head.some((word) => nameHas(required, word));
+  const flavorAsked = flavor.every((word) => queryWords.some((asked) => nameHas([asked], word)));
+  if (headIsFood && !flavorAsked) return true;
+  return !headIsFood && flavor.some((word) => nameHas(required, word));
 }
 
 function wrongHead(nameWords: readonly string[], required: readonly string[]): boolean {
@@ -441,7 +481,7 @@ export function productRelevance(
   if (required.some((word) => !nameHas(nameWords, word))) return -1;
   if (hasPreparedForm(nameWords, queryWords)) return -1;
   if (wrongHead(nameWords, required)) return -1;
-  if (isFlavoredDish(nameWords, required)) return -1;
+  if (isFlavoredDish(nameWords, queryWords, required)) return -1;
   if (isMix(nameWords, queryWords)) return -1;
   if (hasComboEt(nameWords, queryWords)) return -1;
   const foodHead = nameWords.find(
@@ -460,7 +500,16 @@ export function productRelevance(
   const extra = content.filter(
     (word) => word !== 'et' && !nameHas(required, word) && !QUALIFIERS.has(lemma(word)),
   ).length;
+  const foodWords = content.filter((word) => !QUALIFIERS.has(lemma(word)) && !CUTS.has(lemma(word)));
+  const onlyAskedFood = foodWords.length > 0 && foodWords.every((word) => nameHas(required, word));
   const exact = content.map(lemma).join(' ') === queryWords.map(lemma).join(' ');
   const startsWithQuery = required.every((word, index) => nameHas([content[index] ?? ''], word));
-  return (exact ? 1_000 : 0) + (startsWithQuery ? 100 : 0) + form - extra * 8 - nameWords.length;
+  return (exact ? 1_000 : 0) + (onlyAskedFood ? 200 : 0) + (startsWithQuery ? 100 : 0) + form - extra * 8 - nameWords.length;
+}
+
+/** Ne garde que les offres proches de la meilleure : le moins cher ne doit pas ramener un plat. */
+export function topRelevanceBand<T extends { score: number }>(rows: readonly T[]): T[] {
+  if (rows.length === 0) return [];
+  const best = Math.max(...rows.map((row) => row.score));
+  return rows.filter((row) => row.score >= best - 80);
 }

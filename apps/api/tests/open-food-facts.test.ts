@@ -48,7 +48,7 @@ describe('OpenFoodFactsService', () => {
     await expect(service.findOffers('riz', 'LECLERC')).resolves.toEqual([
       expect.objectContaining({ barcode: 'raw-rice', packageQuantity: 1000, price: 2.9 }),
     ]);
-    expect(findMany).toHaveBeenCalledOnce();
+    expect(findMany).toHaveBeenCalled();
     expect(JSON.stringify(findMany.mock.calls)).toContain('LECLERC');
   });
 
@@ -63,7 +63,7 @@ describe('OpenFoodFactsService', () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          OR: [{ AND: [{ searchText: { contains: 'feta', mode: 'insensitive' } }] }],
+          OR: [{ AND: [{ searchText: { startsWith: 'feta', mode: 'insensitive' } }] }],
         }),
       }),
     );
@@ -98,7 +98,7 @@ describe('OpenFoodFactsService', () => {
       },
     ]);
     const offers = await service.findOffersForAllRetailers('riz');
-    expect(findMany).toHaveBeenCalledOnce();
+    expect(findMany).toHaveBeenCalled();
     expect(offers.LECLERC[0]?.price).toBe(2.5);
     expect(offers.LIDL[0]?.price).toBe(2.2);
     expect(offers.AUCHAN).toEqual([]);

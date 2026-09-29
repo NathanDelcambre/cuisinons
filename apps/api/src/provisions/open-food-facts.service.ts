@@ -4,6 +4,7 @@ import {
   productRelevance,
   productSearchGroups,
   productSearchQuery,
+  topRelevanceBand,
   type ProductOffer,
   type Retailer,
 } from '@cuisinons/shared';
@@ -19,13 +20,31 @@ function words(value: string): string[] {
   );
 }
 
-function catalogLookup(query: string) {
+function containsWord(word: string) {
+  return { searchText: { contains: word, mode: 'insensitive' as const } };
+}
+
+/** Le nom qui commence par l'aliment d'abord, les simples mentions ensuite. */
+function matchClauses(query: string) {
   const groups = productSearchGroups(query);
   if (groups.length === 0) return null;
   return {
-    OR: groups.map((words) => ({
-      AND: words.map((word) => ({ searchText: { contains: word, mode: 'insensitive' as const } })),
-    })),
+    headed: {
+      OR: groups.map((words) => ({
+        AND: [
+          { searchText: { startsWith: words[0], mode: 'insensitive' as const } },
+          ...words.slice(1).map(containsWord),
+        ],
+      })),
+    },
+    mentioned: {
+      OR: groups.map((words) => ({
+        AND: [
+          ...words.map(containsWord),
+          { NOT: { searchText: { startsWith: words[0], mode: 'insensitive' as const } } },
+        ],
+      })),
+    },
   };
 }
 
@@ -39,23 +58,48 @@ function productQuery(ingredientName: string): string {
 export class OpenFoodFactsService {
   constructor(@Inject(PrismaService) private readonly prisma: PrismaService) {}
 
+  private async loadPool(
+    query: string,
+    extra: Record<string, unknown>,
+    include?: Record<string, unknown>,
+  ) {
+    const clauses = matchClauses(query);
+    if (!clauses) return [];
+    const [headed, mentioned] = await Promise.all([
+      this.prisma.openFoodProduct.findMany({
+        where: { isActive: true, ...extra, ...clauses.headed },
+        include,
+        orderBy: [{ isBulk: 'desc' }, { isStaple: 'desc' }, { popularity: 'desc' }],
+        take: 160,
+      }),
+      this.prisma.openFoodProduct.findMany({
+        where: { isActive: true, ...extra, ...clauses.mentioned },
+        include,
+        orderBy: [{ popularity: 'desc' }],
+        take: 80,
+      }),
+    ]);
+    const seen = new Set<string>();
+    return [...headed, ...mentioned].filter((product) => {
+      if (seen.has(product.barcode)) return false;
+      seen.add(product.barcode);
+      return true;
+    });
+  }
+
   async findOffers(ingredientName: string, retailer: Retailer): Promise<ProductOffer[]> {
     const query = productSearchQuery(ingredientName);
-    const lookup = catalogLookup(query);
-    if (!lookup) return [];
-    const products = await this.prisma.openFoodProduct.findMany({
-      where: {
-        isActive: true,
-        ...lookup,
+    if (!matchClauses(query)) return [];
+    const products = await this.loadPool(
+      query,
+      {
         packageQuantity: { gt: 0 },
         packageUnit: { in: ['G', 'ML'] },
         prices: { some: { retailer, currency: 'EUR', price: { gt: 0 } } },
       },
-      include: { prices: { where: { retailer, currency: 'EUR' }, take: 1 } },
-      orderBy: [{ isBulk: 'desc' }, { isStaple: 'desc' }, { popularity: 'desc' }],
-      take: 250,
-    });
-    return products
+      { prices: { where: { retailer, currency: 'EUR' }, take: 1 } },
+    );
+    const scored = products
       .map((product) => ({
         product,
         price: product.prices[0],
@@ -70,8 +114,8 @@ export class OpenFoodFactsService {
           b.score - a.score ||
           b.product.popularity - a.product.popularity ||
           Number(a.price!.price) - Number(b.price!.price),
-      )
-      .map(({ product, price }) => ({
+      );
+    return topRelevanceBand(scored).map(({ product, price }) => ({
         barcode: product.barcode,
         name: product.name,
         brand: product.brand,
@@ -102,22 +146,18 @@ export class OpenFoodFactsService {
       INTERMARCHE: [],
     };
     const query = productSearchQuery(ingredientName);
-    const lookup = catalogLookup(query);
-    if (!lookup) return result;
-    const products = await this.prisma.openFoodProduct.findMany({
-      where: {
-        isActive: true,
-        ...lookup,
+    if (!matchClauses(query)) return result;
+    const products = await this.loadPool(
+      query,
+      {
         packageQuantity: { gt: 0 },
         packageUnit: { in: ['G', 'ML'] },
         prices: { some: { currency: 'EUR', price: { gt: 0 } } },
       },
-      include: { prices: { where: { currency: 'EUR', price: { gt: 0 } } } },
-      orderBy: [{ isBulk: 'desc' }, { isStaple: 'desc' }, { popularity: 'desc' }],
-      take: 250,
-    });
+      { prices: { where: { currency: 'EUR', price: { gt: 0 } } } },
+    );
     for (const retailer of RETAILERS) {
-      result[retailer] = products
+      const scored = products
         .flatMap((product) => {
           const price = product.prices.find((candidate) => candidate.retailer === retailer);
           const score = productRelevance(product.name, query, {
@@ -131,8 +171,8 @@ export class OpenFoodFactsService {
             b.score - a.score ||
             b.product.popularity - a.product.popularity ||
             Number(a.price.price) - Number(b.price.price),
-        )
-        .map(({ product, price }) => ({
+        );
+      result[retailer] = topRelevanceBand(scored).map(({ product, price }) => ({
           barcode: product.barcode,
           name: product.name,
           brand: product.brand,
@@ -150,27 +190,36 @@ export class OpenFoodFactsService {
   }
 
   async searchProducts(query: string) {
-    const queryWords = words(query).slice(0, 6);
-    if (queryWords.length === 0) return [];
-    return this.prisma.openFoodProduct.findMany({
-      where: {
-        isActive: true,
-        AND: queryWords.map((word) => ({ searchText: { contains: word, mode: 'insensitive' } })),
-        packageQuantity: { gt: 0 },
-        packageUnit: { in: ['G', 'ML'] },
-      },
-      select: {
-        barcode: true,
-        name: true,
-        brand: true,
-        imageUrl: true,
-        packageQuantity: true,
-        packageUnit: true,
-        nutriScore: true,
-      },
-      orderBy: [{ isBulk: 'desc' }, { isStaple: 'desc' }, { popularity: 'desc' }],
-      take: 30,
+    if (!matchClauses(query)) return [];
+    const products = await this.loadPool(query, {
+      packageQuantity: { gt: 0 },
+      packageUnit: { in: ['G', 'ML'] },
     });
+    return products
+      .map((product) => ({
+        product,
+        score: productRelevance(product.name, query, {
+          categories: product.categories,
+          brand: product.brand,
+        }),
+      }))
+      .filter((row) => row.score !== -1)
+      .sort(
+        (a, b) =>
+          b.score - a.score ||
+          Number(b.product.isBulk) - Number(a.product.isBulk) ||
+          b.product.popularity - a.product.popularity,
+      )
+      .slice(0, 30)
+      .map(({ product }) => ({
+        barcode: product.barcode,
+        name: product.name,
+        brand: product.brand,
+        imageUrl: product.imageUrl,
+        packageQuantity: product.packageQuantity,
+        packageUnit: product.packageUnit,
+        nutriScore: product.nutriScore,
+      }));
   }
 
   async productByBarcode(barcode: string) {
