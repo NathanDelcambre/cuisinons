@@ -867,12 +867,14 @@ function DayCard({
 }) {
   const key = iso(date);
   const today = isToday(date);
+  const past = key < todayIso;
 
   return (
     <div
       className={cn(
         DAY_CARD_FRAME,
         'relative flex flex-col overflow-hidden rounded-2xl border-0 bg-[#fffdfb] p-0 shadow-[0_16px_36px_-12px_rgba(28,25,23,0.28)]',
+        past && 'bg-[#f0ece7] [&_img]:grayscale',
       )}
     >
       <button
@@ -880,7 +882,8 @@ function DayCard({
         onClick={onSelect}
         disabled={!onSelect}
         className={cn(
-          'flex w-full shrink-0 cursor-pointer flex-col gap-1.5 rounded-t-2xl bg-[#6e665e] px-4 py-3 text-left text-[#fffaf6] transition-colors duration-200 ease-out-soft enabled:hover:bg-[#625c54]',
+          'flex w-full shrink-0 cursor-pointer flex-col gap-1.5 rounded-t-2xl px-4 py-3 text-left text-[#fffaf6] transition-colors duration-200 ease-out-soft',
+          past ? 'bg-[#b7b0a8]' : 'bg-[#6e665e] enabled:hover:bg-[#625c54]',
         )}
       >
         <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
@@ -896,7 +899,12 @@ function DayCard({
         <MacroCounts macros={macros} />
       </button>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-2 px-3 pt-3 pb-4">
+      <div
+        className={cn(
+          'flex min-h-0 flex-1 flex-col gap-2 px-3 pt-3 pb-4',
+          past && 'saturate-0',
+        )}
+      >
         {MEAL_SLOTS.map((slot) => (
           <SlotSection
             key={slot}
@@ -979,7 +987,7 @@ function SlotSection({
                 key={item.id}
                 className={cn(
                   'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg bg-[#f6f2ec] py-3.5 pl-3.5 pr-2',
-                  past && 'bg-[#efeae3] opacity-75',
+                  past && 'bg-[#ddd6cc]',
                 )}
               >
                 {cover ? (
@@ -996,7 +1004,12 @@ function SlotSection({
                     className="block min-w-0 rounded-lg text-left"
                   >
                     <span className="block min-w-0">
-                      <p className="line-clamp-2 pr-16 text-sm font-medium leading-snug text-ink-900">
+                      <p
+                        className={cn(
+                          'line-clamp-2 pr-16 text-sm font-medium leading-snug',
+                          past ? 'text-ink-400' : 'text-ink-900',
+                        )}
+                      >
                         {title}
                       </p>
                       {recipe ? (
