@@ -58,7 +58,7 @@ const PREPARED_FORMS = new Set([
   'yogurt',
 ]);
 
-const HEAD_STOP = new Set(['le', 'la', 'les', 'l', 'un', 'une', 'des', 'du', 'de', 'd', 'au', 'aux', 'a']);
+const HEAD_STOP = new Set(['le', 'la', 'les', 'l', 'un', 'une', 'des', 'du', 'de', 'd', 'au', 'aux', 'a', 'ou', 'et']);
 
 /** Découpe / conditionnement de l'aliment lui-même. */
 const CUTS = new Set([
@@ -123,8 +123,16 @@ const QUALIFIERS = new Set([
   'origine',
   'premier',
   'prix',
+  'pur',
   'rond',
   'rouge',
+  'graine',
+  'gousse',
+  'pousse',
+  'feuille',
+  'fleur',
+  'botte',
+  'brin',
   'sec',
   'seche',
   'sechee',
@@ -232,6 +240,72 @@ function culinaryType(ingredientName: string): string | null {
   return ingredientName.match(/\btype\s+([^,;)]+)/i)?.[1]?.trim() ?? null;
 }
 
+/**
+ * Têtes trop larges : le second aliment change le produit
+ * (« huile d'olive », « jus de citron », « beurre de cacahuète »).
+ */
+const GENERIC_HEADS = new Set([
+  'beurre',
+  'creme',
+  'fromage',
+  'huile',
+  'jus',
+  'lait',
+  'levure',
+  'noix',
+  'pate',
+  'sauce',
+]);
+
+/** Le premier mot est un contenant, l'aliment est le suivant (« graines de chia »). */
+const CONTAINERS = new Set(['graine', 'gousse', 'pousse', 'feuille', 'fleur', 'botte', 'brin']);
+
+/** « petit suisse » : le premier mot ne désigne pas l'aliment. */
+const LEADING_SIZE = new Set(['petit', 'petite', 'gros', 'grosse', 'grand', 'grande']);
+
+/**
+ * Précisions de laboratoire Ciqual, inutiles pour retrouver un produit.
+ * « Farine de blé tendre ou froment T45 » se cherche comme « farine ».
+ */
+const LAB_NOISE = new Set([
+  'alimentaire',
+  'allege',
+  'allegee',
+  'ajoute',
+  'ajoutee',
+  'commune',
+  'cotele',
+  'cotelee',
+  'couche',
+  'degustation',
+  'environ',
+  'fait',
+  'fluore',
+  'froment',
+  'germe',
+  'germee',
+  'iode',
+  'maison',
+  'mg',
+  'minimum',
+  'patisserie',
+  'preemballe',
+  'preemballee',
+  'standard',
+  'tablette',
+  'tendre',
+]);
+
+/** Même aliment, autre mot courant sur les fiches ou le vrac. */
+const ALIASES: Record<string, readonly string[]> = {
+  arachide: ['cacahuete'],
+  cacahuete: ['arachide'],
+  ciboule: ['ciboulette'],
+  ciboulette: ['ciboule'],
+  citron: ['lime'],
+  lime: ['citron'],
+};
+
 /** Requête d'offre : « Abricot, dénoyauté, sec » → « Abricot sec », « type feta » → feta. */
 export function productSearchQuery(ingredientName: string): string {
   const typed = culinaryType(ingredientName);
@@ -239,11 +313,56 @@ export function productSearchQuery(ingredientName: string): string {
   return kitchenLabel(ingredientName);
 }
 
-/** Mots à chercher en base : l'aliment, pas l'état (sec, sirop). */
+function isSearchNoise(word: string): boolean {
+  const base = lemma(word);
+  return (
+    HEAD_STOP.has(word) ||
+    HEAD_STOP.has(base) ||
+    FORM_QUERY_WORDS.has(word) ||
+    FORM_QUERY_WORDS.has(base) ||
+    OPTIONAL_QUERY_WORDS.has(base) ||
+    DRIED.has(word) ||
+    DRIED.has(base) ||
+    LAB_NOISE.has(word) ||
+    LAB_NOISE.has(base) ||
+    /^t\d+$/.test(word)
+  );
+}
+
+function foodWords(value: string): string[] {
+  return tokens(value).filter((word) => !isSearchNoise(word));
+}
+
+/**
+ * Mots à chercher en base : le mot de tête, pas toute la phrase Ciqual.
+ * « Tomate côtelée ou coeur de boeuf » → « tomate ».
+ * Une tête générique garde le second aliment : « jus » + « citron ».
+ */
 export function productCatalogTokens(query: string): string[] {
-  const words = tokens(query).filter((word) => !FORM_QUERY_WORDS.has(lemma(word)) && !HEAD_STOP.has(word));
-  const required = words.filter((word) => !OPTIONAL_QUERY_WORDS.has(lemma(word)));
-  return required.length > 0 ? required : words;
+  const firstAlternative = query.split(/\bou\b/i)[0] ?? query;
+  const words = foodWords(firstAlternative);
+  if (words.length === 0) return [];
+  const head = words[0]!;
+  const rest = words.slice(1).filter((word) => !QUALIFIERS.has(lemma(word)));
+  if (LEADING_SIZE.has(lemma(head)) && words[1]) return [head, words[1]];
+  if (CONTAINERS.has(lemma(head))) return rest[0] ? [rest[0]] : [head];
+  if (GENERIC_HEADS.has(lemma(head)) && rest[0]) return [head, rest[0]];
+  return [head];
+}
+
+/** Variantes du mot de tête, pour qu'une ciboulette réponde à « ciboule ». */
+export function productSearchGroups(query: string): string[][] {
+  const primary = productCatalogTokens(query);
+  if (primary.length === 0) return [];
+  const groups = [primary];
+  const last = primary[primary.length - 1]!;
+  for (const alias of ALIASES[lemma(last)] ?? []) groups.push([...primary.slice(0, -1), alias]);
+  return groups;
+}
+
+function nameHas(nameWords: readonly string[], word: string): boolean {
+  if (hasLemma(nameWords, word)) return true;
+  return (ALIASES[lemma(word)] ?? []).some((alias) => hasLemma(nameWords, alias));
 }
 
 function firstContentWord(nameWords: readonly string[]): string | undefined {
@@ -273,7 +392,7 @@ function wrongHead(nameWords: readonly string[], required: readonly string[]): b
   const head = firstContentWord(nameWords);
   if (!head) return true;
   const folded = lemma(head);
-  if (hasLemma(required, head) || QUALIFIERS.has(folded) || CUTS.has(folded)) return false;
+  if (nameHas(required, head) || QUALIFIERS.has(folded) || CUTS.has(folded)) return false;
   return true;
 }
 
@@ -319,22 +438,29 @@ export function productRelevance(
   const queryWords = tokens(query);
   const required = productCatalogTokens(query);
   if (nameWords.length === 0 || required.length === 0) return -1;
-  if (required.some((word) => !hasLemma(nameWords, word))) return -1;
+  if (required.some((word) => !nameHas(nameWords, word))) return -1;
   if (hasPreparedForm(nameWords, queryWords)) return -1;
   if (wrongHead(nameWords, required)) return -1;
   if (isFlavoredDish(nameWords, required)) return -1;
   if (isMix(nameWords, queryWords)) return -1;
   if (hasComboEt(nameWords, queryWords)) return -1;
-  if (processedCategory(context.categories, queryWords)) return -1;
+  const foodHead = nameWords.find(
+    (word) => !HEAD_STOP.has(word) && !QUALIFIERS.has(lemma(word)) && !CUTS.has(lemma(word)),
+  );
+  if (
+    (foodHead === undefined || !nameHas(required, foodHead)) &&
+    processedCategory(context.categories, queryWords)
+  )
+    return -1;
   const brandWords = context.brand ? tokens(context.brand) : [];
   if (hasPreparedForm(brandWords, queryWords)) return -1;
   const form = formPenalty(nameWords, queryWords);
   if (form === null) return -1;
   const content = nameWords.filter((word) => !HEAD_STOP.has(word));
   const extra = content.filter(
-    (word) => word !== 'et' && !hasLemma(required, word) && !QUALIFIERS.has(lemma(word)),
+    (word) => word !== 'et' && !nameHas(required, word) && !QUALIFIERS.has(lemma(word)),
   ).length;
   const exact = content.map(lemma).join(' ') === queryWords.map(lemma).join(' ');
-  const startsWithQuery = required.every((word, index) => lemma(content[index] ?? '') === lemma(word));
+  const startsWithQuery = required.every((word, index) => nameHas([content[index] ?? ''], word));
   return (exact ? 1_000 : 0) + (startsWithQuery ? 100 : 0) + form - extra * 8 - nameWords.length;
 }

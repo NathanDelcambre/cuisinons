@@ -71,4 +71,33 @@ describe('productCatalogTokens', () => {
     expect(productCatalogTokens('Feta')).toEqual(['feta']);
     expect(productCatalogTokens('Poivre noir')).toEqual(['poivre']);
   });
+
+  it('ne garde que le mot de tête d’un libellé Ciqual', () => {
+    expect(productCatalogTokens(productSearchQuery('Tomate côtelée ou coeur de boeuf, crue'))).toEqual([
+      'tomate',
+    ]);
+    expect(
+      productCatalogTokens(productSearchQuery('Farine de blé tendre ou froment T45 (pour pâtisserie)')),
+    ).toEqual(['farine']);
+    expect(productCatalogTokens(productSearchQuery('Pâtes sèches, au blé complet, crues'))).toEqual(['pates']);
+    expect(productCatalogTokens(productSearchQuery('Jus de citron, fait maison'))).toEqual(['jus', 'citron']);
+    expect(productCatalogTokens(productSearchQuery('Beurre de cacahuète ou pâte d\'arachide'))).toEqual([
+      'beurre',
+      'cacahuete',
+    ]);
+    expect(productCatalogTokens('petit suisse')).toEqual(['petit', 'suisse']);
+  });
+});
+
+describe('productRelevance sur un mot de tête', () => {
+  it('accepte le vrac et la farine pour un libellé long', () => {
+    const tomate = productSearchQuery('Tomate côtelée ou coeur de boeuf, crue');
+    expect(productRelevance('Tomates en vrac', tomate)).toBeGreaterThan(-1);
+    const farine = productSearchQuery('Farine de blé tendre ou froment T45 (pour pâtisserie)');
+    expect(productRelevance('Farine de blé T45', farine)).toBeGreaterThan(-1);
+    expect(productRelevance('Graines de chia', productSearchQuery('Chia, graine, séchée'))).not.toBe(-1);
+    expect(productRelevance('Ciboulette en vrac', productSearchQuery('Ciboule ou ciboulette, fraîche'))).toBeGreaterThan(
+      -1,
+    );
+  });
 });

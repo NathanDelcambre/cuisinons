@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
   RETAILERS,
-  productCatalogTokens,
   productRelevance,
+  productSearchGroups,
   productSearchQuery,
   type ProductOffer,
   type Retailer,
@@ -19,6 +19,16 @@ function words(value: string): string[] {
   );
 }
 
+function catalogLookup(query: string) {
+  const groups = productSearchGroups(query);
+  if (groups.length === 0) return null;
+  return {
+    OR: groups.map((words) => ({
+      AND: words.map((word) => ({ searchText: { contains: word, mode: 'insensitive' as const } })),
+    })),
+  };
+}
+
 function productQuery(ingredientName: string): string {
   const typed = ingredientName.match(/\btype\s+([^,;)]+)/i)?.[1]?.trim();
   return typed || ingredientName.split(',')[0]?.trim() || ingredientName.trim();
@@ -31,12 +41,12 @@ export class OpenFoodFactsService {
 
   async findOffers(ingredientName: string, retailer: Retailer): Promise<ProductOffer[]> {
     const query = productSearchQuery(ingredientName);
-    const queryWords = productCatalogTokens(query);
-    if (queryWords.length === 0) return [];
+    const lookup = catalogLookup(query);
+    if (!lookup) return [];
     const products = await this.prisma.openFoodProduct.findMany({
       where: {
         isActive: true,
-        AND: queryWords.map((word) => ({ searchText: { contains: word, mode: 'insensitive' } })),
+        ...lookup,
         packageQuantity: { gt: 0 },
         packageUnit: { in: ['G', 'ML'] },
         prices: { some: { retailer, currency: 'EUR', price: { gt: 0 } } },
@@ -92,12 +102,12 @@ export class OpenFoodFactsService {
       INTERMARCHE: [],
     };
     const query = productSearchQuery(ingredientName);
-    const queryWords = productCatalogTokens(query);
-    if (queryWords.length === 0) return result;
+    const lookup = catalogLookup(query);
+    if (!lookup) return result;
     const products = await this.prisma.openFoodProduct.findMany({
       where: {
         isActive: true,
-        AND: queryWords.map((word) => ({ searchText: { contains: word, mode: 'insensitive' } })),
+        ...lookup,
         packageQuantity: { gt: 0 },
         packageUnit: { in: ['G', 'ML'] },
         prices: { some: { currency: 'EUR', price: { gt: 0 } } },

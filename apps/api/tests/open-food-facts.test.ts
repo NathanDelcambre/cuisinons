@@ -63,7 +63,7 @@ describe('OpenFoodFactsService', () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          AND: [{ searchText: { contains: 'feta', mode: 'insensitive' } }],
+          OR: [{ AND: [{ searchText: { contains: 'feta', mode: 'insensitive' } }] }],
         }),
       }),
     );

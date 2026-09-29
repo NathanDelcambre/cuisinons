@@ -421,22 +421,21 @@ async function collectLatestPrices(
 }
 
 /**
- * Open Prices ne contient pas toujours une observation pour chaque couple
- * produit brut / enseigne. Le produit reste pourtant un essentiel vendu en
- * vrac. Pour éviter qu'il disparaisse du catalogue d'une enseigne, on complète
- * uniquement les trous avec la médiane des prix Open Prices observés dans les
- * autres enseignes. La provenance reste explicite dans storeName.
+ * Open Prices ne couvre pas chaque enseigne. Lidl, en particulier, n'a que
+ * quelques milliers de tickets. Quand un produit a déjà un prix réel dans au
+ * moins une enseigne, les trous sont complétés avec la médiane des prix
+ * observés. storeName distingue cette référence nationale d'un ticket magasin.
  */
-function completeBulkRetailerCoverage(
+function completeRetailerCoverage(
   batchId: string,
   latest: Map<string, PriceRow>,
-  rawProducts: ProductRow[],
+  barcodes: Set<string>,
 ) {
   let fallbackCount = 0;
-  for (const product of rawProducts) {
+  for (const barcode of barcodes) {
     const references = RETAILERS.flatMap((retailer) => {
-      const row = latest.get(`${product.barcode}|${retailer}`);
-      return row ? [row] : [];
+      const row = latest.get(`${barcode}|${retailer}`);
+      return row && row.storeName !== NATIONAL_REFERENCE_STORE ? [row] : [];
     });
     if (references.length === 0) continue;
 
@@ -453,11 +452,11 @@ function completeBulkRetailerCoverage(
     );
 
     for (const retailer of RETAILERS) {
-      const key = `${product.barcode}|${retailer}`;
+      const key = `${barcode}|${retailer}`;
       if (latest.has(key)) continue;
       latest.set(key, {
         id: randomUUID(),
-        productBarcode: product.barcode,
+        productBarcode: barcode,
         retailer,
         locationId: 0,
         storeName: NATIONAL_REFERENCE_STORE,
@@ -501,7 +500,6 @@ async function main() {
       locations,
       rawCategories,
     );
-    const bulkFallbackCount = completeBulkRetailerCoverage(batchId, latestPrices, rawProducts);
     const pricedBarcodes = new Set([...latestPrices.values()].map((row) => row.productBarcode));
     const packagedProducts = await selectProducts(pricedBarcodes);
     const minimumExpectedProducts = Math.floor(MAX_PRODUCTS * MIN_PRODUCT_COMPLETENESS);
@@ -511,6 +509,11 @@ async function main() {
       );
     }
     const products = [...packagedProducts, ...rawProducts];
+    const bulkFallbackCount = completeRetailerCoverage(
+      batchId,
+      latestPrices,
+      new Set(products.map((product) => product.barcode)),
+    );
     for (const batch of chunks(products, 500)) {
       const rows = batch.map(({ score: _score, ...row }) => ({ ...row, importBatchId: batchId }));
       await prisma.$executeRawUnsafe(UPSERT_PRODUCTS, JSON.stringify(rows));
@@ -544,7 +547,7 @@ async function main() {
       },
     });
     console.log(
-      `Import termine: ${products.length} produits, ${priceCount} prix, ${bulkFallbackCount} prix vrac de reference nationale.`,
+      `Import termine: ${products.length} produits, ${priceCount} prix, ${bulkFallbackCount} prix de reference nationale.`,
     );
   } catch (error) {
     await prisma.openFoodImport.update({
