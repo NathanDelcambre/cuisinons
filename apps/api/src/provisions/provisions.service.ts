@@ -219,7 +219,7 @@ export class ProvisionsService {
     const bulkFlags =
       barcodes.length === 0
         ? []
-        : await this.prisma.product.findMany({
+        : await this.prisma.openFoodProduct.findMany({
             where: { barcode: { in: barcodes } },
             select: { barcode: true, isBulk: true },
           });
