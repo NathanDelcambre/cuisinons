@@ -16,6 +16,7 @@ type ProductOption = {
   packageUnit: 'G' | 'ML';
   packageCount: number;
   estimatedPrice: number;
+  isBulk?: boolean;
   currency: string;
   priceObservedAt: string;
   storeName: string | null;
@@ -126,13 +127,16 @@ export function ProductSwapModal({
                       <span className="mt-0.5 block truncate text-xs text-ink-500">{brand}</span>
                     ) : null}
                     <span className="mt-1 block text-xs text-ink-600">
-                      {option.packageCount > 1 ? `${String(option.packageCount)} × ` : ''}
-                      {String(option.packageQuantity)} {UNIT_LABELS[option.packageUnit]}
+                      {option.isBulk
+                        ? 'Au kilo'
+                        : `${option.packageCount > 1 ? `${String(option.packageCount)} × ` : ''}${String(option.packageQuantity)} ${UNIT_LABELS[option.packageUnit]}`}
                     </span>
                   </span>
                   <span className="flex shrink-0 flex-col items-end gap-1">
                     <span className="tabular text-sm font-semibold text-ink-900">
-                      {EUR_FORMAT.format(option.estimatedPrice)}
+                      {option.isBulk
+                        ? `${EUR_FORMAT.format(option.estimatedPrice)}/kg`
+                        : EUR_FORMAT.format(option.estimatedPrice)}
                     </span>
                     {active ? <Check className="size-4 text-sage-600" aria-hidden /> : null}
                   </span>

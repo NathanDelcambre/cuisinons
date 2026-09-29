@@ -66,6 +66,7 @@ type ShoppingItem = {
     storeName: string | null;
     economyNote: string | null;
     source: 'OPEN_FOOD_FACTS';
+    isBulk?: boolean;
   } | null;
 };
 
@@ -489,6 +490,23 @@ function ShoppingDock({ children }: { children: ReactNode }) {
   );
 }
 
+function isBulkLine(item: ShoppingItem) {
+  if (!item.product) return false;
+  if (item.product.isBulk) return true;
+  return item.product.name.toLowerCase().endsWith('en vrac');
+}
+
+/** Le vrac Open Prices est un prix au kilo (ou au litre), pas un paquet de 1 000 g. */
+function formatLinePrice(item: ShoppingItem, bulk: boolean) {
+  const amount = item.product?.estimatedPrice;
+  if (amount === null || amount === undefined) return null;
+  if (bulk && (item.unit === 'G' || item.unit === 'ML') && item.quantity > 0) {
+    const per = (amount / item.quantity) * 1000;
+    return `${EUR_FORMAT.format(per)}/${item.unit === 'G' ? 'kg' : 'L'}`;
+  }
+  return EUR_FORMAT.format(amount);
+}
+
 function ShoppingRow({
   item,
   className,
@@ -507,18 +525,21 @@ function ShoppingRow({
   const name = item.product?.name ?? kitchenLabel(item.ingredient.nameFr);
   const unit = UNIT_LABELS[item.unit];
   const brand = compactProductBrand(item.product?.brand);
-  const price =
-    item.product?.estimatedPrice !== null && item.product?.estimatedPrice !== undefined
-      ? `${item.product.estimatedPrice.toFixed(2).replace('.', ',')} €`
-      : null;
+  const bulk = isBulkLine(item);
+  const price = formatLinePrice(item, bulk);
+  const pieces = item.bulkSuggestion
+    ? `Environ ${String(item.bulkSuggestion.quantity)} unité${item.bulkSuggestion.quantity > 1 ? 's' : ''}`
+    : null;
   const purchase =
     item.product !== null
-      ? `Besoin : ${String(item.neededQuantity)} ${unit} · À acheter : ${String(item.quantity)} ${unit}${
-          item.product.packageCount && item.product.packageQuantity
-            ? ` (${String(item.product.packageCount)} × ${String(item.product.packageQuantity)} ${unit})`
-            : ''
-        }`
-      : (item.bulkSuggestion?.label ?? null);
+      ? bulk
+        ? (pieces ?? `Besoin : ${String(item.neededQuantity)} ${unit}`)
+        : `Besoin : ${String(item.neededQuantity)} ${unit} · À acheter : ${String(item.quantity)} ${unit}${
+            item.product.packageCount && item.product.packageQuantity
+              ? ` (${String(item.product.packageCount)} × ${String(item.product.packageQuantity)} ${unit})`
+              : ''
+          }`
+      : (pieces ?? item.bulkSuggestion?.label ?? null);
   const secondary = [brand, purchase].filter(Boolean).join(' · ');
   return (
     <div
@@ -560,7 +581,7 @@ function ShoppingRow({
         ) : null}
       </span>
 
-      <span className="w-[4.75rem] shrink-0 text-right text-base font-bold tabular-nums leading-none text-ink-900">
+      <span className="min-w-[5.5rem] shrink-0 text-right text-sm font-bold tabular-nums leading-none whitespace-nowrap text-ink-900">
         {price ?? ''}
       </span>
 

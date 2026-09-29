@@ -213,6 +213,17 @@ export class ProvisionsService {
       },
     });
     if (!list) return null;
+    const barcodes = [
+      ...new Set(list.items.flatMap((item) => (item.productBarcode ? [item.productBarcode] : []))),
+    ];
+    const bulkFlags =
+      barcodes.length === 0
+        ? []
+        : await this.prisma.product.findMany({
+            where: { barcode: { in: barcodes } },
+            select: { barcode: true, isBulk: true },
+          });
+    const bulkByBarcode = new Map(bulkFlags.map((row) => [row.barcode, row.isBulk]));
     return {
       id: list.id,
       fromDate: list.fromDate,
@@ -222,6 +233,7 @@ export class ProvisionsService {
       economical: list.economical,
       items: list.items.map((item) => {
         const { conversions, ...ingredient } = item.ingredient;
+        const gramsPerPiece = conversions[0] ? Number(conversions[0].gramsPerUnit) : null;
         return {
           id: item.id,
           quantity: Number(item.quantity),
@@ -231,14 +243,12 @@ export class ProvisionsService {
           origin: item.origin,
           checked: item.checked,
           ingredient,
-          bulkSuggestion: item.productBarcode
-            ? null
-            : bulkPieceSuggestion({
-                quantity: Number(item.neededQuantity ?? item.quantity),
-                unit: item.unit,
-                category: item.ingredient.uxCategory,
-                gramsPerPiece: conversions[0] ? Number(conversions[0].gramsPerUnit) : null,
-              }),
+          bulkSuggestion: bulkPieceSuggestion({
+            quantity: Number(item.neededQuantity ?? item.quantity),
+            unit: item.unit,
+            category: item.ingredient.uxCategory,
+            gramsPerPiece,
+          }),
           product:
             item.productBarcode && item.productName
               ? {
@@ -255,6 +265,9 @@ export class ProvisionsService {
                   storeName: item.storeName,
                   economyNote: item.economyNote,
                   source: item.dataSource,
+                  isBulk:
+                    bulkByBarcode.get(item.productBarcode) === true ||
+                    item.productName.toLowerCase().endsWith('en vrac'),
                 }
               : null,
         };
@@ -515,8 +528,9 @@ export class ProvisionsService {
       imageUrl: selection.imageUrl,
       packageQuantity: selection.packageQuantity,
       packageUnit: selection.packageUnit,
-      packageCount: selection.packageCount,
-      estimatedPrice: selection.totalPrice,
+      packageCount: selection.isBulk ? 1 : selection.packageCount,
+      estimatedPrice: selection.isBulk ? selection.price : selection.totalPrice,
+      isBulk: selection.isBulk === true,
       currency: selection.currency,
       priceObservedAt: selection.observedAt,
       storeName: selection.storeName,
@@ -1020,8 +1034,8 @@ export class ProvisionsService {
       productName: selection.name,
       productBrand: selection.brand,
       productImageUrl: selection.imageUrl,
-      packageQuantity: selection.packageQuantity,
-      packageCount: selection.packageCount,
+      packageQuantity: selection.isBulk ? null : selection.packageQuantity,
+      packageCount: selection.isBulk ? null : selection.packageCount,
       estimatedPrice: selection.totalPrice,
       currency: selection.currency,
       priceObservedAt: new Date(`${selection.observedAt}T00:00:00.000Z`),
