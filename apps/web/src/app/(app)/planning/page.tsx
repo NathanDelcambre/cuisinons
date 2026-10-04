@@ -881,12 +881,7 @@ function DayCard({
         onClick={onSelect}
         disabled={!onSelect}
         className={cn(
-          'flex w-full shrink-0 cursor-pointer flex-col gap-1.5 rounded-t-2xl px-4 py-3 text-left text-[#faf6f1] transition-colors duration-200 ease-out-soft',
-          today
-            ? 'bg-[#3c5246] enabled:hover:bg-[#33463c]'
-            : past
-              ? 'bg-[#3a342f] enabled:hover:bg-[#322d29]'
-              : 'bg-[#2c2824] enabled:hover:bg-[#24211e]',
+          'flex w-full shrink-0 cursor-pointer flex-col gap-1.5 rounded-t-2xl bg-[#8c684f] px-4 py-3 text-left text-[#faf6f1] transition-colors duration-200 ease-out-soft enabled:hover:bg-[#7a5b45]',
         )}
       >
         <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">

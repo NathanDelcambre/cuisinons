@@ -218,7 +218,9 @@ function RecipesInner() {
               href={routes.recetteNouvelle}
               aria-label="Nouvelle recette"
               title="Nouvelle recette"
-              className={buttonClasses({ className: 'max-sm:size-11 max-sm:p-0' })}
+              className={buttonClasses({
+                className: 'bg-[#8c684f] hover:bg-[#7a5b45] max-sm:size-11 max-sm:p-0',
+              })}
             >
               <Plus className="size-4" aria-hidden />
               <span className="max-sm:sr-only">Nouvelle recette</span>
@@ -314,7 +316,10 @@ function RecipesInner() {
               <Button type="button" size="sm" variant="glass" icon={Sparkles} onClick={openSuggest}>
                 Proposer un plat
               </Button>
-              <Link href={routes.recetteNouvelle} className={buttonClasses({ size: 'sm' })}>
+              <Link
+                href={routes.recetteNouvelle}
+                className={buttonClasses({ size: 'sm', className: 'bg-[#8c684f] hover:bg-[#7a5b45]' })}
+              >
                 <Plus className="size-3.5" aria-hidden />
                 Nouvelle recette
               </Link>

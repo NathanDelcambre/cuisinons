@@ -111,7 +111,10 @@ function DesktopSidebar({ pathname }: { pathname: string }) {
       </div>
 
       <div className="mt-6 px-1">
-        <Link href={routes.recetteNouvelle} className={buttonClasses({ block: true })}>
+        <Link
+          href={routes.recetteNouvelle}
+          className={buttonClasses({ block: true, className: 'bg-[#8c684f] hover:bg-[#7a5b45]' })}
+        >
           <Plus className="size-4" aria-hidden />
           Nouvelle recette
         </Link>
