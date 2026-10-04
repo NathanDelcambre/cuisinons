@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -27,6 +28,15 @@ import { OpenFoodFactsService } from './open-food-facts.service.js';
 
 /** Fenetre maximale d'une generation, pour borner la requete et la liste. */
 const MAX_WINDOW_DAYS = 31;
+
+function isUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'code' in error &&
+    (error as { code: unknown }).code === 'P2002'
+  );
+}
 
 /** Ligne que le stock n'a pas pu couvrir, nommee pour l'affichage. */
 type MissingLine = QuantityLine & { name: string };
@@ -77,6 +87,19 @@ export class ProvisionsService {
   ) {}
 
   // ---------------------------------------------------------------- Stock
+
+  /** Le foyer peut consulter les réserves de l'autre. On n'écrit que les siennes. */
+  async listPantryFor(actorId: string, requestedId?: string) {
+    const targetId = requestedId?.trim() || actorId;
+    if (targetId !== actorId) {
+      const target = await this.prisma.user.findUnique({
+        where: { id: targetId },
+        select: { id: true },
+      });
+      if (!target) throw new NotFoundException('Utilisateur introuvable.');
+    }
+    return this.listPantry(targetId);
+  }
 
   async listPantry(userId: string) {
     const items = await this.prisma.pantryItem.findMany({
@@ -147,23 +170,30 @@ export class ProvisionsService {
       throw new BadRequestException('Aucun ingrédient SIQUAL compatible avec ce produit.');
     }
     const area = input.area ?? defaultStorageArea(ingredient.uxCategory);
-    return this.prisma.pantryItem.upsert({
-      where: {
-        userId_productBarcode: {
-          userId,
-          productBarcode: product.barcode,
+    try {
+      return await this.prisma.pantryItem.upsert({
+        where: {
+          userId_productBarcode: {
+            userId,
+            productBarcode: product.barcode,
+          },
         },
-      },
-      update: { quantity: { increment: input.quantity }, ...(input.area ? { area } : {}) },
-      create: {
-        userId,
-        ingredientId: ingredient.id,
-        productBarcode: product.barcode,
-        unit: product.packageUnit,
-        quantity: input.quantity,
-        area,
-      },
-    });
+        update: { quantity: { increment: input.quantity }, ...(input.area ? { area } : {}) },
+        create: {
+          userId,
+          ingredientId: ingredient.id,
+          productBarcode: product.barcode,
+          unit: product.packageUnit,
+          quantity: input.quantity,
+          area,
+        },
+      });
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw new ConflictException('Cet aliment est déjà couvert par un autre produit en réserve.');
+      }
+      throw error;
+    }
   }
 
   /** Corrige une ligne de stock : la quantite remplace l'ancienne. */

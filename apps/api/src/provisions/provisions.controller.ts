@@ -51,8 +51,8 @@ export class ProvisionsController {
   // ---------------------------------------------------------------- Stock
 
   @Get('/pantry')
-  pantry(@CurrentUser() user: AuthUser) {
-    return this.provisions.listPantry(user.id);
+  pantry(@CurrentUser() user: AuthUser, @Query('userId') userId?: string) {
+    return this.provisions.listPantryFor(user.id, userId);
   }
 
   @Get('/pantry/products')

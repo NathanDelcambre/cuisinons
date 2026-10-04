@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
-import { OpenFoodFactsService } from '../src/provisions/open-food-facts.service.js';
+import {
+  OpenFoodFactsService,
+  pickIngredientForProduct,
+} from '../src/provisions/open-food-facts.service.js';
 
 function serviceWith(products: unknown[]) {
   const findMany = vi.fn().mockResolvedValue(products);
@@ -102,5 +105,40 @@ describe('OpenFoodFactsService', () => {
     expect(offers.LECLERC[0]?.price).toBe(2.5);
     expect(offers.LIDL[0]?.price).toBe(2.2);
     expect(offers.AUCHAN).toEqual([]);
+  });
+});
+
+describe('pickIngredientForProduct', () => {
+  const catalog = [
+    { nameFr: 'Lait de grand mélange, en vrac', nameNormalized: 'lait de grand melange en vrac' },
+    { nameFr: 'Brocoli, cru', nameNormalized: 'brocoli cru' },
+    { nameFr: 'Brocoli, purée', nameNormalized: 'brocoli puree' },
+    { nameFr: 'Chou romanesco ou brocoli à pomme, cru', nameNormalized: 'chou romanesco ou brocoli a pomme cru' },
+    { nameFr: 'Laitue, crue', nameNormalized: 'laitue crue' },
+    { nameFr: 'Laitue iceberg, crue', nameNormalized: 'laitue iceberg crue' },
+    { nameFr: 'Concombre, chair et peau, cru', nameNormalized: 'concombre chair et peau cru' },
+    { nameFr: 'Tomate sans précision, crue (aliment moyen)', nameNormalized: 'tomate sans precision crue aliment moyen' },
+    { nameFr: 'Tomate cerise, crue', nameNormalized: 'tomate cerise crue' },
+    { nameFr: 'Caviar de tomates', nameNormalized: 'caviar de tomates' },
+    { nameFr: 'Haricot vert, cru', nameNormalized: 'haricot vert cru' },
+    { nameFr: 'Haricots verts, purée', nameNormalized: 'haricots verts puree' },
+    { nameFr: 'Abricot, dénoyauté, cru', nameNormalized: 'abricot denoyaute cru' },
+    { nameFr: 'Abricot, dénoyauté, sec', nameNormalized: 'abricot denoyaute sec' },
+    { nameFr: 'Oignon rouge, cru', nameNormalized: 'oignon rouge cru' },
+    { nameFr: 'Oignon, cru', nameNormalized: 'oignon cru' },
+  ];
+
+  it('relie le vrac au singulier cru, pas au lait en vrac', () => {
+    expect(pickIngredientForProduct('Brocolis en vrac', catalog)?.nameFr).toBe('Brocoli, cru');
+    expect(pickIngredientForProduct('Laitues en vrac', catalog)?.nameFr).toBe('Laitue, crue');
+    expect(pickIngredientForProduct('Concombres en vrac', catalog)?.nameFr).toBe(
+      'Concombre, chair et peau, cru',
+    );
+    expect(pickIngredientForProduct('Tomates en vrac', catalog)?.nameFr).toBe(
+      'Tomate sans précision, crue (aliment moyen)',
+    );
+    expect(pickIngredientForProduct('Haricots verts en vrac', catalog)?.nameFr).toBe('Haricot vert, cru');
+    expect(pickIngredientForProduct('Abricots en vrac', catalog)?.nameFr).toBe('Abricot, dénoyauté, cru');
+    expect(pickIngredientForProduct('Oignons rouges en vrac', catalog)?.nameFr).toBe('Oignon rouge, cru');
   });
 });

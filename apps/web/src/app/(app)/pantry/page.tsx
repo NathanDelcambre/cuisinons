@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'motion/react';
 import { useState } from 'react';
 import { Check, Pencil, Plus, Refrigerator, Trash2, X } from 'lucide-react';
 import {
@@ -21,11 +22,21 @@ import {
   PageHeader,
   Select,
   Skeleton,
+  cn,
+  transitions,
 } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
+import { useAuth } from '@/components/auth-provider';
+import { Avatar } from '@/components/avatar';
 import { IngredientIcon } from '@/components/ingredient-icon';
 import { StorageAreaIcon, storageAreaOptions } from '@/components/storage-area-icon';
 import { PantryProductPicker } from '@/components/pantry-product-picker';
+
+type HouseholdUser = {
+  id: string;
+  displayName: string;
+  avatarUrl: string | null;
+};
 
 type PantryItem = {
   id: string;
@@ -46,12 +57,25 @@ type PantryItem = {
 };
 
 export default function PantryPage() {
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [picker, setPicker] = useState(false);
+  const [viewUserId, setViewUserId] = useState<string | null>(null);
+  const household = useQuery({
+    queryKey: ['users'],
+    queryFn: () => apiJson<HouseholdUser[]>('/api/bff/users'),
+  });
+  const selectedId = viewUserId ?? user?.id;
+  const selected = household.data?.find((member) => member.id === selectedId);
+  const isSelf = !viewUserId || viewUserId === user?.id;
 
   const pantry = useQuery({
-    queryKey: ['pantry'],
-    queryFn: () => apiJson<PantryItem[]>('/api/bff/pantry'),
+    queryKey: ['pantry', selectedId],
+    queryFn: () =>
+      apiJson<PantryItem[]>(
+        `/api/bff/pantry${isSelf || !selectedId ? '' : `?userId=${encodeURIComponent(selectedId)}`}`,
+      ),
+    enabled: Boolean(selectedId),
   });
 
   const refresh = () => {
@@ -83,17 +107,36 @@ export default function PantryPage() {
   });
 
   const items = pantry.data ?? [];
+  const otherName = selected?.displayName ?? 'l’autre';
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Réserves"
-        description="Ton stock personnel. Il se remplit quand tu valides tes courses et se vide quand tu consommes un repas."
+        description={
+          isSelf
+            ? 'Ton stock personnel. Il se remplit quand tu valides tes courses et se vide quand tu consommes un repas.'
+            : `Les réserves de ${otherName}.`
+        }
         actionsBesideTitle
         actions={
-          <Button variant="glass" icon={Plus} onClick={() => setPicker(true)}>
-            Ajouter
-          </Button>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            {household.data && household.data.length > 1 && selectedId ? (
+              <PersonSwitch
+                people={household.data}
+                selectedId={selectedId}
+                onChange={(id) => {
+                  setPicker(false);
+                  setViewUserId(id);
+                }}
+              />
+            ) : null}
+            {isSelf ? (
+              <Button variant="glass" icon={Plus} onClick={() => setPicker(true)}>
+                Ajouter
+              </Button>
+            ) : null}
+          </div>
         }
       />
 
@@ -107,11 +150,17 @@ export default function PantryPage() {
         <EmptyState
           icon={Refrigerator}
           title="Réserves vides"
-          description="Ajoute ce que tu as déjà, ou valide une liste de courses pour remplir le stock."
+          description={
+            isSelf
+              ? 'Ajoute ce que tu as déjà, ou valide une liste de courses pour remplir le stock.'
+              : `${otherName} n’a rien en réserve.`
+          }
           action={
-            <Button icon={Plus} onClick={() => setPicker(true)}>
-              Ajouter un produit
-            </Button>
+            isSelf ? (
+              <Button icon={Plus} onClick={() => setPicker(true)}>
+                Ajouter un produit
+              </Button>
+            ) : null
           }
         />
       ) : (
@@ -133,6 +182,7 @@ export default function PantryPage() {
                   <PantryRow
                     key={item.id}
                     item={item}
+                    readOnly={!isSelf}
                     onSave={(input) => patch.mutateAsync({ id: item.id, ...input })}
                     onRemove={() => remove.mutate(item.id)}
                   />
@@ -157,12 +207,62 @@ export default function PantryPage() {
   );
 }
 
+function PersonSwitch({
+  people,
+  selectedId,
+  onChange,
+}: {
+  people: HouseholdUser[];
+  selectedId: string;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <div role="radiogroup" aria-label="Personne" className="segmented-track inline-flex rounded-full p-[3px]">
+      {people.map((person) => {
+        const active = person.id === selectedId;
+        return (
+          <button
+            key={person.id}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(person.id)}
+            className={cn(
+              'relative flex min-h-9 items-center gap-1.5 rounded-full py-0.5 pl-1 pr-3 text-[13px] font-medium transition-colors duration-200 ease-out-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-500',
+              active ? 'text-ink-900' : 'text-ink-500 hover:text-ink-800',
+            )}
+          >
+            {active ? (
+              <motion.span
+                layoutId="pantry-person"
+                transition={transitions.spring}
+                className="segmented-thumb absolute inset-0 rounded-full"
+              />
+            ) : null}
+            <Avatar
+              name={person.displayName}
+              src={person.avatarUrl}
+              className={cn(
+                'relative size-6 rounded-full text-[10px] transition-opacity duration-200 ease-out-soft',
+                active ? 'opacity-100' : 'opacity-70',
+              )}
+            />
+            <span className="relative">{person.displayName}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function PantryRow({
   item,
+  readOnly = false,
   onSave,
   onRemove,
 }: {
   item: PantryItem;
+  readOnly?: boolean;
   onSave: (input: { quantity: number; area: StorageArea }) => Promise<unknown>;
   onRemove: () => void;
 }) {
@@ -215,6 +315,7 @@ function PantryRow({
             </span>
           ) : null}
         </span>
+        {readOnly ? null : (
         <div className="flex shrink-0 items-center gap-1">
           {editing ? (
             <>
@@ -253,9 +354,10 @@ function PantryRow({
             </>
           )}
         </div>
+        )}
       </div>
 
-      {editing ? (
+      {editing && !readOnly ? (
         <div className="flex w-full min-w-0 items-end gap-2">
           <div className="grid min-w-0 flex-1 gap-1">
             <span className="px-1 text-[11px] font-medium text-ink-500">Emplacement</span>

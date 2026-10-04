@@ -20,6 +20,131 @@ function words(value: string): string[] {
   );
 }
 
+/** « brocolis » et « brocoli » désignent le même aliment. Les mots courts restent tels quels. */
+function lemma(word: string): string {
+  if (word.length <= 4 || !word.endsWith('s') || word.endsWith('ss')) return word;
+  return word.slice(0, -1);
+}
+
+/** Mots de rayon, pas de l'aliment : « en vrac » ne doit jamais lier un brocoli au lait en vrac. */
+const RETAIL_NOISE = new Set(['vrac', 'bio', 'kilo', 'origine', 'france', 'francais']);
+
+/** État ou précision Ciqual qui ne change pas l'identité de l'aliment. */
+const NEUTRAL = new Set([
+  'aliment',
+  'appertise',
+  'appertisee',
+  'avec',
+  'bouilli',
+  'bouillie',
+  'brut',
+  'brute',
+  'chair',
+  'cru',
+  'crue',
+  'cuit',
+  'cuite',
+  'denoyaute',
+  'denoyautee',
+  'egoutte',
+  'egouttee',
+  'entier',
+  'entiere',
+  'fait',
+  'frais',
+  'fraiche',
+  'maison',
+  'moyen',
+  'moyenne',
+  'nature',
+  'peau',
+  'precision',
+  'preemballe',
+  'preemballee',
+  'preleve',
+  'prelevee',
+  'puree',
+  'roti',
+  'rotie',
+  'sans',
+  'seche',
+  'sechee',
+  'surgele',
+  'surgelee',
+  'vapeur',
+]);
+
+const COOKED = new Set([
+  'appertise',
+  'appertisee',
+  'bouilli',
+  'bouillie',
+  'cuit',
+  'cuite',
+  'puree',
+  'roti',
+  'rotie',
+  'seche',
+  'sechee',
+  'sirop',
+]);
+
+function foodLemmas(value: string): string[] {
+  const seen = new Set<string>();
+  const lemmas: string[] = [];
+  for (const word of words(value)) {
+    if (word.length <= 2 || RETAIL_NOISE.has(word)) continue;
+    const base = NEUTRAL.has(word) ? word : lemma(word);
+    if (seen.has(base)) continue;
+    seen.add(base);
+    lemmas.push(base);
+  }
+  return lemmas;
+}
+
+type IngredientCandidate = { nameFr: string; nameNormalized: string };
+
+/**
+ * Choisit l'aliment SIQUAL d'un produit du rayon.
+ * Le pluriel du vrac (« Brocolis ») doit retrouver le singulier (« Brocoli, cru »),
+ * et un mot de rayon comme « vrac » ne compte pas comme un aliment.
+ */
+export function pickIngredientForProduct<T extends IngredientCandidate>(
+  productName: string,
+  ingredients: readonly T[],
+): T | null {
+  const queryLemmas = foodLemmas(productName).filter((word) => !NEUTRAL.has(word));
+  const head = queryLemmas[0];
+  if (!head) return null;
+  const querySet = new Set(queryLemmas);
+  const wantsRaw = !queryLemmas.some((word) => COOKED.has(word));
+  let best: { item: T; score: number; extra: number; length: number } | null = null;
+  for (const ingredient of ingredients) {
+    const ingredientLemmas = foodLemmas(ingredient.nameNormalized);
+    if (!ingredientLemmas.includes(head)) continue;
+    const overlap = queryLemmas.filter((word) => ingredientLemmas.includes(word)).length;
+    const extra = ingredientLemmas.filter(
+      (word) => !querySet.has(word) && !NEUTRAL.has(word),
+    ).length;
+    const starts = ingredientLemmas[0] === head ? 3 : 0;
+    const raw = wantsRaw && ingredientLemmas.some((word) => word === 'cru' || word === 'crue') ? 2 : 0;
+    const cooked =
+      wantsRaw && ingredientLemmas.some((word) => COOKED.has(word)) ? 4 : 0;
+    const score = overlap * 10 + starts + raw - extra * 6 - cooked;
+    if (score <= 0) continue;
+    const length = ingredient.nameFr.length;
+    if (
+      !best ||
+      score > best.score ||
+      (score === best.score && extra < best.extra) ||
+      (score === best.score && extra === best.extra && length < best.length)
+    ) {
+      best = { item: ingredient, score, extra, length };
+    }
+  }
+  return best?.item ?? null;
+}
+
 function containsWord(word: string) {
   return { searchText: { contains: word, mode: 'insensitive' as const } };
 }
@@ -46,11 +171,6 @@ function matchClauses(query: string) {
       })),
     },
   };
-}
-
-function productQuery(ingredientName: string): string {
-  const typed = ingredientName.match(/\btype\s+([^,;)]+)/i)?.[1]?.trim();
-  return typed || ingredientName.split(',')[0]?.trim() || ingredientName.trim();
 }
 
 /** Catalogue local : aucun appel HTTP n'est effectue pendant une requete. */
@@ -235,29 +355,33 @@ export class OpenFoodFactsService {
 
   /** Trouve le lien SIQUAL nécessaire à la consommation, sans en faire l'identité du stock. */
   async resolveIngredientForProduct(productName: string) {
-    const query = productQuery(productName);
-    const queryWords = words(query)
-      .filter((word) => word.length > 2)
-      .slice(0, 5);
-    if (queryWords.length === 0) return null;
-    const ingredients = await this.prisma.ingredient.findMany({
-      where: {
-        OR: queryWords.map((word) => ({ nameNormalized: { contains: word, mode: 'insensitive' } })),
-      },
-      select: { id: true, nameFr: true, nameNormalized: true, uxCategory: true },
-      take: 250,
+    const lemmas = foodLemmas(productName).filter((word) => !NEUTRAL.has(word));
+    const head = lemmas[0];
+    if (!head) return null;
+    const needles = [...new Set(lemmas.flatMap((word) => [word, `${word}s`]))].slice(0, 8);
+    const select = { id: true, nameFr: true, nameNormalized: true, uxCategory: true } as const;
+    const [headed, mentioned] = await Promise.all([
+      this.prisma.ingredient.findMany({
+        where: { nameNormalized: { startsWith: head, mode: 'insensitive' } },
+        select,
+        take: 80,
+      }),
+      this.prisma.ingredient.findMany({
+        where: {
+          OR: needles.map((word) => ({
+            nameNormalized: { contains: word, mode: 'insensitive' as const },
+          })),
+        },
+        select,
+        take: 120,
+      }),
+    ]);
+    const seen = new Set<string>();
+    const ingredients = [...headed, ...mentioned].filter((ingredient) => {
+      if (seen.has(ingredient.id)) return false;
+      seen.add(ingredient.id);
+      return true;
     });
-    return (
-      ingredients
-        .map((ingredient) => {
-          const ingredientWords = new Set(words(ingredient.nameNormalized));
-          const overlap = queryWords.filter((word) => ingredientWords.has(word)).length;
-          const starts = ingredient.nameNormalized.startsWith(queryWords[0] ?? '') ? 2 : 0;
-          return { ingredient, score: overlap * 10 + starts };
-        })
-        .sort(
-          (a, b) => b.score - a.score || a.ingredient.nameFr.length - b.ingredient.nameFr.length,
-        )[0]?.ingredient ?? null
-    );
+    return pickIngredientForProduct(productName, ingredients);
   }
 }

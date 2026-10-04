@@ -867,7 +867,6 @@ function DayCard({
 }) {
   const key = iso(date);
   const today = isToday(date);
-  const past = key < todayIso;
 
   return (
     <div
@@ -881,11 +880,11 @@ function DayCard({
         onClick={onSelect}
         disabled={!onSelect}
         className={cn(
-          'flex w-full shrink-0 cursor-pointer flex-col gap-1.5 rounded-t-2xl bg-[#8c684f] px-4 py-3 text-left text-[#faf6f1] transition-colors duration-200 ease-out-soft enabled:hover:bg-[#7a5b45]',
+          'flex w-full shrink-0 cursor-pointer flex-col gap-1.5 rounded-t-2xl border-b border-[#e4d3c4] bg-[#f0e2d4] px-4 py-3 text-left text-ink-900 transition-colors duration-200 ease-out-soft enabled:hover:bg-[#e7d5c4]',
         )}
       >
         <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
-          <span className="text-sm font-medium text-[#faf6f1] first-letter:uppercase">
+          <span className="text-sm font-medium text-ink-900 first-letter:uppercase">
             {today ? 'Aujourd’hui' : format(date, 'EEEE d MMMM', { locale: fr })}
           </span>
         </span>
@@ -1284,10 +1283,10 @@ function MealCalories({ kcal }: { kcal: number }) {
 }
 
 const MACRO_LINE = [
-  { key: 'kcal', suffix: 'kcal', className: 'text-[#f3c7a6]' },
-  { key: 'protein', suffix: 'P', className: 'text-[#c9e0d4]' },
-  { key: 'carbs', suffix: 'G', className: 'text-[#f3e6c4]' },
-  { key: 'fat', suffix: 'L', className: 'text-[#f3c4b8]' },
+  { key: 'kcal', suffix: 'kcal', className: 'text-ink-900' },
+  { key: 'protein', suffix: 'P', className: 'text-ink-900' },
+  { key: 'carbs', suffix: 'G', className: 'text-ink-900' },
+  { key: 'fat', suffix: 'L', className: 'text-ink-900' },
 ] as const;
 
 function MacroCounts({
