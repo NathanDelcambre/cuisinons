@@ -1,4 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Prisma } from '@cuisinons/db';
 import {
   RETAILERS,
   productRelevance,
@@ -9,6 +10,8 @@ import {
   type Retailer,
 } from '@cuisinons/shared';
 import { PrismaService } from '../prisma/prisma.service.js';
+
+type PricedProduct = Prisma.OpenFoodProductGetPayload<{ include: { prices: true } }>;
 
 function words(value: string): string[] {
   return (
@@ -210,7 +213,7 @@ export class OpenFoodFactsService {
   async findOffers(ingredientName: string, retailer: Retailer): Promise<ProductOffer[]> {
     const query = productSearchQuery(ingredientName);
     if (!matchClauses(query)) return [];
-    const products = await this.loadPool(
+    const products = (await this.loadPool(
       query,
       {
         packageQuantity: { gt: 0 },
@@ -218,7 +221,7 @@ export class OpenFoodFactsService {
         prices: { some: { retailer, currency: 'EUR', price: { gt: 0 } } },
       },
       { prices: { where: { retailer, currency: 'EUR' }, take: 1 } },
-    );
+    )) as PricedProduct[];
     const scored = products
       .map((product) => ({
         product,
@@ -267,7 +270,7 @@ export class OpenFoodFactsService {
     };
     const query = productSearchQuery(ingredientName);
     if (!matchClauses(query)) return result;
-    const products = await this.loadPool(
+    const products = (await this.loadPool(
       query,
       {
         packageQuantity: { gt: 0 },
@@ -275,7 +278,7 @@ export class OpenFoodFactsService {
         prices: { some: { currency: 'EUR', price: { gt: 0 } } },
       },
       { prices: { where: { currency: 'EUR', price: { gt: 0 } } } },
-    );
+    )) as PricedProduct[];
     for (const retailer of RETAILERS) {
       const scored = products
         .flatMap((product) => {
