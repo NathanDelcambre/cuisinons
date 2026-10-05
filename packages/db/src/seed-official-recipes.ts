@@ -1,6 +1,7 @@
 import { normalizeSearchText, type QuantityUnit } from '@cuisinons/shared';
 import {
   buildHealthyOfficialSpecs,
+  buildVarietyOfficialSpecs,
   HEALTHY_INGREDIENTS,
   OFFICIAL_RECIPE_COUNT,
   pickHealthyIngredient,
@@ -1255,7 +1256,7 @@ export async function seedOfficialRecipes(authorId: string) {
     seeded += 1;
   }
 
-  const healthy = buildHealthyOfficialSpecs();
+  const healthy = [...buildHealthyOfficialSpecs(), ...buildVarietyOfficialSpecs()];
   for (const spec of healthy) {
     const keyToId = new Map<string, string>();
     const resolved: Array<Line & { ingredientId: string }> = [];

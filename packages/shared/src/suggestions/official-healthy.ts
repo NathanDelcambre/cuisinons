@@ -2,6 +2,9 @@
 import type { QuantityUnit } from '../nutrition/units.js';
 import { joinFrench } from './names.js';
 import { HEALTHY_RECIPES, type CookMethod, type NameFilter, type RecipeSpec } from './catalog.js';
+import { VARIETY_RECIPE_COUNT, VARIETY_RECIPES } from './variety.js';
+
+export { VARIETY_RECIPE_COUNT, VARIETY_RECIPES };
 
 export type IngredientRef = {
   key: string;
@@ -125,6 +128,32 @@ export const HEALTHY_INGREDIENTS: Record<string, IngredientRef> = {
   orange: { key: 'orange', code: 13034, names: ['orange'] },
   feta: { key: 'feta', code: 12066, names: ['feta'] },
   goat: { key: 'goat', code: 12805, names: ['fromage de chevre'] },
+  emmental: { key: 'emmental', code: 12115, names: ['emmental'] },
+  comte: { key: 'comte', code: 12110, names: ['comte'] },
+  parmesan: { key: 'parmesan', code: 12120, names: ['parmesan'] },
+  gruyere: { key: 'gruyere', code: 12113, names: ['gruyere'] },
+  roquefort: { key: 'roquefort', code: 12500, names: ['roquefort'] },
+  gorgonzola: { key: 'gorgonzola', code: 12524, names: ['gorgonzola'] },
+  raclette: { key: 'raclette', code: 12749, names: ['raclette'] },
+  cantal: { key: 'cantal', code: 12109, names: ['cantal'] },
+  bleu: { key: 'bleu', code: 12521, names: ['bleu d auvergne'] },
+  reblochon: { key: 'reblochon', code: 12045, names: ['reblochon'] },
+  mimolette: { key: 'mimolette', code: 12735, names: ['mimolette'] },
+  tomme: { key: 'tomme', code: 12758, names: ['tomme'] },
+  munster: { key: 'munster', code: 12039, names: ['munster'] },
+  beaufort: { key: 'beaufort', code: 12105, names: ['beaufort'] },
+  saintNectaire: { key: 'saintNectaire', code: 12752, names: ['saint-nectaire'] },
+  mozzarella: { key: 'mozzarella', code: 19590, names: ['mozzarella'] },
+  cheddar: { key: 'cheddar', code: 12726, names: ['cheddar'] },
+  beef: { key: 'beef', code: 6201, names: ['boeuf, steak', 'bifteck cru'] },
+  beefMince: { key: 'beefMince', code: 6250, names: ['steak hache 5'] },
+  veal: { key: 'veal', code: 6521, names: ['veau, escalope'] },
+  lamb: { key: 'lamb', code: 21500, names: ['agneau, cotelette'] },
+  duck: { key: 'duck', code: 36206, names: ['magret cru'] },
+  ham: { key: 'ham', code: 28902, names: ['jambon cuit, superieur, decouenne'] },
+  bacon: { key: 'bacon', code: 28501, names: ['lardon nature, cru'] },
+  sausage: { key: 'sausage', code: 30110, names: ['saucisse de toulouse'] },
+  merguez: { key: 'merguez', code: 30150, names: ['merguez crue'] },
   yogurt: { key: 'yogurt', code: 19644, names: ['fromage blanc'] },
   milk: { key: 'milk', code: 19041, names: ['lait demi-ecreme'] },
   coconutMilk: { key: 'coconutMilk', code: 18041, names: ['lait de coco'] },
@@ -224,6 +253,15 @@ function matches(tokens: string[], needles: readonly string[]): boolean {
 }
 
 const PROTEIN_FROM_NAME: Array<{ needles: readonly string[]; key: string }> = [
+  { needles: ['hache'], key: 'beefMince' },
+  { needles: ['boeuf'], key: 'beef' },
+  { needles: ['veau'], key: 'veal' },
+  { needles: ['agneau'], key: 'lamb' },
+  { needles: ['canard'], key: 'duck' },
+  { needles: ['jambon'], key: 'ham' },
+  { needles: ['lardon'], key: 'bacon' },
+  { needles: ['merguez'], key: 'merguez' },
+  { needles: ['saucisse'], key: 'sausage' },
   { needles: ['porc', 'mignon'], key: 'pork' },
   { needles: ['poulet'], key: 'chicken' },
   { needles: ['dinde'], key: 'turkey' },
@@ -359,6 +397,7 @@ function vegKeys(spec: RecipeSpec): string[] {
   if (matches(tokens, ['champignon'])) push('mushroom');
   if (matches(tokens, ['epinard', 'épinard'])) push('spinach');
   if (matches(tokens, ['haricot'])) push('greenBean');
+  if (matches(tokens, ['oignon'])) push('onion');
   if (spec.vegetable === true && keys.length === 0) {
     push('zucchini');
     push('tomato');
@@ -496,6 +535,15 @@ const PROTEIN_STEP_KEYS = [
   'tofu',
   'walnut',
   'egg',
+  'beef',
+  'beefMince',
+  'veal',
+  'lamb',
+  'duck',
+  'ham',
+  'bacon',
+  'sausage',
+  'merguez',
 ] as const;
 
 const VEG_STEP_KEYS = [
@@ -943,7 +991,20 @@ function extraTags(spec: RecipeSpec): string[] {
   if (spec.diets.includes('vegan')) tags.add('vegan');
   else if (spec.diets.includes('vegetarian')) tags.add('vegetarien');
   const protein = proteinKey(spec);
-  if (protein === 'chicken' || protein === 'turkey' || protein === 'pork') {
+  if (
+    protein === 'chicken' ||
+    protein === 'turkey' ||
+    protein === 'pork' ||
+    protein === 'beef' ||
+    protein === 'beefMince' ||
+    protein === 'veal' ||
+    protein === 'lamb' ||
+    protein === 'duck' ||
+    protein === 'ham' ||
+    protein === 'bacon' ||
+    protein === 'sausage' ||
+    protein === 'merguez'
+  ) {
     tags.add('viande');
     tags.add('proteine');
   }
@@ -956,6 +1017,41 @@ function extraTags(spec: RecipeSpec): string[] {
     tags.add('proteine');
   }
   return [...tags];
+}
+
+const VARIETY_CHEESES: Array<{ needle: string; key: string }> = [
+  { needle: 'saint-nectaire', key: 'saintNectaire' },
+  { needle: 'emmental', key: 'emmental' },
+  { needle: 'parmesan', key: 'parmesan' },
+  { needle: 'gruyère', key: 'gruyere' },
+  { needle: 'gruyere', key: 'gruyere' },
+  { needle: 'roquefort', key: 'roquefort' },
+  { needle: 'gorgonzola', key: 'gorgonzola' },
+  { needle: 'reblochon', key: 'reblochon' },
+  { needle: 'mimolette', key: 'mimolette' },
+  { needle: 'mozzarella', key: 'mozzarella' },
+  { needle: 'cheddar', key: 'cheddar' },
+  { needle: 'raclette', key: 'raclette' },
+  { needle: 'beaufort', key: 'beaufort' },
+  { needle: 'munster', key: 'munster' },
+  { needle: 'cantal', key: 'cantal' },
+  { needle: 'comté', key: 'comte' },
+  { needle: 'comte', key: 'comte' },
+  { needle: 'tomme', key: 'tomme' },
+  { needle: 'bleu', key: 'bleu' },
+  { needle: 'chèvre', key: 'goat' },
+  { needle: 'chevre', key: 'goat' },
+  { needle: 'feta', key: 'feta' },
+];
+
+function cheesesInLabel(label: string): string[] {
+  const folded = normalizeSearchText(label);
+  const keys: string[] = [];
+  for (const cheese of VARIETY_CHEESES) {
+    if (!folded.includes(normalizeSearchText(cheese.needle))) continue;
+    if (!keys.includes(cheese.key)) keys.push(cheese.key);
+  }
+  return keys;
 }
 
 export function buildHealthyOfficialSpec(spec: RecipeSpec): OfficialHealthySpec {
@@ -1038,6 +1134,11 @@ export function buildHealthyOfficialSpec(spec: RecipeSpec): OfficialHealthySpec 
   if (spec.label.toLowerCase().includes('avocat')) {
     lines.push(piece('avocado', servings, PER_PERSON.avocadoG));
   }
+  if (spec.id.startsWith('v')) {
+    for (const cheese of cheesesInLabel(spec.label)) {
+      lines.push(g(cheese, forPeople(40)));
+    }
+  }
 
   const ingredients = uniqueLines(lines);
   if (ingredients.length < 2) {
@@ -1063,9 +1164,21 @@ export function buildHealthyOfficialSpecs(): OfficialHealthySpec[] {
   return HEALTHY_RECIPES.map(buildHealthyOfficialSpec);
 }
 
+export function buildVarietyOfficialSpecs(): OfficialHealthySpec[] {
+  return VARIETY_RECIPES.map((recipe) => {
+    const built = buildHealthyOfficialSpec(recipe);
+    return {
+      ...built,
+      description: `Pour ${String(built.servings)} personnes. Recette maison, avec les quantités et les étapes pour la refaire telle quelle.`,
+      tagSlugs: built.tagSlugs.filter((tag) => tag !== 'healthy'),
+    };
+  });
+}
+
 export const HEALTHY_OFFICIAL_COUNT = HEALTHY_RECIPES.length;
 export const HANDCRAFTED_OFFICIAL_COUNT = 31;
-export const OFFICIAL_RECIPE_COUNT = HANDCRAFTED_OFFICIAL_COUNT + HEALTHY_OFFICIAL_COUNT;
+export const OFFICIAL_RECIPE_COUNT =
+  HANDCRAFTED_OFFICIAL_COUNT + HEALTHY_OFFICIAL_COUNT + VARIETY_RECIPE_COUNT;
 
 /** Banque « Idées » : toutes les fiches healthy déjà photographiées. */
 export const IDEAS_RECIPE_IDS = HEALTHY_RECIPES.map((spec) => `official-${spec.id}`);

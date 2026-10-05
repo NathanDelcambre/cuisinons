@@ -23,7 +23,7 @@ import {
   Utensils,
   type LucideIcon,
 } from 'lucide-react';
-import { Button, IconButton, cn, transitions } from '@cuisinons/ui';
+import { IconButton, cn, transitions } from '@cuisinons/ui';
 import {
   MEAL_KIND_LABELS,
   MEAL_SLOT_LABELS,
@@ -73,9 +73,13 @@ export const SLOT_CHROME: Record<
 
 export type SpecialMealKind = Exclude<MealKind, 'RECIPE'>;
 
-const SPECIALS: Array<{ kind: SpecialMealKind; icon: LucideIcon }> = [
-  { kind: 'RESTAURANT', icon: Utensils },
+const MENU_ITEMS: Array<
+  | { kind: 'RECIPE'; icon: LucideIcon }
+  | { kind: SpecialMealKind; icon: LucideIcon }
+> = [
+  { kind: 'RECIPE', icon: ChefHat },
   { kind: 'IMPOSED', icon: ListPlus },
+  { kind: 'RESTAURANT', icon: Utensils },
   { kind: 'SKIPPED', icon: Ban },
 ];
 
@@ -318,41 +322,31 @@ export function SlotAddMenu({
                     pos.bottom ? 'origin-bottom' : 'origin-top',
                   )}
                 >
-                  <Button
-                    ref={(node) => {
-                      itemRefs.current[0] = node;
-                    }}
-                    role="menuitem"
-                    icon={ChefHat}
-                    block
-                    tabIndex={highlighted === 0 ? 0 : -1}
-                    onMouseEnter={() => setHighlighted(0)}
-                    onClick={chooseRecipe}
-                  >
-                    Choisir une recette
-                  </Button>
-                  <div className="mt-1.5 space-y-0.5">
-                    {SPECIALS.map((option, index) => {
-                      const itemIndex = index + 1;
+                  <div className="space-y-0.5">
+                    {MENU_ITEMS.map((option, index) => {
                       const Icon = option.icon;
+                      const label =
+                        option.kind === 'RECIPE' ? 'Choisir une recette' : MEAL_KIND_LABELS[option.kind];
                       return (
                         <button
                           key={option.kind}
                           ref={(node) => {
-                            itemRefs.current[itemIndex] = node;
+                            itemRefs.current[index] = node;
                           }}
                           type="button"
                           role="menuitem"
-                          tabIndex={highlighted === itemIndex ? 0 : -1}
-                          onMouseEnter={() => setHighlighted(itemIndex)}
-                          onClick={() => chooseKind(option.kind)}
+                          tabIndex={highlighted === index ? 0 : -1}
+                          onMouseEnter={() => setHighlighted(index)}
+                          onClick={() =>
+                            option.kind === 'RECIPE' ? chooseRecipe() : chooseKind(option.kind)
+                          }
                           className={cn(
                             'flex min-h-10 w-full items-center gap-2.5 rounded-xl px-3 text-left text-sm transition-colors duration-150 ease-out-soft',
-                            highlighted === itemIndex ? 'bg-white/80 text-ink-900' : 'text-ink-600',
+                            highlighted === index ? 'bg-white/80 text-ink-900' : 'text-ink-600',
                           )}
                         >
                           <Icon className="size-4 shrink-0 text-ink-400" aria-hidden />
-                          {MEAL_KIND_LABELS[option.kind]}
+                          {label}
                         </button>
                       );
                     })}

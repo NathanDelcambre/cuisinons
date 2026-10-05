@@ -14,7 +14,9 @@ import { weekMacroAverages } from '../src/nutrition/planned-consumed.js';
 import { aggregateUserStats } from '../src/nutrition/stats.js';
 import {
   buildHealthyOfficialSpecs,
+  buildVarietyOfficialSpecs,
   HEALTHY_INGREDIENTS,
+  VARIETY_RECIPE_COUNT,
   HEALTHY_OFFICIAL_COUNT,
   OFFICIAL_RECIPE_COUNT,
   HANDCRAFTED_OFFICIAL_COUNT,
@@ -155,7 +157,9 @@ describe('catalogue healthy officiel', () => {
     const specs = buildHealthyOfficialSpecs();
     expect(HEALTHY_RECIPES).toHaveLength(200);
     expect(specs).toHaveLength(HEALTHY_OFFICIAL_COUNT);
-    expect(OFFICIAL_RECIPE_COUNT).toBe(HANDCRAFTED_OFFICIAL_COUNT + HEALTHY_OFFICIAL_COUNT);
+    expect(OFFICIAL_RECIPE_COUNT).toBe(
+      HANDCRAFTED_OFFICIAL_COUNT + HEALTHY_OFFICIAL_COUNT + VARIETY_RECIPE_COUNT,
+    );
     expect(new Set(specs.map((s) => s.id)).size).toBe(200);
     expect(specs.every((s) => s.id.startsWith('official-h'))).toBe(true);
     expect(specs.every((s) => s.ingredients.length >= 2)).toBe(true);
@@ -171,7 +175,7 @@ describe('catalogue healthy officiel', () => {
     expect(
       specs.every((s) => s.steps.reduce((n, step) => n + step.description.length, 0) >= 350),
     ).toBe(true);
-    expect(OFFICIAL_RECIPE_COUNT).toBe(231);
+    expect(OFFICIAL_RECIPE_COUNT).toBe(431);
     expect(IDEAS_RECIPE_IDS).toHaveLength(200);
     expect(IDEAS_RECIPE_COUNT).toBe(200);
     expect(IDEAS_RECIPE_IDS.every((id) => id.startsWith('official-h'))).toBe(true);
@@ -276,6 +280,43 @@ describe('catalogue healthy officiel', () => {
       { key: 'carrot', code: null, names: ['carotte'] },
     );
     expect(picked?.ciqualCode).toBe(20009);
+  });
+
+  it('ajoute un catalogue varié de pâtes, riz, viandes et fromages', () => {
+    const specs = buildVarietyOfficialSpecs();
+    expect(VARIETY_RECIPE_COUNT).toBe(200);
+    expect(specs).toHaveLength(200);
+    expect(new Set(specs.map((spec) => spec.id)).size).toBe(200);
+    expect(specs.every((spec) => spec.id.startsWith('official-v'))).toBe(true);
+    expect(specs.every((spec) => !spec.tagSlugs.includes('healthy'))).toBe(true);
+    expect(specs.every((spec) => spec.steps.length >= 4)).toBe(true);
+    expect(specs.filter((spec) => spec.tagSlugs.includes('pates')).length).toBeGreaterThan(40);
+    expect(specs.filter((spec) => spec.tagSlugs.includes('riz')).length).toBeGreaterThan(10);
+    const cheeseKeys = [
+      'emmental',
+      'comte',
+      'parmesan',
+      'gruyere',
+      'roquefort',
+      'raclette',
+      'cantal',
+      'reblochon',
+      'goat',
+      'feta',
+    ];
+    const meatKeys = ['beef', 'beefMince', 'veal', 'lamb', 'duck', 'pork', 'ham', 'bacon', 'sausage', 'merguez'];
+    for (const key of cheeseKeys) {
+      expect(specs.some((spec) => spec.ingredients.some((line) => line.key === key)), key).toBe(true);
+    }
+    for (const key of meatKeys) {
+      expect(specs.some((spec) => spec.ingredients.some((line) => line.key === key)), key).toBe(true);
+    }
+    for (const spec of specs) {
+      const blob = spec.steps.map((step) => step.description).join(' ');
+      for (const line of spec.ingredients) {
+        expect(blob, `${spec.id} ne cite pas ${line.key}`).toContain(`[[ing:${line.key}]]`);
+      }
+    }
   });
 });
 
