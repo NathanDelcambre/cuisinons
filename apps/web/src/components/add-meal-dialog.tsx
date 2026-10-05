@@ -219,8 +219,8 @@ export function AddMealDialog({
       }
     >
       <div className="flex min-h-0 flex-1 flex-col gap-3">
-        <div className="flex items-center gap-3">
-          <div className="min-w-0 w-full max-w-sm">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+          <div className="w-full min-w-0 sm:max-w-sm">
             <SearchInput
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -228,7 +228,7 @@ export function AddMealDialog({
               aria-label="Rechercher une recette"
             />
           </div>
-          <div className="flex min-w-0 flex-1 items-center justify-end gap-5">
+          <div className="flex flex-wrap items-center gap-2 sm:min-w-0 sm:flex-1 sm:justify-end sm:gap-5">
             {shownUsers.map((u) => {
               const amount = portionOf(u.id);
               const setAmount = (next: number) =>
@@ -275,7 +275,7 @@ export function AddMealDialog({
             })}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Select
             value={tag}
             aria-label="Type de repas"
@@ -305,7 +305,7 @@ export function AddMealDialog({
           />
           <Segmented
             label="Vue des recettes"
-            className="h-11 shrink-0"
+            className="hidden h-11 sm:inline-flex sm:w-auto sm:shrink-0"
             value={view}
             onChange={setView}
             options={[
@@ -317,7 +317,7 @@ export function AddMealDialog({
         <Inset className="flex min-h-0 flex-1 flex-col overflow-hidden p-2">
           <div
             className={cn(
-              'min-h-0 flex-1 overflow-y-auto',
+              'min-h-0 flex-1 overflow-y-auto overscroll-contain',
               recipes.isFetching && recipes.isPlaceholderData && 'opacity-60',
             )}
           >

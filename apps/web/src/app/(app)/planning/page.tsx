@@ -127,7 +127,7 @@ function iso(date: Date) {
 
 /** Largeur confortable, qui s'élargit dès que l'écran peut montrer environ cinq jours. */
 const DAY_CARD_FRAME =
-  'h-full min-h-0 w-full sm:min-h-[32rem] sm:w-[20rem] xl:w-[max(20rem,calc((100vw-18.5rem)/5))]';
+  'h-auto max-h-full min-h-[25rem] w-full sm:h-full sm:max-h-none sm:min-h-[32rem] sm:w-[20rem] xl:w-[max(20rem,calc((100vw-18.5rem)/5))]';
 
 /**
  * Glisser horizontalement la bande des jours, sans voler les clics :
@@ -466,24 +466,26 @@ export default function PlanningPage() {
             onClick={() => setWeekStart(addDays(weekStart, 7))}
           />
         </div>
-        <div className="flex w-full flex-wrap items-center justify-center gap-2 sm:ml-auto sm:w-auto sm:justify-end">
+        <div className="flex w-full items-center justify-between gap-2 sm:ml-auto sm:w-auto">
           {household.data && household.data.length > 1 ? (
             <PersonSwitch people={household.data} selectedId={subjectId} onChange={setViewUserId} />
           ) : null}
-          <IconButton
-            icon={Sparkles}
-            label="Ajustement intelligent"
-            size="sm"
-            className="shrink-0 border-white bg-white text-ink-800 shadow-soft"
-            onClick={() => setOptimizeOpen(true)}
-          />
-          <IconButton
-            icon={BarChart3}
-            label="Moyennes de la semaine"
-            size="sm"
-            className="shrink-0 border-white bg-white text-ink-800 shadow-soft"
-            onClick={() => setAveragesOpen(true)}
-          />
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <IconButton
+              icon={Sparkles}
+              label="Ajustement intelligent"
+              size="sm"
+              className="shrink-0 border-white bg-white text-ink-800 shadow-soft"
+              onClick={() => setOptimizeOpen(true)}
+            />
+            <IconButton
+              icon={BarChart3}
+              label="Moyennes de la semaine"
+              size="sm"
+              className="shrink-0 border-white bg-white text-ink-800 shadow-soft"
+              onClick={() => setAveragesOpen(true)}
+            />
+          </div>
         </div>
       </header>
 
@@ -497,8 +499,8 @@ export default function PlanningPage() {
       ) : null}
 
       {mealsQuery.isLoading ? (
-        <div className="scrollbar-none @container -mx-3 min-h-0 flex-1 overflow-x-auto sm:-mx-8 sm:px-8 sm:py-3">
-          <div className="flex h-full w-max gap-3 max-lg:gap-0">
+        <div className="scrollbar-none @container -mx-3 flex min-h-0 flex-1 items-center overflow-x-auto sm:-mx-8 sm:block sm:px-8 sm:py-3">
+          <div className="flex h-max w-max items-center gap-3 max-lg:gap-0 sm:h-full sm:items-stretch">
             {Array.from({ length: 7 }, (_, i) => (
               <Skeleton key={i} className={cn(DAY_CARD_FRAME, 'max-lg:w-[100cqw] rounded-2xl')} />
             ))}
@@ -509,16 +511,16 @@ export default function PlanningPage() {
           ref={scrollerRef}
           onScroll={selectCenteredDay}
           className={cn(
-            'scrollbar-none @container -mx-3 min-h-0 flex-1 snap-x snap-mandatory overflow-x-auto overscroll-x-contain sm:-mx-8 sm:snap-none sm:px-8 sm:py-3 [&_button]:cursor-pointer',
+            'scrollbar-none @container -mx-3 flex min-h-0 flex-1 snap-x snap-mandatory items-center overflow-x-auto overscroll-x-contain sm:-mx-8 sm:block sm:snap-none sm:px-8 sm:py-6 [&_button]:cursor-pointer',
             draggingDays ? 'cursor-grabbing select-none' : 'cursor-grab',
           )}
         >
-          <div className="flex h-full w-max items-stretch gap-3 max-lg:gap-0">
+          <div className="flex h-max w-max items-center gap-3 max-lg:gap-0 sm:h-full sm:items-stretch">
             {days.map((day, index) => (
               <div
                 key={iso(day)}
                 data-day-index={index}
-                className="box-border h-full w-[100cqw] shrink-0 snap-center snap-always px-4 pt-1 pb-6 sm:w-auto sm:px-0 sm:py-0"
+                className="box-border h-auto w-[100cqw] shrink-0 snap-center snap-always px-5 pt-5 pb-8 sm:h-full sm:w-auto sm:px-0 sm:py-0"
               >
                 <DayCard
                   date={day}
@@ -889,19 +891,13 @@ function DayCard({
   const today = isToday(date);
 
   return (
-    <div
-      className={cn(
-        DAY_CARD_FRAME,
-        'relative flex flex-col overflow-hidden rounded-2xl border-0 bg-[#f6f3ee] p-0 shadow-[0_10px_28px_-16px_rgba(28,25,23,0.35)]',
-      )}
-    >
+    <div className={cn(DAY_CARD_FRAME, 'rounded-2xl shadow-[0_10px_28px_-16px_rgba(28,25,23,0.35)]')}>
+      <div className="flex h-full min-h-[inherit] flex-col overflow-hidden rounded-2xl bg-[#f6f3ee]">
       <button
         type="button"
         onClick={onSelect}
         disabled={!onSelect}
-        className={cn(
-          'flex w-full shrink-0 cursor-pointer flex-col gap-1 rounded-t-2xl border-b border-[#d4d4d4] bg-[#ececec] px-3 pt-3.5 pb-2 text-left text-ink-900 transition-colors duration-200 ease-out-soft enabled:hover:bg-[#e2e2e2]',
-        )}
+        className="flex w-full shrink-0 flex-col gap-1.5 rounded-t-2xl border-b border-[#d4d4d4] bg-[#ececec] px-3 py-4 text-left text-ink-900"
       >
         <span className="flex min-w-0 items-center justify-between gap-2">
           <span className="flex min-w-0 items-baseline gap-1.5">
@@ -935,6 +931,7 @@ function DayCard({
             todayIso={todayIso}
           />
         ))}
+      </div>
       </div>
     </div>
   );

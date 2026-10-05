@@ -254,7 +254,7 @@ export function SlotAddMenu({
           onClick={() => setOpen((current) => !current)}
           onKeyDown={onTriggerKeyDown}
           className={cn(
-            'group flex h-full min-h-0 w-full items-center gap-2.5 rounded-lg border border-dashed border-ink-200/55 bg-white/20 px-3 text-left transition duration-200 ease-out-soft hover:border-sage-300/70 hover:bg-white/45 sm:min-h-[5.25rem]',
+            'group flex h-full min-h-[4.75rem] w-full items-center gap-2.5 rounded-lg border border-dashed border-ink-200/55 bg-white/20 px-3 text-left transition duration-200 ease-out-soft hover:border-sage-300/70 hover:bg-white/45 sm:min-h-[5.25rem]',
           )}
         >
           <span
