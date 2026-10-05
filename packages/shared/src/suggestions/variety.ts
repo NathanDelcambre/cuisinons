@@ -2,244 +2,277 @@ import type { DishKind } from './kinds.js';
 import type { CookMethod, RecipeSpec } from './catalog.js';
 
 const OMNI = ['omnivore'] as const;
-const MAIN = ['plat-principal'] as const;
-const POELE = ['poele', 'couteau'] as const;
-const FOUR = ['four', 'plaque-cuisson'] as const;
-const CASS = ['casserole', 'couteau'] as const;
-const WOK = ['wok', 'couteau'] as const;
+const VEGAN = ['omnivore', 'vegetarian', 'vegan'] as const;
 
-const CHEESES = [
-  'emmental',
-  'comté',
-  'parmesan',
-  'gruyère',
-  'roquefort',
-  'gorgonzola',
-  'raclette',
-  'cantal',
-  'bleu',
-  'reblochon',
-  'mimolette',
-  'tomme',
-  'munster',
-  'beaufort',
-  'saint-nectaire',
-  'feta',
-  'chèvre',
-  'mozzarella',
-  'cheddar',
-] as const;
+const EQ = {
+  p: ['poele', 'couteau'],
+  f: ['four', 'plaque-cuisson'],
+  c: ['casserole', 'couteau'],
+  w: ['wok', 'couteau'],
+  s: ['saladier', 'couteau'],
+} as const;
 
-const PASTA_GARNISHES: Array<{
-  title: string;
-  protein: RecipeSpec['protein'];
-  vegetable: RecipeSpec['vegetable'];
-  diets: RecipeSpec['diets'];
-}> = [
-  { title: 'poulet et courgettes', protein: ['poulet'], vegetable: ['courgette', 'tomate'], diets: OMNI },
-  { title: 'bœuf et tomates', protein: ['boeuf'], vegetable: ['tomate', 'carotte'], diets: OMNI },
-  { title: 'veau et champignons', protein: ['veau'], vegetable: ['champignon'], diets: OMNI },
-  { title: 'jambon et épinards', protein: ['jambon'], vegetable: ['épinard'], diets: OMNI },
-  { title: 'lardons et poivrons', protein: ['lardon'], vegetable: ['poivron'], diets: OMNI },
-  { title: 'saucisse et tomates', protein: ['saucisse'], vegetable: ['tomate', 'oignon'], diets: OMNI },
-  { title: 'crevettes et courgettes', protein: ['crevette'], vegetable: ['courgette'], diets: OMNI },
-  { title: 'thon et tomates', protein: ['thon'], vegetable: ['tomate'], diets: OMNI },
+const TAG = {
+  main: ['plat-principal'],
+  salad: ['salade'],
+  soup: ['soupe'],
+  breakfast: ['petit-dejeuner'],
+} as const;
+
+const DIET = { o: OMNI, t: OMNI, g: VEGAN } as const;
+
+/**
+ * Idée publiée (nom du plat seulement). Les étapes viennent du compositeur
+ * Cuisinons, pas du texte d’origine.
+ * protéine, légumes et féculent : tokens séparés par +, vides si aucun.
+ * drapeaux : e œuf, d laitier, f fruit.
+ */
+type Row = [
+  label: string,
+  kind: DishKind,
+  method: CookMethod,
+  prep: number,
+  cook: number,
+  eq: keyof typeof EQ,
+  tag: keyof typeof TAG,
+  diet: 'o' | 't' | 'g',
+  protein: string,
+  veg: string,
+  starch: string,
+  flags: string,
+  source: string,
 ];
 
-const RICE_GARNISHES: Array<{
-  title: string;
-  protein: RecipeSpec['protein'];
-  vegetable: RecipeSpec['vegetable'];
-  method: CookMethod;
-  kind: DishKind;
-  equipment: RecipeSpec['equipment'];
-}> = [
-  { title: 'poulet', protein: ['poulet'], vegetable: ['poivron', 'carotte'], method: 'wok', kind: 'wok', equipment: WOK },
-  { title: 'bœuf', protein: ['boeuf'], vegetable: ['poivron', 'oignon'], method: 'wok', kind: 'wok', equipment: WOK },
-  { title: 'canard', protein: ['canard'], vegetable: ['courgette'], method: 'rice', kind: 'riz', equipment: CASS },
-  { title: 'agneau', protein: ['agneau'], vegetable: ['tomate', 'aubergine'], method: 'rice', kind: 'riz', equipment: CASS },
-  { title: 'crevettes', protein: ['crevette'], vegetable: ['poivron'], method: 'wok', kind: 'wok', equipment: WOK },
-  { title: 'jambon', protein: ['jambon'], vegetable: ['carotte', 'oignon'], method: 'rice', kind: 'riz', equipment: CASS },
-  { title: 'veau', protein: ['veau'], vegetable: ['champignon'], method: 'rice', kind: 'riz', equipment: CASS },
-  { title: 'merguez', protein: ['merguez'], vegetable: ['poivron', 'tomate'], method: 'rice', kind: 'riz', equipment: CASS },
-  { title: 'lardons', protein: ['lardon'], vegetable: ['champignon'], method: 'wok', kind: 'wok', equipment: WOK },
+const ROWS: readonly Row[] = [
+  ['Bœuf bourguignon aux champignons', 'poelee', 'stew', 25, 90, 'c', 'main', 'o', 'boeuf', 'carotte+champignon', '', '', 'bistrosia.fr'],
+  ['Pot-au-feu de bœuf', 'poelee', 'stew', 25, 120, 'c', 'main', 'o', 'boeuf', 'carotte+chou', '', '', 'bistrosia.fr'],
+  ['Daube de bœuf aux olives', 'poelee', 'stew', 25, 100, 'c', 'main', 'o', 'boeuf', 'tomate+aubergine', '', '', 'feteduterroir.fr'],
+  ['Carbonnade de bœuf aux oignons', 'poelee', 'stew', 20, 90, 'c', 'main', 'o', 'boeuf', 'oignon+carotte', '', '', 'feteduterroir.fr'],
+  ['Goulash de bœuf', 'poelee', 'stew', 20, 70, 'c', 'main', 'o', 'boeuf', 'poivron+tomate', '', '', 'marmiton.org'],
+  ['Blanquette de veau', 'poelee', 'stew', 25, 90, 'c', 'main', 'o', 'veau', 'carotte+champignon', '', '', 'les3soeurs.com'],
+  ['Veau marengo à la tomate', 'poelee', 'stew', 20, 70, 'c', 'main', 'o', 'veau', 'tomate+champignon', '', '', 'marmiton.org'],
+  ['Navarin d’agneau', 'poelee', 'stew', 20, 80, 'c', 'main', 'o', 'agneau', 'carotte+tomate', '', '', 'marmiton.org'],
+  ['Tajine d’agneau aux aubergines', 'poelee', 'stew', 20, 70, 'c', 'main', 'o', 'agneau', 'aubergine+tomate', '', '', 'marmiton.org'],
+  ['Cassoulet saucisse et canard', 'poelee', 'stew', 25, 90, 'c', 'main', 'o', 'saucisse+canard', 'tomate+oignon', 'haricot', '', 'les3soeurs.com'],
+  ['Petit salé aux lentilles', 'poelee', 'stew', 15, 45, 'c', 'main', 'o', 'lardon+lentille', 'carotte', '', '', 'marmiton.org'],
+  ['Choucroute saucisse et porc', 'poelee', 'stew', 20, 60, 'c', 'main', 'o', 'saucisse+porc', 'chou', 'pomme de terre', '', 'les3soeurs.com'],
+  ['Potée au porc et au chou', 'poelee', 'stew', 20, 70, 'c', 'main', 'o', 'porc', 'chou+carotte', 'pomme de terre', '', 'viralmag.fr'],
+  ['Coq au vin de poulet', 'poelee', 'stew', 20, 60, 'c', 'main', 'o', 'poulet', 'champignon+carotte', '', '', 'marmiton.org'],
+  ['Poule au pot', 'poelee', 'stew', 20, 70, 'c', 'main', 'o', 'poulet', 'carotte+chou', '', '', 'marmiton.org'],
+  ['Tajine de poulet au citron', 'poelee', 'stew', 15, 40, 'c', 'main', 'o', 'poulet', 'carotte+courgette', '', '', 'marmiton.org'],
+  ['Chili con carne', 'poelee', 'stew', 15, 40, 'c', 'main', 'o', 'hache', 'tomate+poivron', '', '', 'marmiton.org'],
+  ['Chili végétarien aux haricots', 'poelee', 'stew', 15, 35, 'c', 'main', 'g', 'haricot', 'tomate+poivron', '', '', 'marmiton.org'],
+  ['Bouillabaisse de poisson et crevettes', 'soupe', 'soup', 25, 35, 'c', 'soup', 'o', 'poisson+crevette', 'tomate+poivron', '', '', 'les3soeurs.com'],
+  ['Moules marinières', 'poelee', 'stew', 15, 15, 'c', 'main', 'o', 'moule', 'oignon', '', '', 'marmiton.org'],
+  ['Garbure au porc', 'soupe', 'soup', 20, 50, 'c', 'soup', 'o', 'porc+haricot', 'chou+carotte', '', '', 'feteduterroir.fr'],
+  ['Soupe au pistou et basilic', 'soupe', 'soup', 20, 30, 'c', 'soup', 'g', 'haricot', 'courgette+tomate', '', '', 'feteduterroir.fr'],
+  ['Soupe à l’oignon au comté', 'soupe', 'soup', 15, 35, 'c', 'soup', 'o', '', 'oignon', '', '', 'marmiton.org'],
+  ['Velouté de potiron', 'soupe', 'soup', 15, 25, 'c', 'soup', 'g', 'pois chiche', 'potiron', '', '', 'marmiton.org'],
+  ['Velouté de chou-fleur au cumin', 'soupe', 'soup', 15, 25, 'c', 'soup', 'g', 'pois chiche', 'chou-fleur', '', '', 'marmiton.org'],
+  ['Soupe de lentilles', 'soupe', 'soup', 15, 30, 'c', 'soup', 'g', 'lentille', 'carotte', '', '', 'marmiton.org'],
+  ['Minestrone aux pâtes', 'soupe', 'soup', 20, 30, 'c', 'soup', 'g', 'haricot', 'courgette+carotte', 'pate', '', 'marmiton.org'],
+  ['Harira aux lentilles et pois chiches', 'soupe', 'soup', 20, 40, 'c', 'soup', 'g', 'lentille+pois chiche', 'tomate', '', '', 'marmiton.org'],
+  ['Velouté d’asperges au citron', 'soupe', 'soup', 15, 20, 'c', 'soup', 'g', 'pois chiche', 'asperge', '', '', 'marmiton.org'],
+  ['Soupe de betterave', 'soupe', 'soup', 15, 30, 'c', 'soup', 'g', 'lentille', 'betterave', '', '', 'marmiton.org'],
+  ['Pho au bœuf', 'soupe', 'soup', 20, 40, 'c', 'soup', 'o', 'boeuf', 'oignon', 'riz', '', 'marmiton.org'],
+  ['Soupe tom yum aux crevettes', 'soupe', 'soup', 15, 20, 'c', 'soup', 'o', 'crevette', 'champignon', '', '', 'marmiton.org'],
+  ['Soupe miso au tofu', 'soupe', 'soup', 10, 15, 'c', 'soup', 'g', 'tofu', 'champignon', '', '', 'marmiton.org'],
+  ['Soupe de pois chiches au citron', 'soupe', 'soup', 15, 25, 'c', 'soup', 'g', 'pois chiche', 'carotte', '', '', 'marmiton.org'],
+  ['Tom kha de poulet au lait de coco', 'curry', 'curry', 15, 25, 'c', 'main', 'o', 'poulet', 'champignon', '', '', 'happymuncher.com'],
+  ['Laksa de crevettes au coco', 'curry', 'curry', 15, 20, 'c', 'main', 'o', 'crevette', 'poivron', '', '', 'marmiton.org'],
+  ['Butter chicken au lait de coco', 'curry', 'curry', 20, 30, 'c', 'main', 'o', 'poulet', 'tomate', 'riz', 'd', 'tasteofhome.com'],
+  ['Curry vert de poulet au coco', 'curry', 'curry', 15, 25, 'c', 'main', 'o', 'poulet', 'courgette', 'riz', '', 'happymuncher.com'],
+  ['Curry rouge de crevettes au coco', 'curry', 'curry', 15, 20, 'c', 'main', 'o', 'crevette', 'poivron', 'riz', '', 'marmiton.org'],
+  ['Curry de cabillaud à la tomate', 'curry', 'curry', 15, 20, 'c', 'main', 'o', 'cabillaud', 'tomate', '', '', 'marmiton.org'],
+  ['Dahl de lentilles', 'curry', 'curry', 10, 25, 'c', 'main', 'g', 'lentille', 'tomate', '', '', 'marmiton.org'],
+  ['Chana masala', 'curry', 'curry', 15, 25, 'c', 'main', 'g', 'pois chiche', 'tomate+oignon', '', '', 'marmiton.org'],
+  ['Curry de pois chiches et épinards', 'curry', 'curry', 15, 20, 'c', 'main', 'g', 'pois chiche', 'epinard', '', '', 'marmiton.org'],
+  ['Curry de tofu au coco', 'curry', 'curry', 15, 20, 'c', 'main', 'g', 'tofu', 'courgette', '', '', 'marmiton.org'],
+  ['Korma de poulet', 'curry', 'curry', 15, 30, 'c', 'main', 'o', 'poulet', 'carotte', '', 'd', 'marmiton.org'],
+  ['Vindaloo de porc', 'curry', 'curry', 15, 35, 'c', 'main', 'o', 'porc', 'oignon', 'pomme de terre', '', 'marmiton.org'],
+  ['Curry d’agneau aux carottes', 'curry', 'curry', 15, 40, 'c', 'main', 'o', 'agneau', 'carotte', '', '', 'marmiton.org'],
+  ['Curry de chou-fleur', 'curry', 'curry', 15, 25, 'c', 'main', 'g', 'pois chiche', 'chou-fleur', '', '', 'marmiton.org'],
+  ['Curry de potiron et pois chiches', 'curry', 'curry', 15, 25, 'c', 'main', 'g', 'pois chiche', 'potiron', '', '', 'marmiton.org'],
+  ['Curry de poulet et patate douce', 'curry', 'curry', 15, 30, 'c', 'main', 'o', 'poulet', 'oignon', 'patate douce', '', 'marmiton.org'],
+  ['Spaghetti bolognaise au haché', 'pates', 'pasta', 15, 30, 'c', 'main', 'o', 'hache', 'tomate+carotte', 'pate', '', 'marmiton.org'],
+  ['Pâtes carbonara aux lardons', 'pates', 'pasta', 10, 15, 'c', 'main', 'o', 'lardon', '', 'pate', 'e', 'marmiton.org'],
+  ['Cacio e pepe au parmesan', 'pates', 'pasta', 10, 12, 'c', 'main', 't', '', '', 'pate', '', 'marmiton.org'],
+  ['Pâtes puttanesca au thon', 'pates', 'pasta', 15, 15, 'c', 'main', 'o', 'thon', 'tomate', 'pate', '', 'marmiton.org'],
+  ['Pâtes all’amatriciana', 'pates', 'pasta', 15, 20, 'c', 'main', 'o', 'lardon', 'tomate', 'pate', '', 'marmiton.org'],
+  ['Lasagnes au haché', 'gratin', 'bake', 30, 40, 'f', 'main', 'o', 'hache', 'tomate', 'pate', '', 'marmiton.org'],
+  ['Pâtes au pesto et basilic', 'pates', 'pasta', 10, 12, 'c', 'main', 't', '', 'courgette', 'pate', '', 'marmiton.org'],
+  ['Pâtes primavera', 'pates', 'pasta', 15, 15, 'c', 'main', 't', '', 'courgette+tomate', 'pate', '', 'marmiton.org'],
+  ['Spaghetti aux moules', 'pates', 'pasta', 15, 15, 'c', 'main', 'o', 'moule', 'tomate', 'pate', '', 'marmiton.org'],
+  ['Pâtes au saumon et épinards', 'pates', 'pasta', 15, 15, 'c', 'main', 'o', 'saumon', 'epinard', 'pate', '', 'marmiton.org'],
+  ['Macaroni au cheddar', 'pates', 'bake', 15, 25, 'f', 'main', 't', '', '', 'pate', '', 'marmiton.org'],
+  ['Pâtes à la norma', 'pates', 'pasta', 15, 20, 'c', 'main', 't', '', 'aubergine+tomate', 'pate', '', 'marmiton.org'],
+  ['Pâtes au poulet et champignons', 'pates', 'pasta', 15, 18, 'c', 'main', 'o', 'poulet', 'champignon', 'pate', '', 'marmiton.org'],
+  ['Nouilles pad thaï au poulet', 'wok', 'wok', 15, 12, 'w', 'main', 'o', 'poulet', 'carotte', 'pate', 'e', 'bhg.com'],
+  ['Nouilles sautées au bœuf', 'wok', 'wok', 15, 12, 'w', 'main', 'o', 'boeuf', 'poivron', 'pate', '', 'marmiton.org'],
+  ['Yakisoba au porc', 'wok', 'wok', 15, 12, 'w', 'main', 'o', 'porc', 'chou', 'pate', '', 'marmiton.org'],
+  ['Nouilles aux crevettes et soja', 'wok', 'wok', 15, 12, 'w', 'main', 'o', 'crevette', 'courgette', 'pate', '', 'marmiton.org'],
+  ['Risotto aux champignons et gorgonzola', 'riz', 'rice', 15, 25, 'c', 'main', 't', '', 'champignon', 'riz', '', 'marmiton.org'],
+  ['Risotto aux crevettes', 'riz', 'rice', 15, 25, 'c', 'main', 'o', 'crevette', 'oignon', 'riz', '', 'marmiton.org'],
+  ['Paella aux crevettes et moules', 'riz', 'rice', 20, 30, 'c', 'main', 'o', 'crevette+moule', 'poivron+tomate', 'riz', '', 'happymuncher.com'],
+  ['Paella au poulet et merguez', 'riz', 'rice', 20, 30, 'c', 'main', 'o', 'poulet+merguez', 'poivron', 'riz', '', 'hellofresh.com'],
+  ['Riz cantonais au jambon', 'riz', 'wok', 15, 15, 'w', 'main', 'o', 'jambon', 'carotte', 'riz', 'e', 'marmiton.org'],
+  ['Biryani de poulet', 'riz', 'rice', 20, 30, 'c', 'main', 'o', 'poulet', 'oignon+carotte', 'riz', '', 'marmiton.org'],
+  ['Bibimbap de bœuf', 'riz', 'rice', 20, 15, 'c', 'main', 'o', 'boeuf', 'epinard+carotte', 'riz', 'e', 'homecookai.com'],
+  ['Jambalaya saucisse et crevettes', 'riz', 'rice', 20, 30, 'c', 'main', 'o', 'saucisse+crevette', 'poivron+tomate', 'riz', '', 'marmiton.org'],
+  ['Arroz con pollo', 'riz', 'rice', 15, 30, 'c', 'main', 'o', 'poulet', 'tomate+poivron', 'riz', '', 'marmiton.org'],
+  ['Nasi goreng au poulet', 'riz', 'wok', 15, 12, 'w', 'main', 'o', 'poulet', 'carotte', 'riz', 'e', 'marmiton.org'],
+  ['Gyudon de bœuf', 'riz', 'rice', 10, 15, 'c', 'main', 'o', 'boeuf', 'oignon', 'riz', '', 'marmiton.org'],
+  ['Oyakodon', 'riz', 'rice', 15, 15, 'c', 'main', 'o', 'poulet', 'oignon', 'riz', 'e', 'marmiton.org'],
+  ['Riz pilaf aux légumes', 'riz', 'rice', 15, 20, 'c', 'main', 'g', 'pois chiche', 'carotte+courgette', 'riz', '', 'marmiton.org'],
+  ['Riz aux lentilles', 'riz', 'rice', 10, 20, 'c', 'main', 'g', 'lentille', 'carotte', 'riz', '', 'marmiton.org'],
+  ['Riz sauté au tofu', 'riz', 'wok', 15, 12, 'w', 'main', 'g', 'tofu', 'poivron', 'riz', '', 'marmiton.org'],
+  ['Bœuf sauté au basilic', 'wok', 'wok', 15, 12, 'w', 'main', 'o', 'boeuf', 'poivron', '', '', 'marmiton.org'],
+  ['Poulet au basilic thaï', 'wok', 'wok', 15, 12, 'w', 'main', 'o', 'poulet', 'poivron', '', '', 'marmiton.org'],
+  ['Porc laqué aux légumes', 'wok', 'wok', 15, 15, 'w', 'main', 'o', 'porc', 'carotte+poivron', '', '', 'marmiton.org'],
+  ['Crevettes sautées au gingembre', 'wok', 'wok', 12, 8, 'w', 'main', 'o', 'crevette', 'courgette', '', '', 'marmiton.org'],
+  ['Wok de tofu aux légumes', 'wok', 'wok', 15, 10, 'w', 'main', 'g', 'tofu', 'poivron+carotte', '', '', 'marmiton.org'],
+  ['Canard sauté aux poivrons', 'wok', 'wok', 15, 12, 'w', 'main', 'o', 'canard', 'poivron+oignon', '', '', 'marmiton.org'],
+  ['Wok d’agneau aux aubergines', 'wok', 'wok', 15, 15, 'w', 'main', 'o', 'agneau', 'aubergine', '', '', 'marmiton.org'],
+  ['Légumes sautés au soja', 'wok', 'wok', 12, 8, 'w', 'main', 'g', 'tofu', 'courgette+poivron', '', '', 'marmiton.org'],
+  ['Steak de bœuf sauce poivre', 'poelee', 'skillet', 8, 10, 'p', 'main', 'o', 'boeuf', '', 'pomme de terre', '', 'marmiton.org'],
+  ['Bavette de bœuf et oignons', 'poelee', 'skillet', 10, 12, 'p', 'main', 'o', 'boeuf', 'oignon', '', '', 'marmiton.org'],
+  ['Émincé de bœuf aux champignons', 'poelee', 'skillet', 12, 12, 'p', 'main', 'o', 'boeuf', 'champignon', '', '', 'marmiton.org'],
+  ['Escalope de veau au citron', 'poelee', 'skillet', 10, 12, 'p', 'main', 'o', 'veau', 'courgette', '', '', 'marmiton.org'],
+  ['Escalope de veau aux champignons', 'poelee', 'skillet', 12, 12, 'p', 'main', 'o', 'veau', 'champignon', '', '', 'marmiton.org'],
+  ['Saltimbocca de veau au jambon', 'poelee', 'skillet', 15, 12, 'p', 'main', 'o', 'veau+jambon', 'courgette', '', '', 'marmiton.org'],
+  ['Côtes d’agneau à la tomate', 'poelee', 'skillet', 10, 14, 'p', 'main', 'o', 'agneau', 'tomate', '', '', 'marmiton.org'],
+  ['Agneau sauté aux poivrons', 'poelee', 'skillet', 12, 14, 'p', 'main', 'o', 'agneau', 'poivron+oignon', '', '', 'marmiton.org'],
+  ['Magret de canard poêlé', 'poelee', 'skillet', 8, 14, 'p', 'main', 'o', 'canard', 'courgette', '', '', 'les3soeurs.com'],
+  ['Canard à l’orange', 'poelee', 'skillet', 12, 16, 'p', 'main', 'o', 'canard', '', '', 'f', 'marmiton.org'],
+  ['Filet mignon à la moutarde', 'poelee', 'skillet', 10, 16, 'p', 'main', 'o', 'porc', 'carotte', '', '', 'marmiton.org'],
+  ['Escalope de dinde aux champignons', 'poelee', 'skillet', 10, 12, 'p', 'main', 'o', 'dinde', 'champignon', '', '', 'marmiton.org'],
+  ['Suprême de poulet au citron', 'poelee', 'skillet', 10, 14, 'p', 'main', 'o', 'poulet', 'courgette', '', '', 'marmiton.org'],
+  ['Crevettes à l’ail et au citron', 'poelee', 'skillet', 10, 8, 'p', 'main', 'o', 'crevette', 'courgette', '', '', 'marmiton.org'],
+  ['Poêlée de moules et poivrons', 'poelee', 'skillet', 15, 12, 'p', 'main', 'o', 'moule', 'poivron', '', '', 'marmiton.org'],
+  ['Cabillaud poêlé à la provençale', 'poelee', 'skillet', 10, 12, 'p', 'main', 'o', 'cabillaud', 'tomate', '', '', 'marmiton.org'],
+  ['Merlu meunière au citron', 'poelee', 'skillet', 10, 12, 'p', 'main', 'o', 'merlu', 'courgette', '', '', 'marmiton.org'],
+  ['Saumon poêlé aux épinards', 'poelee', 'skillet', 10, 12, 'p', 'main', 'o', 'saumon', 'epinard', '', '', 'marmiton.org'],
+  ['Thon poêlé sauce soja', 'poelee', 'skillet', 8, 8, 'p', 'main', 'o', 'thon', 'courgette', '', '', 'marmiton.org'],
+  ['Sardines poêlées à la tomate', 'poelee', 'skillet', 8, 8, 'p', 'main', 'o', 'sardine', 'tomate', '', '', 'marmiton.org'],
+  ['Maquereau poêlé à la moutarde', 'poelee', 'skillet', 8, 12, 'p', 'main', 'o', 'maquereau', 'courgette', '', '', 'marmiton.org'],
+  ['Truite poêlée au citron', 'poelee', 'skillet', 8, 12, 'p', 'main', 'o', 'truite', 'epinard', '', '', 'marmiton.org'],
+  ['Tofu sauté au gingembre', 'poelee', 'skillet', 10, 10, 'p', 'main', 'g', 'tofu', 'carotte', '', '', 'marmiton.org'],
+  ['Poêlée de champignons', 'poelee', 'skillet', 10, 12, 'p', 'main', 'g', 'lentille', 'champignon', '', '', 'marmiton.org'],
+  ['Poêlée de courgettes et pois chiches', 'poelee', 'skillet', 12, 15, 'p', 'main', 'g', 'pois chiche', 'courgette+tomate', '', '', 'marmiton.org'],
+  ['Aubergines au basilic', 'poelee', 'skillet', 12, 18, 'p', 'main', 'g', 'pois chiche', 'aubergine+tomate', '', '', 'marmiton.org'],
+  ['Fajitas de bœuf', 'poelee', 'skillet', 15, 12, 'p', 'main', 'o', 'boeuf', 'poivron+oignon', '', '', 'marmiton.org'],
+  ['Fajitas de poulet', 'poelee', 'skillet', 15, 12, 'p', 'main', 'o', 'poulet', 'poivron+oignon', '', '', 'marmiton.org'],
+  ['Burger au haché', 'poelee', 'skillet', 12, 12, 'p', 'main', 'o', 'hache', 'tomate', '', '', 'marmiton.org'],
+  ['Boulettes au haché', 'poelee', 'skillet', 20, 15, 'p', 'main', 'o', 'hache', 'tomate+courgette', '', '', 'marmiton.org'],
+  ['Keftas d’agneau', 'poelee', 'skillet', 20, 12, 'p', 'main', 'o', 'agneau', 'tomate+oignon', '', '', 'marmiton.org'],
+  ['Shawarma de poulet', 'poelee', 'skillet', 15, 12, 'p', 'main', 'o', 'poulet', 'oignon+poivron', '', '', 'marmiton.org'],
+  ['Poulet teriyaki', 'poelee', 'skillet', 12, 14, 'p', 'main', 'o', 'poulet', 'carotte', 'riz', '', 'marmiton.org'],
+  ['Crevettes à la mexicaine', 'poelee', 'skillet', 12, 10, 'p', 'main', 'o', 'crevette', 'poivron+tomate', '', '', 'marmiton.org'],
+  ['Truffade au cantal', 'poelee', 'skillet', 15, 25, 'p', 'main', 'o', '', '', 'pomme de terre', '', 'feteduterroir.fr'],
+  ['Croque-monsieur à l’emmental', 'poelee', 'skillet', 10, 8, 'p', 'main', 'o', 'jambon', '', '', '', 'marmiton.org'],
+  ['Rôti de bœuf aux carottes', 'four', 'oven', 15, 40, 'f', 'main', 'o', 'boeuf', 'carotte+oignon', '', '', 'marmiton.org'],
+  ['Rôti de veau aux herbes', 'four', 'oven', 15, 45, 'f', 'main', 'o', 'veau', 'carotte', '', '', 'marmiton.org'],
+  ['Gigot d’agneau aux herbes', 'four', 'oven', 15, 50, 'f', 'main', 'o', 'agneau', 'carotte+oignon', '', '', 'marmiton.org'],
+  ['Rôti de porc aux pommes de terre', 'four', 'oven', 15, 50, 'f', 'main', 'o', 'porc', 'oignon', 'pomme de terre', '', 'marmiton.org'],
+  ['Rôti de dinde aux carottes', 'four', 'oven', 15, 45, 'f', 'main', 'o', 'dinde', 'carotte', '', '', 'marmiton.org'],
+  ['Poulet rôti aux herbes', 'four', 'oven', 15, 45, 'f', 'main', 'o', 'poulet', 'carotte+oignon', '', '', 'marmiton.org'],
+  ['Confit de canard et pommes de terre', 'four', 'oven', 10, 30, 'f', 'main', 'o', 'canard', '', 'pomme de terre', '', 'les3soeurs.com'],
+  ['Boulettes de bœuf au four', 'four', 'oven', 20, 25, 'f', 'main', 'o', 'hache', 'tomate', '', '', 'marmiton.org'],
+  ['Merguez au four et courgettes', 'four', 'oven', 10, 25, 'f', 'main', 'o', 'merguez', 'courgette+oignon', '', '', 'marmiton.org'],
+  ['Papillote de cabillaud au citron', 'four', 'parcel', 12, 18, 'f', 'main', 'o', 'cabillaud', 'courgette', '', '', 'marmiton.org'],
+  ['Papillote de truite aux herbes', 'four', 'parcel', 12, 18, 'f', 'main', 'o', 'truite', 'carotte', '', '', 'marmiton.org'],
+  ['Papillote de saumon aux épinards', 'four', 'parcel', 12, 18, 'f', 'main', 'o', 'saumon', 'epinard', '', '', 'marmiton.org'],
+  ['Cabillaud rôti aux olives', 'four', 'oven', 12, 20, 'f', 'main', 'o', 'cabillaud', 'tomate+poivron', '', '', 'marmiton.org'],
+  ['Lieu rôti à la patate douce', 'four', 'oven', 12, 25, 'f', 'main', 'o', 'lieu', 'oignon', 'patate douce', '', 'marmiton.org'],
+  ['Saumon rôti aux asperges', 'four', 'oven', 12, 18, 'f', 'main', 'o', 'saumon', 'asperge', '', '', 'marmiton.org'],
+  ['Légumes rôtis du jardin', 'four', 'oven', 15, 35, 'f', 'main', 'g', 'pois chiche', 'courgette+poivron', '', '', 'marmiton.org'],
+  ['Chou farci au jambon', 'four', 'oven', 25, 40, 'f', 'main', 'o', 'jambon', 'chou+carotte', '', '', 'marmiton.org'],
+  ['Poulet tikka au four', 'four', 'oven', 15, 25, 'f', 'main', 'o', 'poulet', 'poivron', '', 'd', 'marmiton.org'],
+  ['Tartiflette au reblochon', 'gratin', 'bake', 20, 35, 'f', 'main', 'o', 'lardon', 'oignon', 'pomme de terre', '', 'bistrosia.fr'],
+  ['Raclette aux pommes de terre', 'gratin', 'bake', 15, 20, 'f', 'main', 'o', 'jambon', '', 'pomme de terre', '', 'les3soeurs.com'],
+  ['Hachis parmentier', 'gratin', 'bake', 25, 30, 'f', 'main', 'o', 'hache', 'carotte', 'pomme de terre', '', 'viralmag.fr'],
+  ['Moussaka', 'gratin', 'bake', 30, 40, 'f', 'main', 'o', 'agneau', 'aubergine+tomate', 'pomme de terre', '', 'happymuncher.com'],
+  ['Gratin dauphinois à l’ail', 'gratin', 'bake', 20, 50, 'f', 'main', 't', '', 'oignon', 'pomme de terre', '', 'marmiton.org'],
+  ['Gratin de chou-fleur au gruyère', 'gratin', 'bake', 15, 30, 'f', 'main', 't', '', 'chou-fleur', '', '', 'marmiton.org'],
+  ['Gratin de potiron au parmesan', 'gratin', 'bake', 15, 30, 'f', 'main', 't', '', 'potiron', '', '', 'marmiton.org'],
+  ['Shepherd’s pie à l’agneau', 'gratin', 'bake', 25, 30, 'f', 'main', 'o', 'agneau', 'carotte', 'pomme de terre', '', 'marmiton.org'],
+  ['Gratin de cabillaud', 'gratin', 'bake', 15, 25, 'f', 'main', 'o', 'cabillaud', 'epinard', 'pomme de terre', '', 'marmiton.org'],
+  ['Enchiladas de poulet', 'gratin', 'bake', 20, 25, 'f', 'main', 'o', 'poulet', 'tomate+poivron', '', '', 'marmiton.org'],
+  ['Quiche lorraine', 'gratin', 'bake', 20, 35, 'f', 'main', 'o', 'lardon', 'oignon', '', 'e', 'bistrosia.fr'],
+  ['Quiche aux épinards et chèvre', 'gratin', 'bake', 20, 35, 'f', 'main', 't', '', 'epinard', '', 'e', 'marmiton.org'],
+  ['Quiche au thon', 'gratin', 'bake', 20, 35, 'f', 'main', 'o', 'thon', 'tomate', '', 'e', 'marmiton.org'],
+  ['Salade grecque à la feta', 'salade', 'salad', 15, 0, 's', 'salad', 't', '', 'tomate+concombre', '', '', 'marmiton.org'],
+  ['Salade lyonnaise aux lardons', 'salade', 'salad', 15, 8, 's', 'salad', 'o', 'lardon', 'salade', '', 'e', 'marmiton.org'],
+  ['Salade de betteraves au chèvre', 'salade', 'salad', 15, 0, 's', 'salad', 't', '', 'betterave', '', '', 'marmiton.org'],
+  ['Salade de lentilles et noix', 'salade', 'salad', 15, 0, 's', 'salad', 'g', 'lentille+noix', 'carotte', '', '', 'marmiton.org'],
+  ['Salade de poulet et avocat', 'salade', 'salad', 15, 12, 's', 'salad', 'o', 'poulet', 'salade', '', '', 'marmiton.org'],
+  ['Salade de quinoa et feta', 'salade', 'salad', 15, 12, 's', 'salad', 't', '', 'concombre+tomate', 'quinoa', '', 'marmiton.org'],
+  ['Salade de pois chiches', 'salade', 'salad', 15, 0, 's', 'salad', 'g', 'pois chiche', 'poivron+tomate', '', '', 'marmiton.org'],
+  ['Salade de pâtes au thon', 'salade', 'salad', 15, 12, 's', 'salad', 'o', 'thon', 'tomate', 'pate', '', 'marmiton.org'],
+  ['Salade de chou au roquefort', 'salade', 'salad', 15, 0, 's', 'salad', 't', 'noix', 'chou', '', '', 'marmiton.org'],
+  ['Salade de tomates à la mozzarella', 'salade', 'salad', 10, 0, 's', 'salad', 't', '', 'tomate', '', '', 'marmiton.org'],
+  ['Salade de concombre au yaourt', 'salade', 'salad', 10, 0, 's', 'salad', 't', '', 'concombre', '', 'd', 'marmiton.org'],
+  ['Salade de crevettes et avocat', 'salade', 'salad', 15, 0, 's', 'salad', 'o', 'crevette', 'concombre', '', '', 'marmiton.org'],
+  ['Taboulé de semoule aux tomates', 'salade', 'salad', 20, 0, 's', 'salad', 'g', 'pois chiche', 'tomate+concombre', 'couscous', '', 'marmiton.org'],
+  ['Salade de pommes de terre et lardons', 'salade', 'salad', 15, 20, 's', 'salad', 'o', 'lardon', 'oignon', 'pomme de terre', '', 'marmiton.org'],
+  ['Ceviche de cabillaud', 'salade', 'salad', 20, 0, 's', 'salad', 'o', 'cabillaud', 'tomate', '', '', 'marmiton.org'],
+  ['Salade de chèvre chaud', 'salade', 'salad', 12, 8, 's', 'salad', 't', '', 'salade', '', '', 'marmiton.org'],
+  ['Tortilla de pommes de terre', 'omelette', 'omelette', 15, 20, 'p', 'main', 't', '', 'oignon', 'pomme de terre', 'e', 'marmiton.org'],
+  ['Omelette forestière aux champignons', 'omelette', 'omelette', 8, 8, 'p', 'main', 't', '', 'champignon', '', 'e', 'marmiton.org'],
+  ['Omelette aux épinards et chèvre', 'omelette', 'omelette', 10, 8, 'p', 'main', 't', '', 'epinard', '', 'e', 'marmiton.org'],
+  ['Omelette au jambon', 'omelette', 'omelette', 8, 8, 'p', 'main', 'o', 'jambon', '', '', 'e', 'marmiton.org'],
+  ['Frittata de courgettes', 'omelette', 'omelette', 12, 15, 'p', 'main', 't', '', 'courgette', '', 'e', 'marmiton.org'],
+  ['Omelette au saumon', 'omelette', 'omelette', 10, 8, 'p', 'main', 'o', 'saumon', 'epinard', '', 'e', 'marmiton.org'],
+  ['Menemen turc', 'omelette', 'omelette', 10, 15, 'p', 'main', 't', '', 'tomate+poivron', '', 'e', 'marmiton.org'],
+  ['Poke bowl au saumon', 'bowl', 'bowl', 15, 12, 's', 'main', 'o', 'saumon', 'concombre', 'riz', '', 'marmiton.org'],
+  ['Bo bun au bœuf', 'bowl', 'bowl', 20, 12, 's', 'main', 'o', 'boeuf', 'carotte+concombre', 'riz', '', 'marmiton.org'],
+  ['Burrito bowl au haché', 'bowl', 'bowl', 15, 15, 's', 'main', 'o', 'hache', 'tomate+poivron', 'riz', '', 'marmiton.org'],
+  ['Falafels et semoule', 'bowl', 'bowl', 20, 20, 'f', 'main', 'g', 'pois chiche', 'tomate+concombre', 'couscous', '', 'marmiton.org'],
+  ['Bowl veggie patate douce', 'bowl', 'bowl', 15, 30, 'f', 'main', 'g', 'pois chiche', 'courgette', 'patate douce', '', 'marmiton.org'],
+  ['Bowl tofu et riz', 'bowl', 'bowl', 15, 12, 's', 'main', 'g', 'tofu', 'carotte+concombre', 'riz', '', 'marmiton.org'],
+  ['Buddha bowl quinoa et avocat', 'bowl', 'bowl', 15, 15, 's', 'main', 'g', 'pois chiche', 'concombre', 'quinoa', '', 'marmiton.org'],
+  ['Bowl dinde et quinoa', 'bowl', 'bowl', 15, 15, 's', 'main', 'o', 'dinde', 'courgette', 'quinoa', '', 'marmiton.org'],
+  ['Bowl crevettes et riz', 'bowl', 'bowl', 15, 10, 's', 'main', 'o', 'crevette', 'concombre', 'riz', '', 'marmiton.org'],
+  ['Couscous d’agneau', 'bowl', 'bowl', 20, 30, 'c', 'main', 'o', 'agneau', 'carotte+courgette', 'couscous', '', 'marmiton.org'],
+  ['Couscous aux légumes', 'bowl', 'bowl', 20, 25, 'c', 'main', 'g', 'pois chiche', 'courgette+carotte', 'couscous', '', 'marmiton.org'],
+  ['Bowl lentilles et patate douce', 'bowl', 'bowl', 15, 25, 'f', 'main', 'g', 'lentille', 'carotte', 'patate douce', '', 'sagat.fr'],
+  ['Bol d’avoine à la banane', 'petit-dejeuner', 'breakfast', 5, 0, 's', 'breakfast', 't', '', '', 'avoine', 'f', 'marmiton.org'],
+  ['Porridge avoine et orange', 'petit-dejeuner', 'breakfast', 5, 8, 'c', 'breakfast', 't', '', '', 'avoine', 'f', 'marmiton.org'],
+  ['Pancakes à la banane', 'petit-dejeuner', 'breakfast', 8, 10, 'p', 'breakfast', 't', '', '', 'avoine', 'ef', 'marmiton.org'],
+  ['Bol d’avoine au fromage blanc', 'petit-dejeuner', 'breakfast', 5, 0, 's', 'breakfast', 't', '', '', 'avoine', 'd', 'marmiton.org'],
+  ['Flocons d’avoine au lait', 'petit-dejeuner', 'breakfast', 5, 8, 'c', 'breakfast', 't', '', '', 'avoine', 'd', 'marmiton.org'],
+  ['Fromage blanc noix et orange', 'petit-dejeuner', 'breakfast', 5, 0, 's', 'breakfast', 't', 'noix', '', '', 'df', 'marmiton.org'],
+  ['Œufs au plat et avocat', 'petit-dejeuner', 'skillet', 5, 6, 'p', 'breakfast', 't', '', '', '', 'e', 'marmiton.org'],
+  ['Yaourt avoine et banane', 'petit-dejeuner', 'breakfast', 5, 0, 's', 'breakfast', 't', '', '', 'avoine', 'df', 'marmiton.org'],
 ];
 
-const MEAT_MAINS: Array<{
-  label: string;
-  protein: RecipeSpec['protein'];
-  vegetable: RecipeSpec['vegetable'];
-  method: CookMethod;
-  kind: DishKind;
-  cook: number;
-}> = [
-  { label: 'Steak de bœuf aux poivrons', protein: ['boeuf'], vegetable: ['poivron', 'oignon'], method: 'skillet', kind: 'poelee', cook: 12 },
-  { label: 'Bavette de bœuf et tomates', protein: ['boeuf'], vegetable: ['tomate'], method: 'skillet', kind: 'poelee', cook: 10 },
-  { label: 'Rôti de bœuf aux carottes', protein: ['boeuf'], vegetable: ['carotte', 'oignon'], method: 'oven', kind: 'four', cook: 35 },
-  { label: 'Bœuf mijoté aux champignons', protein: ['boeuf'], vegetable: ['champignon', 'carotte'], method: 'stew', kind: 'poelee', cook: 40 },
-  { label: 'Steak haché sauce tomate', protein: ['hache'], vegetable: ['tomate', 'oignon'], method: 'skillet', kind: 'poelee', cook: 12 },
-  { label: 'Boulettes hachées aux herbes', protein: ['hache'], vegetable: ['tomate', 'courgette'], method: 'oven', kind: 'four', cook: 25 },
-  { label: 'Escalope de veau aux champignons', protein: ['veau'], vegetable: ['champignon'], method: 'skillet', kind: 'poelee', cook: 12 },
-  { label: 'Escalope de veau au citron', protein: ['veau'], vegetable: ['courgette'], method: 'skillet', kind: 'poelee', cook: 12 },
-  { label: 'Rôti de veau aux carottes', protein: ['veau'], vegetable: ['carotte', 'oignon'], method: 'oven', kind: 'four', cook: 40 },
-  { label: 'Blanquette de veau aux légumes', protein: ['veau'], vegetable: ['carotte', 'champignon'], method: 'stew', kind: 'poelee', cook: 45 },
-  { label: 'Côtelette d’agneau aux tomates', protein: ['agneau'], vegetable: ['tomate', 'poivron'], method: 'skillet', kind: 'poelee', cook: 14 },
-  { label: 'Gigot d’agneau aux herbes', protein: ['agneau'], vegetable: ['carotte', 'oignon'], method: 'oven', kind: 'four', cook: 45 },
-  { label: 'Agneau mijoté à l’aubergine', protein: ['agneau'], vegetable: ['aubergine', 'tomate'], method: 'stew', kind: 'poelee', cook: 40 },
-  { label: 'Brochettes d’agneau aux poivrons', protein: ['agneau'], vegetable: ['poivron', 'oignon'], method: 'oven', kind: 'four', cook: 20 },
-  { label: 'Magret de canard aux courgettes', protein: ['canard'], vegetable: ['courgette'], method: 'skillet', kind: 'poelee', cook: 14 },
-  { label: 'Magret de canard au four', protein: ['canard'], vegetable: ['carotte'], method: 'oven', kind: 'four', cook: 22 },
-  { label: 'Émincé de canard aux poivrons', protein: ['canard'], vegetable: ['poivron', 'oignon'], method: 'wok', kind: 'wok', cook: 12 },
-  { label: 'Filet mignon de porc à la tomate', protein: ['porc', 'mignon'], vegetable: ['tomate'], method: 'skillet', kind: 'poelee', cook: 16 },
-  { label: 'Rôti de porc aux herbes', protein: ['porc'], vegetable: ['carotte', 'oignon'], method: 'oven', kind: 'four', cook: 40 },
-  { label: 'Porc sauté aux poivrons', protein: ['porc'], vegetable: ['poivron', 'oignon'], method: 'wok', kind: 'wok', cook: 12 },
-  { label: 'Escalope de dinde aux champignons', protein: ['dinde'], vegetable: ['champignon'], method: 'skillet', kind: 'poelee', cook: 12 },
-  { label: 'Rôti de dinde aux carottes', protein: ['dinde'], vegetable: ['carotte'], method: 'oven', kind: 'four', cook: 35 },
-  { label: 'Poulet rôti aux herbes', protein: ['poulet'], vegetable: ['carotte', 'oignon'], method: 'oven', kind: 'four', cook: 40 },
-  { label: 'Poulet sauté aux poivrons', protein: ['poulet'], vegetable: ['poivron', 'tomate'], method: 'wok', kind: 'wok', cook: 15 },
-  { label: 'Cuisse de poulet mijotée', protein: ['poulet'], vegetable: ['carotte', 'tomate'], method: 'stew', kind: 'poelee', cook: 35 },
-  { label: 'Saucisse de Toulouse à la tomate', protein: ['saucisse'], vegetable: ['tomate', 'oignon'], method: 'stew', kind: 'poelee', cook: 25 },
-  { label: 'Saucisse grillée aux poivrons', protein: ['saucisse'], vegetable: ['poivron'], method: 'skillet', kind: 'poelee', cook: 14 },
-  { label: 'Merguez aux poivrons et tomates', protein: ['merguez'], vegetable: ['poivron', 'tomate'], method: 'skillet', kind: 'poelee', cook: 14 },
-  { label: 'Merguez au four et courgettes', protein: ['merguez'], vegetable: ['courgette', 'oignon'], method: 'oven', kind: 'four', cook: 22 },
-  { label: 'Jambon poêlé aux épinards', protein: ['jambon'], vegetable: ['épinard'], method: 'skillet', kind: 'poelee', cook: 8 },
-  { label: 'Jambon rôti aux carottes', protein: ['jambon'], vegetable: ['carotte'], method: 'oven', kind: 'four', cook: 25 },
-  { label: 'Lardons sautés aux champignons', protein: ['lardon'], vegetable: ['champignon', 'oignon'], method: 'skillet', kind: 'poelee', cook: 10 },
-];
-
-function spec(
-  partial: Pick<RecipeSpec, 'label' | 'kind' | 'method' | 'prep' | 'cook' | 'equipment' | 'tags'> &
-    Partial<RecipeSpec>,
-): RecipeSpec {
-  return {
-    id: '',
-    diets: OMNI,
-    source: 'cuisinons',
-    ...partial,
-  };
+function tokens(value: string): string[] | undefined {
+  if (!value) return undefined;
+  return value.split('+');
 }
 
 function buildVarietyRecipes(): RecipeSpec[] {
-  const recipes: RecipeSpec[] = [];
-
-  for (const cheese of CHEESES) {
-    for (const garnish of PASTA_GARNISHES.slice(0, 6)) {
-      recipes.push(
-        spec({
-          label: `Pâtes ${garnish.title}, ${cheese}`,
-          kind: 'pates',
-          method: 'pasta',
-          prep: 10,
-          cook: 15,
-          equipment: CASS,
-          tags: MAIN,
-          protein: garnish.protein,
-          vegetable: garnish.vegetable,
-          starch: ['pate', 'spaghetti'],
-          diets: garnish.diets,
-        }),
-      );
-    }
-  }
-
-  for (const cheese of CHEESES.slice(0, 10)) {
-    recipes.push(
-      spec({
-        label: `Riz sauté au poulet, ${cheese}`,
-        kind: 'riz',
-        method: 'wok',
-        prep: 10,
-        cook: 15,
-        equipment: WOK,
-        tags: MAIN,
-        protein: ['poulet'],
-        vegetable: ['poivron', 'carotte'],
-        starch: ['riz'],
-      }),
-    );
-    recipes.push(
-      spec({
-        label: `Riz pilaf au bœuf, ${cheese}`,
-        kind: 'riz',
-        method: 'rice',
-        prep: 10,
-        cook: 20,
-        equipment: CASS,
-        tags: MAIN,
-        protein: ['boeuf'],
-        vegetable: ['carotte', 'oignon'],
-        starch: ['riz'],
-      }),
-    );
-  }
-
-  for (const main of MEAT_MAINS) {
-    recipes.push(
-      spec({
-        label: main.label,
-        kind: main.kind,
-        method: main.method,
-        prep: 12,
-        cook: main.cook,
-        equipment: main.method === 'oven' ? FOUR : main.method === 'wok' ? WOK : main.method === 'stew' ? CASS : POELE,
-        tags: MAIN,
-        protein: main.protein,
-        vegetable: main.vegetable,
-      }),
-    );
-  }
-
-  for (const cheese of CHEESES) {
-    recipes.push(
-      spec({
-        label: `Gratin de courgettes, ${cheese}`,
-        kind: 'gratin',
-        method: 'bake',
-        prep: 15,
-        cook: 30,
-        equipment: FOUR,
-        tags: MAIN,
-        vegetable: ['courgette', 'tomate'],
-      }),
-    );
-  }
-
-  for (const cheese of CHEESES.slice(0, 12)) {
-    recipes.push(
-      spec({
-        label: `Salade de tomates, ${cheese}`,
-        kind: 'salade',
-        method: 'salad',
-        prep: 12,
-        cook: 0,
-        equipment: ['saladier', 'couteau'],
-        tags: ['salade'],
-        vegetable: ['tomate', 'concombre'],
-      }),
-    );
-  }
-
-  for (const garnish of RICE_GARNISHES) {
-    recipes.push(
-      spec({
-        label: `Riz au ${garnish.title} et légumes`,
-        kind: garnish.kind,
-        method: garnish.method,
-        prep: 10,
-        cook: 18,
-        equipment: garnish.equipment,
-        tags: MAIN,
-        protein: garnish.protein,
-        vegetable: garnish.vegetable,
-        starch: ['riz'],
-      }),
-    );
-  }
-
-  return recipes.slice(0, 200).map((recipe, index) => ({
-    ...recipe,
-    id: `v${String(index + 1).padStart(3, '0')}`,
-  }));
+  return ROWS.map((row, index) => {
+    const [label, kind, method, prep, cook, eq, tag, diet, protein, veg, starch, flags, source] = row;
+    return {
+      id: `v${String(index + 1).padStart(3, '0')}`,
+      label,
+      kind,
+      method,
+      prep,
+      cook,
+      equipment: EQ[eq],
+      tags: diet === 't' ? [...TAG[tag], 'vegetarien'] : TAG[tag],
+      diets: DIET[diet],
+      protein: tokens(protein),
+      vegetable: tokens(veg),
+      starch: tokens(starch),
+      egg: flags.includes('e'),
+      dairy: flags.includes('d'),
+      fruit: flags.includes('f'),
+      source,
+    };
+  });
 }
 
 export const VARIETY_RECIPES: readonly RecipeSpec[] = buildVarietyRecipes();

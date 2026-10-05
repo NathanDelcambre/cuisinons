@@ -1113,6 +1113,9 @@ export function buildHealthyOfficialSpec(spec: RecipeSpec): OfficialHealthySpec 
   if (spec.label.toLowerCase().includes('gingembre')) {
     lines.push(tsp('ginger', 4));
   }
+  if (/(^|\s)ail(\s|$)/.test(normalizeSearchText(spec.label))) {
+    lines.push(g('garlic', forPeople(10)));
+  }
   if (spec.label.toLowerCase().includes('moutarde')) {
     lines.push(tsp('mustard', 8));
   }
@@ -1169,7 +1172,7 @@ export function buildVarietyOfficialSpecs(): OfficialHealthySpec[] {
     const built = buildHealthyOfficialSpec(recipe);
     return {
       ...built,
-      description: `Pour ${String(built.servings)} personnes. Recette maison, avec les quantités et les étapes pour la refaire telle quelle.`,
+      description: `Pour ${String(built.servings)} personnes. Idée repérée sur ${recipe.source}, réécrite avec les quantités et les étapes Cuisinons, sans reprendre le texte d’origine.`,
       tagSlugs: built.tagSlugs.filter((tag) => tag !== 'healthy'),
     };
   });

@@ -282,16 +282,31 @@ describe('catalogue healthy officiel', () => {
     expect(picked?.ciqualCode).toBe(20009);
   });
 
-  it('ajoute un catalogue varié de pâtes, riz, viandes et fromages', () => {
+  it('ajoute 200 recettes distinctes, pas des variantes de fromage', () => {
     const specs = buildVarietyOfficialSpecs();
+    const healthyNames = new Set(HEALTHY_RECIPES.map((recipe) => recipe.label));
     expect(VARIETY_RECIPE_COUNT).toBe(200);
     expect(specs).toHaveLength(200);
     expect(new Set(specs.map((spec) => spec.id)).size).toBe(200);
+    expect(new Set(specs.map((spec) => spec.name)).size).toBe(200);
     expect(specs.every((spec) => spec.id.startsWith('official-v'))).toBe(true);
     expect(specs.every((spec) => !spec.tagSlugs.includes('healthy'))).toBe(true);
     expect(specs.every((spec) => spec.steps.length >= 4)).toBe(true);
-    expect(specs.filter((spec) => spec.tagSlugs.includes('pates')).length).toBeGreaterThan(40);
-    expect(specs.filter((spec) => spec.tagSlugs.includes('riz')).length).toBeGreaterThan(10);
+    expect(specs.some((spec) => healthyNames.has(spec.name))).toBe(false);
+    expect(new Set(specs.flatMap((spec) => spec.tagSlugs.filter((tag) => (DISH_KINDS as readonly string[]).includes(tag)))).size).toBeGreaterThanOrEqual(8);
+    const pantry = new Set(['oliveOil', 'salt', 'pepper', 'water']);
+    const signatures = specs.map((spec) =>
+      spec.ingredients
+        .map((line) => line.key)
+        .filter((key) => !pantry.has(key))
+        .sort()
+        .join('+'),
+    );
+    const signatureCounts = new Map<string, number>();
+    for (const signature of signatures) {
+      signatureCounts.set(signature, (signatureCounts.get(signature) ?? 0) + 1);
+    }
+    expect(Math.max(...signatureCounts.values())).toBeLessThanOrEqual(2);
     const cheeseKeys = [
       'emmental',
       'comte',
