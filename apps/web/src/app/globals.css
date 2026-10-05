@@ -108,9 +108,17 @@
 html {
   /* Reserve la place de l'ascenseur en permanence : sans cela, une page courte
      et une page longue ne centrent pas le contenu au meme endroit, et toute la
-     mise en page (sidebar comprise) saute a chaque navigation. */
+     mise en page (sidebar comprise) saute a chaque navigation.
+     Sur mobile la barre ne prend pas de place : la gouttiere laisserait un
+     vide a droite. */
   scrollbar-gutter: stable;
   overscroll-behavior: none;
+}
+
+@media (max-width: 1023px) {
+  html {
+    scrollbar-gutter: auto;
+  }
 }
 
 /*
@@ -173,8 +181,8 @@ html,
 body {
   min-height: 100%;
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(125, 155, 138, 0.12), transparent 50%),
-    radial-gradient(900px 500px at 100% 0%, rgba(232, 178, 152, 0.14), transparent 45%), #d5ccc3;
+    radial-gradient(1200px 600px at 10% -10%, rgba(125, 155, 138, 0.1), transparent 50%),
+    radial-gradient(900px 500px at 100% 0%, rgba(232, 178, 152, 0.1), transparent 45%), #e6dfd7;
   color: var(--color-ink-900);
 }
 

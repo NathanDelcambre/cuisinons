@@ -4,15 +4,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Check, Plus, Trash2 } from 'lucide-react';
 import { Button, IconButton, Modal, Stepper } from '@cuisinons/ui';
-import { type MealSlot, type QuantityUnit, UNIT_LABELS } from '@cuisinons/shared';
+import { type MealSlot, type QuantityUnit, UNIT_LABELS, avatarUrlForEmail } from '@cuisinons/shared';
 import { apiJson } from '@/lib/api';
 import { IngredientPicker } from './ingredient-picker';
 import { IngredientIcon } from './ingredient-icon';
 import { useAuth } from './auth-provider';
+import { Avatar } from './avatar';
 
 type Picked = { id: string; nameFr: string; iconUrl: string | null };
 type Line = { ingredient: Picked; quantity: number; unit: QuantityUnit };
-type User = { id: string; displayName: string };
+type User = { id: string; email?: string; displayName: string; avatarUrl?: string | null };
 
 export function ManualMealDialog({
   open,
@@ -139,9 +140,16 @@ export function ManualMealDialog({
           <p className="text-sm font-medium text-ink-700">Portions</p>
           {(users.data ?? []).map((u) => (
             <div key={u.id} className="flex items-center justify-between gap-3">
-              <span className="truncate text-sm text-ink-600">
-                {u.displayName}
-                {u.id === user?.id ? ' (toi)' : ''}
+              <span className="flex min-w-0 items-center gap-2.5">
+                <Avatar
+                  name={u.displayName}
+                  src={u.avatarUrl ?? (u.email ? avatarUrlForEmail(u.email) : null)}
+                  className="size-8 rounded-full text-xs"
+                />
+                <span className="min-w-0 truncate text-sm text-ink-600">
+                  {u.displayName}
+                  {u.id === user?.id ? ' (toi)' : ''}
+                </span>
               </span>
               <Stepper
                 value={portions[u.id] ?? (soloUserId ? (u.id === soloUserId ? 1 : 0) : 1)}

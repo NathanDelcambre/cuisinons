@@ -22,7 +22,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  CookingPot,
   RefreshCw,
   Sparkles,
   Trash2,
@@ -128,7 +127,7 @@ function iso(date: Date) {
 
 /** Largeur confortable, qui s'élargit dès que l'écran peut montrer environ cinq jours. */
 const DAY_CARD_FRAME =
-  'h-full min-h-[32rem] w-[calc(100vw-2rem)] shrink-0 sm:w-[20rem] xl:w-[max(20rem,calc((100vw-18.5rem)/5))]';
+  'h-full min-h-0 w-full sm:min-h-[32rem] sm:w-[20rem] xl:w-[max(20rem,calc((100vw-18.5rem)/5))]';
 
 /**
  * Glisser horizontalement la bande des jours, sans voler les clics :
@@ -422,12 +421,33 @@ export default function PlanningPage() {
     })),
   });
   return (
-    <div className="flex min-h-[calc(100dvh-8.5rem)] flex-col gap-6 lg:min-h-[calc(100dvh-6rem)]">
-      <header className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2">
-        <h1 className="shrink-0 font-display text-[1.75rem] font-semibold tracking-[-0.03em] text-ink-900 sm:text-[2rem]">
-          Planning de {subject?.displayName ?? user?.displayName ?? '…'}
-        </h1>
-        <div className="flex w-full min-w-0 flex-wrap items-center justify-center gap-2 text-ink-900 sm:w-auto sm:justify-start">
+    <div className="flex min-h-0 flex-1 flex-col gap-2 sm:min-h-[calc(100dvh-8.5rem)] sm:gap-6 lg:min-h-[calc(100dvh-6rem)]">
+      <header className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2">
+        <div className="flex min-w-0 items-center gap-2 sm:contents">
+          <h1 className="min-w-0 flex-1 font-display text-base font-semibold leading-tight tracking-[-0.02em] text-ink-900 sm:flex-none sm:truncate sm:text-[2rem] sm:tracking-[-0.03em]">
+            Planning de {subject?.displayName ?? user?.displayName ?? '…'}
+          </h1>
+          <div className="flex shrink-0 items-center gap-0.5 text-ink-900 sm:hidden">
+            <IconButton
+              icon={ChevronLeft}
+              label="Semaine précédente"
+              size="sm"
+              variant="ghost"
+              className="size-7 text-ink-400 hover:text-ink-600"
+              onClick={() => setWeekStart(addDays(weekStart, -7))}
+            />
+            <span className="text-xs font-medium whitespace-nowrap">{weekRangeLabel(weekStart)}</span>
+            <IconButton
+              icon={ChevronRight}
+              label="Semaine suivante"
+              size="sm"
+              variant="ghost"
+              className="size-7 text-ink-400 hover:text-ink-600"
+              onClick={() => setWeekStart(addDays(weekStart, 7))}
+            />
+          </div>
+        </div>
+        <div className="hidden min-w-0 flex-wrap items-center justify-center gap-2 text-ink-900 sm:flex sm:w-auto sm:justify-start">
           <IconButton
             icon={ChevronLeft}
             label="Semaine précédente"
@@ -477,10 +497,10 @@ export default function PlanningPage() {
       ) : null}
 
       {mealsQuery.isLoading ? (
-        <div className="scrollbar-none -mx-4 min-h-0 flex-1 overflow-x-auto px-4 py-3 sm:-mx-8 sm:px-8">
-          <div className="flex h-full w-max gap-3">
+        <div className="scrollbar-none @container -mx-3 min-h-0 flex-1 overflow-x-auto sm:-mx-8 sm:px-8 sm:py-3">
+          <div className="flex h-full w-max gap-3 max-lg:gap-0">
             {Array.from({ length: 7 }, (_, i) => (
-              <Skeleton key={i} className={cn(DAY_CARD_FRAME, 'rounded-2xl')} />
+              <Skeleton key={i} className={cn(DAY_CARD_FRAME, 'max-lg:w-[100cqw] rounded-2xl')} />
             ))}
           </div>
         </div>
@@ -489,16 +509,16 @@ export default function PlanningPage() {
           ref={scrollerRef}
           onScroll={selectCenteredDay}
           className={cn(
-            'scrollbar-none -mx-4 min-h-0 flex-1 snap-x snap-mandatory overflow-x-auto overscroll-x-contain px-4 py-3 sm:-mx-8 sm:snap-none sm:px-8 [&_button]:cursor-pointer',
+            'scrollbar-none @container -mx-3 min-h-0 flex-1 snap-x snap-mandatory overflow-x-auto overscroll-x-contain sm:-mx-8 sm:snap-none sm:px-8 sm:py-3 [&_button]:cursor-pointer',
             draggingDays ? 'cursor-grabbing select-none' : 'cursor-grab',
           )}
         >
-          <div className="flex h-full w-max items-stretch gap-3">
+          <div className="flex h-full w-max items-stretch gap-3 max-lg:gap-0">
             {days.map((day, index) => (
               <div
                 key={iso(day)}
                 data-day-index={index}
-                className="h-full shrink-0 snap-center snap-always"
+                className="box-border h-full w-[100cqw] shrink-0 snap-center snap-always px-4 pt-1 pb-6 sm:w-auto sm:px-0 sm:py-0"
               >
                 <DayCard
                   date={day}
@@ -880,13 +900,21 @@ function DayCard({
         onClick={onSelect}
         disabled={!onSelect}
         className={cn(
-          'flex w-full shrink-0 cursor-pointer flex-col gap-1.5 rounded-t-2xl border-b border-[#e4d3c4] bg-[#f0e2d4] px-4 py-3 text-left text-ink-900 transition-colors duration-200 ease-out-soft enabled:hover:bg-[#e7d5c4]',
+          'flex w-full shrink-0 cursor-pointer flex-col gap-1 rounded-t-2xl border-b border-[#d4d4d4] bg-[#ececec] px-3 pt-3.5 pb-2 text-left text-ink-900 transition-colors duration-200 ease-out-soft enabled:hover:bg-[#e2e2e2]',
         )}
       >
-        <span className="flex min-w-0 flex-wrap items-baseline gap-x-1.5">
-          <span className="text-sm font-medium text-ink-900 first-letter:uppercase">
-            {today ? 'Aujourd’hui' : format(date, 'EEEE d MMMM', { locale: fr })}
+        <span className="flex min-w-0 items-center justify-between gap-2">
+          <span className="flex min-w-0 items-baseline gap-1.5">
+            <span className="text-[13px] font-semibold text-ink-900 capitalize">
+              {format(date, 'EEEE', { locale: fr })}
+            </span>
+            <span className="text-xs text-ink-600">{format(date, 'd MMMM', { locale: fr })}</span>
           </span>
+          {today ? (
+            <span className="shrink-0 rounded bg-[#6b6560] px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-white uppercase">
+              Aujourd’hui
+            </span>
+          ) : null}
         </span>
         <MacroCounts macros={macros} />
       </button>
@@ -973,7 +1001,7 @@ function SlotSection({
               <li
                 key={item.id}
                 className={cn(
-                  'group relative flex min-h-[5.75rem] flex-1 items-center overflow-hidden rounded-lg border border-ink-200/80 bg-white py-3.5 pl-3.5 pr-2',
+                  'group relative flex min-h-0 flex-1 items-center overflow-hidden rounded-lg border border-ink-200/80 bg-white py-2 pr-2 pl-2.5 sm:min-h-[5.75rem] sm:py-3.5 sm:pl-3.5',
                   past && 'border-[#ddd9d4] bg-[#f3f1ef] saturate-0',
                 )}
               >
@@ -1247,7 +1275,6 @@ function ActionMenu({
 function RecipeMeta({ recipe, kcal }: { recipe: NonNullable<MealItem['recipe']>; kcal: number }) {
   const ingredientCount = recipe.ingredientCount ?? 0;
   const prep = recipe.prepTimeMinutes;
-  const cook = recipe.cookTimeMinutes;
   return (
     <p className="mt-2.5 flex flex-nowrap items-center gap-1.5 overflow-hidden whitespace-nowrap pr-12 text-[11px] leading-none text-ink-400">
       {ingredientCount > 0 ? (
@@ -1260,12 +1287,6 @@ function RecipeMeta({ recipe, kcal }: { recipe: NonNullable<MealItem['recipe']>;
         <span className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap">
           <Clock className="size-3 shrink-0" aria-hidden />
           <span className="tabular">{prep} min</span>
-        </span>
-      ) : null}
-      {cook != null && cook > 0 ? (
-        <span className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap">
-          <CookingPot className="size-3 shrink-0" aria-hidden />
-          <span className="tabular">{cook} min</span>
         </span>
       ) : null}
       <MealCalories kcal={kcal} />

@@ -50,7 +50,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   return (
-    <div className="min-h-dvh">
+    <div
+      className={cn(
+        'min-h-dvh',
+        pathname === routes.planning && 'max-lg:flex max-lg:h-dvh max-lg:flex-col max-lg:overflow-hidden',
+      )}
+    >
       <DesktopSidebar pathname={pathname} />
       <MobileHeader />
       {/*
@@ -59,13 +64,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         largeur de la page, ni de la presence d'un ascenseur. Rien ne peut la
         decaler d'une page a l'autre.
       */}
-      <main className="lg:pl-[17rem]">
+      <main
+        className={cn(
+          'lg:pl-[17rem]',
+          pathname === routes.planning && 'max-lg:flex max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col',
+        )}
+      >
         {/* Le planning occupe toute la largeur utile : les colonnes de jours
             grandissent avec l'ecran. Les autres pages gardent une mesure de texte. */}
         <div
           className={cn(
             'mx-auto w-full px-4 pb-28 pt-6 sm:px-8 lg:pb-14 lg:pt-10',
-            pathname === routes.planning ? 'max-w-none' : 'max-w-[88rem]',
+            pathname === routes.planning
+              ? 'flex max-w-none min-h-0 flex-1 flex-col max-lg:px-3 max-lg:pt-3'
+              : 'max-w-[88rem]',
           )}
         >
           {/*
@@ -74,7 +86,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             invisible tant que l'hydratation n'a pas eu lieu. La cle relance
             l'animation a chaque changement d'URL.
           */}
-          <div key={pathname} className="animate-rise">
+          <div
+            key={pathname}
+            className={cn(
+              'animate-rise',
+              pathname === routes.planning && 'flex min-h-0 flex-1 flex-col',
+            )}
+          >
             {children}
           </div>
         </div>
