@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ChartNoAxesCombined, LogOut, Mail, ShieldCheck } from 'lucide-react';
+import { ChartNoAxesCombined, LogOut, Mail, ShieldCheck, Target } from 'lucide-react';
 import { Button, Card, NavRow, PageHeader } from '@cuisinons/ui';
 import { apiFetch } from '@/lib/api';
 import { routes } from '@/lib/routes';
@@ -10,6 +10,12 @@ import { useAuth } from '@/components/auth-provider';
 import { Avatar } from '@/components/avatar';
 
 const LINKS = [
+  {
+    href: routes.objectifs,
+    icon: Target,
+    label: 'Objectifs',
+    description: 'Calories, protéines, glucides et lipides par jour',
+  },
   {
     href: routes.profilStatistiques,
     icon: ChartNoAxesCombined,

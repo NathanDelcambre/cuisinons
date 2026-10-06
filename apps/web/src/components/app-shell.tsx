@@ -11,7 +11,6 @@ import {
   Plus,
   Refrigerator,
   ShoppingBasket,
-  Target,
   UserRound,
   type LucideIcon,
 } from 'lucide-react';
@@ -30,7 +29,6 @@ const NAV: NavItem[] = [
   { href: routes.recettes, label: 'Recettes', icon: ChefHat },
   { href: routes.courses, label: 'Courses', icon: ShoppingBasket },
   { href: routes.reserves, label: 'Réserves', icon: Refrigerator },
-  { href: routes.objectifs, label: 'Objectifs', icon: Target },
 ];
 
 /** Cinq onglets au maximum : au-dela, les cibles deviennent trop etroites. */
@@ -274,7 +272,9 @@ function MobileTabBar({ pathname }: { pathname: string }) {
       className="glass fixed inset-x-3 bottom-3 z-40 flex justify-around rounded-3xl p-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))] lg:hidden"
     >
       {TABS.map((tab) => {
-        const active = pathname === tab.href;
+        const active =
+          pathname === tab.href ||
+          (tab.href === routes.profil && pathname.startsWith(`${routes.profil}/`));
         const Icon = tab.icon;
         return (
           <Link

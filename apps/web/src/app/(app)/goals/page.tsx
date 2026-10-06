@@ -4,9 +4,11 @@ import { GOAL_MODES, GOAL_MODE_LABELS, type GoalMode } from '@cuisinons/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { ChevronLeft, Sparkles } from 'lucide-react';
 import { Button, Card, Field, Input, PageHeader, Select, Skeleton, transitions, cn } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
+import { routes } from '@/lib/routes';
 import { useAuth } from '@/components/auth-provider';
 import { Avatar } from '@/components/avatar';
 import { MacroIcon, type MacroKey } from '@/components/macro-icon';
@@ -162,7 +164,15 @@ export default function GoalsPage() {
   }, [goals.data, isSelf, save.isPending, save.mutate]);
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-3xl space-y-6">
+      <Link
+        href={routes.profil}
+        className="inline-flex items-center gap-1.5 text-sm text-ink-500 transition-colors duration-200 ease-out-soft hover:text-ink-900"
+      >
+        <ChevronLeft className="size-4" aria-hidden />
+        Profil
+      </Link>
+
       <PageHeader
         title="Objectifs nutritionnels"
         description={

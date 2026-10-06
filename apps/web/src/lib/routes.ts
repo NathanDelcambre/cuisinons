@@ -9,7 +9,7 @@ export const routes = {
   recetteModifier: (id: string) => `/recettes/${id}/modifier`,
   courses: '/courses',
   reserves: '/reserves',
-  objectifs: '/objectifs',
+  objectifs: '/profil/objectifs',
   profil: '/profil',
   profilStatistiques: '/profil/statistiques',
   profilSecurite: '/profil/securite',
