@@ -78,7 +78,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           className={cn(
             'mx-auto w-full',
             planning
-              ? 'flex min-h-0 max-w-none flex-1 flex-col overflow-hidden px-3 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-3 sm:px-8 lg:block lg:overflow-visible lg:px-8 lg:pb-14 lg:pt-10'
+              ? 'flex min-h-0 max-w-none flex-1 flex-col overflow-hidden px-3 pb-[calc(5.25rem+env(safe-area-inset-bottom))] pt-3 sm:px-8 lg:block lg:overflow-visible lg:px-8 lg:pb-14 lg:pt-10'
               : 'max-w-[88rem] px-4 pb-28 pt-6 sm:px-8 lg:pb-14 lg:pt-10',
           )}
         >
