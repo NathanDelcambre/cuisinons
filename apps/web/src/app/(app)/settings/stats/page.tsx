@@ -1,14 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ChevronLeft, Star } from 'lucide-react';
+import { ChevronLeft, Sparkles, Star } from 'lucide-react';
 import { MEAL_SLOT_LABELS, type MealSlot } from '@cuisinons/shared';
-import { Card, PageHeader, Segmented, Skeleton } from '@cuisinons/ui';
+import { Button, Card, PageHeader, Segmented, Skeleton } from '@cuisinons/ui';
 import { apiJson } from '@/lib/api';
 import { routes } from '@/lib/routes';
 import { Avatar } from '@/components/avatar';
+import { EstimateMacrosModal, type BodyProfile } from '@/components/estimate-macros-modal';
 import { MacroIcon, type MacroKey } from '@/components/macro-icon';
 
 const MACROS: Array<{ key: MacroKey; label: string; unit: string }> = [
@@ -31,10 +32,30 @@ type StatsResponse = {
 };
 
 export default function StatsPage() {
+  const queryClient = useQueryClient();
   const [period, setPeriod] = useState<'day' | 'week' | 'month' | 'year'>('week');
+  const [estimatorOpen, setEstimatorOpen] = useState(false);
   const stats = useQuery({
     queryKey: ['nutrition-stats', period],
     queryFn: () => apiJson<StatsResponse>(`/api/bff/nutrition/stats?period=${period}`),
+  });
+  const body = useQuery({
+    queryKey: ['me-body'],
+    queryFn: () => apiJson<BodyProfile & { id: string }>('/api/bff/me'),
+  });
+  const applyEstimate = useMutation({
+    mutationFn: (input: { heightCm: number; weightKg: number; targetWeightKg: number | null }) =>
+      apiJson('/api/bff/nutrition-goals/from-body', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      }),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['goals'] }),
+        queryClient.invalidateQueries({ queryKey: ['me-body'] }),
+      ]);
+      setEstimatorOpen(false);
+    },
   });
 
   return (
@@ -51,6 +72,15 @@ export default function StatsPage() {
         title="Statistiques"
         description="Apports prévus et consommés, et les plats que tu fais le plus souvent."
       />
+
+      <Button variant="glass" icon={Sparkles} onClick={() => setEstimatorOpen(true)}>
+        Estimer mes macros
+      </Button>
+      {applyEstimate.error ? (
+        <p role="alert" className="text-sm font-medium text-tomato-500">
+          {applyEstimate.error.message}
+        </p>
+      ) : null}
 
       <Segmented
         label="Période"
@@ -114,6 +144,14 @@ export default function StatsPage() {
           ))}
         </div>
       )}
+
+      <EstimateMacrosModal
+        open={estimatorOpen}
+        profile={body.data ?? null}
+        pending={applyEstimate.isPending}
+        onClose={() => setEstimatorOpen(false)}
+        onConfirm={(input) => applyEstimate.mutate(input)}
+      />
     </div>
   );
 }

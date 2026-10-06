@@ -48,12 +48,13 @@ function isActive(pathname: string, href: string): boolean {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const planning = pathname === routes.planning;
 
   return (
     <div
       className={cn(
         'min-h-dvh',
-        pathname === routes.planning && 'max-lg:flex max-lg:h-dvh max-lg:flex-col max-lg:overflow-hidden',
+        planning && 'max-lg:flex max-lg:h-dvh max-lg:flex-col max-lg:overflow-hidden',
       )}
     >
       <DesktopSidebar pathname={pathname} />
@@ -67,17 +68,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <main
         className={cn(
           'lg:pl-[17rem]',
-          pathname === routes.planning && 'max-lg:flex max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col',
+          planning &&
+            'max-lg:flex max-lg:min-h-0 max-lg:flex-1 max-lg:flex-col max-lg:overflow-hidden',
         )}
       >
         {/* Le planning occupe toute la largeur utile : les colonnes de jours
             grandissent avec l'ecran. Les autres pages gardent une mesure de texte. */}
         <div
           className={cn(
-            'mx-auto w-full px-4 pb-28 pt-6 sm:px-8 lg:pb-14 lg:pt-10',
-            pathname === routes.planning
-              ? 'flex max-w-none min-h-0 flex-1 flex-col max-lg:px-3 max-lg:pt-3'
-              : 'max-w-[88rem]',
+            'mx-auto w-full',
+            planning
+              ? 'flex min-h-0 max-w-none flex-1 flex-col overflow-hidden px-3 pb-[calc(4.5rem+env(safe-area-inset-bottom))] pt-3 sm:px-8 lg:block lg:overflow-visible lg:px-8 lg:pb-14 lg:pt-10'
+              : 'max-w-[88rem] px-4 pb-28 pt-6 sm:px-8 lg:pb-14 lg:pt-10',
           )}
         >
           {/*
@@ -90,7 +92,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             key={pathname}
             className={cn(
               'animate-rise',
-              pathname === routes.planning && 'flex min-h-0 flex-1 flex-col',
+              planning && 'flex min-h-0 flex-1 flex-col overflow-hidden lg:overflow-visible',
             )}
           >
             {children}

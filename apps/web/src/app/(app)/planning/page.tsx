@@ -25,7 +25,6 @@ import {
   RefreshCw,
   Sparkles,
   Trash2,
-  UtensilsCrossed,
   type LucideIcon,
 } from 'lucide-react';
 import {
@@ -127,7 +126,7 @@ function iso(date: Date) {
 
 /** Largeur confortable, qui s'élargit dès que l'écran peut montrer environ cinq jours. */
 const DAY_CARD_FRAME =
-  'h-auto max-h-full min-h-[25rem] w-full sm:h-full sm:max-h-none sm:min-h-[32rem] sm:w-[20rem] xl:w-[max(20rem,calc((100vw-18.5rem)/5))]';
+  'h-full min-h-0 w-full sm:min-h-[32rem] sm:w-[20rem] xl:w-[max(20rem,calc((100vw-18.5rem)/5))]';
 
 /**
  * Glisser horizontalement la bande des jours, sans voler les clics :
@@ -421,8 +420,8 @@ export default function PlanningPage() {
     })),
   });
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2 sm:min-h-[calc(100dvh-8.5rem)] sm:gap-6 lg:min-h-[calc(100dvh-6rem)]">
-      <header className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2">
+    <div className="flex h-full min-h-0 flex-1 flex-col gap-2 overflow-hidden sm:min-h-[calc(100dvh-8.5rem)] sm:gap-6 sm:overflow-visible lg:min-h-[calc(100dvh-6rem)]">
+      <header className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3 sm:gap-y-2">
         <div className="flex min-w-0 items-center gap-2 sm:contents">
           <h1 className="min-w-0 flex-1 font-display text-base font-semibold leading-tight tracking-[-0.02em] text-ink-900 sm:flex-none sm:truncate sm:text-[2rem] sm:tracking-[-0.03em]">
             Planning de {subject?.displayName ?? user?.displayName ?? '…'}
@@ -499,8 +498,8 @@ export default function PlanningPage() {
       ) : null}
 
       {mealsQuery.isLoading ? (
-        <div className="scrollbar-none @container -mx-3 flex min-h-0 flex-1 items-center overflow-x-auto sm:-mx-8 sm:block sm:px-8 sm:py-3">
-          <div className="flex h-max w-max items-center gap-3 max-lg:gap-0 sm:h-full sm:items-stretch">
+        <div className="scrollbar-none @container -mx-3 flex min-h-0 flex-1 touch-pan-x overflow-x-auto overflow-y-hidden overscroll-y-none sm:-mx-8 sm:block sm:px-8 sm:py-3">
+          <div className="flex h-full w-max items-stretch gap-3 max-lg:gap-0">
             {Array.from({ length: 7 }, (_, i) => (
               <Skeleton key={i} className={cn(DAY_CARD_FRAME, 'max-lg:w-[100cqw] rounded-2xl')} />
             ))}
@@ -511,16 +510,16 @@ export default function PlanningPage() {
           ref={scrollerRef}
           onScroll={selectCenteredDay}
           className={cn(
-            'scrollbar-none @container -mx-3 flex min-h-0 flex-1 snap-x snap-mandatory items-center overflow-x-auto overscroll-x-contain sm:-mx-8 sm:block sm:snap-none sm:px-8 sm:py-6 [&_button]:cursor-pointer',
+            'scrollbar-none @container -mx-3 flex min-h-0 flex-1 touch-pan-x snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain overscroll-y-none sm:-mx-8 sm:block sm:snap-none sm:px-8 sm:py-3 [&_button]:cursor-pointer',
             draggingDays ? 'cursor-grabbing select-none' : 'cursor-grab',
           )}
         >
-          <div className="flex h-max w-max items-center gap-3 max-lg:gap-0 sm:h-full sm:items-stretch">
+          <div className="flex h-full w-max items-stretch gap-3 max-lg:gap-0">
             {days.map((day, index) => (
               <div
                 key={iso(day)}
                 data-day-index={index}
-                className="box-border h-auto w-[100cqw] shrink-0 snap-center snap-always px-5 pt-5 pb-8 sm:h-full sm:w-auto sm:px-0 sm:py-0"
+                className="box-border flex h-full w-[100cqw] shrink-0 snap-center snap-always px-3 sm:h-full sm:w-auto sm:px-0"
               >
                 <DayCard
                   date={day}
@@ -1032,12 +1031,6 @@ function SlotSection({
                       ) : null}
                     </span>
                   </button>
-                  {(recipe || kind === 'IMPOSED') && !item.nutrition.complete ? (
-                    <p className="flex items-center gap-1 pr-12 text-[11px] text-peach-500">
-                      <UtensilsCrossed className="size-3 shrink-0" aria-hidden />
-                      Incomplet
-                    </p>
-                  ) : null}
                 </div>
                 {participants.length > 0 ? (
                   <div

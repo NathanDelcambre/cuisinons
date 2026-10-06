@@ -14,7 +14,7 @@ const LINKS = [
     href: routes.profilStatistiques,
     icon: ChartNoAxesCombined,
     label: 'Statistiques',
-    description: 'Apports prévus, consommés et plats préférés',
+    description: 'Apports, plats préférés, et estimation des macros selon ton poids',
   },
   {
     href: routes.profilSecurite,
