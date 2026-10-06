@@ -164,7 +164,7 @@ export default function GoalsPage() {
   }, [goals.data, isSelf, save.isPending, save.mutate]);
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
       <Link
         href={routes.profil}
         className="inline-flex items-center gap-1.5 text-sm text-ink-500 transition-colors duration-200 ease-out-soft hover:text-ink-900"
